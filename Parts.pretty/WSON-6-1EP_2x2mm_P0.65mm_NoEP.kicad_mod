@@ -1,0 +1,207 @@
+(footprint "WSON-6-1EP_2x2mm_P0.65mm_NoEP"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "WSON, 6 Pin (http://www.ti.com/lit/ds/symlink/tps61040.pdf#page=35), generated with kicad-footprint-generator ipc_noLead_generator.py")
+	(tags "WSON NoLead")
+	(property "Reference" "REF**"
+		(at 0 -1.95 0)
+		(layer "F.SilkS")
+		(uuid "014e3ba9-24a7-4437-befc-0ef988f0ed19")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "WSON-6-1EP_2x2mm_P0.65mm_NoEP"
+		(at 0 1.95 0)
+		(layer "F.Fab")
+		(uuid "afc20fa2-699b-44a3-b6f2-06c0e2b46964")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "5ff6e291-b1dc-48a7-ba8a-1d2cefb9b837")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "1ad9483a-9458-45b4-b9b6-3aa7e728c8b6")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1 -1.11)
+		(end 1 -1.11)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "2a1149fb-8930-4e8a-a2e9-1f682e076bca")
+	)
+	(fp_line
+		(start -1 1.11)
+		(end 1 1.11)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "8ae6b195-8e63-463a-8472-ae7b5105e49d")
+	)
+	(fp_poly
+		(pts
+			(xy -1.24 -1.01) (xy -1.52 -1.01) (xy -1.24 -1.29)
+		)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "67dbd2f4-beb8-45fe-a11a-7f6194479256")
+	)
+	(fp_rect
+		(start -1.33 -1.25)
+		(end 1.33 1.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "a07e986a-d018-4551-b2c6-a62e5d751e2e")
+	)
+	(fp_poly
+		(pts
+			(xy -1 -0.5) (xy -1 1) (xy 1 1) (xy 1 -1) (xy -0.5 -1)
+		)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "0d789ebc-ab22-4db3-8412-909423d4108f")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "3b98dcc1-7858-4b71-9fb6-2ab4b06089e7")
+		(effects
+			(font
+				(size 0.5 0.5)
+				(thickness 0.08)
+			)
+		)
+	)
+	(pad "1" smd roundrect
+		(at -0.975 -0.65)
+		(size 0.45 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "bf77b950-18c0-44ca-83ff-00e5e7d12171")
+	)
+	(pad "2" smd roundrect
+		(at -0.975 0)
+		(size 0.45 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "ab34ac49-5a20-4202-9993-e419fecb9ba2")
+	)
+	(pad "3" smd roundrect
+		(at -0.975 0.65)
+		(size 0.45 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "a667e39b-72cf-4e87-a503-7de32b82b707")
+	)
+	(pad "4" smd roundrect
+		(at 0.975 0.65)
+		(size 0.45 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "c0562415-a450-478c-8e2e-183286e00b98")
+	)
+	(pad "5" smd roundrect
+		(at 0.975 0)
+		(size 0.45 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "2d391de9-16af-4840-bf1e-b036c7a2f657")
+	)
+	(pad "6" smd roundrect
+		(at 0.975 -0.65)
+		(size 0.45 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "f536490e-bb47-44ae-a630-3da5a3654337")
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layer "F.Cu")
+		(uuid "2bd0eb5c-a903-4053-bc5c-5c7a647d5a9b")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads not_allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+		)
+		(polygon
+			(pts
+				(xy -0.6 -1) (xy 0.6 -1) (xy 0.6 1) (xy -0.6 1)
+			)
+		)
+	)
+	(embedded_fonts no)
+	(model "${KICAD9_3DMODEL_DIR}/Package_SON.3dshapes/WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

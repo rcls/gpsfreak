@@ -2551,12 +2551,485 @@
 		)
 		(embedded_fonts no)
 	)
+	(symbol "TPS7A8801RTJR"
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U?"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Value" "TPS7A8801RTJR"
+			(at 0 10.16 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Footprint" "RTJ0020D"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/gpn/tps7a88"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "TPS7A8801RTJR"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "RTJ0020D"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "TPS7A8801RTJR_0_1"
+			(rectangle
+				(start -7.62 8.89)
+				(end 7.62 -8.89)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(pin power_in line
+				(at 0 -11.43 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "21"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "TPS7A8801RTJR_1_1"
+			(pin power_in line
+				(at -10.16 6.35 0)
+				(length 2.54)
+				(name "IN1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -10.16 6.35 0)
+				(length 2.54)
+				(hide yes)
+				(name "IN1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 3.81 0)
+				(length 2.54)
+				(name "EN1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "20"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 -1.27 0)
+				(length 2.54)
+				(name "SS_CTRL1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "18"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 -3.81 0)
+				(length 2.54)
+				(name "NR_SS1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "19"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -11.43 90)
+				(length 2.54)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 10.16 6.35 180)
+				(length 2.54)
+				(name "OUT1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 10.16 6.35 180)
+				(length 2.54)
+				(hide yes)
+				(name "OUT1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "15"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 10.16 -1.27 180)
+				(length 2.54)
+				(name "FB1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 10.16 -6.35 180)
+				(length 2.54)
+				(name "PG1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "17"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "TPS7A8801RTJR_2_1"
+			(pin power_in line
+				(at -10.16 6.35 0)
+				(length 2.54)
+				(name "IN2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -10.16 6.35 0)
+				(length 2.54)
+				(hide yes)
+				(name "IN2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 3.81 0)
+				(length 2.54)
+				(name "EN2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 -1.27 0)
+				(length 2.54)
+				(name "NR_SS2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -10.16 -3.81 0)
+				(length 2.54)
+				(name "SS_CTRL2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -11.43 90)
+				(length 2.54)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 10.16 6.35 180)
+				(length 2.54)
+				(name "OUT2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 10.16 6.35 180)
+				(length 2.54)
+				(hide yes)
+				(name "OUT2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 10.16 -1.27 180)
+				(length 2.54)
+				(name "FB2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 10.16 -6.35 180)
+				(length 2.54)
+				(name "PG2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
 	(symbol "TPS7A91"
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "U"
-			(at -6.35 11.43 0)
+			(at -6.35 10.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2564,7 +3037,7 @@
 			)
 		)
 		(property "Value" "TPS7A91"
-			(at 3.81 11.43 0)
+			(at 3.81 10.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2618,8 +3091,8 @@
 		)
 		(symbol "TPS7A91_0_1"
 			(rectangle
-				(start -7.62 10.16)
-				(end 7.62 -7.62)
+				(start -7.62 8.89)
+				(end 7.62 -8.89)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -2631,7 +3104,7 @@
 		)
 		(symbol "TPS7A91_1_1"
 			(pin passive line
-				(at -10.16 7.62 0)
+				(at -10.16 6.35 0)
 				(length 2.54)
 				(hide yes)
 				(name "IN"
@@ -2650,7 +3123,7 @@
 				)
 			)
 			(pin power_in line
-				(at -10.16 7.62 0)
+				(at -10.16 6.35 0)
 				(length 2.54)
 				(name "IN"
 					(effects
@@ -2668,7 +3141,7 @@
 				)
 			)
 			(pin input line
-				(at -10.16 5.08 0)
+				(at -10.16 3.81 0)
 				(length 2.54)
 				(name "EN"
 					(effects
@@ -2686,7 +3159,7 @@
 				)
 			)
 			(pin input line
-				(at -10.16 0 0)
+				(at -10.16 -1.27 0)
 				(length 2.54)
 				(name "SS_CTRL"
 					(effects
@@ -2704,7 +3177,7 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 -2.54 0)
+				(at -10.16 -3.81 0)
 				(length 2.54)
 				(name "NR/SS"
 					(effects
@@ -2722,7 +3195,7 @@
 				)
 			)
 			(pin passive line
-				(at 0 -10.16 90)
+				(at 0 -11.43 90)
 				(length 2.54)
 				(hide yes)
 				(name "GND"
@@ -2741,7 +3214,7 @@
 				)
 			)
 			(pin power_in line
-				(at 0 -10.16 90)
+				(at 0 -11.43 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -2759,7 +3232,7 @@
 				)
 			)
 			(pin power_out line
-				(at 10.16 7.62 180)
+				(at 10.16 6.35 180)
 				(length 2.54)
 				(name "OUT"
 					(effects
@@ -2777,7 +3250,7 @@
 				)
 			)
 			(pin passive line
-				(at 10.16 7.62 180)
+				(at 10.16 6.35 180)
 				(length 2.54)
 				(hide yes)
 				(name "OUT"
@@ -2796,7 +3269,7 @@
 				)
 			)
 			(pin input line
-				(at 10.16 0 180)
+				(at 10.16 -1.27 180)
 				(length 2.54)
 				(name "FB"
 					(effects
@@ -2814,7 +3287,7 @@
 				)
 			)
 			(pin open_collector line
-				(at 10.16 -5.08 180)
+				(at 10.16 -6.35 180)
 				(length 2.54)
 				(name "PG"
 					(effects

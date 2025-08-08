@@ -277,7 +277,35 @@
       "version": 4
     },
     "net_colors": null,
-    "netclass_assignments": null,
+    "netclass_assignments": {
+      "/CPU/USB_D+": [
+        "90diff"
+      ],
+      "/CPU/USB_D-": [
+        "90diff"
+      ],
+      "Net-(C13-Pad2)": [
+        "50diff"
+      ],
+      "Net-(C14-Pad2)": [
+        "50diff"
+      ],
+      "Net-(C21-Pad2)": [
+        "50diff"
+      ],
+      "Net-(C22-Pad2)": [
+        "50diff"
+      ],
+      "Net-(J1-In)": [
+        "50cop"
+      ],
+      "Net-(J2-In)": [
+        "50cop"
+      ],
+      "Net-(J5-In)": [
+        "50cop"
+      ]
+    },
     "netclass_patterns": []
   },
   "pcbnew": {
@@ -348,22 +376,22 @@
           "show": false
         },
         {
+          "group_by": false,
+          "label": "JLCPCB",
+          "name": "JLCPCB",
+          "show": true
+        },
+        {
           "group_by": true,
           "label": "Footprint",
           "name": "Footprint",
           "show": true
         },
         {
-          "group_by": false,
+          "group_by": true,
           "label": "Datasheet",
           "name": "Datasheet",
           "show": true
-        },
-        {
-          "group_by": false,
-          "label": "JLCPCB",
-          "name": "JLCPCB",
-          "show": false
         },
         {
           "group_by": false,
@@ -382,8 +410,8 @@
       "group_symbols": true,
       "include_excluded_from_bom": true,
       "name": "",
-      "sort_asc": false,
-      "sort_field": "Datasheet"
+      "sort_asc": true,
+      "sort_field": "Reference"
     },
     "connection_grid_size": 50.0,
     "drawing": {
@@ -431,8 +459,8 @@
       "Root"
     ],
     [
-      "9b249195-a432-4f49-a1e0-f7d117f1807f",
-      "Main"
+      "69331f4b-e5ad-4452-8850-5c5a77857efb",
+      "GPS"
     ],
     [
       "131a3728-0d51-4d75-9961-26d31d87be39",
@@ -441,6 +469,10 @@
     [
       "26994282-45a2-461a-b033-dde2ded4d8ff",
       "Outputs"
+    ],
+    [
+      "9b249195-a432-4f49-a1e0-f7d117f1807f",
+      "CPU"
     ],
     [
       "6988b802-c4bd-48f6-b03d-8f2b1e6051d9",

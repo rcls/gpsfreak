@@ -1,0 +1,222 @@
+(footprint "XFMR_MABA-007159-000000"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0.775 -3.735 0)
+		(layer "F.SilkS")
+		(uuid "0554aa54-74e7-417f-846d-c87ea9659967")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "XFMR_MABA-007159-000000"
+		(at 12.005 3.665 0)
+		(layer "F.Fab")
+		(uuid "23db4eef-3273-4e96-b374-9c22c5d3ea47")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d1c4d752-6f5d-435d-b997-6617d45d0fbf")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "154731e4-dcb1-4fd7-8cc6-981b39e923ee")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.965 -1.9)
+		(end -1.965 1.9)
+		(stroke
+			(width 0.127)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "f1850c39-c91a-4527-bf7e-d7d3ab0d7311")
+	)
+	(fp_line
+		(start 1.965 -1.9)
+		(end 1.965 1.9)
+		(stroke
+			(width 0.127)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "51a27a5c-194a-4bc1-92c3-9bd33890c171")
+	)
+	(fp_circle
+		(center -2.8 -2.1)
+		(end -2.65 -2.1)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "95bf8f84-b979-45a4-ad20-ba4749500fd2")
+	)
+	(fp_line
+		(start -2.155 -2.665)
+		(end 2.155 -2.665)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "889839c8-cbf3-4c8a-b86c-851726134854")
+	)
+	(fp_line
+		(start -2.155 2.665)
+		(end -2.155 -2.665)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "194f8db5-8e24-45dc-8a9b-4931fd175084")
+	)
+	(fp_line
+		(start 2.155 -2.665)
+		(end 2.155 2.665)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "99c55fdd-2c46-4afa-9b62-920187d059e6")
+	)
+	(fp_line
+		(start 2.155 2.665)
+		(end -2.155 2.665)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "3bf040dd-f82e-42b1-93d6-3939fc1836bf")
+	)
+	(fp_line
+		(start -1.905 -1.905)
+		(end 1.905 -1.905)
+		(stroke
+			(width 0.127)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "024a6fab-2cb3-4bc5-8484-672ee826eccb")
+	)
+	(fp_line
+		(start -1.905 1.905)
+		(end -1.905 -1.905)
+		(stroke
+			(width 0.127)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d2b9d6f5-90c2-4267-8d7c-ec6da948057b")
+	)
+	(fp_line
+		(start 1.905 -1.905)
+		(end 1.905 1.905)
+		(stroke
+			(width 0.127)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "4c517d4a-a3a8-4c29-b9c5-2a27c281ec2c")
+	)
+	(fp_line
+		(start 1.905 1.905)
+		(end -1.905 1.905)
+		(stroke
+			(width 0.127)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "0d90e2d2-7c80-45bb-9138-693985b26fb5")
+	)
+	(fp_circle
+		(center -2.8 -2.1)
+		(end -2.65 -2.1)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "c0645695-a2ee-403d-aa2a-f5cc54ded06e")
+	)
+	(pad "1" smd rect
+		(at -1.27 -1.715)
+		(size 0.76 1.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.102)
+		(uuid "f7ccebaf-a720-4964-a95e-5c2ccb145556")
+	)
+	(pad "2" smd rect
+		(at 0 -1.715)
+		(size 0.76 1.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.102)
+		(uuid "37dfbaad-8ccb-4bff-b5fe-ab6ea9b0c372")
+	)
+	(pad "3" smd rect
+		(at 1.27 -1.715)
+		(size 0.76 1.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.102)
+		(uuid "18aa1964-799e-4513-8f7b-5be74ea212ee")
+	)
+	(pad "4" smd rect
+		(at 1.27 1.715)
+		(size 0.76 1.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.102)
+		(uuid "54e0b595-6159-4ad1-8878-f6442fe4dbf3")
+	)
+	(pad "5" smd rect
+		(at -1.27 1.715)
+		(size 0.76 1.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.102)
+		(uuid "9f8af32a-95ba-44fb-a0e4-6d7460a61f2f")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/Parts.pretty/MABA-007159-000000.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+)

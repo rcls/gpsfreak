@@ -1677,7 +1677,7 @@
 					(justify left bottom)
 				)
 			)
-			(property "Footprint" "MABA-007159-000000:XFMR_MABA-007159-000000"
+			(property "Footprint" "Parts:XFMR_MABA-007159-000000"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1975,6 +1975,26 @@
 					)
 				)
 			)
+			(symbol "MABA-007159-000000_1_0"
+				(pin no_connect line
+					(at 10.16 0 180)
+					(length 5.08)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
 			(embedded_fonts no)
 		)
 		(symbol "power:+3V3"
@@ -2214,17 +2234,6 @@
 			(justify left bottom)
 		)
 		(uuid "0e830a2a-422f-4196-8a11-873addcdb0bf")
-	)
-	(text "TODO - protection"
-		(exclude_from_sim no)
-		(at 184.658 79.248 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left top)
-		)
-		(uuid "17f5cc6c-5f82-491a-b5a4-4572079fe7b5")
 	)
 	(text "TODO - which rail for these?"
 		(exclude_from_sim no)
@@ -3194,6 +3203,96 @@
 		)
 		(uuid "fc069ea6-b513-4396-84fb-22c8d47d8c3c")
 	)
+	(label "AC2_P"
+		(at 187.96 52.07 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "070c5751-a805-449f-87cc-3e27c052fbb0")
+	)
+	(label "Ext3"
+		(at 167.64 138.43 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "11f7a6fc-6f9e-4b31-8326-8e722ac63c4d")
+	)
+	(label "Ext4"
+		(at 167.64 101.6 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "1ee28fb9-fbb3-4a93-ae5d-9c47f929ac33")
+	)
+	(label "AC0_N"
+		(at 99.06 62.23 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "27e8e0d5-da61-458e-aefe-09087616ce9e")
+	)
+	(label "Ext1"
+		(at 127 52.07 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "3226e906-b1bd-4c36-9760-4ff375588760")
+	)
+	(label "AC0_P"
+		(at 99.06 52.07 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "6aebf678-5a92-46df-88ca-944d927e412a")
+	)
+	(label "Ext2"
+		(at 215.9 52.07 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "7240b759-52c8-4311-8cf7-952a14a71e11")
+	)
+	(label "Conn4"
+		(at 205.74 104.14 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "c9723d72-ff5f-4ad9-95f2-39bd7c684eee")
+	)
+	(label "AC2_N"
+		(at 187.96 62.23 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e976c7a6-ffd5-4e06-9023-1d80556c5eb9")
+	)
 	(global_label "EN_REF2"
 		(shape input)
 		(at 184.15 115.57 180)
@@ -3280,7 +3379,7 @@
 	)
 	(global_label "OUT7_N"
 		(shape input)
-		(at 102.87 127 180)
+		(at 102.87 90.17 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3290,7 +3389,7 @@
 		)
 		(uuid "6d847d15-dd55-4c57-aae3-e5521db01952")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 92.7486 127 0)
+			(at 92.8091 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3322,7 +3421,7 @@
 	)
 	(global_label "OUT7_P"
 		(shape input)
-		(at 102.87 90.17 180)
+		(at 102.87 127 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3332,7 +3431,7 @@
 		)
 		(uuid "9ec63a81-72b9-41ff-ac1c-00dada1fb870")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 92.8091 90.17 0)
+			(at 92.7486 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3428,25 +3527,25 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 190.5 62.23 0)
+		(at 190.5 52.07 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "1fcf3e0c-7ff8-4f55-9a8a-58356926de4d")
 		(property "Netclass" "50diff"
-			(at 190.5 58.928 0)
+			(at 190.5 55.372 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify bottom)
+				(justify top)
 			)
 		)
 		(property "Component Class" ""
-			(at 161.29 43.18 0)
+			(at 161.29 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3458,25 +3557,25 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 190.5 52.07 0)
+		(at 190.5 62.23 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "1fe56709-b9c2-4133-88f1-3f7b72e145ce")
 		(property "Netclass" "50diff"
-			(at 190.5 48.768 0)
+			(at 190.5 65.532 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify bottom)
+				(justify top)
 			)
 		)
 		(property "Component Class" ""
-			(at 161.29 33.02 0)
+			(at 161.29 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3488,7 +3587,7 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 217.17 52.07 0)
+		(at 213.36 52.07 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3497,7 +3596,7 @@
 		)
 		(uuid "a05606d3-136d-4240-b89a-af8bd81538c3")
 		(property "Netclass" "50cop"
-			(at 217.17 48.768 0)
+			(at 213.36 48.768 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3506,7 +3605,7 @@
 			)
 		)
 		(property "Component Class" ""
-			(at 187.96 33.02 0)
+			(at 184.15 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3518,7 +3617,7 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 128.27 52.07 0)
+		(at 124.46 52.07 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3527,7 +3626,7 @@
 		)
 		(uuid "a8c75fb6-6cf6-4a14-9e02-2410590cefce")
 		(property "Netclass" "50cop"
-			(at 128.27 48.768 0)
+			(at 124.46 48.768 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3536,7 +3635,7 @@
 			)
 		)
 		(property "Component Class" ""
-			(at 99.06 33.02 0)
+			(at 95.25 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3548,25 +3647,25 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 101.6 52.07 0)
+		(at 101.6 52.07 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "b9ca01e6-6e53-4b11-9762-d0619fed8775")
 		(property "Netclass" "50diff"
-			(at 101.6 48.768 0)
+			(at 101.6 55.372 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify bottom)
+				(justify top)
 			)
 		)
 		(property "Component Class" ""
-			(at 72.39 33.02 0)
+			(at 72.39 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3578,25 +3677,25 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 101.6 62.23 0)
+		(at 101.6 62.23 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "ccecb5ab-002e-48d9-8642-c4262d3071fc")
 		(property "Netclass" "50diff"
-			(at 101.6 58.928 0)
+			(at 101.6 65.532 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify bottom)
+				(justify top)
 			)
 		)
 		(property "Component Class" ""
-			(at 72.39 43.18 0)
+			(at 72.39 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4240,34 +4339,34 @@
 			)
 		)
 		(pin "8"
-			(uuid "d2169dab-22b1-4f0f-84f1-c90512471de9")
+			(uuid "d2169dab-22b1-4f0f-84f1-c90512471dea")
 		)
 		(pin "4"
-			(uuid "42817d76-3d3f-46da-afcf-60f2e737cf13")
+			(uuid "42817d76-3d3f-46da-afcf-60f2e737cf14")
 		)
 		(pin "6"
-			(uuid "e9b1dd99-3317-4ced-a165-a765cd8eaa77")
+			(uuid "e9b1dd99-3317-4ced-a165-a765cd8eaa78")
 		)
 		(pin "3"
-			(uuid "25ac53d4-1c9e-454a-985b-cf6ea92002a5")
+			(uuid "25ac53d4-1c9e-454a-985b-cf6ea92002a6")
 		)
 		(pin "1"
-			(uuid "0c03b7ca-e053-4b9f-b4cb-c52fb2ce4f59")
+			(uuid "0c03b7ca-e053-4b9f-b4cb-c52fb2ce4f5a")
 		)
 		(pin "10"
-			(uuid "d106f5fb-6153-436f-a9b3-c7fc6026dca0")
+			(uuid "d106f5fb-6153-436f-a9b3-c7fc6026dca1")
 		)
 		(pin "5"
-			(uuid "a501b5f5-3cf1-4813-b887-fa98de57a7a9")
+			(uuid "a501b5f5-3cf1-4813-b887-fa98de57a7aa")
 		)
 		(pin "7"
-			(uuid "aac689b0-8dc2-4954-a096-ad3119118b5d")
+			(uuid "aac689b0-8dc2-4954-a096-ad3119118b5e")
 		)
 		(pin "9"
-			(uuid "0f8af8c1-dbd0-4c2c-a071-083bdc0a923c")
+			(uuid "0f8af8c1-dbd0-4c2c-a071-083bdc0a923d")
 		)
 		(pin "2"
-			(uuid "aedda766-ab73-482e-b79b-0e78564a7a30")
+			(uuid "aedda766-ab73-482e-b79b-0e78564a7a31")
 		)
 		(instances
 			(project ""
@@ -4490,7 +4589,7 @@
 	)
 	(symbol
 		(lib_id "74xGxx:74LVC1G125")
-		(at 146.05 127 0)
+		(at 146.05 90.17 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -4498,7 +4597,7 @@
 		(dnp no)
 		(uuid "318d4bd9-9f8a-43ac-b766-41202cb8ad5e")
 		(property "Reference" "U12"
-			(at 145.542 126.746 0)
+			(at 145.542 89.916 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4506,7 +4605,7 @@
 			)
 		)
 		(property "Value" "74LVC1G125"
-			(at 147.828 133.35 0)
+			(at 147.828 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4514,7 +4613,7 @@
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
-			(at 146.05 127 0)
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4523,7 +4622,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf"
-			(at 146.05 127 0)
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4532,7 +4631,7 @@
 			)
 		)
 		(property "Description" "Single Buffer Gate Tri-State, Low-Voltage CMOS"
-			(at 146.05 127 0)
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4737,7 +4836,7 @@
 				(justify top)
 			)
 		)
-		(property "Footprint" "MABA-007159-000000:XFMR_MABA-007159-000000"
+		(property "Footprint" "Parts:XFMR_MABA-007159-000000"
 			(at 203.2 57.15 0)
 			(effects
 				(font
@@ -4776,6 +4875,9 @@
 		)
 		(pin "5"
 			(uuid "9968e917-7127-4066-8acf-713dd7201457")
+		)
+		(pin "2"
+			(uuid "c2bd4849-c6dd-4023-a209-bf65538a3bfa")
 		)
 		(instances
 			(project "gpsref"
@@ -4953,7 +5055,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 132.588 83.82 90)
 			(effects
 				(font
@@ -5231,7 +5333,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 120.65 135.382 90)
 			(effects
 				(font
@@ -5508,7 +5610,7 @@
 				(justify top)
 			)
 		)
-		(property "Footprint" "MABA-007159-000000:XFMR_MABA-007159-000000"
+		(property "Footprint" "Parts:XFMR_MABA-007159-000000"
 			(at 114.3 57.15 0)
 			(effects
 				(font
@@ -5547,6 +5649,9 @@
 		)
 		(pin "5"
 			(uuid "985c0523-1298-424d-9eea-a3c08035f012")
+		)
+		(pin "2"
+			(uuid "feea9bfb-16ce-4012-bf9c-ed81fb183bd8")
 		)
 		(instances
 			(project ""
@@ -5612,34 +5717,34 @@
 			)
 		)
 		(pin "8"
-			(uuid "d2169dab-22b1-4f0f-84f1-c90512471de9")
+			(uuid "d2169dab-22b1-4f0f-84f1-c90512471deb")
 		)
 		(pin "4"
-			(uuid "42817d76-3d3f-46da-afcf-60f2e737cf13")
+			(uuid "42817d76-3d3f-46da-afcf-60f2e737cf15")
 		)
 		(pin "6"
-			(uuid "e9b1dd99-3317-4ced-a165-a765cd8eaa77")
+			(uuid "e9b1dd99-3317-4ced-a165-a765cd8eaa79")
 		)
 		(pin "3"
-			(uuid "25ac53d4-1c9e-454a-985b-cf6ea92002a5")
+			(uuid "25ac53d4-1c9e-454a-985b-cf6ea92002a7")
 		)
 		(pin "1"
-			(uuid "0c03b7ca-e053-4b9f-b4cb-c52fb2ce4f59")
+			(uuid "0c03b7ca-e053-4b9f-b4cb-c52fb2ce4f5b")
 		)
 		(pin "10"
-			(uuid "d106f5fb-6153-436f-a9b3-c7fc6026dca0")
+			(uuid "d106f5fb-6153-436f-a9b3-c7fc6026dca2")
 		)
 		(pin "5"
-			(uuid "a501b5f5-3cf1-4813-b887-fa98de57a7a9")
+			(uuid "a501b5f5-3cf1-4813-b887-fa98de57a7ab")
 		)
 		(pin "7"
-			(uuid "aac689b0-8dc2-4954-a096-ad3119118b5d")
+			(uuid "aac689b0-8dc2-4954-a096-ad3119118b5f")
 		)
 		(pin "9"
-			(uuid "0f8af8c1-dbd0-4c2c-a071-083bdc0a923c")
+			(uuid "0f8af8c1-dbd0-4c2c-a071-083bdc0a923e")
 		)
 		(pin "2"
-			(uuid "aedda766-ab73-482e-b79b-0e78564a7a30")
+			(uuid "aedda766-ab73-482e-b79b-0e78564a7a32")
 		)
 		(instances
 			(project ""
@@ -5874,7 +5979,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 120.65 98.552 90)
 			(effects
 				(font
@@ -6560,7 +6665,7 @@
 	)
 	(symbol
 		(lib_id "74xGxx:74LVC1G125")
-		(at 146.05 90.17 0)
+		(at 146.05 127 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6568,7 +6673,7 @@
 		(dnp no)
 		(uuid "a834ab4c-5373-49c5-9632-e0f371915a8d")
 		(property "Reference" "U11"
-			(at 146.05 90.17 0)
+			(at 146.05 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6576,7 +6681,7 @@
 			)
 		)
 		(property "Value" "74LVC1G125"
-			(at 147.828 96.52 0)
+			(at 147.828 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6584,7 +6689,7 @@
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
-			(at 146.05 90.17 0)
+			(at 146.05 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6593,7 +6698,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf"
-			(at 146.05 90.17 0)
+			(at 146.05 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6602,7 +6707,7 @@
 			)
 		)
 		(property "Description" "Single Buffer Gate Tri-State, Low-Voltage CMOS"
-			(at 146.05 90.17 0)
+			(at 146.05 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7291,7 +7396,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 132.588 120.65 90)
 			(effects
 				(font

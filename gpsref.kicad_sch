@@ -198,7 +198,7 @@
 				)
 			)
 		)
-		(property "Sheetfile" "main.kicad_sch"
+		(property "Sheetfile" "cpu.kicad_sch"
 			(at 114.3 109.8046 0)
 			(effects
 				(font

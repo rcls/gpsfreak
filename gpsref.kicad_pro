@@ -193,7 +193,6 @@
       ],
       "track_widths": [
         0.0,
-        0.0,
         0.125,
         0.15,
         0.2,
@@ -533,7 +532,7 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.15,
+        "track_width": 0.2,
         "via_diameter": 0.5,
         "via_drill": 0.3,
         "wire_width": 6
@@ -583,7 +582,7 @@
       {
         "clearance": 0.125,
         "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.3493,
+        "diff_pair_width": 0.2395,
         "microvia_diameter": 0.0,
         "microvia_drill": 0.0,
         "name": "50ms",
@@ -703,6 +702,9 @@
       "Net-(C22-Pad2)": [
         "50diff"
       ],
+      "Net-(D4-A1)": [
+        "50ms"
+      ],
       "Net-(D4-Pad3)": [
         "50ms"
       ],
@@ -730,6 +732,12 @@
       "OUT2_P": [
         "50diff"
       ],
+      "OUT6": [
+        "50ms"
+      ],
+      "OUT7": [
+        "50ms"
+      ],
       "OUT7_N": [
         "50ms"
       ],
@@ -746,7 +754,7 @@
     "netclass_patterns": [
       {
         "netclass": "50ms",
-        "pattern": "/GPS/GPSin"
+        "pattern": "SecRef"
       }
     ]
   },
@@ -765,7 +773,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 110,
+    "annotate_start_num": 10,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {

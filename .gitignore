@@ -1,0 +1,6 @@
+\#*
+fp-info-cache
+gpsref-backups/
+*.kicad_dru
+*.kicad_prl
+~*.lck

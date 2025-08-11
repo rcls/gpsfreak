@@ -2496,11 +2496,17 @@
 		(color 0 0 0 0)
 		(uuid "c112a241-ba01-46fb-a42b-530264a47342")
 	)
-	(junction
-		(at 118.11 106.68)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "c7a9e4bd-bc14-4b12-ab52-77fdba0a08ec")
+	(no_connect
+		(at 85.09 99.06)
+		(uuid "0b622bf6-a4c6-4628-b379-514d4a3b3c92")
+	)
+	(no_connect
+		(at 85.09 96.52)
+		(uuid "1fd514fa-8553-41eb-ab9a-556d21bb4e85")
+	)
+	(no_connect
+		(at 85.09 106.68)
+		(uuid "4e7b7280-4aad-42da-b830-2cd17e07b3b1")
 	)
 	(no_connect
 		(at 100.33 81.28)
@@ -2526,7 +2532,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 106.68) (xy 124.46 106.68)
+			(xy 115.57 106.68) (xy 124.46 106.68)
 		)
 		(stroke
 			(width 0)
@@ -2576,16 +2582,6 @@
 	)
 	(wire
 		(pts
-			(xy 115.57 106.68) (xy 118.11 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1bf105a1-cfe6-46cc-a755-bd423cac1783")
-	)
-	(wire
-		(pts
 			(xy 115.57 99.06) (xy 130.81 99.06)
 		)
 		(stroke
@@ -2623,16 +2619,6 @@
 			(type default)
 		)
 		(uuid "523d7995-fb24-42b6-a908-da6ee4bd2539")
-	)
-	(wire
-		(pts
-			(xy 76.2 96.52) (xy 85.09 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5b56cf84-80e0-4413-a28b-6e984740ec2e")
 	)
 	(wire
 		(pts
@@ -2713,26 +2699,6 @@
 			(type default)
 		)
 		(uuid "b953078b-aee2-4e95-b6b4-65362b6467e4")
-	)
-	(wire
-		(pts
-			(xy 76.2 99.06) (xy 85.09 99.06)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "bdb03ecd-32c7-47c7-add8-078a3ad03fe6")
-	)
-	(wire
-		(pts
-			(xy 72.39 106.68) (xy 85.09 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "beceb143-d761-41f7-8214-464de0460611")
 	)
 	(wire
 		(pts
@@ -2884,48 +2850,6 @@
 		)
 		(uuid "fc8dc212-88c7-49cb-96d9-1d63d4c47de1")
 	)
-	(global_label "I2C_SCL"
-		(shape input)
-		(at 76.2 96.52 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "05d298a4-3044-4a4e-bde5-5427d155d753")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 65.6553 96.52 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "I2C_SDA"
-		(shape bidirectional)
-		(at 76.2 99.06 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "1c226b02-061f-46ad-8b57-5a66b96ae8bc")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 64.4835 99.06 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "GPS2CPU"
 		(shape output)
 		(at 76.2 91.44 180)
@@ -3042,7 +2966,7 @@
 			(justify left bottom)
 		)
 		(uuid "7fa62ca8-5006-41ef-9d32-8709980670e7")
-		(property "Netclass" "50cop"
+		(property "Netclass" "50ms"
 			(at 119.3165 95.758 0)
 			(effects
 				(font
@@ -3114,24 +3038,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 80.01 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 80.01 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "fd95c4ed-84d7-40d9-a606-63d82f707928")
 		)
@@ -3139,89 +3045,6 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "TP12")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint_Probe")
-		(at 118.11 106.68 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(uuid "06959b6a-5d63-4208-9e59-faa4b493b537")
-		(property "Reference" "TP13"
-			(at 119.761 102.362 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TestPoint_Probe"
-			(at 119.761 102.616 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Parts:TestPoint"
-			(at 123.19 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 123.19 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point (alternative probe-style design)"
-			(at 118.11 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 118.11 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 118.11 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "729cfa87-fbf2-4541-bd36-e4bb17ac1b02")
-		)
-		(instances
-			(project "gpsref"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "TP13")
 					(unit 1)
 				)
 			)
@@ -3337,24 +3160,6 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 139.7 99.06 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 139.7 99.06 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 139.7 99.06 0)
 			(effects
 				(font
@@ -3508,24 +3313,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 130.81 85.09 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 130.81 85.09 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "2e2e2809-44c6-4ae5-b11d-e8ed6a6a51ee")
 		)
@@ -3566,7 +3353,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
+		(property "Footprint" "Parts:HHS_0402"
 			(at 130.81 95.25 0)
 			(effects
 				(font
@@ -3595,24 +3382,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 130.81 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 130.81 95.25 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 130.81 95.25 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3758,24 +3527,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 82.55 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 82.55 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "1e120c5e-75e3-499d-a177-a036fd865a9b")
 		)
@@ -3848,24 +3599,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 115.57 64.77 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 115.57 64.77 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 115.57 64.77 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3948,90 +3681,6 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR073")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint_Probe")
-		(at 72.39 106.68 0)
-		(mirror y)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(uuid "65e92c93-9da2-4c18-9c96-1ee8123ad0ba")
-		(property "Reference" "TP11"
-			(at 70.739 102.362 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TestPoint_Probe"
-			(at 70.739 102.616 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Parts:TestPoint"
-			(at 67.31 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 67.31 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point (alternative probe-style design)"
-			(at 72.39 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 72.39 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 72.39 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "078b95e4-0302-4eba-91f4-5e2311620639")
-		)
-		(instances
-			(project "gpsref"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "TP11")
 					(unit 1)
 				)
 			)
@@ -4155,24 +3804,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 100.33 99.06 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 100.33 99.06 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "8"
 			(uuid "ef1db52d-a57b-48db-bc6f-1db1c1722fe9")
 		)
@@ -4288,24 +3919,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 167.64 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 167.64 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(property "JLCPCB" ""
 			(at 167.64 90.17 0)
 			(effects
@@ -4401,24 +4014,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 115.57 67.31 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 115.57 67.31 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "24b62ee7-8d00-4dea-8bdf-a75f8db10d88")
 		)
@@ -4480,24 +4075,6 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 171.45 76.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 171.45 76.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 171.45 76.2 0)
 			(effects
 				(font
@@ -4575,24 +4152,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 147.32 93.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 147.32 93.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "c2ca2c4f-978f-40af-b46e-4c5ae926e5b1")
 		)
@@ -4654,24 +4213,6 @@
 			)
 		)
 		(property "Description" "test point (alternative probe-style design)"
-			(at 147.32 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 147.32 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 147.32 90.17 0)
 			(effects
 				(font
@@ -4882,24 +4423,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 128.27 76.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 128.27 76.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "5b8ab293-f13c-4131-a89a-20757af81575")
 		)
@@ -4963,24 +4486,6 @@
 		)
 		(property "Description" "Resistor"
 			(at 123.19 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 123.19 71.12 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 123.19 71.12 90)
 			(effects
 				(font
 					(size 1.27 1.27)

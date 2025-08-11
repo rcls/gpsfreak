@@ -178,6 +178,179 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "74xGxx:74LVC1G240"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at 2.54 7.62 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "74LVC1G240"
+				(at 2.54 -7.62 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Single Buffer/Driver Gate Tri-State, Low-Voltage CMOS"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "Single Gate Buff/Drv Tri-State LVC CMOS"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "SOT* SG-*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "74LVC1G240_0_1"
+				(polyline
+					(pts
+						(xy -7.62 6.35) (xy -7.62 -6.35) (xy 5.08 0) (xy -7.62 6.35)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "74LVC1G240_1_1"
+				(pin input line
+					(at -15.24 0 0)
+					(length 7.62)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -5.08 10.16 270)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -5.08 -10.16 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input inverted
+					(at 0 10.16 270)
+					(length 7.62)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state inverted
+					(at 12.7 0 180)
+					(length 7.62)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Analog_Switch:TS5A63157DBV"
 			(pin_names
 				(offset 0.127)
@@ -922,156 +1095,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:D_TVS"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "D"
-				(at 0 2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "D_TVS"
-				(at 0 -2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "~"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Bidirectional transient-voltage-suppression diode"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "diode TVS thyrector"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "D_TVS_0_1"
-				(polyline
-					(pts
-						(xy -2.54 1.27) (xy -2.54 -1.27) (xy 2.54 1.27) (xy 2.54 -1.27) (xy -2.54 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.508 1.27) (xy 0 1.27) (xy 0 -1.27) (xy -0.508 -1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy -1.27 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "D_TVS_1_1"
-				(pin passive line
-					(at -3.81 0 0)
-					(length 2.54)
-					(name "A1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 3.81 0 180)
-					(length 2.54)
-					(name "A2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Device:R"
 			(pin_numbers
 				(hide yes)
@@ -1346,6 +1369,487 @@
 					(at 3.81 0 180)
 					(length 2.54)
 					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Diode:BAS40-04"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0.635 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "BAS40-04"
+				(at -6.35 5.715 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+				(at -6.35 7.62 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "http://www.vishay.com/docs/85701/bas40v.pdf"
+				(at -3.048 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "40V 0.2A Dual Small Signal Schottky Diodes"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "Schottky, Diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "SOT?23*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "BAS40-04_0_1"
+				(polyline
+					(pts
+						(xy -4.445 3.81) (xy -4.445 1.27) (xy -2.54 2.54) (xy -4.445 3.81)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -3.81 2.54) (xy -1.27 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -3.175 1.27) (xy -3.175 1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 3.81) (xy -1.905 3.81)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 1.27) (xy -3.175 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 1.27) (xy -2.54 3.81)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.905 3.81) (xy -1.905 3.556)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.905 2.54) (xy 1.905 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 2.54)
+					(radius 0.254)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 2.54) (xy 3.81 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.905 3.81) (xy 1.905 1.27) (xy 3.81 2.54) (xy 1.905 3.81)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.175 1.27) (xy 3.175 1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.81 3.81) (xy 4.445 3.81)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.81 1.27) (xy 3.175 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.81 1.27) (xy 3.81 3.81)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 4.445 3.81) (xy 4.445 3.556)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "BAS40-04_1_1"
+				(pin passive line
+					(at -7.62 2.54 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -2.54 90)
+					(length 5.08)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 7.62 2.54 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Parts:D_TVS"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "D_TVS"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Parts:HHS_0402"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Bidirectional transient-voltage-suppression diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "diode TVS thyrector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "D_TVS_0_1"
+				(polyline
+					(pts
+						(xy -2.54 1.27) (xy -2.54 -1.27) (xy 2.54 1.27) (xy 2.54 -1.27) (xy -2.54 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.508 1.27) (xy 0 1.27) (xy 0 -1.27) (xy -0.508 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "D_TVS_1_1"
+				(text "H"
+					(at 2.54 -0.254 0)
+					(effects
+						(font
+							(size 0.635 0.635)
+						)
+						(justify left top)
+					)
+				)
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1935,17 +2439,6 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "TODO - check polarity & pull\n"
-		(exclude_from_sim no)
-		(at 150.368 86.868 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "0e830a2a-422f-4196-8a11-873addcdb0bf")
-	)
 	(text "TODO - which rail for these?"
 		(exclude_from_sim no)
 		(at 95.758 113.03 0)
@@ -2037,6 +2530,26 @@
 			(justify left)
 		)
 		(uuid "c278af36-a6e0-4218-837f-87eefc2b27a2")
+	)
+	(text_box "Replace R118 with capacitor for AC coupling."
+		(exclude_from_sim no)
+		(at 204.47 99.06 0)
+		(size 17.78 7.62)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "c429d14f-20a3-4bcd-a54b-9cd3d4915ac7")
 	)
 	(text_box "For DC coupled output, replace the _P line capacitor with a short, and leave the _N capacitor in place.  Depending on the drive level you want, it should not be necessary to replace the balun with shorts for DC operation."
 		(exclude_from_sim no)
@@ -2167,10 +2680,10 @@
 		(uuid "950d92d7-27c7-45a8-a419-7d29aab7b684")
 	)
 	(junction
-		(at 201.93 92.71)
+		(at 207.01 92.71)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "9dfed69a-9fd0-490a-94d2-d1aecf917e43")
+		(uuid "969b5677-ca32-44e1-bccb-d70ab7d87323")
 	)
 	(junction
 		(at 115.57 95.25)
@@ -2302,6 +2815,16 @@
 	)
 	(wire
 		(pts
+			(xy 182.88 95.25) (xy 185.42 95.25)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2100025c-f08b-4282-b210-e60e30205215")
+	)
+	(wire
+		(pts
 			(xy 231.14 127) (xy 232.41 127)
 		)
 		(stroke
@@ -2359,6 +2882,16 @@
 			(type default)
 		)
 		(uuid "3494a208-9edc-4e85-bcfa-72adfdd82ee0")
+	)
+	(wire
+		(pts
+			(xy 193.04 101.6) (xy 193.04 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3cbcab9c-756e-4b27-ada3-e38e2428f578")
 	)
 	(wire
 		(pts
@@ -2562,16 +3095,6 @@
 	)
 	(wire
 		(pts
-			(xy 199.39 92.71) (xy 201.93 92.71)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7983208a-9c41-4a3b-b6b3-54fcccb4e156")
-	)
-	(wire
-		(pts
 			(xy 105.41 127) (xy 106.68 127)
 		)
 		(stroke
@@ -2602,7 +3125,7 @@
 	)
 	(wire
 		(pts
-			(xy 184.15 100.33) (xy 191.77 100.33)
+			(xy 182.88 101.6) (xy 193.04 101.6)
 		)
 		(stroke
 			(width 0)
@@ -2692,16 +3215,6 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 106.68) (xy 201.93 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "96220289-64ce-4030-8b0e-a79e1a9df3a7")
-	)
-	(wire
-		(pts
 			(xy 114.3 90.17) (xy 115.57 90.17)
 		)
 		(stroke
@@ -2782,6 +3295,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 92.71) (xy 220.98 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bcc6969b-d358-4b39-b9a3-543a8038ea59")
+	)
+	(wire
+		(pts
 			(xy 219.71 53.34) (xy 228.6 53.34)
 		)
 		(stroke
@@ -2842,16 +3365,6 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 92.71) (xy 201.93 99.06)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cd91d5ae-de0b-4be4-a831-940743218e95")
-	)
-	(wire
-		(pts
 			(xy 130.81 124.46) (xy 130.81 127)
 		)
 		(stroke
@@ -2899,6 +3412,16 @@
 			(type default)
 		)
 		(uuid "d6d106f2-9013-41bd-a504-c9db62a2206b")
+	)
+	(wire
+		(pts
+			(xy 200.66 92.71) (xy 207.01 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e03dcd1a-803c-4a13-819d-bbe23d791e96")
 	)
 	(wire
 		(pts
@@ -2962,7 +3485,7 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 90.17) (xy 184.15 90.17)
+			(xy 167.64 90.17) (xy 185.42 90.17)
 		)
 		(stroke
 			(width 0)
@@ -3061,12 +3584,12 @@
 		(uuid "7240b759-52c8-4311-8cf7-952a14a71e11")
 	)
 	(label "Conn4"
-		(at 201.93 99.06 90)
+		(at 220.98 92.71 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "c9723d72-ff5f-4ad9-95f2-39bd7c684eee")
 	)
@@ -3082,7 +3605,7 @@
 	)
 	(global_label "EN_REF2"
 		(shape input)
-		(at 184.15 100.33 180)
+		(at 182.88 101.6 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3092,7 +3615,7 @@
 		)
 		(uuid "0416f662-1537-471f-9c02-e57cba2115dd")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 173.0006 100.33 0)
+			(at 171.7306 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3103,7 +3626,7 @@
 	)
 	(global_label "SecRef"
 		(shape output)
-		(at 184.15 95.25 180)
+		(at 182.88 95.25 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3113,7 +3636,7 @@
 		)
 		(uuid "0f5c4360-5060-4672-a731-af5f05f66410")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 174.6938 95.25 0)
+			(at 173.4238 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3311,27 +3834,6 @@
 			)
 		)
 	)
-	(global_label "EN_OUT4"
-		(shape input)
-		(at 226.06 100.33 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "e043d8d7-6eca-4498-891a-a6d10812ba67")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 214.7896 100.33 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "EN_REF2"
 		(shape input)
 		(at 219.71 129.54 180)
@@ -3437,6 +3939,126 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
+		(at 158.75 127 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "341addf6-4b53-4d62-afe6-a36fb8f51cdf")
+		(property "Netclass" "50ms"
+			(at 158.75 130.302 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Component Class" ""
+			(at 187.96 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 185.42 95.25 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3f2883a4-c552-4b4a-a898-c4ccaa042d4d")
+		(property "Netclass" "50ms"
+			(at 185.42 98.552 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Component Class" ""
+			(at 214.63 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 105.41 90.17 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "41c487bd-3d84-414e-9069-a1b00878a312")
+		(property "Netclass" "50ms"
+			(at 105.41 86.868 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Component Class" ""
+			(at 76.2 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 175.26 90.17 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "57786b84-2c39-4480-a6f4-f5e1e1edd6b1")
+		(property "Netclass" "50ms"
+			(at 175.26 86.868 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Component Class" ""
+			(at 146.05 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
 		(at 182.88 63.5 0)
 		(effects
 			(font
@@ -3497,6 +4119,36 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
+		(at 110.49 143.51 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "9e8f5f69-981e-4de5-bba6-322edc8c5edf")
+		(property "Netclass" "50ms"
+			(at 110.49 140.208 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Component Class" ""
+			(at 81.28 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
 		(at 219.71 53.34 0)
 		(effects
 			(font
@@ -3505,7 +4157,7 @@
 			(justify left bottom)
 		)
 		(uuid "a05606d3-136d-4240-b89a-af8bd81538c3")
-		(property "Netclass" "50cop"
+		(property "Netclass" "50ms"
 			(at 219.71 50.038 0)
 			(effects
 				(font
@@ -3535,7 +4187,7 @@
 			(justify left bottom)
 		)
 		(uuid "a8c75fb6-6cf6-4a14-9e02-2410590cefce")
-		(property "Netclass" "50cop"
+		(property "Netclass" "50ms"
 			(at 130.81 50.038 0)
 			(effects
 				(font
@@ -3576,6 +4228,36 @@
 		)
 		(property "Component Class" ""
 			(at 64.77 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 207.01 92.71 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "b5ec5cc3-5b57-4307-88bb-669efcaaad9e")
+		(property "Netclass" "50ms"
+			(at 207.01 96.012 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Component Class" ""
+			(at 236.22 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3666,6 +4348,66 @@
 		)
 		(property "Component Class" ""
 			(at 123.19 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 167.64 127 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f4a8ffad-1ec0-459c-84d1-ee35baf2e502")
+		(property "Netclass" "50ms"
+			(at 167.64 123.698 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Component Class" ""
+			(at 138.43 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 218.44 92.71 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "fdcfee61-f222-4ea3-8814-501f5fcb9a6c")
+		(property "Netclass" "50ms"
+			(at 218.44 96.012 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Component Class" ""
+			(at 247.65 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3866,24 +4608,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 162.56 90.17 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 162.56 90.17 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "a194f63b-75c5-4c03-85bc-ad33dfbc7dae")
 		)
@@ -3901,7 +4625,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 201.93 107.95 0)
+		(at 201.93 100.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3909,7 +4633,7 @@
 		(dnp no)
 		(uuid "18a841b5-6bcd-4ffe-9650-604ca7ac081e")
 		(property "Reference" "#PWR088"
-			(at 201.93 114.3 0)
+			(at 201.93 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3918,7 +4642,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 201.93 110.744 0)
+			(at 201.93 103.124 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3927,7 +4651,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 201.93 107.95 0)
+			(at 201.93 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3936,7 +4660,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 201.93 107.95 0)
+			(at 201.93 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3945,7 +4669,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 201.93 107.95 0)
+			(at 201.93 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4028,24 +4752,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "d0a51514-286b-4c0e-887a-cf702245591d")
 		)
@@ -4062,11 +4768,11 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
+		(lib_id "Parts:D_TVS")
 		(at 93.98 67.31 270)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "1b947b63-6e35-4297-a924-6d2ebfed44f6")
@@ -4086,7 +4792,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_0402_1005Metric_Pad0.77x0.64mm_HandSolder"
+		(property "Footprint" "Parts:HHS_0402"
 			(at 93.98 67.31 0)
 			(effects
 				(font
@@ -4105,24 +4811,6 @@
 			)
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
-			(at 93.98 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 93.98 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 93.98 67.31 0)
 			(effects
 				(font
@@ -4147,11 +4835,12 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
+		(lib_id "Parts:D_TVS")
 		(at 167.64 147.32 90)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "1c3c2718-af90-41a0-bb58-d1025e5b31b3")
@@ -4171,7 +4860,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_0402_1005Metric_Pad0.77x0.64mm_HandSolder"
+		(property "Footprint" "Parts:HHS_0402"
 			(at 167.64 147.32 0)
 			(effects
 				(font
@@ -4190,24 +4879,6 @@
 			)
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
-			(at 167.64 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 167.64 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 167.64 147.32 0)
 			(effects
 				(font
@@ -4236,7 +4907,7 @@
 		(at 191.77 138.43 0)
 		(unit 2)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "20ff6e6a-717e-4504-adde-fc2421d02da3")
@@ -4277,24 +4948,6 @@
 			)
 		)
 		(property "Description" "Single SPDT Analog Switch, 5V/3.3V Single-Supply Operation, 12Ohm Ron, SOT-23-6"
-			(at 191.77 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 191.77 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 191.77 138.43 0)
 			(effects
 				(font
@@ -4459,24 +5112,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 101.6 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 101.6 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "539e7302-3b86-47c1-b954-48e8bc437bea")
 		)
@@ -4494,16 +5129,16 @@
 	)
 	(symbol
 		(lib_id "Analog_Switch:TS5A63157DBV")
-		(at 191.77 92.71 0)
+		(at 193.04 92.71 0)
 		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "260b68c0-edc2-4a64-804d-59de657791c5")
 		(property "Reference" "U13"
-			(at 195.58 89.408 0)
+			(at 196.85 89.408 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4512,7 +5147,7 @@
 			)
 		)
 		(property "Value" "TS5A63157DBV"
-			(at 190.627 98.933 0)
+			(at 191.897 98.933 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4522,7 +5157,7 @@
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
-			(at 190.5 106.045 0)
+			(at 191.77 106.045 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4532,7 +5167,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/ts5a63157.pdf"
-			(at 190.5 104.14 0)
+			(at 191.77 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4542,25 +5177,7 @@
 			)
 		)
 		(property "Description" "Single SPDT Analog Switch, 5V/3.3V Single-Supply Operation, 12Ohm Ron, SOT-23-6"
-			(at 191.77 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 191.77 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 191.77 92.71 0)
+			(at 193.04 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4569,22 +5186,22 @@
 			)
 		)
 		(pin "5"
-			(uuid "184b7ee2-2114-4179-95fa-ab23352c4150")
+			(uuid "184b7ee2-2114-4179-95fa-ab23352c4151")
 		)
 		(pin "2"
-			(uuid "193c0a07-6236-4a6f-9a7d-655c5cd64cb8")
+			(uuid "193c0a07-6236-4a6f-9a7d-655c5cd64cb9")
 		)
 		(pin "6"
-			(uuid "b34e50b0-eb6d-4089-a3cc-31c1b37cc859")
+			(uuid "b34e50b0-eb6d-4089-a3cc-31c1b37cc85a")
 		)
 		(pin "4"
-			(uuid "004db0b0-d875-4a7c-9329-b90a74627424")
+			(uuid "004db0b0-d875-4a7c-9329-b90a74627425")
 		)
 		(pin "3"
-			(uuid "ff0cffb9-128e-481d-beb1-b9a27df2cafe")
+			(uuid "ff0cffb9-128e-481d-beb1-b9a27df2caff")
 		)
 		(pin "1"
-			(uuid "b7b3736a-4a51-4617-93d2-2ed3fc274e81")
+			(uuid "b7b3736a-4a51-4617-93d2-2ed3fc274e82")
 		)
 		(instances
 			(project ""
@@ -4663,7 +5280,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 207.01 97.79 0)
+		(at 226.06 97.79 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4671,7 +5288,7 @@
 		(dnp no)
 		(uuid "2d384ea8-332d-4b01-b958-5544fdfaaacb")
 		(property "Reference" "#PWR061"
-			(at 207.01 104.14 0)
+			(at 226.06 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4680,7 +5297,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 207.01 100.584 0)
+			(at 226.06 100.584 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4689,7 +5306,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 207.01 97.79 0)
+			(at 226.06 97.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4698,7 +5315,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 207.01 97.79 0)
+			(at 226.06 97.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4707,7 +5324,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 207.01 97.79 0)
+			(at 226.06 97.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4728,7 +5345,7 @@
 		)
 	)
 	(symbol
-		(lib_id "74xGxx:74LVC1G125")
+		(lib_id "74xGxx:74LVC1G240")
 		(at 146.05 90.17 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -4744,8 +5361,8 @@
 				)
 			)
 		)
-		(property "Value" "74LVC1G125"
-			(at 147.828 96.52 0)
+		(property "Value" "74LVC1G240"
+			(at 147.828 96.266 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4761,7 +5378,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf"
+		(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
 			(at 146.05 90.17 0)
 			(effects
 				(font
@@ -4770,7 +5387,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Single Buffer Gate Tri-State, Low-Voltage CMOS"
+		(property "Description" "Single Buffer/Driver Gate Tri-State, Low-Voltage CMOS"
 			(at 146.05 90.17 0)
 			(effects
 				(font
@@ -4780,24 +5397,6 @@
 			)
 		)
 		(property "JLCPCB" ""
-			(at 146.05 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 146.05 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 146.05 90.17 0)
 			(effects
 				(font
@@ -4874,24 +5473,6 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 175.26 127 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 175.26 127 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 175.26 127 0)
 			(effects
 				(font
@@ -4978,24 +5559,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 190.5 63.5 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 190.5 63.5 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "b86761d3-3347-440a-a89e-d7ee2862e1d7")
 		)
@@ -5059,24 +5622,6 @@
 			)
 		)
 		(property "Description" ""
-			(at 209.55 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 209.55 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 209.55 58.42 0)
 			(effects
 				(font
@@ -5163,24 +5708,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 110.49 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 110.49 90.17 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 110.49 90.17 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5330,24 +5857,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 130.81 83.82 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 130.81 83.82 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "00762d10-cb55-4364-bc4d-9b2c983e4225")
 		)
@@ -5364,33 +5873,42 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
-		(at 201.93 102.87 270)
-		(mirror x)
+		(lib_id "Diode:BAS40-04")
+		(at 204.47 92.71 90)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "56772e2e-0bcf-4c37-82f3-6e4d6da601cc")
 		(property "Reference" "D4"
-			(at 203.454 106.934 0)
+			(at 204.216 87.63 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "D_TVS"
-			(at 199.39 102.87 0)
+		(property "Value" "BAS40-04"
+			(at 208.026 85.598 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_0402_1005Metric_Pad0.77x0.64mm_HandSolder"
-			(at 201.93 102.87 0)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 196.85 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.vishay.com/docs/85701/bas40v.pdf"
+			(at 201.93 95.758 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5398,8 +5916,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 201.93 102.87 0)
+		(property "Description" "40V 0.2A Dual Small Signal Schottky Diodes"
+			(at 204.47 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5407,26 +5925,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Bidirectional transient-voltage-suppression diode"
-			(at 201.93 102.87 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 201.93 102.87 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 201.93 102.87 0)
+		(property "JLCPCB" "C7502688"
+			(at 204.47 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5439,6 +5939,9 @@
 		)
 		(pin "1"
 			(uuid "f660bf20-4e2b-40d2-830e-f6d497df9cda")
+		)
+		(pin "3"
+			(uuid "edb680b5-05c9-498c-8147-11d616633be7")
 		)
 		(instances
 			(project "gpsref"
@@ -5495,24 +5998,6 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 96.52 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 96.52 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 96.52 101.6 0)
 			(effects
 				(font
@@ -5591,24 +6076,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 137.16 143.51 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 137.16 143.51 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 137.16 143.51 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5758,24 +6225,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 137.16 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 137.16 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "153ca458-1e7b-4bd7-99af-ca8d0a7b2833")
 		)
@@ -5793,7 +6242,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_Coaxial")
-		(at 207.01 92.71 0)
+		(at 226.06 92.71 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -5801,7 +6250,7 @@
 		(dnp no)
 		(uuid "64d013ef-3c19-4264-a91c-362f5113cd8e")
 		(property "Reference" "J4"
-			(at 207.264 89.662 0)
+			(at 226.314 89.662 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5809,7 +6258,7 @@
 			)
 		)
 		(property "Value" "SMA"
-			(at 209.931 92.71 90)
+			(at 228.981 92.71 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5817,7 +6266,7 @@
 			)
 		)
 		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount"
-			(at 207.01 92.71 0)
+			(at 226.06 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5826,7 +6275,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 207.01 92.71 0)
+			(at 226.06 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5835,25 +6284,7 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 207.01 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 207.01 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 207.01 92.71 0)
+			(at 226.06 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6063,24 +6494,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "3"
 			(uuid "ffa2da98-f482-48a8-b030-7e399dc1600e")
 		)
@@ -6150,24 +6563,6 @@
 			)
 		)
 		(property "Description" "75V 0.15A Fast switching Diode, SOD-323"
-			(at 120.65 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 120.65 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 120.65 95.25 0)
 			(effects
 				(font
@@ -6319,24 +6714,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 227.33 129.54 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 227.33 129.54 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "e2d99e43-0df9-4624-9969-690cac252755")
 		)
@@ -6478,24 +6855,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 100.33 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 100.33 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "c27d9ab1-383b-45f0-a8c8-07368feed237")
 		)
@@ -6557,24 +6916,6 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 96.52 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 96.52 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 96.52 138.43 0)
 			(effects
 				(font
@@ -6659,24 +7000,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 162.56 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 162.56 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "67659b7c-cca7-400d-83db-d29115ead866")
 		)
@@ -6754,24 +7077,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 137.16 106.68 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 137.16 106.68 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "3fca3309-e322-48b0-9b77-562a81e3fdeb")
 		)
@@ -6841,24 +7146,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 227.33 124.46 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 227.33 124.46 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 227.33 124.46 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6944,24 +7231,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 101.6 63.5 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 101.6 63.5 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "b97a3e8e-13bb-4576-b0bf-e89a882fd39c")
 		)
@@ -7023,24 +7292,6 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 200.66 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 200.66 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 200.66 138.43 0)
 			(effects
 				(font
@@ -7131,11 +7382,11 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
+		(lib_id "Parts:D_TVS")
 		(at 182.88 67.31 270)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "99ec8f54-7dd1-4a30-84e8-49b1a7194677")
@@ -7155,7 +7406,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_0402_1005Metric_Pad0.77x0.64mm_HandSolder"
+		(property "Footprint" "Parts:HHS_0402"
 			(at 182.88 67.31 0)
 			(effects
 				(font
@@ -7174,24 +7425,6 @@
 			)
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
-			(at 182.88 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 182.88 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 182.88 67.31 0)
 			(effects
 				(font
@@ -7407,24 +7640,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 146.05 127 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 146.05 127 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "4"
 			(uuid "f1166953-fd92-4d1c-b5e6-4fd979e46c9c")
 		)
@@ -7512,24 +7727,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 90.17 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 90.17 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "12f99766-0bee-4ee3-ab2b-4a01f857383e")
 		)
@@ -7546,11 +7743,12 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
+		(lib_id "Parts:D_TVS")
 		(at 182.88 49.53 270)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "b34a621b-4fa2-4687-bba5-d6b20130f6bb")
@@ -7570,7 +7768,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_0402_1005Metric_Pad0.77x0.64mm_HandSolder"
+		(property "Footprint" "Parts:HHS_0402"
 			(at 182.88 49.53 0)
 			(effects
 				(font
@@ -7597,24 +7795,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 182.88 49.53 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 182.88 49.53 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "80f07b5a-6132-4e27-bfd1-cc3fb184ddaf")
 		)
@@ -7625,6 +7805,82 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
 					(reference "D21")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 210.82 92.71 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b9e312e9-7088-41da-8fcb-73b61341fd60")
+		(property "Reference" "R118"
+			(at 210.82 90.678 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0"
+			(at 210.82 92.71 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 210.82 94.488 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "Not sure about value."
+			(at 210.82 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 210.82 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
+			(at 210.82 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "f5ac3571-7306-4bf3-a18d-d08c284f8a5c")
+		)
+		(pin "1"
+			(uuid "c0ae3483-9564-44ab-9494-a41eb7ece3ba")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
+					(reference "R118")
 					(unit 1)
 				)
 			)
@@ -7748,24 +8004,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 144.78 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 144.78 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "13fb87a6-5a4e-4a19-b4f8-848972eead3f")
 		)
@@ -7782,11 +8020,12 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:D_TVS")
+		(lib_id "Parts:D_TVS")
 		(at 93.98 49.53 270)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "ca5a3609-707c-4f49-a06b-b4aaa198184d")
@@ -7806,7 +8045,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_0402_1005Metric_Pad0.77x0.64mm_HandSolder"
+		(property "Footprint" "Parts:HHS_0402"
 			(at 93.98 49.53 0)
 			(effects
 				(font
@@ -7825,24 +8064,6 @@
 			)
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
-			(at 93.98 49.53 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 93.98 49.53 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 93.98 49.53 0)
 			(effects
 				(font
@@ -7927,24 +8148,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 110.49 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 110.49 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "00bd53da-8279-473a-948d-6bf88b9fb8e7")
 		)
@@ -8016,24 +8219,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 190.5 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 190.5 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 190.5 53.34 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8183,24 +8368,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 130.81 120.65 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 130.81 120.65 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "903baf37-e4b9-4289-a158-11512df607b5")
 		)
@@ -8335,24 +8502,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 120.65 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 120.65 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "76bf71a6-77c2-415f-be86-e3bb881dd566")
 		)
@@ -8435,6 +8584,71 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+3V3")
+		(at 201.93 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e0093b35-67fd-41f6-bf93-ff796a42cf32")
+		(property "Reference" "#PWR012"
+			(at 201.93 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 201.93 81.534 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 201.93 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 201.93 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 201.93 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7dfc160d-94c8-446b-8ed3-9113401cfdfb")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
+					(reference "#PWR012")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_Coaxial")
 		(at 233.68 53.34 0)
 		(unit 1)
@@ -8478,24 +8692,6 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 233.68 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 233.68 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 233.68 53.34 0)
 			(effects
 				(font
@@ -8639,24 +8835,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 227.33 127 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 227.33 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 227.33 127 90)
 			(effects
 				(font
 					(size 1.27 1.27)

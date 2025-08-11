@@ -1,0 +1,195 @@
+(footprint "LED-QPLB615-RGB"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0.1 -1.4 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "936faf42-9404-40da-95cc-5830c3930a56")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "LED-QPLB615-RGB"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "63f403b6-34e5-495c-b484-1ad3bf7a8268")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "df000e4e-82a1-4691-9393-51e64d4b5d2a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c58b5a52-03d2-4e96-ab17-c8e31e4470cc")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.6 0.7)
+		(end -1.6 0.4)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "e0f2722c-940e-4bc6-912f-41be9c98f002")
+	)
+	(fp_line
+		(start -1.6 0.7)
+		(end 1.6 0.7)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "719b18b0-0f6d-4e74-97c4-a65d1aeae144")
+	)
+	(fp_line
+		(start 1.6 0.7)
+		(end 1.6 0.4)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "1748a20b-9fec-4c04-8a57-dc6b21b0721f")
+	)
+	(fp_rect
+		(start -2 -1.6)
+		(end 2 0.6)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "ed8d468d-f345-4fda-b254-0a301a1a41f2")
+	)
+	(fp_line
+		(start -1.6 -0.2)
+		(end 1.6 -0.2)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "15896782-856c-412e-849d-07353b68a1b2")
+	)
+	(fp_line
+		(start -1.6 0.4)
+		(end -1.6 -0.2)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "4b2e6574-6f20-492a-982f-8ce2c905a65e")
+	)
+	(fp_line
+		(start 1.6 -0.2)
+		(end 1.6 0.4)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "3a7cb8b7-8773-4b33-be41-6aa8fce83638")
+	)
+	(fp_arc
+		(start -1 -0.2)
+		(mid 0 -1.2)
+		(end 1 -0.2)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "fa164b4f-0764-45be-8664-551753969e10")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "185954d4-2dbf-4101-89ac-87eb862c1854")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd roundrect
+		(at -0.4 0.125)
+		(size 0.5 0.75)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.15)
+		(thermal_bridge_angle 45)
+		(uuid "f3b86172-81ed-4d16-a27c-560690781a63")
+	)
+	(pad "2" smd roundrect
+		(at 0.4 0.125)
+		(size 0.5 0.75)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.15)
+		(thermal_bridge_angle 45)
+		(uuid "24ef1f04-f1b5-4881-955a-82829f5e30f4")
+	)
+	(pad "3" smd roundrect
+		(at 1.4 0)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.15)
+		(thermal_bridge_angle 45)
+		(uuid "785c8bbb-417c-45e2-91ec-c96db2d5c7b7")
+	)
+	(pad "4" smd roundrect
+		(at -1.4 0)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.15)
+		(thermal_bridge_angle 45)
+		(uuid "10b2921b-e65f-4f83-8109-c6a603809a67")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/Parts.pretty/QBLP615_TRI.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -180)
+		)
+	)
+)

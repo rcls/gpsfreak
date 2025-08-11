@@ -128,7 +128,7 @@
       },
       "rules": {
         "max_error": 0.005,
-        "min_clearance": 0.15,
+        "min_clearance": 0.125,
         "min_connection": 0.125,
         "min_copper_edge_clearance": 0.15,
         "min_groove_width": 0.0,
@@ -197,13 +197,12 @@
         0.125,
         0.15,
         0.2,
+        0.25,
         0.3,
         0.4,
-        0.4247,
         0.5,
         1.0,
-        2.0,
-        3.0
+        2.0
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -523,7 +522,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.15,
+        "clearance": 0.125,
         "diff_pair_gap": 0.15,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2395,
@@ -540,9 +539,25 @@
         "wire_width": 6
       },
       {
-        "clearance": 0.15,
+        "clearance": 0.125,
         "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.2395,
+        "diff_pair_width": 0.6034,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
+        "name": "25ms",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 1.0,
+        "via_diameter": 0.5,
+        "via_drill": 0.3
+      },
+      {
+        "clearance": 0.125,
+        "diff_pair_gap": 0.15,
+        "diff_pair_width": 0.2614,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
         "name": "50cop",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 3,
@@ -552,48 +567,56 @@
         "via_drill": 0.3
       },
       {
-        "clearance": 0.15,
+        "clearance": 0.125,
         "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.8087,
+        "diff_pair_width": 0.5844,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
         "name": "50diff",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
+        "priority": 2,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.8087,
         "via_diameter": 0.5,
         "via_drill": 0.3
       },
       {
-        "clearance": 0.15,
+        "clearance": 0.125,
         "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.2395,
+        "diff_pair_width": 0.3493,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
         "name": "50ms",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 1,
+        "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.3493,
         "via_diameter": 0.5,
         "via_drill": 0.3
       },
       {
-        "clearance": 0.15,
+        "clearance": 0.125,
         "diff_pair_gap": 0.15,
         "diff_pair_width": 0.2395,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
         "name": "90diff",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 2,
+        "priority": 4,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2395,
         "via_diameter": 0.5,
         "via_drill": 0.3
       },
       {
-        "clearance": 0.15,
+        "clearance": 0.125,
         "diff_pair_gap": 0.15,
         "diff_pair_width": 0.2395,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
         "name": "Pwr",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 4,
+        "priority": 5,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.4,
         "via_diameter": 0.6,
@@ -615,7 +638,7 @@
         "90diff"
       ],
       "/GPS/GPSin": [
-        "50cop"
+        "50ms"
       ],
       "/Outputs/AC0_N": [
         "50diff"
@@ -629,11 +652,20 @@
       "/Outputs/AC2_P": [
         "50diff"
       ],
+      "/Outputs/Conn4": [
+        "50ms"
+      ],
       "/Outputs/Ext1": [
-        "50cop"
+        "50ms"
       ],
       "/Outputs/Ext2": [
-        "50cop"
+        "50ms"
+      ],
+      "/Outputs/Ext3": [
+        "50ms"
+      ],
+      "/Outputs/Ext4": [
+        "50ms"
       ],
       "/Power/2V1": [
         "Pwr"
@@ -671,6 +703,9 @@
       "Net-(C22-Pad2)": [
         "50diff"
       ],
+      "Net-(D4-Pad3)": [
+        "50ms"
+      ],
       "Net-(J1-In)": [
         "50cop"
       ],
@@ -679,6 +714,9 @@
       ],
       "Net-(J5-In)": [
         "50cop"
+      ],
+      "Net-(R125-Pad1)": [
+        "50ms"
       ],
       "OUT0_N": [
         "50diff"
@@ -692,11 +730,25 @@
       "OUT2_P": [
         "50diff"
       ],
+      "OUT7_N": [
+        "50ms"
+      ],
+      "OUT7_P": [
+        "50ms"
+      ],
+      "SecRef": [
+        "50ms"
+      ],
       "TCXO_3V3": [
         "Pwr"
       ]
     },
-    "netclass_patterns": []
+    "netclass_patterns": [
+      {
+        "netclass": "50ms",
+        "pattern": "/GPS/GPSin"
+      }
+    ]
   },
   "pcbnew": {
     "last_paths": {
@@ -713,7 +765,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 10,
+    "annotate_start_num": 110,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {

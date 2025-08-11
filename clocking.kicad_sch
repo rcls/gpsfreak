@@ -5,6 +5,126 @@
 	(uuid "cf049e14-c50a-4d5c-8d38-3a63ee1a9bc9")
 	(paper "A4")
 	(lib_symbols
+		(symbol "Connector:TestPoint_Probe"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.762)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "TP"
+				(at 1.651 5.842 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "TestPoint_Probe"
+				(at 1.651 4.064 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 5.08 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 5.08 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "test point (alternative probe-style design)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "test point tp"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Pin* Test*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "TestPoint_Probe_0_1"
+				(polyline
+					(pts
+						(xy 1.27 0.762) (xy 0 0) (xy 0.762 1.27) (xy 1.27 0.762)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.397 0.635) (xy 0.635 1.397) (xy 2.413 3.175) (xy 3.175 2.413) (xy 1.397 0.635)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "TestPoint_Probe_1_1"
+				(pin passive line
+					(at 0 0 90)
+					(length 0)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:C"
 			(pin_numbers
 				(hide yes)
@@ -1851,7 +1971,7 @@
 					(justify right)
 				)
 			)
-			(property "Footprint" "Parts:WSON-6-1EP_2x2mm_P0.65mm_NoEP"
+			(property "Footprint" "Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm"
 				(at 1.27 -8.89 0)
 				(effects
 					(font
@@ -2111,6 +2231,25 @@
 						)
 					)
 					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -10.16 90)
+					(length 2.54)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2977,16 +3116,6 @@
 	)
 	(wire
 		(pts
-			(xy 176.53 138.43) (xy 187.96 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5f217e06-61c2-47f9-958a-15b286c86d19")
-	)
-	(wire
-		(pts
 			(xy 115.57 120.65) (xy 115.57 123.19)
 		)
 		(stroke
@@ -3367,7 +3496,7 @@
 	)
 	(wire
 		(pts
-			(xy 187.96 138.43) (xy 187.96 129.54)
+			(xy 187.96 139.7) (xy 187.96 129.54)
 		)
 		(stroke
 			(width 0)
@@ -4416,7 +4545,7 @@
 	)
 	(global_label "PDN"
 		(shape input)
-		(at 176.53 138.43 180)
+		(at 187.96 139.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4426,7 +4555,7 @@
 		)
 		(uuid "a2e1fabc-45f7-41b3-9894-b35d5319a17f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 169.6743 138.43 0)
+			(at 187.96 146.5557 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4708,24 +4837,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 81.28 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 81.28 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "a40ef8ba-db23-4275-a69a-6d5932c92fff")
 		)
@@ -4736,6 +4847,71 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "C35")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint_Probe")
+		(at 153.67 102.87 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "06959b6a-5d63-4208-9e59-faa4b493b537")
+		(property "Reference" "TP13"
+			(at 159.639 100.838 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TestPoint_Probe"
+			(at 155.321 98.806 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "Parts:TestPoint"
+			(at 158.75 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 158.75 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point (alternative probe-style design)"
+			(at 153.67 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "729cfa87-fbf2-4541-bd36-e4bb17ac1b02")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
+					(reference "TP13")
 					(unit 1)
 				)
 			)
@@ -4796,24 +4972,6 @@
 			)
 		)
 		(property "JLCPCB" "C15525"
-			(at 107.95 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 107.95 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 107.95 57.15 0)
 			(effects
 				(font
@@ -5033,24 +5191,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 248.92 92.71 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 248.92 92.71 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "b48813f9-d59f-440d-9aba-3582d66cdd84")
 		)
@@ -5224,7 +5364,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Parts:WSON-6-1EP_2x2mm_P0.65mm_NoEP"
+		(property "Footprint" "Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm"
 			(at 109.22 144.78 0)
 			(effects
 				(font
@@ -5253,24 +5393,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 107.95 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 107.95 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "4"
 			(uuid "7dd27b2c-7086-442c-b6d9-57ce160a9b15")
 		)
@@ -5288,6 +5410,9 @@
 		)
 		(pin "5"
 			(uuid "ee6f7648-6802-4152-8f5e-bbdba82c5041")
+		)
+		(pin "7"
+			(uuid "b06b2b17-d77c-4d92-b32f-b8a5eb62295c")
 		)
 		(instances
 			(project ""
@@ -5354,24 +5479,6 @@
 			)
 		)
 		(property "JLCPCB" "C15525"
-			(at 248.92 110.49 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 248.92 110.49 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 248.92 110.49 90)
 			(effects
 				(font
@@ -5456,24 +5563,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 143.51 121.92 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 143.51 121.92 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "ff3bd259-8f1c-4d96-a147-0de983ad0714")
 		)
@@ -5550,24 +5639,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 153.67 121.92 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 153.67 121.92 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "8b06827c-e39f-475d-9328-693a1ee7853c")
 		)
@@ -5636,24 +5707,6 @@
 			)
 		)
 		(property "JLCPCB" "C14709"
-			(at 73.66 110.49 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 73.66 110.49 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 73.66 110.49 90)
 			(effects
 				(font
@@ -5738,24 +5791,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 100.33 93.98 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 100.33 93.98 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "f264a214-9cca-4db6-b4e3-57f451737cad")
 		)
@@ -5824,24 +5859,6 @@
 			)
 		)
 		(property "JLCPCB" "C14709"
-			(at 170.18 33.02 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 170.18 33.02 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 170.18 33.02 90)
 			(effects
 				(font
@@ -6117,24 +6134,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 127 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 127 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "d281139e-15e2-4f0f-a0d3-147af2c1cb4d")
 		)
@@ -6205,24 +6204,6 @@
 			)
 		)
 		(property "JLCPCB" "C15525"
-			(at 158.75 95.25 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 158.75 95.25 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 158.75 95.25 90)
 			(effects
 				(font
@@ -6376,24 +6357,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 247.65 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 247.65 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "90bb3384-d6ea-433f-8c5b-8f0501685969")
 		)
@@ -6463,24 +6426,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 180.34 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 180.34 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "e8d3ac05-410e-44eb-be44-be75618fe50f")
 		)
@@ -6541,24 +6486,6 @@
 		)
 		(property "Description" "Resistor"
 			(at 123.19 127 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 123.19 127 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 123.19 127 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6702,24 +6629,6 @@
 			)
 		)
 		(property "JLCPCB" ""
-			(at 119.38 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 119.38 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 119.38 135.89 0)
 			(effects
 				(font
@@ -6872,24 +6781,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 214.63 46.99 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 214.63 46.99 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "89b41097-e4f9-48b4-86da-c876cb6abf05")
 		)
@@ -6968,24 +6859,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 107.95 97.79 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 107.95 97.79 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "b39472d9-646b-47fe-956f-d82cf34c3860")
 		)
@@ -7054,24 +6927,6 @@
 			)
 		)
 		(property "JLCPCB" "C14709"
-			(at 100.33 34.29 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 100.33 34.29 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 100.33 34.29 90)
 			(effects
 				(font
@@ -7186,7 +7041,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Inductor_SMD:L_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 227.33 42.418 90)
 			(effects
 				(font
@@ -7213,25 +7068,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C14709"
-			(at 227.33 40.64 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 227.33 40.64 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
+		(property "JLCPCB" ""
 			(at 227.33 40.64 90)
 			(effects
 				(font
@@ -7316,24 +7153,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 73.66 34.29 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 73.66 34.29 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "e694c74a-2195-4ca4-8ed5-3762fec1d12e")
 		)
@@ -7403,24 +7222,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 121.92 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 121.92 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "995d25e2-c846-47ce-8a54-35d7dda43573")
 		)
@@ -7482,24 +7283,6 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 116.84 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 116.84 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 116.84 57.15 0)
 			(effects
 				(font
@@ -7652,24 +7435,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 107.95 38.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 107.95 38.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "2b924af8-815e-401a-84e6-153df5b83230")
 		)
@@ -7812,24 +7577,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 73.66 93.98 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 73.66 93.98 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "ed6a305c-536d-4ff1-85b1-adb27b44626c")
 		)
@@ -7900,24 +7647,6 @@
 			)
 		)
 		(property "JLCPCB" "C15525"
-			(at 81.28 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 81.28 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 81.28 78.74 0)
 			(effects
 				(font
@@ -8136,24 +7865,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 81.28 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 81.28 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "ff839eb5-51a8-476e-9808-90464f57b25b")
 		)
@@ -8232,24 +7943,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 175.26 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 175.26 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "d301342a-44a6-4230-8293-9ac56f183978")
 		)
@@ -8320,24 +8013,6 @@
 			)
 		)
 		(property "JLCPCB" "C3611586"
-			(at 201.93 104.14 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 201.93 104.14 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 201.93 104.14 0)
 			(effects
 				(font
@@ -8527,7 +8202,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 236.728 44.45 90)
 			(effects
 				(font
@@ -8554,17 +8229,8 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 234.95 44.45 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 234.95 44.45 90)
+		(property "JLCPCB" ""
+			(at 234.95 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8714,24 +8380,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 73.66 74.93 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 73.66 74.93 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "a67be8d0-34a7-4568-9180-4c3bbd2a8a58")
 		)
@@ -8808,24 +8456,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 100.33 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 100.33 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "808ea737-6ea4-4786-ab2b-105b5b5febe2")
 		)
@@ -8894,24 +8524,6 @@
 			)
 		)
 		(property "JLCPCB" "C14709"
-			(at 100.33 74.93 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 100.33 74.93 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 100.33 74.93 90)
 			(effects
 				(font
@@ -9062,24 +8674,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 148.59 102.87 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 148.59 102.87 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "21d592cc-ec1b-4db9-bf83-e2804d998914")
 		)
@@ -9100,7 +8694,7 @@
 		(at 189.23 44.45 180)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp yes)
 		(uuid "c30e63bf-29bd-4c2b-8ec9-9e5dd9296aa6")
@@ -9120,7 +8714,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 191.008 44.45 90)
 			(effects
 				(font
@@ -9149,24 +8743,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 189.23 44.45 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 189.23 44.45 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 189.23 44.45 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9450,24 +9026,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 200.66 40.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 200.66 40.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "10"
 			(uuid "3db7a181-29de-4795-892b-a437e3b6c38f")
 		)
@@ -9568,24 +9126,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 148.59 118.11 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 148.59 118.11 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "58308f9d-537d-4b0f-91c1-f53d5268a798")
 		)
@@ -9656,24 +9196,6 @@
 			)
 		)
 		(property "JLCPCB" "C15525"
-			(at 81.28 97.79 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 81.28 97.79 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 81.28 97.79 0)
 			(effects
 				(font
@@ -9758,24 +9280,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 153.67 106.68 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 153.67 106.68 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "cda00f5e-a543-4a17-9fb1-fc5436a13fd2")
 		)
@@ -9816,7 +9320,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 191.008 36.83 90)
 			(effects
 				(font
@@ -9845,24 +9349,6 @@
 		)
 		(property "JLCPCB" ""
 			(at 189.23 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 189.23 36.83 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 189.23 36.83 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9948,24 +9434,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 81.28 38.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 81.28 38.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "b732c5b9-a812-4cb9-945e-5f93d048ced0")
 		)
@@ -10037,24 +9505,6 @@
 			)
 		)
 		(property "JLCPCB" ""
-			(at 160.02 45.72 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 160.02 45.72 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 160.02 45.72 0)
 			(effects
 				(font
@@ -10363,24 +9813,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 255.27 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 255.27 135.89 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "63811c1c-59aa-4e1c-bfa2-6d3c8baafb85")
 		)
@@ -10451,24 +9883,6 @@
 			)
 		)
 		(property "JLCPCB" "C15525"
-			(at 107.95 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 107.95 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 107.95 78.74 0)
 			(effects
 				(font
@@ -10687,24 +10101,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" ""
-			(at 245.11 95.25 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
-			(at 245.11 95.25 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "6242c0f9-14a4-4ae5-9317-9648b505ebe8")
 		)
@@ -10773,24 +10169,6 @@
 			)
 		)
 		(property "JLCPCB" "C14709"
-			(at 73.66 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Device" ""
-			(at 73.66 53.34 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" ""
 			(at 73.66 53.34 90)
 			(effects
 				(font

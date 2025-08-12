@@ -4454,6 +4454,10 @@
 		(uuid "ffdb56bd-9d6f-418e-9505-b833ea6f4f45")
 	)
 	(no_connect
+		(at 157.48 55.88)
+		(uuid "2d221e74-6381-409a-8cfb-6ced75a2bd43")
+	)
+	(no_connect
 		(at 57.15 86.36)
 		(uuid "8222376c-7270-4968-8195-fb41ebb29130")
 	)
@@ -5104,6 +5108,16 @@
 			(type default)
 		)
 		(uuid "ae322ed0-8149-4d89-86a8-b8df0f226ffd")
+	)
+	(wire
+		(pts
+			(xy 157.48 73.66) (xy 161.29 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b25157fa-76b0-40d0-9826-884f25fb256e")
 	)
 	(wire
 		(pts
@@ -6728,6 +6742,72 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
 					(reference "J12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 161.29 73.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1a990217-7ba7-4a71-a7e3-e52c68e8d62e")
+		(property "Reference" "#PWR080"
+			(at 161.29 80.01 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 163.576 73.152 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 161.29 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 161.29 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 161.29 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e70b6e5a-d4dc-4ab0-a3ec-05417c96cef1")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
+					(reference "#PWR080")
 					(unit 1)
 				)
 			)
@@ -9976,7 +10056,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e00f9f50-daee-43c2-a3d1-0001888a1ffb")
-		(property "Reference" "J6"
+		(property "Reference" "J7"
 			(at 41.91 51.435 0)
 			(effects
 				(font
@@ -10073,7 +10153,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
-					(reference "J6")
+					(reference "J7")
 					(unit 1)
 				)
 			)

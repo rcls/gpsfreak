@@ -2835,16 +2835,6 @@
 		)
 		(uuid "42b01ed1-966d-4abe-a9c3-748c1f59b0b1")
 	)
-	(label "InTC3V3"
-		(at 123.19 59.69 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "42cdee53-d3bc-4cad-b7e3-f77cfd7abb8e")
-	)
 	(label "FbCG18"
 		(at 152.4 135.89 0)
 		(effects
@@ -2894,16 +2884,6 @@
 			(justify left bottom)
 		)
 		(uuid "93a190d9-8d60-4297-8114-c7437b6bb877")
-	)
-	(label "InCG3V3"
-		(at 123.19 93.98 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a1614658-5956-410f-9478-13111ca86815")
 	)
 	(label "Fb21"
 		(at 85.09 135.89 180)

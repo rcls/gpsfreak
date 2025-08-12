@@ -3040,6 +3040,107 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "power:PWR_FLAG"
+			(power)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#FLG"
+				(at 0 1.905 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "PWR_FLAG"
+				(at 0 3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Special symbol for telling ERC where power comes from"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "flag power"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "PWR_FLAG_0_0"
+				(pin power_out line
+					(at 0 0 90)
+					(length 0)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_1"
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 	)
 	(text "Open for 3.3V\n"
 		(exclude_from_sim no)
@@ -3089,6 +3190,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "4c641081-7c9b-4cdb-8480-507c3959463e")
+	)
+	(junction
+		(at 100.33 74.93)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "56cd0f41-a466-49f3-a082-18c690ebfa10")
 	)
 	(junction
 		(at 130.81 99.06)
@@ -3179,6 +3286,16 @@
 			(type default)
 		)
 		(uuid "0765792f-ff64-4c7c-8551-a23affa1417c")
+	)
+	(wire
+		(pts
+			(xy 100.33 74.93) (xy 100.33 72.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "083eabe3-0a97-429a-af81-62a930a0ff73")
 	)
 	(wire
 		(pts
@@ -3282,7 +3399,7 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 81.28) (xy 100.33 72.39)
+			(xy 100.33 81.28) (xy 100.33 74.93)
 		)
 		(stroke
 			(width 0)
@@ -3840,7 +3957,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "0e3e5380-f9d6-4172-82d0-c9c12ec1e92c")
-		(property "Reference" "J5"
+		(property "Reference" "J6"
 			(at 139.954 96.012 0)
 			(effects
 				(font
@@ -3892,7 +4009,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "J5")
+					(reference "J6")
 					(unit 1)
 				)
 			)
@@ -5653,6 +5770,72 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 100.33 74.93 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b50c37cf-8237-4692-b1d7-c126aa647d2b")
+		(property "Reference" "#FLG071"
+			(at 98.425 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 96.52 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" ""
+			(at 100.33 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 100.33 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 100.33 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7cc6b362-c68c-4bed-ba6d-097bd892d379")
+		)
+		(instances
+			(project ""
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
+					(reference "#FLG071")
 					(unit 1)
 				)
 			)

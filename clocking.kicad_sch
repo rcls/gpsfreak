@@ -2716,8 +2716,28 @@
 		(uuid "ff864d69-8530-44d3-9e53-b7ca80b04bdf")
 	)
 	(no_connect
+		(at 213.36 78.74)
+		(uuid "1b7681e4-6ca5-450f-a7b0-559515aac964")
+	)
+	(no_connect
+		(at 198.12 78.74)
+		(uuid "2a3b1423-a297-481a-ba7e-0d2d284af204")
+	)
+	(no_connect
 		(at 118.11 130.81)
 		(uuid "60de8694-ea16-4470-a927-b67634751421")
+	)
+	(no_connect
+		(at 205.74 78.74)
+		(uuid "747f6390-dfbc-4e2a-8106-fb43ac756cfb")
+	)
+	(no_connect
+		(at 210.82 78.74)
+		(uuid "adf12fcb-bfee-45f9-86fe-ed2aaacfb793")
+	)
+	(no_connect
+		(at 190.5 78.74)
+		(uuid "f32b45d6-744c-44eb-b6fd-b161f3c70001")
 	)
 	(wire
 		(pts
@@ -3791,6 +3811,16 @@
 	)
 	(wire
 		(pts
+			(xy 203.2 68.58) (xy 203.2 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e3e7c460-de0e-4515-b801-c26bc4e01f2e")
+	)
+	(wire
+		(pts
 			(xy 93.98 133.35) (xy 97.79 133.35)
 		)
 		(stroke
@@ -3951,7 +3981,7 @@
 	)
 	(wire
 		(pts
-			(xy 208.28 76.2) (xy 200.66 76.2)
+			(xy 200.66 76.2) (xy 208.28 76.2)
 		)
 		(stroke
 			(width 0)
@@ -4160,7 +4190,7 @@
 		(uuid "61a9ec75-69fd-4292-8835-33bf7771b1f4")
 	)
 	(label "VDDO_456"
-		(at 203.2 76.2 0)
+		(at 205.74 76.2 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4504,6 +4534,27 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+	)
+	(global_label "OUT5"
+		(shape output)
+		(at 203.2 68.58 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "92b2c839-ab01-4678-9019-23aecdc5704a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 203.2 60.7567 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)

@@ -2391,17 +2391,6 @@
 		)
 		(uuid "2af77e76-c5fb-4751-800f-3cebf588c8ab")
 	)
-	(text "TODO - pads for unused\noutputs?"
-		(exclude_from_sim no)
-		(at 222.504 77.978 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "48592fe2-4cd9-4308-a985-4b75ca854419")
-	)
 	(text "Ganged outputs\nprovide 50ohm\ndrive.\n"
 		(exclude_from_sim no)
 		(at 201.93 147.574 0)
@@ -2462,6 +2451,26 @@
 			(justify left)
 		)
 		(uuid "c2cf0752-8f80-4ac6-84ca-a46b4bbdf659")
+	)
+	(text_box "The variant with filter cap appears to be vapour-ware."
+		(exclude_from_sim no)
+		(at 212.1153 31.8079 0)
+		(size 30.4547 5.0221)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d6dd637e-69e8-4150-8937-da92d5e8a16e")
 	)
 	(junction
 		(at 69.85 93.98)
@@ -4369,7 +4378,7 @@
 		)
 		(uuid "f7bea331-e386-4033-ac5e-7cfe3bb0c9ed")
 	)
-	(global_label "OUT2_P"
+	(global_label "OUT1_P"
 		(shape output)
 		(at 210.82 139.7 270)
 		(fields_autoplaced yes)
@@ -4432,7 +4441,7 @@
 			)
 		)
 	)
-	(global_label "OUT0_N"
+	(global_label "OUT2_N"
 		(shape output)
 		(at 193.04 139.7 270)
 		(fields_autoplaced yes)
@@ -4495,7 +4504,7 @@
 			)
 		)
 	)
-	(global_label "OUT6"
+	(global_label "OUT4"
 		(shape output)
 		(at 195.58 68.58 90)
 		(fields_autoplaced yes)
@@ -4516,7 +4525,7 @@
 			)
 		)
 	)
-	(global_label "OUT2_N"
+	(global_label "OUT1_N"
 		(shape output)
 		(at 213.36 139.7 270)
 		(fields_autoplaced yes)
@@ -4663,7 +4672,7 @@
 			)
 		)
 	)
-	(global_label "OUT0_P"
+	(global_label "OUT2_P"
 		(shape output)
 		(at 190.5 139.7 270)
 		(fields_autoplaced yes)
@@ -4705,7 +4714,7 @@
 			)
 		)
 	)
-	(global_label "OUT7"
+	(global_label "OUT3"
 		(shape output)
 		(at 187.96 68.58 90)
 		(fields_autoplaced yes)
@@ -6788,7 +6797,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "6c304910-16a3-4c36-b0cb-4f25331cb530")
 		(property "Reference" "C47"
 			(at 214.63 45.72 0)
@@ -9871,7 +9880,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Rect_L7.2mm_W3.5mm_P5.00mm_FKS2_FKP2_MKS2_MKP2"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 256.2352 139.7 0)
 			(effects
 				(font
@@ -9880,7 +9889,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "Film"
+		(property "Datasheet" "C0G"
 			(at 255.27 135.89 0)
 			(effects
 				(font

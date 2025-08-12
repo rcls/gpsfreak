@@ -2526,7 +2526,7 @@
 		)
 		(uuid "ff2aaefb-e900-49a0-b0e5-1fdaca97233e")
 	)
-	(label "AC2_P"
+	(label "AC1_P"
 		(at 194.31 53.34 0)
 		(effects
 			(font
@@ -2546,7 +2546,7 @@
 		)
 		(uuid "11f7a6fc-6f9e-4b31-8326-8e722ac63c4d")
 	)
-	(label "AC0_N"
+	(label "AC2_N"
 		(at 105.41 63.5 0)
 		(effects
 			(font
@@ -2556,7 +2556,7 @@
 		)
 		(uuid "27e8e0d5-da61-458e-aefe-09087616ce9e")
 	)
-	(label "Ext1"
+	(label "Ext2"
 		(at 133.35 53.34 0)
 		(effects
 			(font
@@ -2566,7 +2566,7 @@
 		)
 		(uuid "3226e906-b1bd-4c36-9760-4ff375588760")
 	)
-	(label "AC0_P"
+	(label "AC2_P"
 		(at 105.41 53.34 0)
 		(effects
 			(font
@@ -2576,7 +2576,7 @@
 		)
 		(uuid "6aebf678-5a92-46df-88ca-944d927e412a")
 	)
-	(label "Ext2"
+	(label "Ext1"
 		(at 222.25 53.34 0)
 		(effects
 			(font
@@ -2596,7 +2596,7 @@
 		)
 		(uuid "c9723d72-ff5f-4ad9-95f2-39bd7c684eee")
 	)
-	(label "AC2_N"
+	(label "AC1_N"
 		(at 194.31 63.5 0)
 		(effects
 			(font
@@ -2669,7 +2669,7 @@
 			)
 		)
 	)
-	(global_label "OUT0_P"
+	(global_label "OUT2_P"
 		(shape input)
 		(at 87.63 53.34 180)
 		(fields_autoplaced yes)
@@ -2711,7 +2711,7 @@
 			)
 		)
 	)
-	(global_label "OUT2_N"
+	(global_label "OUT1_N"
 		(shape input)
 		(at 176.53 63.5 180)
 		(fields_autoplaced yes)
@@ -2753,7 +2753,7 @@
 			)
 		)
 	)
-	(global_label "OUT6"
+	(global_label "OUT4"
 		(shape input)
 		(at 157.48 95.25 0)
 		(fields_autoplaced yes)
@@ -2795,7 +2795,7 @@
 			)
 		)
 	)
-	(global_label "OUT7"
+	(global_label "OUT3"
 		(shape input)
 		(at 128.27 125.73 180)
 		(fields_autoplaced yes)
@@ -2816,7 +2816,7 @@
 			)
 		)
 	)
-	(global_label "OUT0_N"
+	(global_label "OUT2_N"
 		(shape input)
 		(at 87.63 63.5 180)
 		(fields_autoplaced yes)
@@ -2879,7 +2879,7 @@
 			)
 		)
 	)
-	(global_label "OUT2_P"
+	(global_label "OUT1_P"
 		(shape input)
 		(at 176.53 53.34 180)
 		(fields_autoplaced yes)
@@ -3628,7 +3628,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1b947b63-6e35-4297-a924-6d2ebfed44f6")
-		(property "Reference" "D14"
+		(property "Reference" "D22"
 			(at 96.52 67.31 0)
 			(effects
 				(font
@@ -3680,7 +3680,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "D14")
+					(reference "D22")
 					(unit 1)
 				)
 			)
@@ -3763,7 +3763,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "256a6f34-9dd6-415b-98c7-5ada0e324bfa")
-		(property "Reference" "C13"
+		(property "Reference" "C21"
 			(at 100.584 53.086 90)
 			(effects
 				(font
@@ -3772,7 +3772,7 @@
 				(justify left top)
 			)
 		)
-		(property "Value" "10n"
+		(property "Value" "3n3"
 			(at 100.584 53.848 90)
 			(effects
 				(font
@@ -3808,7 +3808,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C15195"
+		(property "JLCPCB" "C26404"
 			(at 101.6 53.34 0)
 			(effects
 				(font
@@ -3826,7 +3826,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "C13")
+					(reference "C21")
 					(unit 1)
 				)
 			)
@@ -4010,7 +4010,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
 			(at 200.66 125.73 0)
 			(effects
 				(font
@@ -4061,7 +4061,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "442c9c79-5f90-41f9-a411-f26769c10e16")
-		(property "Reference" "C22"
+		(property "Reference" "C14"
 			(at 189.484 63.246 90)
 			(effects
 				(font
@@ -4070,7 +4070,7 @@
 				(justify left top)
 			)
 		)
-		(property "Value" "10n"
+		(property "Value" "3n3"
 			(at 189.484 64.008 90)
 			(effects
 				(font
@@ -4106,7 +4106,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C15195"
+		(property "JLCPCB" "C26404"
 			(at 190.5 63.5 0)
 			(effects
 				(font
@@ -4124,7 +4124,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "C22")
+					(reference "C14")
 					(unit 1)
 				)
 			)
@@ -4140,13 +4140,13 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4486cfe5-055b-4326-92d9-97efed6e56b6")
-		(property "Reference" "T2"
-			(at 214.6339 50.7921 0)
+		(property "Reference" "T1"
+			(at 209.5539 54.8561 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify bottom)
 			)
 		)
 		(property "Value" "MABA-007159-000000"
@@ -4213,7 +4213,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "T2")
+					(reference "T1")
 					(unit 1)
 				)
 			)
@@ -4595,7 +4595,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
 			(at 200.66 92.71 0)
 			(effects
 				(font
@@ -4778,13 +4778,13 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6f669726-6b85-495b-81a8-8f7c48246182")
-		(property "Reference" "T1"
-			(at 125.7339 50.7921 0)
+		(property "Reference" "T2"
+			(at 120.6539 55.1101 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify bottom)
 			)
 		)
 		(property "Value" "MABA-007159-000000"
@@ -4851,7 +4851,7 @@
 		(instances
 			(project ""
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "T1")
+					(reference "T2")
 					(unit 1)
 				)
 			)
@@ -5438,7 +5438,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "90ce6ab7-7dd8-4a5f-b899-7123d8fe5292")
-		(property "Reference" "C14"
+		(property "Reference" "C22"
 			(at 100.584 63.246 90)
 			(effects
 				(font
@@ -5447,7 +5447,7 @@
 				(justify left top)
 			)
 		)
-		(property "Value" "10n"
+		(property "Value" "3n3"
 			(at 100.584 64.008 90)
 			(effects
 				(font
@@ -5483,7 +5483,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C15195"
+		(property "JLCPCB" "C26404"
 			(at 101.6 63.5 0)
 			(effects
 				(font
@@ -5501,7 +5501,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "C14")
+					(reference "C22")
 					(unit 1)
 				)
 			)
@@ -5660,7 +5660,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "99ec8f54-7dd1-4a30-84e8-49b1a7194677")
-		(property "Reference" "D22"
+		(property "Reference" "D13"
 			(at 185.42 67.31 0)
 			(effects
 				(font
@@ -5712,7 +5712,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "D22")
+					(reference "D13")
 					(unit 1)
 				)
 			)
@@ -5879,7 +5879,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "b34a621b-4fa2-4687-bba5-d6b20130f6bb")
-		(property "Reference" "D21"
+		(property "Reference" "D11"
 			(at 185.42 49.53 0)
 			(effects
 				(font
@@ -5931,7 +5931,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "D21")
+					(reference "D11")
 					(unit 1)
 				)
 			)
@@ -6038,7 +6038,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
+		(property "Footprint" "Parts:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
 			(at 100.33 101.6 0)
 			(effects
 				(font
@@ -6180,7 +6180,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
 			(at 144.78 53.34 0)
 			(effects
 				(font
@@ -6232,7 +6232,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ca5a3609-707c-4f49-a06b-b4aaa198184d")
-		(property "Reference" "D13"
+		(property "Reference" "D21"
 			(at 96.52 49.53 0)
 			(effects
 				(font
@@ -6284,7 +6284,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "D13")
+					(reference "D21")
 					(unit 1)
 				)
 			)
@@ -6375,7 +6375,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cba96997-f60a-498e-8d62-e5c3a5b8c6cd")
-		(property "Reference" "C21"
+		(property "Reference" "C13"
 			(at 189.484 53.086 90)
 			(effects
 				(font
@@ -6384,7 +6384,7 @@
 				(justify left top)
 			)
 		)
-		(property "Value" "10n"
+		(property "Value" "3n3"
 			(at 189.484 53.848 90)
 			(effects
 				(font
@@ -6420,7 +6420,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C15195"
+		(property "JLCPCB" "C26404"
 			(at 190.5 53.34 0)
 			(effects
 				(font
@@ -6438,7 +6438,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "C21")
+					(reference "C13")
 					(unit 1)
 				)
 			)
@@ -6820,7 +6820,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
 			(at 233.68 53.34 0)
 			(effects
 				(font

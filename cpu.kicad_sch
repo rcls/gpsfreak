@@ -4388,12 +4388,6 @@
 		(uuid "9312f4d9-ac59-4e90-959c-4c5e887a58c9")
 	)
 	(junction
-		(at 171.45 111.76)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "9aa67e9e-477b-4830-a15c-8d51cb709262")
-	)
-	(junction
 		(at 66.04 58.42)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4434,6 +4428,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "cdbfba3f-c19b-4350-9d62-a22befcd8498")
+	)
+	(junction
+		(at 171.45 116.84)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "edd95288-2ef0-4b0e-a773-a634936bbc9a")
 	)
 	(junction
 		(at 57.15 73.66)
@@ -4631,6 +4631,16 @@
 	)
 	(wire
 		(pts
+			(xy 171.45 116.84) (xy 180.34 116.84)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "34686280-8be2-47c6-b81f-0a352fb2cd79")
+	)
+	(wire
+		(pts
 			(xy 173.99 102.87) (xy 176.53 102.87)
 		)
 		(stroke
@@ -4671,7 +4681,7 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 111.76) (xy 171.45 111.76)
+			(xy 167.64 111.76) (xy 180.34 111.76)
 		)
 		(stroke
 			(width 0)
@@ -4951,16 +4961,6 @@
 	)
 	(wire
 		(pts
-			(xy 171.45 110.49) (xy 171.45 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8225768c-85cb-4b92-8b04-e87b6e7c2c90")
-	)
-	(wire
-		(pts
 			(xy 176.53 110.49) (xy 176.53 114.3)
 		)
 		(stroke
@@ -4991,16 +4991,6 @@
 	)
 	(wire
 		(pts
-			(xy 171.45 111.76) (xy 180.34 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "888aae2e-134e-45c3-a752-08eab5c9a95f")
-	)
-	(wire
-		(pts
 			(xy 157.48 78.74) (xy 184.15 78.74)
 		)
 		(stroke
@@ -5021,7 +5011,7 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 116.84) (xy 180.34 116.84)
+			(xy 167.64 116.84) (xy 171.45 116.84)
 		)
 		(stroke
 			(width 0)
@@ -5218,6 +5208,16 @@
 			(type default)
 		)
 		(uuid "c5187f5c-b73b-4cd6-9044-580f9ec364db")
+	)
+	(wire
+		(pts
+			(xy 171.45 110.49) (xy 171.45 116.84)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c53a831b-13fa-4c7c-8342-8450302f324d")
 	)
 	(wire
 		(pts
@@ -6052,7 +6052,7 @@
 	)
 	(global_label "I2C_SCL"
 		(shape input)
-		(at 180.34 111.76 0)
+		(at 180.34 116.84 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6061,7 +6061,7 @@
 		)
 		(uuid "cea60dfb-a322-4ec6-afba-b2a7f5c94a62")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 188.9737 111.76 0)
+			(at 188.9737 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6092,7 +6092,7 @@
 	)
 	(global_label "PDN"
 		(shape input)
-		(at 180.34 116.84 0)
+		(at 180.34 111.76 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6101,7 +6101,7 @@
 		)
 		(uuid "ea3110cc-ee20-461f-9ab8-6013382aa602")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 186.6272 116.84 0)
+			(at 186.6272 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10512,8 +10512,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x04_Pin")
-		(at 162.56 116.84 0)
-		(mirror x)
+		(at 162.56 114.3 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -10521,7 +10520,7 @@
 		(dnp no)
 		(uuid "f8fae349-4cc1-490e-ac3f-c45219719c9c")
 		(property "Reference" "J13"
-			(at 162.56 110.49 0)
+			(at 162.814 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10529,7 +10528,7 @@
 			)
 		)
 		(property "Value" "I2C_Snoop"
-			(at 162.814 120.65 0)
+			(at 162.56 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10537,7 +10536,7 @@
 			)
 		)
 		(property "Footprint" "Parts:PinHeader_1x04_P2.54mm_Vertical"
-			(at 162.56 116.84 0)
+			(at 162.56 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10546,7 +10545,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 162.56 116.84 0)
+			(at 162.56 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10555,7 +10554,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x04, script generated"
-			(at 162.56 116.84 0)
+			(at 162.56 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)

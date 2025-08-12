@@ -48,7 +48,7 @@
         "silk_text_thickness": 0.1,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.15
+          "min_clearance": 0.125
         }
       },
       "diff_pair_dimensions": [
@@ -63,7 +63,16 @@
           "width": 0.2395
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "courtyards_overlap|110425000|94375000|0d540748-081c-4f38-ac45-0ee4a3658217|35aa32e3-c34f-4ae6-8136-ffd3a8935f03",
+          "Intentional for strapping."
+        ],
+        [
+          "silk_overlap|144850000|112440000|248a71e0-dd23-498b-abb1-6a764f4c9463|49373a84-3997-46ac-a08e-e80f07435e9d",
+          "We'll live with that."
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -130,9 +139,9 @@
         "max_error": 0.005,
         "min_clearance": 0.125,
         "min_connection": 0.125,
-        "min_copper_edge_clearance": 0.15,
+        "min_copper_edge_clearance": 0.2,
         "min_groove_width": 0.0,
-        "min_hole_clearance": 0.2,
+        "min_hole_clearance": 0.15,
         "min_hole_to_hole": 0.3,
         "min_microvia_diameter": 0.2,
         "min_microvia_drill": 0.1,
@@ -517,7 +526,7 @@
       "similar_labels": "warning",
       "similar_power": "warning",
       "simulation_model_issue": "ignore",
-      "single_global_label": "ignore",
+      "single_global_label": "error",
       "unannotated": "error",
       "unconnected_wire_endpoint": "warning",
       "unit_value_mismatch": "error",
@@ -661,6 +670,12 @@
       "/Outputs/AC0_P": [
         "50diff"
       ],
+      "/Outputs/AC1_N": [
+        "50diff"
+      ],
+      "/Outputs/AC1_P": [
+        "50diff"
+      ],
       "/Outputs/AC2_N": [
         "50diff"
       ],
@@ -745,11 +760,23 @@
       "OUT0_P": [
         "50diff"
       ],
+      "OUT1_N": [
+        "50diff"
+      ],
+      "OUT1_P": [
+        "50diff"
+      ],
       "OUT2_N": [
         "50diff"
       ],
       "OUT2_P": [
         "50diff"
+      ],
+      "OUT3": [
+        "50ms"
+      ],
+      "OUT4": [
+        "50ms"
       ],
       "OUT6": [
         "50ms"
@@ -792,7 +819,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 70,
+    "annotate_start_num": 20,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
@@ -892,7 +919,7 @@
       "include_excluded_from_bom": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "JLCPCB"
+      "sort_field": "Value"
     },
     "connection_grid_size": 50.0,
     "drawing": {

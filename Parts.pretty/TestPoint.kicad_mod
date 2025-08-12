@@ -71,7 +71,7 @@
 		(at 0 0)
 		(size 1.7 1.7)
 		(drill 0.9)
-		(layers "*.Cu" "F.Mask" "F.Paste")
+		(layers "*.Cu" "*.Paste" "*.Mask")
 		(remove_unused_layers no)
 		(zone_connect 2)
 		(uuid "29943d22-2720-4a8f-9ee9-a543c03c0864")

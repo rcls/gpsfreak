@@ -4322,6 +4322,12 @@
 		(uuid "53ef082b-e31c-4657-8816-dbec79c761e4")
 	)
 	(junction
+		(at 63.5 50.8)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "23cadcb6-03a1-4537-a92f-78962811d2fe")
+	)
+	(junction
 		(at 173.99 102.87)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4376,16 +4382,22 @@
 		(uuid "92192d3a-b09f-42fe-8a64-3eebd27d65c4")
 	)
 	(junction
-		(at 71.12 58.42)
+		(at 72.39 58.42)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "98afec29-3942-407c-b480-a743e88f9331")
+		(uuid "9312f4d9-ac59-4e90-959c-4c5e887a58c9")
 	)
 	(junction
 		(at 171.45 111.76)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "9aa67e9e-477b-4830-a15c-8d51cb709262")
+	)
+	(junction
+		(at 66.04 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a4ae7d67-85b7-4809-8a92-a76a0bb7cfbb")
 	)
 	(junction
 		(at 57.15 76.2)
@@ -4815,6 +4827,16 @@
 	)
 	(wire
 		(pts
+			(xy 63.5 50.8) (xy 66.04 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67b5f48c-93e4-4607-8331-3dde4ee820c6")
+	)
+	(wire
+		(pts
 			(xy 157.48 60.96) (xy 168.91 60.96)
 		)
 		(stroke
@@ -5105,6 +5127,16 @@
 	)
 	(wire
 		(pts
+			(xy 63.5 50.8) (xy 60.96 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b4a5a663-2ffd-4da9-b762-5ca3025b7e51")
+	)
+	(wire
+		(pts
 			(xy 100.33 78.74) (xy 111.76 78.74)
 		)
 		(stroke
@@ -5235,7 +5267,7 @@
 	)
 	(wire
 		(pts
-			(xy 60.96 58.42) (xy 71.12 58.42)
+			(xy 60.96 58.42) (xy 66.04 58.42)
 		)
 		(stroke
 			(width 0)
@@ -5252,16 +5284,6 @@
 			(type default)
 		)
 		(uuid "d8842a2b-199f-45cc-b1c5-4ff1342db5b6")
-	)
-	(wire
-		(pts
-			(xy 71.12 58.42) (xy 76.2 58.42)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d9bade0a-fc8b-4205-a6ad-6d03e72ef32c")
 	)
 	(wire
 		(pts
@@ -5312,6 +5334,26 @@
 			(type default)
 		)
 		(uuid "e79c3424-0fb0-40de-9a04-ef5732210e22")
+	)
+	(wire
+		(pts
+			(xy 66.04 58.42) (xy 72.39 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e847a0ce-b164-4ec8-bc01-7de829f02fc2")
+	)
+	(wire
+		(pts
+			(xy 72.39 58.42) (xy 76.2 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ec197359-0227-4da7-ba20-150424200924")
 	)
 	(wire
 		(pts
@@ -6208,6 +6250,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 129.54 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "7169e576-e1d6-44ab-bf8a-54a1ed218e7e")
 		)
@@ -6229,7 +6280,7 @@
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00d38092-740f-49e3-9c70-75ba68d20540")
@@ -6352,6 +6403,15 @@
 		)
 		(property "Description" "Resistor"
 			(at 111.76 116.84 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 116.84 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6562,6 +6622,15 @@
 		)
 		(property "Description" "Resistor"
 			(at 176.53 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C25076"
+			(at 176.53 133.35 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6861,6 +6930,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C11702"
+			(at 53.34 119.38 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "a486c805-a907-419a-95e2-83d0510e5d38")
 		)
@@ -7073,6 +7151,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C307331"
+			(at 177.8 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "33cdff77-68f8-44c8-8adf-d22995154993")
 		)
@@ -7134,6 +7221,15 @@
 		)
 		(property "Description" "Resistor"
 			(at 176.53 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C25744"
+			(at 176.53 106.68 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7203,6 +7299,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 182.88 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C307331"
 			(at 182.88 53.34 0)
 			(effects
 				(font
@@ -7345,6 +7450,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 119.38 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "1d35bffd-f08f-4b4e-a3dc-bf9a4d2ea825")
 		)
@@ -7366,7 +7480,7 @@
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "3f43712d-4118-492f-b9a4-f7ff4e1ae362")
@@ -7481,6 +7595,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C11702"
+			(at 53.34 129.54 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "b10b4ebc-6b2f-44be-bb23-1ca23bb98449")
 		)
@@ -7502,7 +7625,7 @@
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "400776f7-05e9-4aef-bb09-cb2d3fbac209")
@@ -7683,6 +7806,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 124.46 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "7e9977dc-d3bb-49aa-b457-ae80586ebf2e")
 		)
@@ -7751,7 +7883,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
+		(property "JLCPCB" "C22385521"
 			(at 134.62 78.74 0)
 			(effects
 				(font
@@ -8078,6 +8210,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25905"
+			(at 63.5 66.04 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "a1d5fbed-a2f5-4e9c-8769-d5dc63c9e8be")
 		)
@@ -8356,6 +8497,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 121.92 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "93546129-a80f-4e90-aff3-04eac51c66ae")
 		)
@@ -8417,6 +8567,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 85.09 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C15195"
 			(at 85.09 120.65 0)
 			(effects
 				(font
@@ -8693,6 +8852,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C52923"
+			(at 60.96 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "ca415f9f-c0c3-4c9b-9895-0fd2c60c06d7")
 		)
@@ -8827,6 +8995,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25076"
+			(at 176.53 130.81 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "4594eafa-62de-48c1-a473-fce755ab4083")
 		)
@@ -8953,6 +9130,15 @@
 		)
 		(property "Description" "Resistor"
 			(at 111.76 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 127 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9114,6 +9300,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25744"
+			(at 92.71 130.81 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "3533693e-f5ed-4942-bc26-dd0fd606c724")
 		)
@@ -9248,6 +9443,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C11702"
+			(at 53.34 124.46 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "95c4a0ce-7c19-4b53-9b81-ed4cb14607ed")
 		)
@@ -9316,6 +9520,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25744"
+			(at 171.45 106.68 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "e891987c-9212-4fb5-9c42-b2a2a154caa0")
 		)
@@ -9326,6 +9539,84 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
 					(reference "R18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 66.04 54.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "bc1fd87b-68ac-480a-98d0-7357c62df483")
+		(property "Reference" "C9"
+			(at 66.04 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "1u"
+			(at 66.04 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 67.0052 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 66.04 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 66.04 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" "C52923"
+			(at 66.04 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d26244d6-6559-4eec-9282-8ad10d51ebbe")
+		)
+		(pin "2"
+			(uuid "ce0ffc11-ba8a-4c21-85a5-6decd5796562")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
+					(reference "C9")
 					(unit 1)
 				)
 			)
@@ -9520,6 +9811,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C307331"
+			(at 187.96 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "43b96f15-753a-4ce6-8401-af4ced5061c1")
 		)
@@ -9537,7 +9837,7 @@
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
-		(at 71.12 58.42 0)
+		(at 72.39 58.42 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9545,7 +9845,7 @@
 		(dnp no)
 		(uuid "dc794f4e-773a-4f82-a36b-b0c4f9e2ee99")
 		(property "Reference" "#FLG012"
-			(at 71.12 56.515 0)
+			(at 72.39 56.515 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9554,7 +9854,7 @@
 			)
 		)
 		(property "Value" "PWR_FLAG"
-			(at 71.12 54.61 0)
+			(at 72.39 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9563,7 +9863,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 71.12 58.42 0)
+			(at 72.39 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9572,7 +9872,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 71.12 58.42 0)
+			(at 72.39 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9581,7 +9881,7 @@
 			)
 		)
 		(property "Description" "Special symbol for telling ERC where power comes from"
-			(at 71.12 58.42 0)
+			(at 72.39 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9603,7 +9903,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 60.96 50.8 180)
+		(at 63.5 50.8 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9611,7 +9911,7 @@
 		(dnp no)
 		(uuid "dd398b55-54b7-4338-8551-78e437008fc3")
 		(property "Reference" "#PWR029"
-			(at 60.96 44.45 0)
+			(at 63.5 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9620,7 +9920,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 60.96 48.006 0)
+			(at 63.5 48.006 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9629,7 +9929,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 60.96 50.8 0)
+			(at 63.5 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9638,7 +9938,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 60.96 50.8 0)
+			(at 63.5 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9647,7 +9947,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 60.96 50.8 0)
+			(at 63.5 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9897,6 +10197,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25905"
+			(at 63.5 63.5 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "fe42af53-648c-4f11-84c0-dea7730ef816")
 		)
@@ -10031,6 +10340,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" "C25076"
+			(at 111.76 132.08 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "9ba40a0b-6eb0-4b43-98e7-ed17c1365a81")
 		)
@@ -10118,7 +10436,7 @@
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "f8fae349-4cc1-490e-ac3f-c45219719c9c")

@@ -4172,15 +4172,6 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
-			(at 130.81 85.09 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "2e2e2809-44c6-4ae5-b11d-e8ed6a6a51ee")
 		)
@@ -4240,15 +4231,6 @@
 			)
 		)
 		(property "Description" "Inductor"
-			(at 130.81 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 130.81 95.25 0)
 			(effects
 				(font
@@ -4392,15 +4374,6 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
-			(at 83.82 76.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "37abaf16-cd25-4e3f-8d5d-54dd5bf279e0")
 		)
@@ -4473,7 +4446,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C20917"
+		(property "LCSC" "C20917"
 			(at 120.65 82.55 0)
 			(effects
 				(font
@@ -4552,8 +4525,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
-			(at 119.38 63.5 0)
+		(property "LCSC" "C17168"
+			(at 119.38 63.5 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4629,8 +4602,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25076"
-			(at 90.17 72.39 0)
+		(property "LCSC" "C25076"
+			(at 90.17 72.39 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5034,7 +5007,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C2128"
+		(property "LCSC" "C2128"
 			(at 90.17 67.31 0)
 			(effects
 				(font
@@ -5102,15 +5075,6 @@
 			)
 		)
 		(property "Description" "Single Buffer Gate, Open Drain, Low-Voltage CMOS"
-			(at 167.64 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 167.64 90.17 0)
 			(effects
 				(font
@@ -5195,7 +5159,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C14709"
+		(property "LCSC" "C14709"
 			(at 111.76 63.5 90)
 			(effects
 				(font
@@ -5272,8 +5236,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C21189"
-			(at 115.57 67.31 0)
+		(property "LCSC" "C21189"
+			(at 115.57 67.31 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5350,7 +5314,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C307331"
+		(property "LCSC" "C307331"
 			(at 171.45 76.2 0)
 			(effects
 				(font
@@ -5428,7 +5392,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C307331"
+		(property "LCSC" "C307331"
 			(at 147.32 93.98 0)
 			(effects
 				(font
@@ -5774,7 +5738,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C15127"
+		(property "LCSC" "C15127"
 			(at 128.27 76.2 0)
 			(effects
 				(font
@@ -5853,7 +5817,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25741"
+		(property "LCSC" "C25741"
 			(at 123.19 71.12 90)
 			(effects
 				(font
@@ -5987,15 +5951,6 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 127 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 127 114.3 0)
 			(effects
 				(font

@@ -3595,8 +3595,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C307331"
-			(at 146.05 125.73 0)
+		(property "LCSC" "C307331"
+			(at 146.05 125.73 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3808,8 +3808,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C26404"
-			(at 101.6 53.34 0)
+		(property "LCSC" "C26404"
+			(at 101.6 53.34 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4106,8 +4106,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C26404"
-			(at 190.5 63.5 0)
+		(property "LCSC" "C26404"
+			(at 190.5 63.5 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4186,7 +4186,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C350943"
+		(property "LCSC" "C350943"
 			(at 209.55 58.42 0)
 			(effects
 				(font
@@ -4330,15 +4330,6 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 162.56 142.24 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 162.56 142.24 0)
 			(effects
 				(font
@@ -4546,8 +4537,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25890"
-			(at 146.05 135.89 0)
+		(property "LCSC" "C25890"
+			(at 146.05 135.89 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4824,7 +4815,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C350943"
+		(property "LCSC" "C350943"
 			(at 120.65 58.42 0)
 			(effects
 				(font
@@ -4976,8 +4967,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25741"
-			(at 233.68 130.81 0)
+		(property "LCSC" "C25741"
+			(at 233.68 130.81 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5119,7 +5110,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C307331"
+		(property "LCSC" "C307331"
 			(at 121.92 137.16 0)
 			(effects
 				(font
@@ -5195,8 +5186,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C21189"
-			(at 187.96 125.73 0)
+		(property "LCSC" "C21189"
+			(at 187.96 125.73 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5405,8 +5396,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25741"
-			(at 233.68 125.73 0)
+		(property "LCSC" "C25741"
+			(at 233.68 125.73 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5483,8 +5474,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C26404"
-			(at 101.6 63.5 0)
+		(property "LCSC" "C26404"
+			(at 101.6 63.5 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5561,7 +5552,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C307331"
+		(property "LCSC" "C307331"
 			(at 120.65 101.6 0)
 			(effects
 				(font
@@ -5836,15 +5827,6 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
-			(at 171.45 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "4"
 			(uuid "f1166953-fd92-4d1c-b5e6-4fd979e46c9c")
 		)
@@ -5989,8 +5971,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C21189"
-			(at 185.42 92.71 0)
+		(property "LCSC" "C21189"
+			(at 185.42 92.71 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6057,15 +6039,6 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 100.33 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 100.33 101.6 0)
 			(effects
 				(font
@@ -6342,8 +6315,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C21189"
-			(at 135.89 125.73 0)
+		(property "LCSC" "C21189"
+			(at 135.89 125.73 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6420,8 +6393,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C26404"
-			(at 190.5 53.34 0)
+		(property "LCSC" "C26404"
+			(at 190.5 53.34 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6562,8 +6535,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25741"
-			(at 156.21 119.38 0)
+		(property "LCSC" "C25741"
+			(at 156.21 119.38 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6705,7 +6678,7 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C2128"
+		(property "LCSC" "C2128"
 			(at 146.05 130.81 0)
 			(effects
 				(font
@@ -6980,8 +6953,8 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" "C25741"
-			(at 233.68 128.27 0)
+		(property "LCSC" "C25741"
+			(at 233.68 128.27 90)
 			(effects
 				(font
 					(size 1.27 1.27)

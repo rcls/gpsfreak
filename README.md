@@ -36,13 +36,17 @@ Output 4
   termination and a divider to match 3.3V drive to the clock chip.  However
   swapping resistors can change to 50ohm, and can be AC coupled.
 
-Output 5
+Internal Output 5
 : Internal Hirose U.Fl connector.  Connects straight to a clock generator output
   pin, do what you wish with it.  Unlike the external outputs, there is no
   protection external to the clock generator IC.
 
-USB C.  Power (approx 2W) and data (USB FS).
+Internal GPS timing 6
+: A second Hirose U.Fl connector.  This connects to the GPS time-pulse output.
+  A use-case is to break out 1pps from the GPS, lock a Rubidium clock to this,
+  and feed 10MHz back to the secondary reference input.
 
+USB C.  Power (approx 2W) and data (USB FS).
 
 GPS
 ===

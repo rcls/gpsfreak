@@ -274,7 +274,48 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      [
+        "pin_not_driven|850900|1041400|0dcc68a1-4141-41aa-8a79-74519f35d87e|00000000-0000-0000-0000-000000000000|/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb|/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb|",
+        "It has pull-up, we drive with open-drain."
+      ],
+      [
+        "pin_to_pin|1574800|736600|27d5b456-349f-47c5-849d-c820709ad085|354e2894-415c-49ba-825a-80eb07e0c3b3|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1574800|787400|4409553e-093b-47b1-a577-ef492018587b|541f9fbd-4b52-4147-80ac-66c9618cd30a|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1828800|736600|4409553e-093b-47b1-a577-ef492018587b|4dddaf77-56ef-479e-b41b-a807fc2b1dbb|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1905000|1295400|a265e9f4-8f19-4c3d-9b26-f99cd5f9ca66|de7347d9-d61f-474f-b9ad-3529fc71607d|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Ganged output"
+      ],
+      [
+        "pin_to_pin|1930400|1295400|f2800c74-5994-4e86-b797-5069e64a0193|a9b7cf4f-a7c2-42dd-862b-2b2b18feba2d|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Ganged output"
+      ],
+      [
+        "pin_to_pin|2057400|1295400|1db404b8-44cc-46aa-926f-ab03861e17bc|1ab291ac-ff34-4910-87ca-ffa851e8807a|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Ganged output"
+      ],
+      [
+        "pin_to_pin|2082800|1295400|486f5269-85aa-45a0-a3a1-1fdee4a2cfc1|9371be45-2934-44f5-8024-fa299c06afdb|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Ganged output"
+      ],
+      [
+        "pin_to_pin|2159000|1295400|640c59c4-5a6b-48ca-aba4-b3b729cb6294|354e2894-415c-49ba-825a-80eb07e0c3b3|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|2273300|1054100|be5e1437-de6e-409d-b137-3a7bf73e33c7|354e2894-415c-49ba-825a-80eb07e0c3b3|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        "Intentional"
+      ]
+    ],
     "meta": {
       "version": 0
     },
@@ -713,7 +754,7 @@
       "Net-(R125-Pad1)": [
         "50ms"
       ],
-      "Net-(R19-Pad1)": [
+      "Net-(R36-Pad1)": [
         "50ms"
       ],
       "Net-(R78-Pad1)": [
@@ -784,7 +825,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 0,
+    "annotate_start_num": 30,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {

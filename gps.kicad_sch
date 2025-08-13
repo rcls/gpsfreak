@@ -4478,7 +4478,7 @@
 		(at 119.38 63.5 90)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp yes)
 		(uuid "50fb17e7-d8db-4aa7-8d58-d70dea269a01")
@@ -4527,6 +4527,15 @@
 		)
 		(property "LCSC" "C17168"
 			(at 119.38 63.5 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
+			(at 119.38 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)

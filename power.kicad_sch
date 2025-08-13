@@ -5972,8 +5972,17 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25796"
+		(property "LCSC" "C25783"
 			(at 107.95 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
+			(at 107.95 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7805,6 +7814,15 @@
 			)
 		)
 		(property "LCSC" "C16780"
+			(at 119.38 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
 			(at 119.38 35.56 0)
 			(effects
 				(font

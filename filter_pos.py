@@ -12,8 +12,10 @@ BOM_FIRST_LINE = None
 PREFIX_ROTATE = [
     ('MSOP-', -90),
     ('QFN-', -90),
+    ('QFN10_TG5032CGN', -90),
     ('SOIC-', -90),
     ('SOT-23', 180),
+    ('SIL0008C', 180),
     ('WSON', -90),
     ('Texas_S-PWSON', -90)]
 

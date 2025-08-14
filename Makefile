@@ -2,7 +2,10 @@
 KICAD_PRO:=$(wildcard *.kicad_pro)
 PROJECTS=$(KICAD_PRO:%.kicad_pro=%)
 
+all: $(PROJECTS:%=%.all)
+
 $(PROJECTS:%=%.all): %.all: out/%_bom.csv out/%_cpl.csv out/%_gerber.zip out/%.rpt
+	echo "$*" "$@" "$<"
 
 .PHONY: $(PROJECTS:%=%.all) $(PROJECTS:%=%.drc)
 

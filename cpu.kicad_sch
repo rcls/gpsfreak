@@ -4189,6 +4189,12 @@
 		(uuid "408bf697-621e-4b32-aefb-36b1da7fdfbc")
 	)
 	(junction
+		(at 161.29 68.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "49564e93-ba63-4693-8a9e-914b4fd2d844")
+	)
+	(junction
 		(at 41.91 96.52)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4279,6 +4285,12 @@
 		(uuid "cdbfba3f-c19b-4350-9d62-a22befcd8498")
 	)
 	(junction
+		(at 161.29 73.66)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d8929b94-ecfe-482a-bcce-0e433edefc41")
+	)
+	(junction
 		(at 171.45 116.84)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4303,20 +4315,12 @@
 		(uuid "ffdb56bd-9d6f-418e-9505-b833ea6f4f45")
 	)
 	(no_connect
-		(at 157.48 55.88)
-		(uuid "2d221e74-6381-409a-8cfb-6ced75a2bd43")
-	)
-	(no_connect
 		(at 57.15 86.36)
 		(uuid "8222376c-7270-4968-8195-fb41ebb29130")
 	)
 	(no_connect
 		(at 57.15 88.9)
 		(uuid "c97ab6d1-1282-42b5-89a4-457728dc3c8e")
-	)
-	(no_connect
-		(at 111.76 83.82)
-		(uuid "e5cba9e9-d47e-4e36-a712-ff292ecfeedd")
 	)
 	(wire
 		(pts
@@ -4437,6 +4441,16 @@
 			(type default)
 		)
 		(uuid "2322e7f3-dbb4-40fa-b0e1-6f60fdc93fb7")
+	)
+	(wire
+		(pts
+			(xy 161.29 68.58) (xy 161.29 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2a8156bb-b6ba-4698-96a1-ef13362c1c7a")
 	)
 	(wire
 		(pts
@@ -4650,7 +4664,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 68.58) (xy 168.91 68.58)
+			(xy 111.76 78.74) (xy 100.33 78.74)
 		)
 		(stroke
 			(width 0)
@@ -4697,6 +4711,16 @@
 			(type default)
 		)
 		(uuid "5ac8fe7f-8acc-49a0-a3e7-1993032a0205")
+	)
+	(wire
+		(pts
+			(xy 157.48 68.58) (xy 161.29 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67757fd0-bbe5-4deb-8190-580b5430eaa9")
 	)
 	(wire
 		(pts
@@ -5020,7 +5044,7 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 78.74) (xy 111.76 78.74)
+			(xy 100.33 81.28) (xy 111.76 81.28)
 		)
 		(stroke
 			(width 0)
@@ -5160,13 +5184,23 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 81.28) (xy 111.76 81.28)
+			(xy 100.33 83.82) (xy 111.76 83.82)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "d8842a2b-199f-45cc-b1c5-4ff1342db5b6")
+	)
+	(wire
+		(pts
+			(xy 157.48 55.88) (xy 161.29 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d8d199e4-47b5-4738-b23b-c7d7abf4d50f")
 	)
 	(wire
 		(pts
@@ -5297,6 +5331,16 @@
 			(type default)
 		)
 		(uuid "f9d375aa-9791-41a0-8f54-394f8a2a50cb")
+	)
+	(wire
+		(pts
+			(xy 161.29 55.88) (xy 161.29 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "faf96805-e791-4419-8dce-0184d0730031")
 	)
 	(wire
 		(pts
@@ -5619,12 +5663,12 @@
 		(uuid "c1522056-2e7b-4ddc-9e66-2bbd72b7a15a")
 	)
 	(label "DBG_TX"
-		(at 168.91 68.58 180)
+		(at 100.33 78.74 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify left bottom)
 		)
 		(uuid "d148cbd2-e678-49c5-b630-98c0f1f1e2a6")
 	)
@@ -5775,7 +5819,7 @@
 	)
 	(global_label "EN_REF2"
 		(shape output)
-		(at 100.33 81.28 180)
+		(at 100.33 83.82 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5785,7 +5829,7 @@
 		)
 		(uuid "4e467ff0-c1aa-427e-a1df-034ddb788e71")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 89.1806 81.28 0)
+			(at 89.1806 83.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5838,7 +5882,7 @@
 	)
 	(global_label "EN_OUT4"
 		(shape output)
-		(at 100.33 78.74 180)
+		(at 100.33 81.28 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5848,7 +5892,7 @@
 		)
 		(uuid "ae21abd1-9c23-4954-8bd9-8d2e24ffe523")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 89.0596 78.74 0)
+			(at 89.0596 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7965,6 +8009,15 @@
 				(hide yes)
 			)
 		)
+		(property "JLCPCB" ""
+			(at 134.62 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "21"
 			(uuid "4ae40346-87f6-4c0e-bb56-5f251244f8c9")
 			(alternate "USB_DM")
@@ -7989,7 +8042,6 @@
 		)
 		(pin "10"
 			(uuid "1353a046-a2e5-4024-9421-ac6214fbc575")
-			(alternate "USART3_TX")
 		)
 		(pin "18"
 			(uuid "993c944e-c9f2-430a-9b3d-dd8ff77c6b08")
@@ -7997,6 +8049,7 @@
 		)
 		(pin "26"
 			(uuid "531e3205-e377-4027-9b7b-74d911c4889d")
+			(alternate "USART3_TX")
 		)
 		(pin "33"
 			(uuid "8911ce50-a242-436c-a3e3-f33e7a329e5b")
@@ -8020,7 +8073,6 @@
 		)
 		(pin "11"
 			(uuid "088ec86a-bd3c-44cd-9eb9-54b9fa66f65e")
-			(alternate "USART2_TX")
 		)
 		(pin "28"
 			(uuid "fbf802cf-921c-4d13-948f-7d9ce76abb11")
@@ -8048,7 +8100,7 @@
 		)
 		(pin "25"
 			(uuid "6e7a0b40-ec1a-4dbc-899e-31b1f3103215")
-			(alternate "USART2_RX")
+			(alternate "USART3_RX")
 		)
 		(pin "15"
 			(uuid "68b3f970-7719-4d18-a665-94e7fedcd54d")
@@ -8065,7 +8117,6 @@
 		)
 		(pin "9"
 			(uuid "337a4565-7251-4b33-ae3d-ffcf494842ab")
-			(alternate "USART3_RX")
 		)
 		(pin "19"
 			(uuid "13bc15f6-5c36-4ed3-a008-fdcfe42b4f31")

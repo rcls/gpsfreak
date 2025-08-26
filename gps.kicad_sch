@@ -4009,7 +4009,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_EdgeMount"
 			(at 139.7 99.06 0)
 			(effects
 				(font
@@ -5050,7 +5050,7 @@
 		(dnp no)
 		(uuid "790d34e6-74c0-407c-acfb-8a2a4fb3c1b4")
 		(property "Reference" "U11"
-			(at 168.148 90.424 0)
+			(at 168.91 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)

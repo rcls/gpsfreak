@@ -4010,7 +4010,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_EdgeMount"
 			(at 200.66 125.73 0)
 			(effects
 				(font
@@ -4586,7 +4586,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_EdgeMount"
 			(at 200.66 92.71 0)
 			(effects
 				(font
@@ -6153,7 +6153,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_EdgeMount"
 			(at 144.78 53.34 0)
 			(effects
 				(font
@@ -6793,7 +6793,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SMA_Amphenol_132289_EdgeMount"
+		(property "Footprint" "Parts:SMA_EdgeMount"
 			(at 233.68 53.34 0)
 			(effects
 				(font

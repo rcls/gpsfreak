@@ -31,6 +31,25 @@ fn bugger() {
     loop {}
 }
 
+pub fn enable_interrupt(n: stm32h503::Interrupt) {
+    let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
+    let bit: usize = n as usize % 32;
+    let idx: usize = n as usize / 32;
+    unsafe {nvic.iser[idx].write(1 << bit)};
+}
+
+#[inline(always)]
+#[allow(non_snake_case)]
+pub fn WFE() {
+    if cfg!(target_arch = "arm") {
+        unsafe {
+            core::arch::asm!("wfe", options(nomem, preserves_flags, nostack))};
+    }
+    else {
+        panic!("wfe!");
+    }
+}
+
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct VectorTable {
@@ -66,23 +85,16 @@ impl const Default for VectorTable {
     }
 }
 
+impl VectorTable {
+    pub const fn isr(&mut self,
+                     n: stm32h503::Interrupt, handler: fn()) -> &mut Self {
+        self.isr[n as usize] = handler;
+        self
+    }
+}
+
 unsafe extern "C" {
     #[allow(unused)]
     #[link_name = "llvm.frameaddress"]
     fn frameaddress(level: i32) -> *const u8;
 }
-
-#[used]
-#[unsafe(link_section = ".vectors")]
-pub static VECTORS: VectorTable = VectorTable {
-    stack     : &raw const end_of_ram,
-    reset     : crate::main,
-    nmi       : bugger,
-    hard_fault: bugger,
-    reserved1 : [0; _],
-    svcall    : bugger,
-    reserved2 : [0; _],
-    pendsv    : bugger,
-    systick   : bugger,
-    isr       : [bugger; _]
-};

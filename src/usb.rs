@@ -13,7 +13,7 @@
 ///   CHEP 3
 
 use crate::usb_strings::string_index;
-use crate::vcell::VCell;
+use crate::vcell::{UCell, VCell};
 use crate::usb_types::{setup_result, *};
 
 const USB_SRAM_BASE: usize = 0x4001_6400;
@@ -248,7 +248,7 @@ fn usb_isr() {
             16 => control_rx_handler(),
             1  => serial_tx_handler(),
             18 => serial_rx_handler(),
-            2  => intrrpt_tx_handler(),
+            2  => interrupt_tx_handler(),
             _ => (),
         }
     }
@@ -270,11 +270,17 @@ fn control_rx_handler() {
             unsafe {core::ptr::copy_nonoverlapping(
                 data.as_ptr(), CTRL_TX_BUF as *mut u8, data.len())};
             // Setup the control transfer.  CHEP 0, TX is first in BD.
+            // If the length is zero, then we are sending an ack.  If the length
+            // is non-zero, then we are sending data and expect an ack.  We
+            // ignore the ack, and ignore whether or not we get one...
             chep_bd()[0].write((CTRL_TX_OFFSET + data.len() * 65536) as u32);
             // FIXME address.  FIXME DTOG.
             // FIXME bits to preserve?
+            // FIXME status-out correct handling.
+            let chep0 = usb.CHEP0R.read();
             usb.CHEP0R.write(
-                |w| w.DEVADDR().bits(0).UTYPE().bits(1).EPKIND().set_bit());
+                |w| w.DEVADDR().bits(chep0.DEVADDR().bits()).UTYPE().bits(1)
+                    .EPKIND().bit(data.len() == 0));
         }
     }
 }
@@ -302,20 +308,51 @@ fn setup_rx_handler() -> SetupResult {
         },
         (0x21, 0x00) => Err(()), // FIXME DFU detach.
         (0xa1, 0x03) => setup_result(&[0u8, 100, 0, 0, 0, 0]), // DFU status.
-        (0x00, 0x05) => Err(()), // Set address.
-        (0x00, 0x09) => Err(()), // Set configuration
-        (0x01, 0x0b) => Err(()), // Set interface
+        (0x00, 0x05) => set_address(buffer[2]), // Set address.
+        // We just enable our only config when we get an address, so we can
+        // just ACK the set config / set intf messages.
+        (0x00, 0x09) => setup_result(&()), // Set configuration
+        (0x01, 0x0b) => setup_result(&()), // Set interface
         _ => Err(()),
     }
 }
 
+static PENDING_ADDRESS: UCell<Option<u8>> = Default::default();
+
+fn set_address(address: u8) -> SetupResult {
+    *unsafe {PENDING_ADDRESS.as_mut()} = Some(address);
+    setup_result(&())
+}
+
+fn do_set_address() {
+    let Some(address) = *PENDING_ADDRESS.as_ref() else {return};
+    let usb = unsafe {&*stm32h503::USB::ptr()};
+    usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(address));
+    // Set-up all cheps.  FIXME - what do we do on repeated set-address?
+    // I think it officially just clears enabled ocnfig anyway....
+    // TODO - in device mode do we need to set the address in each CHEP?
+    usb.CHEP0R.write(|w| w.UTYPE().bits(1).DEVADDR().bits(address));
+    // FIXME double buffered TX
+    usb.CHEP1R.write(
+        |w| w.UTYPE().bits(0).DEVADDR().bits(address).EA().bits(1));
+    // FIXME double buffered TX
+    usb.CHEP2R.write(
+        |w| w.UTYPE().bits(0).DEVADDR().bits(address).EA().bits(1));
+    usb.CHEP3R.write(
+        |w| w.UTYPE().bits(3).DEVADDR().bits(address).EA().bits(2));
+}
+
 fn serial_tx_handler() {
+    // CHEP 1, BD 2 & 3.  Clear VTTX?  What STATTX value do we want?
 }
 
 fn serial_rx_handler() {
+    // CHEP 2, BD 4 & 5.
+    // Re-arm the RX.  Clear VTRX.  What STATRX value do we want?
 }
 
-fn intrrpt_tx_handler() {
+fn interrupt_tx_handler() {
+    // CHEP 3, BD 6 & 7. [6 = TX, I think]
 }
 
 fn usb_initialize() {
@@ -336,8 +373,8 @@ fn usb_initialize() {
     // Set EF bit in DADDR.
 
     let chep = chep_bd();
-    chep[0].write(chep_block::<64>(0x80)); // TX
-    chep[1].write(chep_block::<64>(0xc0)); // RX
+    chep[0].write(chep_block::<64>(0x80)); // Control TX
+    chep[1].write(chep_block::<64>(0xc0)); // Control RX
 }
 
 impl crate::cpu::VectorTable {

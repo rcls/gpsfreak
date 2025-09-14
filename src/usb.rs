@@ -13,20 +13,29 @@
 ///   CHEP 3
 
 use crate::usb_strings::string_index;
+use crate::usb_types::{setup_result, SetupHeader, *};
 use crate::vcell::{UCell, VCell};
-use crate::usb_types::{setup_result, *};
+
+use crate::dbgln;
+use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
 const USB_SRAM_BASE: usize = 0x4001_6400;
-const CTRL_RX_OFFSET: usize = 0x80;
-const CTRL_TX_OFFSET: usize = 0xc0;
+const CTRL_RX_OFFSET: usize = 0xc0;
+const CTRL_TX_OFFSET: usize = 0x80;
+#[allow(dead_code)]
 const BULK_RX_OFFSET: usize = 0x100;
+#[allow(dead_code)]
 const BULK_TX_OFFSET: usize = 0x200;
+#[allow(dead_code)]
 const INTR_TX_OFFSET: usize = 0x40;
 
 const CTRL_RX_BUF: *const u8 = (USB_SRAM_BASE + CTRL_RX_OFFSET) as *const u8;
 const CTRL_TX_BUF: *mut   u8 = (USB_SRAM_BASE + CTRL_TX_OFFSET) as *mut   u8;
+#[allow(dead_code)]
 const BULK_RX_BUF: *const u8 = (USB_SRAM_BASE + BULK_RX_OFFSET) as *const u8;
+#[allow(dead_code)]
 const BULK_TX_BUF: *mut   u8 = (USB_SRAM_BASE + BULK_TX_OFFSET) as *mut   u8;
+#[allow(dead_code)]
 const INTR_TX_BUF: *mut   u8 = (USB_SRAM_BASE + INTR_TX_OFFSET) as *mut   u8;
 
 static DEVICE_DESC: DeviceDesc = DeviceDesc{
@@ -47,6 +56,7 @@ static DEVICE_DESC: DeviceDesc = DeviceDesc{
 };
 
 #[repr(packed)]
+#[allow(dead_code)]
 struct Config1plus2 {
     config    : ConfigurationDesc,
     assoc     : InterfaceAssociation,
@@ -132,40 +142,11 @@ static CONFIG0_DESC: Config1plus2 = Config1plus2{
     },
 };
 
-// /// A pair of USBSRAM descriptors.  The low 16 bits of each value are the
-// /// address offset, the high 16 bits contain the 10 bit number of bytes.
-// ///  0..=15 : Address offset, must be 4-byte aligned.
-// /// 16..=25 : Byte count
-// /// 26..=30 : NUM_BLOCK
-// /// 31      : BLSIZE (0 : NUM_BLOCK * 2, 1 : NUM_BLOCK * 32 + 32)
-// /// For RX the byte count is written by HW.  For TX the byte count is written
-// /// by SW and the block info appears to be ignored.
-// #[repr(C)]
-// struct Chepx {
-//     /// TX pointer for single buffered, TOGGLE=0 pointer for double buffered.
-//     tx: VCell<u32>,
-//     /// RX pointer for single buffered, TOGGLE=1 pointer for double buffered.
-//     rx: VCell<u32>,
-// }
-
 fn chep_bd() -> &'static [VCell<u32>; 16] {
     unsafe {&*(USB_SRAM_BASE as *const _)}
 }
 
-fn chep_ptr(d: u32) -> *mut u8 {
-    (USB_SRAM_BASE + (d as usize & 0xffff)) as _
-}
-
-fn chep_len(d: u32) -> usize {
-    d as usize >> 16 & 0x3ff
-}
-
-fn chep_offset(p: *const u8) -> u32 {
-    (p as usize - USB_SRAM_BASE) as u32 & 0xffff
-}
-//const CHEP: &'static mut [Chep; 8] = unsafe {&mut * (0x40041200 as *mut _)};
-
-const fn chep_block<const BLK_SIZE: u32>(offset: u32) -> u32 {
+const fn chep_block<const BLK_SIZE: usize>(offset: usize) -> u32 {
     assert!(offset + BLK_SIZE <= 2048);
     let block = if BLK_SIZE == 1023 {
         0xfc000000
@@ -179,35 +160,43 @@ const fn chep_block<const BLK_SIZE: u32>(offset: u32) -> u32 {
     else {
         panic!();
     };
-    block + offset
+    (block + offset) as u32
 }
-
-unsafe fn chep_to_slice(d: u32) -> &'static [u8] {
-    unsafe {core::slice::from_raw_parts(chep_ptr(d), chep_len(d))}
-}
-
-
 
 pub fn init() {
-    let rcc = unsafe {&*stm32h503::RCC::ptr()};
-    let crs = unsafe {&*stm32h503::CRS::ptr()};
-    let usb = unsafe {&*stm32h503::USB::ptr()};
+    let crs   = unsafe {&*stm32h503::CRS  ::ptr()};
+    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
+    let usb   = unsafe {&*stm32h503::USB  ::ptr()};
 
     // Bring up the HSI48 clock.
     rcc.CR.modify(|_,w| w.HSI48ON().set_bit());
     while !rcc.CR.read().HSI48RDY().bit() {
     }
+    // Route the HSI48 to USB.
+    rcc.CCIPR4.write(|w| w.USBFSSEL().B_0x3());
 
+    // Configure pins (PA11, PA12).  (PA9 = VBUS?)
+    gpioa.AFRH.modify(|_,w| w.AFSEL11().bits(10).AFSEL12().bits(10));
+    gpioa.MODER.modify(|_,w| w.MODE11().B_0x2().MODE12().B_0x2());
+
+    // Enable CRS and USB clocks.
     rcc.APB1LENR.modify(|_,w| w.CRSEN().set_bit());
-
-    // crs_sync_in_2 USB SOF selected - default.
-    crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit().CEN().set_bit());
-
     rcc.APB2ENR.modify(|_,w| w.USBFSEN().set_bit());
 
+    // crs_sync_in_2 USB SOF selected - default.
+    crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit());
+    crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit().CEN().set_bit());
+
     usb.CNTR.modify(|_,w| w.PDWN().clear_bit());
-    // FIXME Wait t_startup....
-    usb.CNTR.modify(|_,w| w.USBRST().clear_bit());
+    // Wait t_startup (1µs).
+    for _ in 0..48 {
+        crate::vcell::nothing();
+    }
+    usb.CNTR.write(
+        |w|w.PDWN().clear_bit().USBRST().clear_bit()
+            .RST_DCONM().set_bit().CTRM().set_bit());
+
     // Clear any spurious interrupts.
     usb.ISTR.write(|w| w);
 
@@ -223,92 +212,124 @@ pub fn init() {
     // 3 : CDC ACM OUT (host to us)
     // Don't bring up 1,2,3 till the set-up is done?
 
-    crate::cpu::enable_interrupt(stm32h503::Interrupt::USB_FS);
-    // Software trigger it to do the set-up....
-    let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
-    unsafe {nvic.stir.write(stm32h503::Interrupt::USB_FS as u32)};
+    usb_initialize();
+
+    crate::cpu::enable_interrupt(INTERRUPT);
 }
 
 fn usb_isr() {
     let usb = unsafe {&*stm32h503::USB::ptr()};
-    let cntr = usb.CNTR.read();
-    if cntr.USBRST().bit() {
-        // Reset....
-        usb_initialize();
-        return;
-    }
-    // Normal interrupt.
     let istr = usb.ISTR.read();
+    dbgln!("*** USB isr ISTR = {:#010x}", istr.bits());
     // Write zero to the interrupt bits we wish to acknowledge.
     usb.ISTR.write(|w| w.bits(!istr.bits() & !0x37fc0));
+    if istr.RST_DCON().bit() {
+        usb_initialize();
+    }
 
-    if istr.CTR().bit() {
-        match istr.bits() & 31 {
-            0  => control_tx_handler(),
-            16 => control_rx_handler(),
-            1  => serial_tx_handler(),
-            18 => serial_rx_handler(),
-            2  => interrupt_tx_handler(),
-            _ => (),
+    match istr.bits() & 15 {
+        0 => control_handler(),
+        1 => serial_tx_handler(),
+        2 => serial_rx_handler(),
+        3 => interrupt_handler(),
+        _ => (),
+    }
+    dbgln!("***");
+}
+
+fn control_handler() {
+    let usb = unsafe {&*stm32h503::USB::ptr()};
+    let chep = usb.CHEPR[0].read();
+    dbgln!("Control handler CHEP0 = {:#010x}, FNR = {}",
+           chep.bits(), usb.FNR.read().FN().bits());
+
+    if chep.VTTX().bit() {
+        dbgln!("Control VTTX!");
+        let address = unsafe {PENDING_ADDRESS.as_mut()};
+        if let Some(a) = *address {
+            do_set_address(a);
+            *address = None;
         }
     }
-}
-
-fn control_tx_handler() {
-}
-
-fn control_rx_handler() {
-    let usb = unsafe {&*stm32h503::USB::ptr()};
-    let chep = usb.CHEP0R.read();
-    if chep.SETUP().bit() {
-        if let Ok(data) = setup_rx_handler() {
-            // TODO - what happens on repeated setup?
+    if !chep.VTRX().bit() {
+        dbgln!("Control no VTRX :-(");
+    }
+    else if chep.SETUP().bit() {
+        crate::vcell::barrier();
+        let setup = unsafe {&*(CTRL_RX_BUF as *const SetupHeader)};
+        if let Ok(data) = setup_rx_handler(setup) {
             // TODO - what do we do on zero size?
             // TODO - get the ack correct.
-            // TODO - clamp length?
             // Copy the data into the control TX buffer.
-            unsafe {core::ptr::copy_nonoverlapping(
-                data.as_ptr(), CTRL_TX_BUF as *mut u8, data.len())};
+            let len = data.len().min(setup.length as usize);
+            jfc_bytes(data.as_ptr(), CTRL_TX_BUF, len);
+            dbgln!("Setup response length = {} -> {} [{:02x} {:02x}]",
+                   data.len(), len,
+                   if data.len() > 0 {unsafe{*data.as_ptr()}} else {0},
+                   unsafe{*CTRL_TX_BUF});
+
             // Setup the control transfer.  CHEP 0, TX is first in BD.
             // If the length is zero, then we are sending an ack.  If the length
             // is non-zero, then we are sending data and expect an ack.  We
             // ignore the ack, and ignore whether or not we get one...
-            chep_bd()[0].write((CTRL_TX_OFFSET + data.len() * 65536) as u32);
+            chep_bd()[0].write((CTRL_TX_OFFSET + len * 65536) as u32);
             // FIXME address.  FIXME DTOG.
             // FIXME bits to preserve?
             // FIXME status-out correct handling.
-            let chep0 = usb.CHEP0R.read();
-            usb.CHEP0R.write(
-                |w| w.DEVADDR().bits(chep0.DEVADDR().bits()).UTYPE().bits(1)
+            let chep = usb.CHEPR[0].read();
+            usb.CHEPR[0].write(
+                |w|w.DEVADDR().bits(chep.DEVADDR().bits()).UTYPE().bits(1)
+                    .STATTX().bits(chep.STATTX().bits() ^ 3)
                     .EPKIND().bit(data.len() == 0));
         }
+        else {
+            dbgln!("Set-up error");
+            // Set STATTX to 1 (stall)
+            let chep = usb.CHEPR[0].read();
+            usb.CHEPR[0].write(
+                |w|w.DEVADDR().bits(chep.DEVADDR().bits()).UTYPE().bits(1)
+                    .STATTX().bits(chep.STATTX().bits() ^ 1));
+        }
     }
+    else {
+        dbgln!("Control RX handler, CHEP0 = {:#010x}, non-setup", chep.bits());
+    }
+    let chep = usb.CHEPR[0].read();
+    if chep.STATTX().bits() != 3 {
+        // Leave DTOGRX=0, STATRX=3.
+        usb.CHEPR[0].write(
+            |w|w.DEVADDR().bits(chep.DEVADDR().bits()).EA().bits(0)
+                .UTYPE().bits(1).STATRX().bits(chep.STATRX().bits() ^ 3)
+                .DTOGRX().bit(chep.DTOGRX().bit())
+                //.DTOGTX().bit(chep.DTOGTX().bit())
+            );
+    }
+
+    dbgln!("CHEP0 now {:#010x}", usb.CHEPR[0].read().bits());
 }
 
-fn setup_rx_handler() -> SetupResult {
+fn setup_rx_handler(setup: &SetupHeader) -> SetupResult {
     let bd = chep_bd()[1].read();
     let len = bd >> 16 & 0x03ff;
-    crate::vcell::barrier();
-    // We own the buffer now so safe to take a reference.
-    // Its easier to do exact length checks by hand, so just take the entire
-    // buffer segment.
-    let buffer = unsafe {core::slice::from_raw_parts(
-        CTRL_RX_BUF as *const u8, 64)};
     if len < 8 {
+        dbgln!("Rx setup len = {len} < 8");
         return Err(());
     }
-    match (buffer[0], buffer[1]) {
+    dbgln!("Rx setup {:02x} {:02x} {:02x} {:02x} -> {}",
+           setup.request_type, setup.request, setup.value_lo, setup.value_hi,
+           setup.length);
+    match (setup.request_type, setup.request) {
         (0x80, 0x00) => setup_result(&0u16), // Status.
-        (0x80, 0x06) => match buffer[2] { // Get descriptor.
+        (0x80, 0x06) => match setup.value_hi { // Get descriptor.
             1 => setup_result(&DEVICE_DESC),
             2 => setup_result(&CONFIG0_DESC),
-            3 => crate::usb_strings::get_descriptor(buffer[4]),
+            3 => crate::usb_strings::get_descriptor(setup.value_lo),
             // 6 => setup_result(), // Device qualifier.
             _ => Err(()),
         },
         (0x21, 0x00) => Err(()), // FIXME DFU detach.
         (0xa1, 0x03) => setup_result(&[0u8, 100, 0, 0, 0, 0]), // DFU status.
-        (0x00, 0x05) => set_address(buffer[2]), // Set address.
+        (0x00, 0x05) => set_address(setup.value_lo), // Set address.
         // We just enable our only config when we get an address, so we can
         // just ACK the set config / set intf messages.
         (0x00, 0x09) => setup_result(&()), // Set configuration
@@ -320,51 +341,72 @@ fn setup_rx_handler() -> SetupResult {
 static PENDING_ADDRESS: UCell<Option<u8>> = Default::default();
 
 fn set_address(address: u8) -> SetupResult {
+    dbgln!("Set addr rqst {address}");
     *unsafe {PENDING_ADDRESS.as_mut()} = Some(address);
     setup_result(&())
 }
 
-fn do_set_address() {
-    let Some(address) = *PENDING_ADDRESS.as_ref() else {return};
+fn do_set_address(address: u8) {
+    dbgln!("Set address to {address}");
     let usb = unsafe {&*stm32h503::USB::ptr()};
     usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(address));
     // Set-up all cheps.  FIXME - what do we do on repeated set-address?
-    // I think it officially just clears enabled ocnfig anyway....
+    // I think it officially just clears enabled config anyway....
     // TODO - in device mode do we need to set the address in each CHEP?
-    usb.CHEP0R.write(|w| w.UTYPE().bits(1).DEVADDR().bits(address));
-    // FIXME double buffered TX
-    usb.CHEP1R.write(
-        |w| w.UTYPE().bits(0).DEVADDR().bits(address).EA().bits(1));
-    // FIXME double buffered TX
-    usb.CHEP2R.write(
-        |w| w.UTYPE().bits(0).DEVADDR().bits(address).EA().bits(1));
-    usb.CHEP3R.write(
-        |w| w.UTYPE().bits(3).DEVADDR().bits(address).EA().bits(2));
+    // FIXME - it seems that it doesn't even get stored!
+    usb.CHEPR[0].write(
+        |w|w.UTYPE().bits(1).DEVADDR().bits(address));
+    // FIXME proper double buffered TX toggles etc.
+    // STATTX==0 : Nothing to send yet.
+    // Set DTOGTX to 1 and DTOGRX to 0.
+    usb.CHEPR[1].modify(
+        |r,w| w.UTYPE().bits(0).EPKIND().set_bit().STATTX().bits(0)
+            .DEVADDR().bits(address).EA().bits(1)
+            .DTOGTX().bit(!r.DTOGTX().bit()).DTOGRX().bit(r.DTOGRX().bit()));
+    // FIXME proper double buffer RX
+    usb.CHEPR[2].modify(
+        |r,w| w.UTYPE().bits(0).EPKIND().set_bit().STATRX().bits(3)
+            .DEVADDR().bits(address).EA().bits(1)
+            .DTOGTX().bit(r.DTOGTX().bit()).DTOGRX().bit(!r.DTOGRX().bit()));
+    usb.CHEPR[3].modify(
+        |r,w| w.UTYPE().bits(3).STATTX().bits(3)
+            .DEVADDR().bits(address).EA().bits(2)
+            .DTOGTX().bit(!r.DTOGTX().bit()));
+    dbgln!("After set address, CHEP0 = {:#010x}", usb.CHEPR[0].read().bits());
 }
 
 fn serial_tx_handler() {
+    let usb = unsafe {&*stm32h503::USB::ptr()};
+    let chep = usb.CHEPR[1].read();
+    dbgln!("serial_tx_handler {:#010x}", chep.bits());
+
     // CHEP 1, BD 2 & 3.  Clear VTTX?  What STATTX value do we want?
 }
 
 fn serial_rx_handler() {
+    dbgln!("serial_rx_handler")
     // CHEP 2, BD 4 & 5.
     // Re-arm the RX.  Clear VTRX.  What STATRX value do we want?
 }
 
-fn interrupt_tx_handler() {
+fn interrupt_handler() {
+    dbgln!("interrupt_tx_handler")
     // CHEP 3, BD 6 & 7. [6 = TX, I think]
 }
 
 fn usb_initialize() {
     let usb = unsafe {&*stm32h503::USB::ptr()};
-    crate::dbgln!("USB initialize...\n");
+    crate::dbgln!("USB initialize...");
+    unsafe {*PENDING_ADDRESS.as_mut() = None};
 
     usb.CNTR.write(
         |w|w.PDWN().clear_bit().USBRST().clear_bit()
             .RST_DCONM().set_bit().CTRM().set_bit());
 
-    // FIXME statrx bits!!!
-    usb.CHEP0R.write(|w| w.UTYPE().bits(1));
+    usb.BCDR.write(|w| w.DPPU_DPD().set_bit().DCDEN().set_bit());
+
+    usb.CHEPR[0].write(|w| w.UTYPE().bits(1).STATRX().bits(3));
+    usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(0));
 
     // We want DTOGTX=1, DTOGRX=0? ... looks like HW manages that.
     //usb.CHEP0R.modify(
@@ -372,13 +414,34 @@ fn usb_initialize() {
     //        .DTOGRX().bit(r.DTOGRX().bit()));
     // Set EF bit in DADDR.
 
-    let chep = chep_bd();
-    chep[0].write(chep_block::<64>(0x80)); // Control TX
-    chep[1].write(chep_block::<64>(0xc0)); // Control RX
+    let bd = chep_bd();
+    crate::vcell::barrier();
+    bd[0].write(chep_block::<64>(CTRL_TX_OFFSET)); // Control TX
+    bd[1].write(chep_block::<64>(CTRL_RX_OFFSET)); // Control RX
+    crate::vcell::barrier();
 }
 
 impl crate::cpu::VectorTable {
     pub const fn usb(&mut self) -> &mut Self {
-        self.isr(stm32h503::Interrupt::USB_FS, usb_isr)
+        self.isr(INTERRUPT, usb_isr)
     }
+}
+
+fn jfc_bytes(s: *const u8, d: *mut u8, len: usize) {
+    crate::vcell::barrier();
+    // The USBRAM must be accessed with 32 bit accesses, just to make life fun.
+    // We always have an aligned dest.
+    let mut s = s as *const u32;
+    let mut d = d as *mut   u32;
+    for _ in (0 .. len).step_by(4) {
+        unsafe {*d = core::ptr::read_unaligned(s)};
+        d = d.wrapping_add(1);
+        s = s.wrapping_add(1);
+    }
+    crate::vcell::barrier();
+}
+
+#[test]
+fn check_isr() {
+    assert!(crate::VECTORS.isr[INTERRUPT as usize] == usb_isr);
 }

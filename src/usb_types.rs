@@ -1,6 +1,5 @@
 use core::slice::from_raw_parts;
 
-
 #[repr(packed)]
 pub struct DeviceDesc {
     pub length            : u8,
@@ -102,7 +101,8 @@ pub const TYPE_INTF_ASSOC   : u8 = 11;
 pub struct SetupHeader {
     pub request_type: u8,
     pub request     : u8,
-    pub value       : u16,
+    pub value_lo    : u8,
+    pub value_hi    : u8,
     pub index       : u16,
     pub length      : u16,
 }

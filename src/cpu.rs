@@ -25,6 +25,10 @@ pub fn init() {
         }
         crate::vcell::barrier();
     }
+
+    // We use sev-on-pend to avoid trivial interrupt handlers.
+    let scb  = unsafe {&*cortex_m::peripheral::SCB::PTR};
+    unsafe {scb.scr.write(16)};
 }
 
 fn bugger() {

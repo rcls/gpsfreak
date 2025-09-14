@@ -10,7 +10,8 @@
 use crate::cpu::WFE;
 use crate::vcell::{UCell, VCell, barrier};
 
-pub use stm32h503::USART2 as UART;
+pub use stm32h503::USART3 as UART;
+pub use stm32h503::Interrupt::USART3 as INTERRUPT;
 
 pub struct DebugMarker;
 
@@ -19,10 +20,16 @@ pub struct DebugMarker;
 #[unsafe(link_section = ".noinit")]
 pub static DEBUG: Debug = Debug::new();
 
+type Index = u8;
+const BUF_SIZE: usize = 256;
+const BUF_MASK: Index = (BUF_SIZE - 1) as Index;
+const _: () = assert!(BUF_SIZE <= Index::MAX as usize + 1);
+const _: () = assert!(BUF_SIZE & BUF_SIZE - 1 == 0);
+
 pub struct Debug {
-    w: VCell<u8>,
-    r: VCell<u8>,
-    buf: [UCell<u8>; 256],
+    w: VCell<Index>,
+    r: VCell<Index>,
+    buf: [UCell<u8>; BUF_SIZE],
 }
 
 fn debug_isr() {
@@ -33,19 +40,19 @@ impl Debug {
     const fn new() -> Debug {
         Debug {
             w: VCell::new(0), r: VCell::new(0),
-            buf: [const {UCell::new(0)}; 256]
+            buf: [const {UCell::new(0)}; _]
         }
     }
     fn write_bytes(&self, s: &[u8]) {
         let mut w = self.w.read();
         for &b in s {
-            while self.r.read().wrapping_sub(w) == 1 {
+            while self.r.read().wrapping_sub(w) & BUF_MASK == 1 {
                 self.enable(w);
                 self.push();
             }
             // The ISR won't access the array element in question.
             unsafe {*self.buf[w as usize].as_mut() = b};
-            w = w.wrapping_add(1);
+            w = w.wrapping_add(1) & BUF_MASK;
         }
         self.enable(w);
     }
@@ -55,8 +62,8 @@ impl Debug {
         // twice in case there is a race condition where we read pending on an
         // enabled interrupt.
         let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
-        let bit: usize = stm32h503::Interrupt::USART2 as usize % 32;
-        let idx: usize = stm32h503::Interrupt::USART2 as usize / 32;
+        let bit: usize = INTERRUPT as usize % 32;
+        let idx: usize = INTERRUPT as usize / 32;
         if nvic.icpr[idx].read() & 1 << bit == 0 {
             return;
         }
@@ -94,7 +101,7 @@ impl Debug {
         let mut done = 0;
         while r != w && done < FIFO_SIZE {
             uart.TDR.write(|w| w.bits(*self.buf[r].as_ref() as u32));
-            r = (r + 1) & 0xff;
+            r = r + 1 & BUF_SIZE - 1;
             done += 1;
         }
         self.r.write(r as u8);
@@ -142,21 +149,23 @@ macro_rules! dbgln {
 
 pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let uart = unsafe {&*UART::ptr()};
 
     DEBUG.w.write(0);
     DEBUG.r.write(0);
 
-    gpioa.AFRL.modify(|_,w| w.AFSEL5().B_0x9());
-    gpioa.AFRH.modify(|_,w| w.AFSEL15().B_0x9());
-    gpioa.MODER.modify(|_,w| w.MODE5().B_0x2().MODE15().B_0x2());
+    gpioa.AFRH.modify(|_,w| w.AFSEL15().B_0xD());
+    gpiob.AFRL.modify(|_,w| w.AFSEL3().B_0xD());
+    gpioa.MODER.modify(|_,w| w.MODE15().B_0x2());
+    gpiob.MODER.modify(|_,w| w.MODE3().B_0x2());
 
     // 32e6 / 115200 ≈ 277.
     uart.BRR.write(|w| w.bits(277));
 
     uart.CR1.write(|w| w.FIFOEN().set_bit().TE().set_bit().UE().set_bit());
 
-    crate::cpu::enable_interrupt(stm32h503::Interrupt::USART2);
+    crate::cpu::enable_interrupt(INTERRUPT);
 
     if false {
         dbg!("");
@@ -164,14 +173,23 @@ pub fn init() {
     }
 }
 
+#[cfg(target_os = "none")]
+#[panic_handler]
+fn ph(info: &core::panic::PanicInfo) -> ! {
+    dbgln!("{info}");
+    loop {
+        DEBUG.push();
+    }
+}
+
 impl crate::cpu::VectorTable {
     pub const fn debug(&mut self) -> &mut Self {
-        self.isr(stm32h503::Interrupt::USART2, debug_isr)
+        self.isr(INTERRUPT, debug_isr)
     }
 }
 
 #[test]
 fn check_isr() {
-    assert!(crate::VECTORS.isr[stm32h503::Interrupt::USART2 as usize]
+    assert!(crate::VECTORS.isr[INTERRUPT as usize]
             == debug_isr);
 }

@@ -75,7 +75,7 @@ static CONFIG0_DESC: Config1plus2 = Config1plus2{
     config: ConfigurationDesc{
         length             : size_of::<ConfigurationDesc>() as u8,
         descriptor_type    : TYPE_CONFIGURATION,
-        total_length       : 1234, // FIXME.
+        total_length       : size_of::<Config1plus2>() as u16,
         num_interfaces     : 2,
         configuration_value: 1,
         i_configuration    : string_index("Single ACM"),
@@ -220,13 +220,14 @@ pub fn init() {
 fn usb_isr() {
     let usb = unsafe {&*stm32h503::USB::ptr()};
     let istr = usb.ISTR.read();
-    dbgln!("*** USB isr ISTR = {:#010x}", istr.bits());
+    dbgln!("*** USB isr ISTR = {:#010x} FN={}", istr.bits(), usb.FNR.read().FN().bits());
     // Write zero to the interrupt bits we wish to acknowledge.
     usb.ISTR.write(|w| w.bits(!istr.bits() & !0x37fc0));
     if istr.RST_DCON().bit() {
         usb_initialize();
     }
 
+    // FIXME - is this CHEP or endpoint?
     match istr.bits() & 15 {
         0 => control_handler(),
         1 => serial_tx_handler(),
@@ -240,8 +241,7 @@ fn usb_isr() {
 fn control_handler() {
     let usb = unsafe {&*stm32h503::USB::ptr()};
     let chep = usb.CHEPR[0].read();
-    dbgln!("Control handler CHEP0 = {:#010x}, FNR = {}",
-           chep.bits(), usb.FNR.read().FN().bits());
+    dbgln!("Control handler CHEP0 = {:#010x}", chep.bits());
 
     if chep.VTTX().bit() {
         dbgln!("Control VTTX!");
@@ -249,17 +249,34 @@ fn control_handler() {
         if let Some(a) = *address {
             do_set_address(a);
             *address = None;
+            // Clear the VTTX bit.  Make sure STATRX is enabled.
+            // FIXME - what say we attempt to reenable RX below!
+            usb.CHEPR[0].write(
+                |w|w.UTYPE().bits(1).VTRX().set_bit().VTTX().clear_bit()
+                    //.STATRX().bits(chep.STATRX().bits() ^ 3)
+                );
         }
     }
+    // Note that we must not clear VTRX until the setup is processed, as a
+    // setup even in Nak or Stall may overwrite the current one?
     if !chep.VTRX().bit() {
         dbgln!("Control no VTRX :-(");
+        if chep.STATTX().bits() != 3 && chep.STATRX().bits() != 3 {
+            // Leave DTOGRX=0, STATRX=3.
+            usb.CHEPR[0].write(
+                |w|w.EA().bits(0).UTYPE().bits(1)
+                    .STATRX().bits(chep.STATRX().bits() ^ 3)
+                    .DTOGRX().bit(chep.DTOGRX().bit())
+                    //.DTOGTX().bit(chep.DTOGTX().bit())
+                );
+        }
     }
     else if chep.SETUP().bit() {
         crate::vcell::barrier();
         let setup = unsafe {&*(CTRL_RX_BUF as *const SetupHeader)};
         if let Ok(data) = setup_rx_handler(setup) {
             // TODO - what do we do on zero size?
-            // TODO - get the ack correct.
+
             // Copy the data into the control TX buffer.
             let len = data.len().min(setup.length as usize);
             jfc_bytes(data.as_ptr(), CTRL_TX_BUF, len);
@@ -273,42 +290,42 @@ fn control_handler() {
             // is non-zero, then we are sending data and expect an ack.  We
             // ignore the ack, and ignore whether or not we get one...
             chep_bd()[0].write((CTRL_TX_OFFSET + len * 65536) as u32);
-            // FIXME address.  FIXME DTOG.
-            // FIXME bits to preserve?
+            // FIXME what about SETUP + OUT?
             // FIXME status-out correct handling.
-            let chep = usb.CHEPR[0].read();
             usb.CHEPR[0].write(
-                |w|w.DEVADDR().bits(chep.DEVADDR().bits()).UTYPE().bits(1)
+                |w|w.UTYPE().bits(1)
                     .STATTX().bits(chep.STATTX().bits() ^ 3)
+                    //.VTTX().set_bit().VTRX().clear_bit()
+                    //.DTOGTX().bit(chep.DTOGTX().bit())
                     .EPKIND().bit(data.len() == 0));
         }
         else {
             dbgln!("Set-up error");
-            // Set STATTX to 1 (stall)
-            let chep = usb.CHEPR[0].read();
+            // Set STATTX to 1 (stall).  FIXME - this is racy if STATTX is
+            // doing stuff beneath us?  I guess we just have to make sure
+            // that doesn't happen...
             usb.CHEPR[0].write(
-                |w|w.DEVADDR().bits(chep.DEVADDR().bits()).UTYPE().bits(1)
+                |w|w.UTYPE().bits(1)
+                    .STATRX().bits(chep.STATRX().bits() ^ 3)
                     .STATTX().bits(chep.STATTX().bits() ^ 1));
         }
     }
     else {
         dbgln!("Control RX handler, CHEP0 = {:#010x}, non-setup", chep.bits());
-    }
-    let chep = usb.CHEPR[0].read();
-    if chep.STATTX().bits() != 3 {
-        // Leave DTOGRX=0, STATRX=3.
+        // Make sure we are ready for another read.
         usb.CHEPR[0].write(
-            |w|w.DEVADDR().bits(chep.DEVADDR().bits()).EA().bits(0)
-                .UTYPE().bits(1).STATRX().bits(chep.STATRX().bits() ^ 3)
-                .DTOGRX().bit(chep.DTOGRX().bit())
-                //.DTOGTX().bit(chep.DTOGTX().bit())
-            );
+            |w|w.UTYPE().bits(1)
+                .STATRX().bits(chep.STATRX().bits() ^ 3)
+                // FIXME - is that tx correct?  Preserve VTTX?
+                .STATTX().bits(chep.STATTX().bits() ^ 1));
     }
 
     dbgln!("CHEP0 now {:#010x}", usb.CHEPR[0].read().bits());
 }
 
 fn setup_rx_handler(setup: &SetupHeader) -> SetupResult {
+    // Cancel any pending set-address.
+    unsafe {*PENDING_ADDRESS.as_mut() = None};
     let bd = chep_bd()[1].read();
     let len = bd >> 16 & 0x03ff;
     if len < 8 {
@@ -350,29 +367,6 @@ fn do_set_address(address: u8) {
     dbgln!("Set address to {address}");
     let usb = unsafe {&*stm32h503::USB::ptr()};
     usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(address));
-    // Set-up all cheps.  FIXME - what do we do on repeated set-address?
-    // I think it officially just clears enabled config anyway....
-    // TODO - in device mode do we need to set the address in each CHEP?
-    // FIXME - it seems that it doesn't even get stored!
-    usb.CHEPR[0].write(
-        |w|w.UTYPE().bits(1).DEVADDR().bits(address));
-    // FIXME proper double buffered TX toggles etc.
-    // STATTX==0 : Nothing to send yet.
-    // Set DTOGTX to 1 and DTOGRX to 0.
-    usb.CHEPR[1].modify(
-        |r,w| w.UTYPE().bits(0).EPKIND().set_bit().STATTX().bits(0)
-            .DEVADDR().bits(address).EA().bits(1)
-            .DTOGTX().bit(!r.DTOGTX().bit()).DTOGRX().bit(r.DTOGRX().bit()));
-    // FIXME proper double buffer RX
-    usb.CHEPR[2].modify(
-        |r,w| w.UTYPE().bits(0).EPKIND().set_bit().STATRX().bits(3)
-            .DEVADDR().bits(address).EA().bits(1)
-            .DTOGTX().bit(r.DTOGTX().bit()).DTOGRX().bit(!r.DTOGRX().bit()));
-    usb.CHEPR[3].modify(
-        |r,w| w.UTYPE().bits(3).STATTX().bits(3)
-            .DEVADDR().bits(address).EA().bits(2)
-            .DTOGTX().bit(!r.DTOGTX().bit()));
-    dbgln!("After set address, CHEP0 = {:#010x}", usb.CHEPR[0].read().bits());
 }
 
 fn serial_tx_handler() {
@@ -408,12 +402,6 @@ fn usb_initialize() {
     usb.CHEPR[0].write(|w| w.UTYPE().bits(1).STATRX().bits(3));
     usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(0));
 
-    // We want DTOGTX=1, DTOGRX=0? ... looks like HW manages that.
-    //usb.CHEP0R.modify(
-    //    |r,w| w.DTOGTX().bit(!r.DTOGTX().bit())
-    //        .DTOGRX().bit(r.DTOGRX().bit()));
-    // Set EF bit in DADDR.
-
     let bd = chep_bd();
     crate::vcell::barrier();
     bd[0].write(chep_block::<64>(CTRL_TX_OFFSET)); // Control TX
@@ -427,13 +415,16 @@ impl crate::cpu::VectorTable {
     }
 }
 
+/// The USB SRAM is finicky about 32bit accesses, so we need to jump through
+/// hoops to copy into it.  We assume that we are passed an aligned destination.
 fn jfc_bytes(s: *const u8, d: *mut u8, len: usize) {
     crate::vcell::barrier();
-    // The USBRAM must be accessed with 32 bit accesses, just to make life fun.
-    // We always have an aligned dest.
     let mut s = s as *const u32;
     let mut d = d as *mut   u32;
     for _ in (0 .. len).step_by(4) {
+        // We potentially overrun the source buffer by up to 3 bytes, which
+        // should be harmless, as long as the buffer is not right at the end
+        // of flash or RAM.
         unsafe {*d = core::ptr::read_unaligned(s)};
         d = d.wrapping_add(1);
         s = s.wrapping_add(1);

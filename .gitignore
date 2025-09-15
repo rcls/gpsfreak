@@ -4,3 +4,5 @@ fp-info-cache
 *.kicad_dru
 *.kicad_prl
 ~*.lck
+out/
+target/

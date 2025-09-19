@@ -1,19 +1,21 @@
 
-// RX on pin 25. PA15, USART2 RX.
-// TX on pin 11. PA5, USART2 TX
+// RX on pin 25. PA15, USART3 RX.
+// TX on pin 26. PB3, USART3 TX
 
-// Boot clock flags:
-// HSIDIVF - on
-// HSIDIV = 0b01 : 32MHz
-// HSION
-
-use crate::cpu::WFE;
-use crate::vcell::{UCell, VCell, barrier};
+use crate::cpu::{WFE, barrier, interrupt};
+use crate::vcell::{UCell, VCell};
 
 pub use stm32h503::USART3 as UART;
 pub use stm32h503::Interrupt::USART3 as INTERRUPT;
 
 pub struct DebugMarker;
+
+pub const ENABLE: bool = true;
+pub const BAUD: u32 = 115200;
+const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
+const _: () = assert!(BRR < 65536);
+
+const FIFO_SIZE: usize = 8;
 
 /// State for debug logging.  We mark this as no-init and initialize the cells
 /// ourselves, to avoid putting the buffer into BSS.
@@ -81,21 +83,26 @@ impl Debug {
         let uart = unsafe {&*UART::ptr()};
         // Use the FIFO empty interrupt.  Normally we should be fast enough
         // to refill before the last byte finishes.
-        uart.CR1.write(
-            |w| w.FIFOEN().set_bit().TE().set_bit().UE().set_bit()
-                . TXFEIE().set_bit());
+        uart.CR1.modify(|_,w| w.TXFEIE().set_bit());
     }
     fn isr(&self) {
         let uart = unsafe {&*UART::ptr()};
-        let sr = uart.ISR.read();
-        if sr.TC().bit() {
+        let mut isr = uart.ISR.read();
+        if isr.TC().bit() {
             uart.CR1.modify(|_,w| w.TCIE().clear_bit());
         }
-        if !sr.TXFE().bit() {
-            return;
+        if isr.TXFE().bit() {
+            self.isr_tx();
         }
+        while isr.RXFNE().bit() {
+            // Dumbly push a byte through for now...
+            crate::gps_uart::send_byte(uart.RDR.read().bits() as u8);
+            isr = uart.ISR.read();
+        }
+    }
 
-        const FIFO_SIZE: usize = 8;
+    fn isr_tx(&self) {
+        let uart = unsafe {&*UART::ptr()};
         let mut r = self.r.read() as usize;
         let w = self.w.read() as usize;
         let mut done = 0;
@@ -109,6 +116,10 @@ impl Debug {
             uart.CR1.modify(|_,w| w.TXFEIE().clear_bit());
         }
     }
+}
+
+pub fn write_bytes(s: &[u8]) {
+    DEBUG.write_bytes(s);
 }
 
 pub fn write_str(s: &str) {
@@ -130,27 +141,37 @@ impl core::fmt::Write for DebugMarker {
 #[macro_export]
 macro_rules! dbg {
     ($($tt:tt)*) => {{
-        let _ = core::fmt::Write::write_fmt(
-            &mut $crate::uart_debug::DebugMarker, format_args!($($tt)*));
-    }}
+        if $crate::uart_debug::ENABLE {
+            let _ = core::fmt::Write::write_fmt(
+                &mut $crate::uart_debug::DebugMarker, format_args!($($tt)*));
+    }}}
 }
 
 #[macro_export]
 macro_rules! dbgln {
     () => {{
-        let _ = core::fmt::Write::write_str(
-            &mut $crate::uart_debug::DebugMarker, "\n");
-        }};
+        if $crate::uart_debug::ENABLE {
+            let _ = core::fmt::Write::write_str(
+                &mut $crate::uart_debug::DebugMarker, "\n");
+        }}};
     ($($tt:tt)*) => {{
-        let _ = core::fmt::Write::write_fmt(
-            &mut $crate::uart_debug::DebugMarker, format_args_nl!($($tt)*));
-        }};
+        if $crate::uart_debug::ENABLE {
+            let _ = core::fmt::Write::write_fmt(
+                &mut $crate::uart_debug::DebugMarker, format_args_nl!($($tt)*));
+        }}};
 }
 
 pub fn init() {
+    if !ENABLE {
+        return;
+    }
+
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
     let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
-    let uart = unsafe {&*UART::ptr()};
+    let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
+    let uart  = unsafe {&*UART::ptr()};
+
+    rcc.APB1LENR.modify(|_,w| w.USART3EN().set_bit());
 
     DEBUG.w.write(0);
     DEBUG.r.write(0);
@@ -160,12 +181,13 @@ pub fn init() {
     gpioa.MODER.modify(|_,w| w.MODE15().B_0x2());
     gpiob.MODER.modify(|_,w| w.MODE3().B_0x2());
 
-    // 32e6 / 115200 ≈ 277.
-    uart.BRR.write(|w| w.bits(277));
+    uart.BRR.write(|w| w.bits(BRR));
 
-    uart.CR1.write(|w| w.FIFOEN().set_bit().TE().set_bit().UE().set_bit());
+    uart.CR1.write(
+        |w|w.FIFOEN().set_bit().TE().set_bit().RE().set_bit().UE().set_bit()
+            .RXFNEIE().set_bit());
 
-    crate::cpu::enable_interrupt(INTERRUPT);
+    interrupt::enable(INTERRUPT);
 
     if false {
         dbg!("");
@@ -178,18 +200,26 @@ pub fn init() {
 fn ph(info: &core::panic::PanicInfo) -> ! {
     dbgln!("{info}");
     loop {
-        DEBUG.push();
+        if ENABLE {
+            DEBUG.push();
+        }
     }
 }
 
 impl crate::cpu::VectorTable {
     pub const fn debug(&mut self) -> &mut Self {
-        self.isr(INTERRUPT, debug_isr)
+        if ENABLE {
+            self.isr(INTERRUPT, debug_isr)
+        }
+        else {
+            self
+        }
     }
 }
 
 #[test]
 fn check_isr() {
-    assert!(crate::VECTORS.isr[INTERRUPT as usize]
-            == debug_isr);
+    if ENABLE {
+        assert!(crate::VECTORS.isr[INTERRUPT as usize] == debug_isr);
+    }
 }

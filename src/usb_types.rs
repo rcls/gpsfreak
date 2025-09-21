@@ -108,10 +108,34 @@ pub struct SetupHeader {
     pub length      : u16,
 }
 
-pub type SetupResult = Result<&'static [u8], ()>;
+/// Result from processing a set-up.  It can indicate no-data, data TX, data RX
+/// and error.
+pub enum SetupResult {
+    Tx(&'static [u8]),
+    Rx(usize),
+}
 
-pub fn setup_result<T>(data: &'static T) -> SetupResult {
-    Ok(unsafe{from_raw_parts(data as *const _ as *const _, size_of::<T>())})
+impl const Default for SetupResult {
+    fn default() -> SetupResult {SetupResult::Rx(0)}
+}
+
+impl SetupResult {
+    pub fn tx_data<T: ?Sized>(data: &'static T) -> SetupResult {
+        SetupResult::Tx(unsafe {from_raw_parts(
+            data as *const _ as *const _, size_of_val(data))})
+    }
+    pub fn no_data() -> SetupResult {
+        SetupResult::tx_data(&())
+    }
+    pub fn rx_data(len: usize) -> SetupResult {
+        SetupResult::Rx(len)
+    }
+    pub fn error() -> SetupResult {
+        SetupResult::Rx(0)
+    }
+    pub fn is_tx(&self) -> bool {
+        if let SetupResult::Tx(_) = self {true} else {false}
+    }
 }
 
 // CDC header

@@ -1,3 +1,4 @@
+use crate::usb_types::SetupResult;
 
 const STRING_LIST: [&str; 7] = [
     "\u{0409}", // Languages.
@@ -53,12 +54,13 @@ static DATA: [u16; TOTAL_LENGTH] = {
 
 pub fn get_descriptor(idx: u8) -> crate::usb_types::SetupResult {
     if idx as usize > NUM_STRINGS {
-        return Err(());
+        return SetupResult::error();
     }
     let offset = OFFSETS[idx as usize] as usize;
     let len = DATA[offset] as usize & 255;
-    Ok(unsafe {core::slice::from_raw_parts(
-        &DATA[offset] as *const _ as *const _, len)})
+    let data: &[u8] = unsafe{core::slice::from_raw_parts(
+        &DATA[offset] as *const _ as *const _, len)};
+    SetupResult::Tx(data)
 }
 
 const fn str_utf16_count(s: &str) -> usize {

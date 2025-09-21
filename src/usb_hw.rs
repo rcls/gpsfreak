@@ -67,12 +67,12 @@ pub fn chep_rx  () -> &'static stm32h503::usb::CHEPR {chep_ref(1)}
 pub fn chep_tx  () -> &'static stm32h503::usb::CHEPR {chep_ref(2)}
 pub fn chep_intr() -> &'static stm32h503::usb::CHEPR {chep_ref(3)}
 
-const fn chep_ref(n: usize) -> &'static stm32h503::usb::CHEPR {
+fn chep_ref(n: usize) -> &'static stm32h503::usb::CHEPR {
     let usb = unsafe {&*stm32h503::USB::ptr()};
     &usb.CHEPR[n]
 }
 
-const fn chep_bd() -> &'static [VCell<u32>; 16] {
+fn chep_bd() -> &'static [VCell<u32>; 16] {
     unsafe {&*(USB_SRAM_BASE as *const _)}
 }
 
@@ -91,7 +91,8 @@ pub fn bd_serial_tx_init(toggle: bool) {
     bd_serial_tx(toggle).write(BULK_TX_OFFSET as u32 + 64 * toggle as u32);
 }
 
-pub const fn chep_block<const BLK_SIZE: usize>(offset: usize) -> u32 {
+/// Return a Buffer Descriptor value for a RX block.
+pub fn chep_block<const BLK_SIZE: usize>(offset: usize) -> u32 {
     assert!(offset + BLK_SIZE <= 2048);
     let block = if BLK_SIZE == 1023 {
         0xfc000000
@@ -108,15 +109,23 @@ pub const fn chep_block<const BLK_SIZE: usize>(offset: usize) -> u32 {
     (block + offset) as u32
 }
 
-pub const fn chep_bd_tx(offset: usize, len: usize) -> u32 {
+/// Create a Buffer Descriptor value for TX.
+pub fn chep_bd_tx(offset: usize, len: usize) -> u32 {
     offset as u32 + len as u32 * 65536
 }
 
-pub const fn chep_bd_len(bd: u32) -> u32 {
+/// Return the byte count from a Buffer Descriptor value.
+pub fn chep_bd_len(bd: u32) -> u32 {
     bd >> 16 & 0x3ff
 }
 
-pub const fn chep_bd_ptr(bd: u32) -> *const u8 {
+/// Return pointer to the buffer for a Buffer Descriptor.
+pub fn chep_bd_ptr(bd: u32) -> *const u8 {
     (USB_SRAM_BASE + (bd as usize & 0xffff)) as *const u8
 }
-pub const fn chep_bd_ptr_mut(bd: u32) -> *mut u32 {chep_bd_ptr(bd) as *mut u32}
+
+/// Return pointer to the next write location for a (TX) Buffer Descriptor.
+pub fn chep_bd_tail(bd: u32) -> *mut u32 {
+    let bd = bd as usize;
+    (USB_SRAM_BASE + (bd & 0xffff) + (bd >> 16 & 0x3ff)) as *mut u32
+}

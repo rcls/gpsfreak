@@ -16,15 +16,20 @@ SECTIONS
      *(SORT_BY_ALIGNMENT(.rodata*))
   } > FLASH
   .data : {
-     *(SORT_BY_ALIGNMENT(.rwdata*))
-  } > RAM
+     __data_start = .;
+     *(SORT_BY_ALIGNMENT(.data*))
+     __data_end = .;
+  } > RAM AT>FLASH
   .bss (NOLOAD) : {
      __bss_start = .;
      *(SORT_BY_ALIGNMENT(.bss*))
      __bss_end = .;
      *(SORT_BY_ALIGNMENT(.noinit*))
+     . += 2K; /* Stack reservation. */
   } > RAM
   .stack_sizes (INFO): {
      KEEP(*(.stack_sizes));
   }
 }
+
+__rom_data_start = LOADADDR(.data);

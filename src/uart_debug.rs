@@ -34,7 +34,7 @@ pub struct Debug {
     buf: [UCell<u8>; BUF_SIZE],
 }
 
-fn debug_isr() {
+pub fn debug_isr() {
     DEBUG.isr();
 }
 
@@ -87,17 +87,12 @@ impl Debug {
     }
     fn isr(&self) {
         let uart = unsafe {&*UART::ptr()};
-        let mut isr = uart.ISR.read();
+        let isr = uart.ISR.read();
         if isr.TC().bit() {
             uart.CR1.modify(|_,w| w.TCIE().clear_bit());
         }
         if isr.TXFE().bit() {
             self.isr_tx();
-        }
-        while isr.RXFNE().bit() {
-            // Dumbly push a byte through for now...
-            crate::gps_uart::send_byte(uart.RDR.read().bits() as u8);
-            isr = uart.ISR.read();
         }
     }
 
@@ -116,10 +111,6 @@ impl Debug {
             uart.CR1.modify(|_,w| w.TXFEIE().clear_bit());
         }
     }
-}
-
-pub fn write_bytes(s: &[u8]) {
-    DEBUG.write_bytes(s);
 }
 
 pub fn write_str(s: &str) {
@@ -184,8 +175,8 @@ pub fn init() {
     uart.BRR.write(|w| w.bits(BRR));
 
     uart.CR1.write(
-        |w|w.FIFOEN().set_bit().TE().set_bit().RE().set_bit().UE().set_bit()
-            .RXFNEIE().set_bit());
+        |w|w.FIFOEN().set_bit().TE().set_bit()
+            .UE().set_bit().RXFNEIE().set_bit());
 
     interrupt::enable(INTERRUPT);
 

@@ -1,9 +1,8 @@
 
-const STRING_LIST: [&str; 11] = [
+const STRING_LIST: [&str; 7] = [
     "\u{0409}", // Languages.
     "Ralph", "GPS REF", "0000", "Single ACM",
-    "CDC not yet", "CDC DATA interface",
-    "BURP", "STEAK", "VEGETABLES", "BREAKFAST",
+    "CDC", "CDC DATA interface",
 ];
 
 pub const fn string_index(s: &str) -> u8 {

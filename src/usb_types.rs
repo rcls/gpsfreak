@@ -96,6 +96,7 @@ pub const TYPE_INTERFACE    : u8 = 4;
 pub const TYPE_ENDPOINT     : u8 = 5;
 pub const TYPE_DEVICE_QUAL  : u8 = 6;
 pub const TYPE_INTF_ASSOC   : u8 = 11;
+pub const TYPE_CS_INTERFACE : u8 = 0x24;
 
 #[repr(C)] // We keep the buffer aligned.
 pub struct SetupHeader {
@@ -111,4 +112,52 @@ pub type SetupResult = Result<&'static [u8], ()>;
 
 pub fn setup_result<T>(data: &'static T) -> SetupResult {
     Ok(unsafe{from_raw_parts(data as *const _ as *const _, size_of::<T>())})
+}
+
+// CDC header
+// CDC call management - capabilities = 3, bDataInterface = ?1.
+// CDC ACM - capabilities = 0 to start.
+// CDC union - slave not master
+
+#[repr(packed)]
+#[allow(non_camel_case_types)]
+pub struct CDC_Header {
+    pub length         : u8,
+    pub descriptor_type: u8,
+    pub sub_type       : u8,
+    pub cdc            : u16,
+}
+
+#[repr(packed)]
+pub struct UnionFunctionalDesc<const NUM_INTF: usize> {
+    pub length           : u8,
+    pub descriptor_type  : u8,
+    pub sub_type         : u8,
+    pub control_interface: u8,
+    pub sub_interface    : [u8; NUM_INTF],
+}
+
+#[repr(packed)]
+pub struct CallManagementDesc {
+    pub length         : u8,
+    pub descriptor_type: u8,
+    pub sub_type       : u8,
+    pub capabilities   : u8,
+    pub data_interface : u8,
+}
+
+#[repr(packed)]
+pub struct AbstractControlDesc {
+    pub length         : u8,
+    pub descriptor_type: u8,
+    pub sub_type       : u8,
+    pub capabilities   : u8,
+}
+
+#[repr(packed)]
+pub struct LineCoding {
+    pub dte_rate   : u32,
+    pub char_format: u8,
+    pub parity_type: u8,
+    pub data_bits  : u8,
 }

@@ -3,10 +3,7 @@
 #![deny(warnings)]
 #![allow(internal_features)]
 #![allow(unpredictable_function_pointer_comparisons)]
-#![feature(const_cmp)]
-#![feature(const_default)]
-#![feature(const_index)]
-#![feature(const_trait_impl)]
+#![feature(const_clone, const_cmp, const_default,const_index, const_trait_impl)]
 #![feature(derive_const)]
 #![feature(format_args_nl)]
 #![feature(link_llvm_intrinsics)]
@@ -15,6 +12,7 @@ mod cpu;
 mod gps_uart;
 mod uart_debug;
 mod usb;
+mod usb_hw;
 mod usb_strings;
 #[allow(dead_code)]
 mod usb_types;
@@ -29,7 +27,7 @@ pub fn main() -> ! {
     uart_debug::init();
 
     usb::init();
-    if false {gps_uart::init();}
+    if true {gps_uart::init();}
 
     // FIXME - this races with interrupts using debug!
     dbgln!("Entering main loop!");

@@ -4,6 +4,9 @@ pub const CPU_FREQ: u32 = 160_000_000;
 unsafe extern "C" {
     static mut __bss_start: u8;
     static mut __bss_end: u8;
+    static mut __data_start: u8;
+    static mut __data_end: u8;
+    static mut __rom_data_start: u8;
     #[cfg(target_os = "none")]
     static end_of_ram: u8;
 }
@@ -19,17 +22,22 @@ pub fn init() {
     let rcc    = unsafe {&*stm32h503::RCC   ::ptr()};
     let scb    = unsafe {&*cortex_m::peripheral::SCB::PTR};
 
-    // Clear the BSS.
+    // Copy the RW data and clear the BSS. The rustc memset is hideous so we
+    // copy by hand.
     if !cfg!(test) {
         barrier();
-        // The rustc memset is hideous.
-        let mut p = (&raw mut __bss_start) as *mut u32;
-        loop {
-            unsafe {*p = 0};
-            p = p.wrapping_add(1);
-            if p as *mut u8 >= &raw mut __bss_end {
-                break;
-            }
+        let src = &raw const __rom_data_start;
+        let dst = &raw mut __data_start;
+        let len = &raw mut __data_end as usize - dst as usize;
+        for i in 0 .. len as usize {
+            unsafe {*dst.wrapping_add(i) = *src.wrapping_add(i)}
+        }
+
+
+        let bss = &raw mut __bss_start as *mut u32;
+        let len = &raw mut __bss_end as usize - bss as usize;
+        for i in 0 .. len {
+            unsafe {*bss.wrapping_add(i) = 0};
         }
         barrier();
     }
@@ -108,7 +116,15 @@ pub fn init() {
 }
 
 fn bugger() {
-    loop {}
+    let fp = unsafe {frameaddress(0)};
+    // The exception PC is at +0x18, but then LLVM pushes an additional 8
+    // bytes to form the frame.
+    let pcp = fp.wrapping_add(0x20);
+    let pc = unsafe {*(pcp as *const u32)};
+    crate::dbgln!("Crash @ {pc:#010x}");
+    loop {
+        crate::uart_debug::debug_isr();
+    }
 }
 
 #[inline(always)]

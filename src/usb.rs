@@ -15,19 +15,25 @@
 ///   64 bytes at 0x40 offset.
 ///   CHEP 3
 
+mod control;
+mod hardware;
+mod strings;
+mod types;
+
+use control::{CONTROL_STATE, ControlState};
+use hardware::*;
+use strings::string_index;
+use types::*;
+
 use crate::cpu::{barrier, interrupt, nothing};
-use crate::usb_strings::string_index;
-use crate::usb_hw::*;
-use crate::usb_types::*;
-use crate::vcell::UCell;
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
-macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
+macro_rules!intr_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
 macro_rules!srx_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
 macro_rules!stx_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!intr_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
+macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
 
 static DEVICE_DESC: DeviceDesc = DeviceDesc{
     length            : size_of::<DeviceDesc>() as u8,
@@ -79,9 +85,9 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
         descriptor_type   : TYPE_INTF_ASSOC,
         first_interface   : 0,
         interface_count   : 2,
-        function_class    : 255, // FIXME
-        function_sub_class: 255, // FIXME
-        function_protocol : 255, // FIXME
+        function_class    : 2,          // Communications
+        function_sub_class: 2,          // Abstract (Modem [sic])
+        function_protocol : 0,
         i_function        : string_index("CDC"),
     },
     interface0: InterfaceDesc{
@@ -104,8 +110,8 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
     call_mgmt: CallManagementDesc{
         length             : size_of::<CallManagementDesc>() as u8,
         descriptor_type    : TYPE_CS_INTERFACE,
-        sub_type           : 1,         // Call management
-        capabilities       : 3,         // Call management [sic], data.
+        sub_type           : 1,         // Call management [sic]
+        capabilities       : 3,         // Call management, data.
         data_interface     : 1,
     },
     acm_ctrl: AbstractControlDesc{
@@ -117,18 +123,11 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
     union_desc: UnionFunctionalDesc::<1>{
         length             : size_of::<UnionFunctionalDesc<1>>() as u8,
         descriptor_type    : TYPE_CS_INTERFACE,
-        sub_type           : 6,          // Union Functional Desc,
+        sub_type           : 6,         // Union Functional Desc,
         control_interface  : 0,
         sub_interface      : [1],
     },
-    endp0: EndpointDesc {
-        length             : size_of::<EndpointDesc>() as u8,
-        descriptor_type    : TYPE_ENDPOINT,
-        endpoint_address   : 0x82,      // End point 2 IN
-        attributes         : 3,         // Interrupt.
-        max_packet_size    : 64,
-        interval           : 4,
-    },
+    endp0: EndpointDesc::new(0x82, 3, 64, 4), // IN 2, Interrupt.
     interface1: InterfaceDesc{
         length             : size_of::<InterfaceDesc>() as u8,
         descriptor_type    : TYPE_INTERFACE,
@@ -140,36 +139,9 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
         interface_protocol : 0,
         i_interface        : string_index("CDC DATA interface"),
     },
-    endp1: EndpointDesc {
-        length             : size_of::<EndpointDesc>() as u8,
-        descriptor_type    : TYPE_ENDPOINT,
-        endpoint_address   : 0x81,      // EP 1 IN
-        attributes         : 2,         // Bulk.
-        max_packet_size    : 64,
-        interval           : 1,
-    },
-    endp2: EndpointDesc {
-        length             : size_of::<EndpointDesc>() as u8,
-        descriptor_type    : TYPE_ENDPOINT,
-        endpoint_address   : 1,         // EP 1 OUT.
-        attributes         : 2,         // Bulk.
-        max_packet_size    : 64,
-        interval           : 1,
-    },
+    endp1: EndpointDesc::new(0x81, 2, 64, 1), // IN 1, Bulk.
+    endp2: EndpointDesc::new(0x01, 2, 64, 1), // OUT 82, Bulk.
 };
-
-#[derive_const(Default)]
-struct ControlState {
-    /// Set-up data to send.  On TX ACK we send the next block.
-    setup_data: SetupResult,
-    /// If set, the setup data is shorter than the requested data and we must
-    /// end with a zero-length packet if needed.
-    setup_short: bool,
-    /// Address received in a SET ADDRESS.  On TX ACK, we apply this.
-    pending_address: Option<u8>,
-}
-
-static CONTROL_STATE: UCell<ControlState> = Default::default();
 
 pub fn init() {
     let crs   = unsafe {&*stm32h503::CRS  ::ptr()};
@@ -218,7 +190,7 @@ pub fn init() {
     // 3 : CDC ACM OUT (host to us)
     // Don't bring up 1,2,3 till the set-up is done?
 
-    usb_initialize();
+    usb_initialize(unsafe {CONTROL_STATE.as_mut()});
 
     interrupt::set_priority(INTERRUPT, 0xff);
     interrupt::enable(INTERRUPT);
@@ -303,14 +275,14 @@ fn usb_isr() {
 
     // FIXME - before or after data handling?
     if istr.RST_DCON().bit() {
-        usb_initialize();
+        usb_initialize(unsafe {CONTROL_STATE.as_mut()});
     }
 
     // FIXME - is this CHEP or endpoint?
     while false && istr.CTR().bit() {
         match istr.bits() & 31 {
-            0  => control_tx_handler(),
-            16 => control_rx_handler(),
+            0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
+            16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
             1  => serial_tx_handler(),
             17 => serial_rx_handler(),
             2  => interrupt_handler(),
@@ -320,8 +292,8 @@ fn usb_isr() {
     }
     while true && istr.CTR().bit() {
         match istr.bits() & 31 {
-            0  => control_tx_handler(),
-            16 => control_rx_handler(),
+            0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
+            16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
             1  => serial_rx_handler(),
             18 => serial_tx_handler(),
             3  => interrupt_handler(),
@@ -333,179 +305,6 @@ fn usb_isr() {
     if not_only_sof {
         ctrl_dbgln!("CHEP0 now {:#010x}\n***", chep_ctrl().read().bits());
     }
-}
-
-fn control_tx_handler() {
-    let chep = chep_ctrl().read();
-    ctrl_dbgln!("Control TX handler CHEP0 = {:#010x}", chep.bits());
-
-    if !chep.VTTX().bit() {
-        ctrl_dbgln!("Bugger!");
-        return;
-    }
-
-    let control_state = unsafe {CONTROL_STATE.as_mut()};
-
-    if let SetupResult::Tx(data) = control_state.setup_data {
-        setup_next_data(data);
-        chep_ctrl().write(
-            |w| w.control().VTTX().clear_bit().tx_valid(&chep));
-        return;
-    }
-
-    chep_ctrl().write(
-        |w|w.control().VTTX().clear_bit().rx_valid(&chep).dtogrx(&chep, false));
-
-    if let Some(address) = control_state.pending_address {
-        do_set_address(address);
-        control_state.pending_address = None;
-        // FIXME - race with incoming?
-    }
-}
-
-fn control_rx_handler() {
-    let chep = chep_ctrl().read();
-    ctrl_dbgln!("Control RX handler CHEP0 = {:#010x}", chep.bits());
-
-    if !chep.VTRX().bit() {
-        ctrl_dbgln!("Bugger");
-        return;
-    }
-
-    if !chep.SETUP().bit() {
-        ctrl_dbgln!("Control RX handler, CHEP0 = {:#010x}, non-setup", chep.bits());
-        // Make sure we are ready for another read.
-        chep_ctrl().write(
-            |w|w.control().VTRX().clear_bit().rx_valid(&chep)
-                .stat_tx(&chep, 2) // Nak
-            );
-        return;
-    }
-
-    // The USBSRAM only supports 32 bit accesses.  However, that only makes a
-    // difference to the AHB bus on writes, not reads.  So access the setup
-    // packet in place.
-    barrier();
-    let setup = unsafe {&*(CTRL_RX_BUF as *const SetupHeader)};
-    // FIXME what about SETUP + OUT?
-    let result = setup_rx_handler(setup);
-    if let SetupResult::Tx(data) = result {
-        setup_send_data(setup, data);
-    }
-    // FIXME - handle setup RX.
-    else {
-        ctrl_dbgln!("Set-up error");
-        // Set STATTX to 1 (stall).  FIXME - clearing DTOGRX should not be
-        // needed.  FIXME - do we really want to stall TX, or just NAK?
-        chep_ctrl().write(
-            |w|w.control().VTRX().clear_bit()
-                .rx_valid(&chep).stat_tx(&chep, 1)
-                .DTOGRX().bit(chep.DTOGRX().bit()));
-    };
-}
-
-fn setup_rx_handler(setup: &SetupHeader) -> SetupResult {
-    // Cancel any pending set-address and set-up data.
-    let cs = unsafe {CONTROL_STATE.as_mut()};
-    cs.pending_address = None;
-    cs.setup_data = SetupResult::default();
-
-    let bd = bd_control_rx().read();
-    let len = bd >> 16 & 0x03ff;
-    if len < 8 {
-        ctrl_dbgln!("Rx setup len = {len} < 8");
-        return SetupResult::error();
-    }
-    ctrl_dbgln!("Rx setup {:02x} {:02x} {:02x} {:02x} -> {}",
-           setup.request_type, setup.request, setup.value_lo, setup.value_hi,
-           setup.length);
-    match (setup.request_type, setup.request) {
-        (0x80, 0x00) => SetupResult::tx_data(&0u16), // Status.
-        (0x80, 0x06) => match setup.value_hi { // Get descriptor.
-            1 => SetupResult::tx_data(&DEVICE_DESC),
-            2 => SetupResult::tx_data(&CONFIG0_DESC),
-            3 => crate::usb_strings::get_descriptor(setup.value_lo),
-            // 6 => setup_result(), // Device qualifier.
-            _ => SetupResult::error(),
-        },
-        (0x00, 0x05) => set_address(setup.value_lo), // Set address.
-        // We enable our only config when we get an address, so we can
-        // just ACK the set interface message.
-        (0x00, 0x09) => set_configuration(setup.value_lo),
-        (0x01, 0x0b) => SetupResult::no_data(), // Set interface
-
-        // (0x21, 0x00) => Err(()), // FIXME DFU detach.
-        // FIXME - 0xa1 0x03 appears to be GET_COMM_FEATURE?
-        // (0xa1, 0x03) => setup_result(&[0u8, 100, 0, 0, 0, 0]), // DFU status.
-
-        //(0x21, 0x20) => set_line_coding(setup),
-        //(0xa1, 0x21) => get_line_coding(setup),
-
-        // We could flush buffers on a transition from line-down to line-up...
-        (0x21, 0x22) => SetupResult::no_data(), // Set Control Line State - useful?
-        _ => {
-            usb_dbgln!("Unknown setup {:02x} {:02x} {:02x} {:02x} -> {}",
-                       setup.request_type, setup.request,
-                       setup.value_lo, setup.value_hi, setup.length);
-            SetupResult::error()
-        },
-    }
-}
-
-// Note that data should be a tx_data or no_data.
-fn setup_send_data(setup: &SetupHeader, data: &'static [u8]) {
-    let cs = unsafe {CONTROL_STATE.as_mut()};
-
-    cs.setup_short = data.len() < setup.length as usize;
-    let len = if cs.setup_short {data.len()} else {setup.length as usize};
-    ctrl_dbgln!("Setup response length = {} -> {} [{:02x} {:02x}]",
-                data.len(), len,
-                if data.len() > 0 {data[0]} else {0},
-                unsafe{*CTRL_TX_BUF});
-
-    setup_next_data(&data[..len]);
-
-    let chep = chep_ctrl().read();
-    chep_ctrl().write(|w| w.control().VTRX().clear_bit().tx_valid(&chep));
-}
-
-/// Send the next data from the control state.  Return True if something sent,
-/// False if nothing sent.
-fn setup_next_data(data: &'static [u8]) {
-    // TODO - update setup_data and get rid of setup_next.
-    let cs = unsafe {CONTROL_STATE.as_mut()};
-
-    let len = data.len();
-    let is_short = len < 64;
-    let len = if is_short {len} else {64};
-    ctrl_dbgln!("Setup TX {len} of {}", data.len());
-
-    // Copy the data into the control TX buffer.
-    unsafe {copy_by_dest32(data.as_ptr(), CTRL_TX_BUF, len)};
-
-    if len != data.len() || !is_short && cs.setup_short {
-        cs.setup_data = SetupResult::Tx(&data[len..]);
-    }
-    else {
-        cs.setup_data = SetupResult::default();
-    }
-
-    // If the length is zero, then we are sending an ack.  If the length
-    // is non-zero, then we are sending data and expect an ack.
-    bd_control_tx().write(chep_bd_tx(CTRL_TX_OFFSET, len));
-}
-
-fn set_address(address: u8) -> SetupResult {
-    usb_dbgln!("Set addr received {address}");
-    let cs = unsafe {CONTROL_STATE.as_mut()};
-    cs.pending_address = Some(address);
-    SetupResult::no_data()
-}
-
-fn do_set_address(address: u8) {
-    usb_dbgln!("Set address apply {address}");
-    let usb = unsafe {&*stm32h503::USB::ptr()};
-    usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(address));
 }
 
 fn set_configuration(cfg: u8) -> SetupResult {
@@ -554,11 +353,11 @@ fn clear_buffer_descs() {
     bd_interrupt().write(chep_block::<0>(INTR_TX_OFFSET));
 }
 
-fn usb_initialize() {
+fn usb_initialize(cs: &mut ControlState) {
     let usb = unsafe {&*stm32h503::USB::ptr()};
     usb_dbgln!("USB initialize...");
-    let cs = unsafe {CONTROL_STATE.as_mut()};
-    cs.pending_address = None;
+
+    cs.initialize();
 
     usb.CNTR.write(
         |w|w.PDWN().clear_bit().USBRST().clear_bit()
@@ -571,9 +370,8 @@ fn usb_initialize() {
     bd_control_rx().write(chep_block::<64>(CTRL_RX_OFFSET));
     clear_buffer_descs();
 
-    // TODO - do we need a bus barrier here?
-
-    chep_ctrl().modify(|r,w| w.control().rx_valid(r));
+    let chep = chep_ctrl().read();
+    chep_ctrl().write(|w| w.control().rx_valid(&chep));
 }
 
 fn serial_rx_handler() {
@@ -667,23 +465,6 @@ fn interrupt_handler() {
     // TODO - nothing here yet!
     let chep = chep_intr();
     chep.write(|w| w.interrupt().VTTX().clear_bit());
-}
-
-/// The USB SRAM is finicky about 32bit accesses, so we need to jump through
-/// hoops to copy into it.  We assume that we are passed an aligned destination.
-unsafe fn copy_by_dest32(s: *const u8, d: *mut u8, len: usize) {
-    barrier();
-    let mut s = s as *const u32;
-    let mut d = d as *mut   u32;
-    for _ in (0 .. len).step_by(4) {
-        // We potentially overrun the source buffer by up to 3 bytes, which
-        // should be harmless, as long as the buffer is not right at the end
-        // of flash or RAM.
-        unsafe {*d = core::ptr::read_unaligned(s)};
-        d = d.wrapping_add(1);
-        s = s.wrapping_add(1);
-    }
-    barrier();
 }
 
 impl crate::cpu::VectorTable {

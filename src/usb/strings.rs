@@ -1,4 +1,4 @@
-use crate::usb_types::SetupResult;
+use super::types::SetupResult;
 
 const STRING_LIST: [&str; 7] = [
     "\u{0409}", // Languages.
@@ -52,7 +52,7 @@ static DATA: [u16; TOTAL_LENGTH] = {
     d
 };
 
-pub fn get_descriptor(idx: u8) -> crate::usb_types::SetupResult {
+pub fn get_descriptor(idx: u8) -> SetupResult {
     if idx as usize > NUM_STRINGS {
         return SetupResult::error();
     }

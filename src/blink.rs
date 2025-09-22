@@ -12,10 +12,6 @@ mod cpu;
 mod gps_uart;
 mod uart_debug;
 mod usb;
-mod usb_hw;
-mod usb_strings;
-#[allow(dead_code)]
-mod usb_types;
 mod vcell;
 
 pub fn main() -> ! {

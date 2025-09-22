@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use core::slice::from_raw_parts;
 
 #[repr(packed)]
@@ -62,14 +63,23 @@ const _: () = const {assert!(size_of::<InterfaceDesc>() == 9)};
 
 #[repr(packed)]
 pub struct EndpointDesc {
-    pub length             : u8,
-    pub descriptor_type    : u8,
-    pub endpoint_address   : u8,
-    pub attributes         : u8,
-    pub max_packet_size    : u16,
-    pub interval           : u8,
+    pub length          : u8,
+    pub descriptor_type : u8,
+    pub endpoint_address: u8,
+    pub attributes      : u8,
+    pub max_packet_size : u16,
+    pub interval        : u8,
 }
 const _: () = const {assert!(size_of::<EndpointDesc>() == 7)};
+
+impl EndpointDesc {
+    pub const fn new(endpoint_address: u8, attributes: u8,
+                     max_packet_size: u16, interval: u8) -> EndpointDesc {
+        EndpointDesc{
+            length: 7, descriptor_type: TYPE_ENDPOINT,
+            endpoint_address, attributes, max_packet_size, interval}
+    }
+}
 
 #[repr(packed)]
 #[allow(non_camel_case_types)]
@@ -98,7 +108,8 @@ pub const TYPE_DEVICE_QUAL  : u8 = 6;
 pub const TYPE_INTF_ASSOC   : u8 = 11;
 pub const TYPE_CS_INTERFACE : u8 = 0x24;
 
-#[repr(C)] // We keep the buffer aligned.
+#[derive_const(Default)]
+#[repr(C)]
 pub struct SetupHeader {
     pub request_type: u8,
     pub request     : u8,
@@ -106,6 +117,18 @@ pub struct SetupHeader {
     pub value_hi    : u8,
     pub index       : u16,
     pub length      : u16,
+}
+
+impl SetupHeader {
+    pub fn new(w0: u32, w1: u32) -> SetupHeader {
+        unsafe {core::mem::transmute((w0, w1))}
+    }
+    /// Create a setup header from memory (probably in a buffer).  ptr should
+    /// be 32-bit aligned and have at least 8 bytes available.
+    pub unsafe fn from_ptr(ptr: *const u8) -> SetupHeader {
+        let w = unsafe {*(ptr as *const (u32, u32))};
+        SetupHeader::new(w.0, w.1)
+    }
 }
 
 /// Result from processing a set-up.  It can indicate no-data, data TX, data RX

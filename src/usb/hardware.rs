@@ -1,6 +1,6 @@
 use stm32h503::usb::chepr::{R as CheprR, W as CheprW};
 
-use crate::vcell::VCell;
+use crate::{cpu::barrier, vcell::VCell};
 
 pub trait Chepr {
     fn control(&mut self) -> &mut Self {self.endpoint(0, 1, false)}
@@ -128,4 +128,21 @@ pub fn chep_bd_ptr(bd: u32) -> *const u8 {
 pub fn chep_bd_tail(bd: u32) -> *mut u32 {
     let bd = bd as usize;
     (USB_SRAM_BASE + (bd & 0xffff) + (bd >> 16 & 0x3ff)) as *mut u32
+}
+
+/// The USB SRAM is finicky about 32bit accesses, so we need to jump through
+/// hoops to copy into it.  We assume that we are passed an aligned destination.
+pub unsafe fn copy_by_dest32(s: *const u8, d: *mut u8, len: usize) {
+    barrier();
+    let mut s = s as *const u32;
+    let mut d = d as *mut   u32;
+    for _ in (0 .. len).step_by(4) {
+        // We potentially overrun the source buffer by up to 3 bytes, which
+        // should be harmless, as long as the buffer is not right at the end
+        // of flash or RAM.
+        unsafe {*d = core::ptr::read_unaligned(s)};
+        d = d.wrapping_add(1);
+        s = s.wrapping_add(1);
+    }
+    barrier();
 }

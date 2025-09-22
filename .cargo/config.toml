@@ -1,6 +1,6 @@
 [alias]
-b = 'build --release --target thumbv8m.main-none-eabihf -Zbuild-std -Zbuild-std-features=optimize_for_size -Z build-std-features=panic_immediate_abort'
-bp = 'build --release --target thumbv8m.main-none-eabihf -Zbuild-std -Zbuild-std-features=optimize_for_size'
+ba = 'build --release --target thumbv8m.main-none-eabihf -Zbuild-std -Zbuild-std-features=optimize_for_size -Z build-std-features=panic_immediate_abort'
+b = 'build --release --target thumbv8m.main-none-eabihf -Zbuild-std -Zbuild-std-features=optimize_for_size'
 
 [target.thumbv8m.main-none-eabihf]
 rustflags = [

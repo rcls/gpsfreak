@@ -126,8 +126,8 @@ impl SetupHeader {
     /// Create a setup header from memory (probably in a buffer).  ptr should
     /// be 32-bit aligned and have at least 8 bytes available.
     pub unsafe fn from_ptr(ptr: *const u8) -> SetupHeader {
-        let w = unsafe {*(ptr as *const (u32, u32))};
-        SetupHeader::new(w.0, w.1)
+        let w = unsafe {*(ptr as *const [u32; 2])};
+        SetupHeader::new(w[0], w[1])
     }
 }
 
@@ -143,9 +143,9 @@ impl const Default for SetupResult {
 }
 
 impl SetupResult {
-    pub fn tx_data<T: ?Sized>(data: &'static T) -> SetupResult {
+    pub fn tx_data<T>(data: &'static T) -> SetupResult {
         SetupResult::Tx(unsafe {from_raw_parts(
-            data as *const _ as *const _, size_of_val(data))})
+            data as *const _ as *const _, size_of::<T>())})
     }
     pub fn no_data() -> SetupResult {
         SetupResult::tx_data(&())
@@ -201,7 +201,8 @@ pub struct AbstractControlDesc {
     pub capabilities   : u8,
 }
 
-#[repr(packed)]
+#[derive_const(Default)]
+#[repr(C)]
 pub struct LineCoding {
     pub dte_rate   : u32,
     pub char_format: u8,

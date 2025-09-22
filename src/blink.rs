@@ -10,6 +10,7 @@
 
 mod cpu;
 mod gps_uart;
+#[macro_use]
 mod uart_debug;
 mod usb;
 mod vcell;

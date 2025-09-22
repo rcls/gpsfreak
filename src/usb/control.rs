@@ -5,9 +5,7 @@ use crate::cpu::barrier;
 use crate::usb::{CONFIG0_DESC, DEVICE_DESC};
 use crate::vcell::UCell;
 
-// FIXME - work out how to share with super.
-macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!usb_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
+use super::{ctrl_dbgln, usb_dbgln};
 
 #[derive_const(Default)]
 pub struct ControlState {
@@ -81,9 +79,8 @@ impl ControlState {
 
             let ok = self.setup_rx_data();
             self.setup = SetupHeader::default();
-            bd_control_tx().write(bd_control_rx().read() & 0xffff);
             // Send either a zero-length ACK or an error stall.
-            bd_control_tx().write(bd_control_rx().read() & 0xffff);
+            bd_control_tx().write(chep_bd_tx(CTRL_TX_OFFSET, 0));
             chep_ctrl().write(
                 |w|w.control().VTRX().clear_bit()
                     .stat_tx(&chep, if ok {3} else {1})
@@ -104,7 +101,11 @@ impl ControlState {
                 // Receive some data.  TODO: is the length match guarenteed?
                 self.setup = setup;
                 chep_ctrl().write(
-                    |w|w.control().VTRX().clear_bit().rx_valid(&chep));
+                    |w|w.control().VTRX().clear_bit().rx_valid(&chep)
+                    .dtogrx(&chep, true).dtogtx(&chep, false)
+                );
+                ctrl_dbgln!("Set-up data rx armed {len}, CHEP = {:#x}",
+                            chep_ctrl().read().bits());
             },
             SetupResult::Rx(_) => {
                 ctrl_dbgln!("Set-up error");
@@ -135,29 +136,31 @@ impl ControlState {
                setup.length);
         match (setup.request_type, setup.request) {
             (0x80, 0x00) => SetupResult::tx_data(&0u16), // Status.
+            (0x00, 0x05) => self.set_address(setup.value_lo), // Set address.
             (0x80, 0x06) => match setup.value_hi { // Get descriptor.
                 1 => SetupResult::tx_data(&DEVICE_DESC),
                 2 => SetupResult::tx_data(&CONFIG0_DESC),
                 3 => super::strings::get_descriptor(setup.value_lo),
                 // 6 => setup_result(), // Device qualifier.
-                _ => SetupResult::error(),
+                desc => {
+                    usb_dbgln!("Unsupported get descriptor {desc}");
+                    SetupResult::error()
+                }
             },
-            (0x00, 0x05) => self.set_address(setup.value_lo), // Set address.
+            (0x00, 0x09) => super::set_configuration(setup.value_lo),
             // We enable our only config when we get an address, so we can
             // just ACK the set interface message.
-            (0x00, 0x09) => super::set_configuration(setup.value_lo),
             (0x01, 0x0b) => SetupResult::no_data(), // Set interface
 
             // (0x21, 0x00) => Err(()), // FIXME DFU detach.
             // FIXME - 0xa1 0x03 appears to be GET_COMM_FEATURE?
             // (0xa1, 0x03) => setup_result(&[0u8, 100, 0, 0, 0, 0]), // DFU status.
 
-            //(0x21, 0x20) => set_line_coding(setup),
-            //(0xa1, 0x21) => get_line_coding(setup),
+            (0x21, 0x20) => SetupResult::Rx(7), // Set Line Coding.
+            (0xa1, 0x21) => super::get_line_coding(),
 
             // We could flush buffers on a transition from line-down to line-up...
-            (0x21, 0x22) => SetupResult::no_data(), // Set Control Line State - useful?
-            _ => {
+            (0x21, 0x22) => super::set_control_line_state(setup.value_lo),            _ => {
                 usb_dbgln!("Unknown setup {:02x} {:02x} {:02x} {:02x} -> {}",
                            setup.request_type, setup.request,
                            setup.value_lo, setup.value_hi, setup.length);
@@ -168,19 +171,18 @@ impl ControlState {
 
     /// Process just received setup OUT data.
     fn setup_rx_data(&mut self) -> bool {
-        // FIXME - actually process it.
         // First check that we really were expecting data.
-        false
+        match (self.setup.request_type, self.setup.request) {
+            (0x21, 0x20) => return super::set_line_coding(),
+            _ => return false,
+        }
     }
 
     // Note that data should be a tx_data or no_data.
     fn setup_send_data(&mut self, setup: &SetupHeader, data: &'static [u8]) {
         self.setup_short = data.len() < setup.length as usize;
         let len = if self.setup_short {data.len()} else {setup.length as usize};
-        ctrl_dbgln!("Setup response length = {} -> {} [{:02x} {:02x}]",
-                    data.len(), len,
-                    if data.len() > 0 {data[0]} else {0},
-                    unsafe{*CTRL_TX_BUF});
+        ctrl_dbgln!("Setup response length = {} -> {}", data.len(), len);
 
         self.setup_next_data(&data[..len]);
 

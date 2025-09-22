@@ -17,9 +17,7 @@ const _: () = assert!(BRR < 65536);
 
 const FIFO_SIZE: usize = 8;
 
-/// State for debug logging.  We mark this as no-init and initialize the cells
-/// ourselves, to avoid putting the buffer into BSS.
-#[unsafe(link_section = ".noinit")]
+/// State for debug logging.
 pub static DEBUG: Debug = Debug::new();
 
 type Index = u8;
@@ -163,9 +161,6 @@ pub fn init() {
     let uart  = unsafe {&*UART::ptr()};
 
     rcc.APB1LENR.modify(|_,w| w.USART3EN().set_bit());
-
-    DEBUG.w.write(0);
-    DEBUG.r.write(0);
 
     gpioa.AFRH.modify(|_,w| w.AFSEL15().B_0xD());
     gpiob.AFRL.modify(|_,w| w.AFSEL3().B_0xD());

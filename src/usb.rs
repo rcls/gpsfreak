@@ -26,14 +26,19 @@ use strings::string_index;
 use types::*;
 
 use crate::cpu::{barrier, interrupt, nothing};
+use crate::dbgln;
+use crate::vcell::UCell;
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
-macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!intr_dbgln {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!srx_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!stx_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
-macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {crate::dbgln!($($tt)*)}};}
+macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!intr_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!srx_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+
+pub(crate) use {ctrl_dbgln, intr_dbgln, srx_dbgln, stx_dbgln, usb_dbgln};
 
 static DEVICE_DESC: DeviceDesc = DeviceDesc{
     length            : size_of::<DeviceDesc>() as u8,
@@ -104,7 +109,7 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
     cdc_header: CDC_Header{
         length             : size_of::<CDC_Header>() as u8,
         descriptor_type    : TYPE_CS_INTERFACE,
-        sub_type           : 2,         // Abstract Control Management
+        sub_type           : 0,         // CDC Header Functional Descriptor
         cdc                : 0x0110,
     },
     call_mgmt: CallManagementDesc{
@@ -118,7 +123,7 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
         length             : size_of::<AbstractControlDesc>() as u8,
         descriptor_type    : TYPE_CS_INTERFACE,
         sub_type           : 2,         // Abstract Control Mgmt Functional Desc
-        capabilities       : 0,         // FIXME
+        capabilities       : 6,         // "Line coding and serial state"
     },
     union_desc: UnionFunctionalDesc::<1>{
         length             : size_of::<UnionFunctionalDesc<1>>() as u8,
@@ -214,8 +219,8 @@ pub fn serial_tx_push32(word: u32) {
     if len == 60 && chep.DTOGTX().bit() == toggle {
         chep_tx().write(|w| w.serial().DTOGRX().set_bit());
         bd_serial_tx_init(!toggle);
-        stx_dbgln!("USB TX push CHEP now {:#06x} was {:#06x}",
-                   chep_tx().read().bits(), chep.bits());
+        fast_dbgln!("USB TX push CHEP now {:#06x} was {:#06x}",
+                    chep_tx().read().bits(), chep.bits());
     }
     else if len == 60 {
         stx_dbgln!("USB TX push now full CHEP {:#06x}", chep.bits());
@@ -242,7 +247,7 @@ fn start_of_frame() {
         let (word, bytes) = crate::gps_uart::serial_rx_flush();
         if bytes != 0 {
             // Store the new data.
-            stx_dbgln!("USB TX flush {bytes}, BD {bd}");
+            fast_dbgln!("USB TX flush {bytes}, BD {bd}");
             unsafe {*chep_bd_tail(bd) = word};
             bd_ref.write(bd + bytes as u32 * 65536);
         }
@@ -254,7 +259,7 @@ fn start_of_frame() {
     // Start the TX.
     chep_tx().write(|w| w.serial().DTOGRX().set_bit());
     bd_serial_tx_init(!toggle);
-    stx_dbgln!("SOF start TX, CHEP now {:#x} was {:#x}",
+    fast_dbgln!("SOF start TX, CHEP now {:#x} was {:#x}",
                chep_tx().read().bits(), chep.bits());
 }
 
@@ -263,7 +268,7 @@ fn usb_isr() {
     let mut istr = usb.ISTR.read();
     let not_only_sof = istr.RST_DCON().bit() || istr.CTR().bit();
     if not_only_sof {
-        ctrl_dbgln!("*** USB isr ISTR = {:#010x} FN={}",
+        fast_dbgln!("*** USB isr ISTR = {:#010x} FN={}",
                     istr.bits(), usb.FNR.read().FN().bits());
     }
     // Write zero to the interrupt bits we wish to acknowledge.
@@ -273,44 +278,43 @@ fn usb_isr() {
         start_of_frame();
     }
 
-    // FIXME - before or after data handling?
     if istr.RST_DCON().bit() {
         usb_initialize(unsafe {CONTROL_STATE.as_mut()});
     }
 
-    // FIXME - is this CHEP or endpoint?
-    while false && istr.CTR().bit() {
-        match istr.bits() & 31 {
-            0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
-            16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
-            1  => serial_tx_handler(),
-            17 => serial_rx_handler(),
-            2  => interrupt_handler(),
-            _  => break,  // FIXME, this will hang!
+    while istr.CTR().bit() {
+        let item = istr.bits() & 31;
+        let item_bit = 1 << item;
+        // 16, 0, 2, 3, 17
+        static SEEN: UCell<u32> = UCell::new(0);
+        let seen = unsafe {SEEN.as_mut()};
+        if *seen & item_bit == 0 {
+            *seen |= item_bit;
+            dbgln!("SEEN mask {:#010x}, item = {item}", *seen);
         }
-        istr = usb.ISTR.read();
-    }
-    while true && istr.CTR().bit() {
         match istr.bits() & 31 {
             0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
             16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
-            1  => serial_rx_handler(),
-            18 => serial_tx_handler(),
+            17 => serial_rx_handler(),
+            2  => serial_tx_handler(),
             3  => interrupt_handler(),
-            _  => break,  // FIXME, this will hang!
+            _  => {
+                dbgln!("Bugger endpoint?, ISTR = {:#010x}", istr.bits());
+                break;  // FIXME, this will hang!
+            },
         }
         istr = usb.ISTR.read();
     }
 
     if not_only_sof {
-        ctrl_dbgln!("CHEP0 now {:#010x}\n***", chep_ctrl().read().bits());
+        fast_dbgln!("CHEP0 now {:#010x}\n***", chep_ctrl().read().bits());
     }
 }
 
 fn set_configuration(cfg: u8) -> SetupResult {
     usb_dbgln!("Set configuration {cfg}");
 
-    clear_buffer_descs(); // FIXME - do we really want to do this?
+    clear_buffer_descs();
 
     if cfg == 0 {
         let rx = chep_rx().read();
@@ -325,7 +329,8 @@ fn set_configuration(cfg: u8) -> SetupResult {
         return SetupResult::error();
     }
 
-    // Serial RX.  USB OUT.  FIXME - this can stomp on an in-use buffer.
+    // Serial RX.  USB OUT.
+    // Set TOGRX=0. TOGTX=1.
     let rx = chep_rx().read();
     chep_rx().write(|w| w.serial().init(&rx).rx_valid(&rx));
     // According to the datasheet, in double buffer mode, we should be able to
@@ -375,7 +380,6 @@ fn usb_initialize(cs: &mut ControlState) {
 }
 
 fn serial_rx_handler() {
-    srx_dbgln!("serial_rx_handler");
     let chep = chep_rx().read();
     if !chep.VTRX().bit() {
         srx_dbgln!("serial_rx_handler spurious!");
@@ -385,54 +389,74 @@ fn serial_rx_handler() {
     let bd = bd_serial_rx(toggle).read();
     // If we have data, and the GPS TX DMA is idle, then schedule the DMA now.
     let len = chep_bd_len(bd);
-    if len != 0 && false { // !gps_tx_dma_active {
-        crate::gps_uart::dma_tx(chep_bd_ptr(bd) as *const u8, len as usize);
+    if len != 0 && !crate::gps_uart::dma_tx_busy() {
+        srx_dbgln!("serial_rx_handler FWD, CHEP = {:#06x}, len = {len}",
+                   chep.bits());
+        crate::gps_uart::dma_tx(chep_bd_ptr(bd), len as usize);
+    }
+    else {
+        srx_dbgln!("serial_rx_handler, CHEP = {:#06x}, len = {len}",
+                   chep.bits());
     }
     // Now inspect the next bd.  If it is idle (marked by len==0), then enable
     // USB to receive it.
     let next = bd_serial_rx(!toggle).read();
     let go_next = chep_bd_len(next) != 0;
     chep_rx().write(|w| w.serial().VTRX().clear_bit().DTOGTX().bit(go_next));
+    srx_dbgln!("Chep now {:#x}, toggled = {go_next}", chep_rx().read().bits());
 }
 
 /// Notification from the consumer that we have finished processing a buffer and
 /// are ready for the next.
 pub fn serial_rx_done(buf_end: *const u8) {
-    srx_dbgln!("serial_rx_done");
     let chep = chep_rx().read();
-
+    // If this is a valid done, then the SW (TX) toggle indicates the buffer
+    // we just processed.
     let toggle = chep.DTOGTX().bit();
     let bd_ref = bd_serial_rx(toggle);
-    let mut bd = bd_ref.read();
+    let bd = bd_ref.read();
 
-    // FIXME - find a better way of error handling!
-    let bd_end = chep_bd_ptr(bd).wrapping_add(chep_bd_len(bd) as usize);
-    if chep_bd_ptr(bd) <= buf_end && bd_end == buf_end {
-        // Mark len=0 in the BD to indicate that we're done with it.
-        bd_ref.write(bd & !0x3ff0000);
+    // Calculate the details of the buffer we think we may have just processed.
+    // If it is valid (not empty), and matches the passed in pointer, then it
+    // is what we processed.
+    let bd_len = chep_bd_len(bd);
+    let bd_end = chep_bd_ptr(bd).wrapping_add(bd_len as usize);
+    srx_dbgln!("serial_rx_done, end={buf_end:?} exp={bd_end:?} [{bd_len}]");
 
-        // If the RX is blocked, flip the TX toggle to allow the next RX.
-        if chep.DTOGRX().bit() == toggle {
-            chep_rx().write(|w| w.serial().DTOGTX().set_bit());
-            bd = bd_serial_rx(!toggle).read();
-        }
-    }
-    else {
+    if bd_end != buf_end || bd_len == 0 {
+        // This can happen if new USB data has kicked of the GPS serial before
+        // we get called from the DMA ISR.
         srx_dbgln!("Serial RX buf out of sync");
+        return
     }
 
-    // Dispatch the next RX buffer if it is not empty.
+    // Mark len=0 in the BD to indicate that we're done with it.
+    bd_ref.write(bd & !0x3ff0000);
+
+    if chep.DTOGRX().bit() != toggle {
+        srx_dbgln!("Serial RX already waiting, CHEP={:#x}", chep.bits());
+        return;                         // USB is active, just wait for data.
+    }
+
+    // Kick off USB receive.
+    chep_rx().write(|w| w.serial().DTOGTX().set_bit());
+    srx_dbgln!("Toggled, CHEP = {:#x}", chep_rx().read().bits());
+
+    // Maybe dispatch the next buffer.
+    let bd = bd_serial_rx(!toggle).read();
     let len = chep_bd_len(bd);
     if len != 0 {
+        srx_dbgln!("serial_rx_done NEXT {:#x?} {len}", chep_bd_ptr(bd));
         crate::gps_uart::dma_tx(chep_bd_ptr(bd), len as usize);
     }
 }
 
 fn serial_tx_handler() {
     let chep = chep_tx().read();
-    stx_dbgln!("serial_tx_handler {:#010x}", chep.bits());
+    stx_dbgln!("serial_tx_handler CHEP = {:#06x}", chep.bits());
     if chep.STATTX().bits() == 0 {
-        stx_dbgln!("STX interrupt but STATTX==0, CHEP={:#06x}", chep.bits());
+        stx_dbgln!("STX interrupt but STATTX==0");
+        chep_tx().write(|w| w.serial().VTTX().clear_bit());
         return;                         // Not initialized or reset.
     }
     let toggle = chep.DTOGTX().bit();
@@ -440,6 +464,7 @@ fn serial_tx_handler() {
         // The state doesn't make sense, it doesn't look like we just wrote
         // something.
         stx_dbgln!("serial tx spurious");
+        chep_tx().write(|w| w.serial().VTTX().clear_bit());
         return;
     }
 
@@ -460,11 +485,63 @@ fn serial_tx_handler() {
     }
 }
 
+/// This handles USB interrupt pipe VTTX not CPU interrupts!
 fn interrupt_handler() {
-    intr_dbgln!("interrupt_tx_handler");
     // TODO - nothing here yet!
-    let chep = chep_intr();
-    chep.write(|w| w.interrupt().VTTX().clear_bit());
+    let chep = chep_intr().read();
+    chep_intr().write(|w| w.interrupt().VTTX().clear_bit());
+    intr_dbgln!("interrupt_tx_handler CHEP now {:#06x} was {:#06x}",
+                chep_intr().read().bits(), chep.bits());
+}
+
+fn set_control_line_state(_value: u8) -> SetupResult {
+    usb_tx_interrupt();
+    SetupResult::no_data()
+}
+
+fn set_line_coding() -> bool {
+    let line_coding: LineCoding = unsafe {
+        core::mem::transmute_copy (
+            &* (CTRL_RX_BUF as *const (u32, u32))
+        )
+    };
+    ctrl_dbgln!("USB Set Line Coding, Baud = {}", line_coding.dte_rate);
+    // We ignore everything except the baud rate.
+    let result = crate::gps_uart::set_baud_rate(line_coding.dte_rate);
+    usb_tx_interrupt();
+    result
+}
+
+fn get_line_coding() -> SetupResult {
+    ctrl_dbgln!("USB Get Line Coding");
+    static LINE_CODING: UCell<LineCoding> = Default::default();
+    let lc = unsafe {LINE_CODING.as_mut()};
+    *lc = LineCoding {
+        dte_rate: crate::gps_uart::get_baud_rate(),
+        char_format: 0, parity_type: 0, data_bits: 8};
+    SetupResult::tx_data(lc)
+}
+
+fn usb_tx_interrupt() {
+    intr_dbgln!("Sending USB interrupt");
+    // Just send a canned response, because USB sucks.
+    #[allow(dead_code)]
+    #[repr(C)]
+    struct LineState{header: SetupHeader, state: u16}
+    static LINE_STATE: LineState = LineState{
+        header: SetupHeader {
+            request_type: 0xa1, request: 0x20, value_lo: 3,
+            value_hi: 0, index: 0, length: 2},
+        state: 3,
+    };
+    unsafe {copy_by_dest32(&LINE_STATE as *const _ as *const _,
+                           INTR_TX_BUF, size_of::<LineState>())};
+    barrier();
+    bd_interrupt().write(chep_bd_tx(INTR_TX_OFFSET, size_of::<LineState>()));
+    let chep = chep_intr().read();
+    chep_intr().write(|w| w.interrupt().tx_valid(&chep));
+    intr_dbgln!("INTR CHEP now {:#06x} was {:#06x}",
+                chep_intr().read().bits(), chep.bits());
 }
 
 impl crate::cpu::VectorTable {

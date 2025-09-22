@@ -2,8 +2,9 @@
 // TX on pin 19 PA8 (USART2 AF4, USART3 AF13)
 // RX on pin 18 PB15 (USART2 AF13, USART1 AF4, LPUART1, AF8)
 
+use crate::cpu;
 use crate::cpu::interrupt;
-use crate::vcell::UCell;
+use crate::vcell::{UCell, VCell};
 
 use stm32h503::GPDMA1 as DMA;
 use stm32h503::USART2 as UART;
@@ -93,7 +94,7 @@ pub fn init() {
 
     uart.BRR.write(|w| w.bits(BRR));
 
-    uart.CR3.write(|w| w.RXFTCFG().bits(5).RXFTIE().set_bit());
+    uart.CR3.write(|w| w.RXFTCFG().bits(5).RXFTIE().set_bit().DMAT().set_bit());
     uart.CR1.write(
         |w|w.FIFOEN().set_bit().RE().set_bit().RXFNEIE().set_bit()
             .TE().set_bit().UE().set_bit());
@@ -104,21 +105,61 @@ pub fn init() {
     interrupt::enable(DMA_INTERRUPT);
 }
 
+static BAUD_RATE: VCell<u32> = VCell::new(9600);
+
+pub fn set_baud_rate(baud: u32) -> bool {
+    let uart  = unsafe {&*UART::ptr()};
+    // We need to disable the UART to udpate the baud rate.
+    // FIXME - validate.  FIXME - allow us to recover the baud rate!
+    // FIXME - use the prescalar also.
+    let brr = (cpu::CPU_FREQ * 2 + baud) / (baud * 2);
+    // We are called from the USB ISR, which is the same priority as our ISRs.
+    // So there should be no interrupt to race with.
+    let config = uart.CR1.read().bits();
+    uart.CR1.write(|w| w.UE().clear_bit());
+    uart.BRR.write(|w| w.bits(brr));
+    uart.CR1.write(|w| w.bits(config));
+    BAUD_RATE.write(baud);
+    true
+}
+
+pub fn get_baud_rate() -> u32 {
+    BAUD_RATE.read()
+}
+
 /// Assumes that the DMA channel is idle.
 /// Len must fit in 16 bits.
 pub fn dma_tx(data: *const u8, len: usize) {
     let dma  = unsafe {&*DMA ::ptr()};
     let uart = unsafe {&*UART::ptr()};
     let ch = &dma.C[DMA_CHANNEL];
+    if ch.CR.read().EN().bit() {
+        crate::dbgln!("DMA busy");
+        return;
+    }
+
+    crate::dbgln!("DMA about to TX {data:?} {len}, SR={:#x}, CR={:#x}",
+                  ch.SR.read().bits(), ch.CR.read().bits());
     ch.DAR.write(|w| w.bits(uart.TDR.as_ptr() as u32));
     ch.SAR.write(|w| w.bits(data as u32));
-    ch.BR2.write(|w| w.bits(len as u32));
+    ch.BR1.write(|w| w.BNDT().bits(len as u16));
     // Pack mode, source increment, dest u8, source u32.
-    ch.TR1.write(|w| w.PAM().bits(2).SINC().set_bit().SDW_LOG2().B_0x2());
+    // Despite what the docs say, it appears only 0 and 1 are supported...
+    //ch.TR1.write(|w| w.PAM().bits(2).SINC().set_bit().SDW_LOG2().B_0x2());
+    ch.TR1.write(|w| w.SINC().set_bit());
     ch.TR2.write(|w| w.REQSEL().bits(TX_DMA_REQ));
 
     // TODO - check if TC gets set on error halts!
     ch.CR.write(|w| w.EN().set_bit().TCIE().set_bit());
+    let cr = ch.CR.read().bits();
+    crate::cpu::barrier();
+    crate::dbgln!("DMA CR now {:#x}", cr);
+}
+
+pub fn dma_tx_busy() -> bool {
+    let dma = unsafe {&*DMA::ptr()};
+    let ch = &dma.C[DMA_CHANNEL];
+    ch.CR.read().EN().bit()
 }
 
 fn uart_isr() {
@@ -154,14 +195,24 @@ fn uart_isr() {
 fn dma_isr() {
     let dma = unsafe {&*DMA::ptr()};
     let ch = &dma.C[DMA_CHANNEL];
+
     let sr = ch.SR.read();
     ch.FCR.write(|w| w.bits(sr.bits()));      // Clear the interrupts.
 
-    if sr.bits() & 0x7f00 != 0 {
-        // We completed a transfer, or it errored.
-        let buf_end = ch.DAR.read().bits() as *const u8;
+    // Be care to read CR after SR.
+    let cr = ch.CR.read();
+    crate::dbgln!("DMA isr, SR={:#x} CR={:#x}", sr.bits(), cr.bits());
+
+    if !cr.EN().bit() && sr.bits() & 0x7f00 != 0 {
+        // We completed a transfer, or it errored, and don't have a new transfer
+        // in flight.
+        // FIXME - this calculation of buf_end is incorrect if we error!
+        let buf_end = ch.SAR.read().bits() as *const u8;
         // This may kick off the next transfer.
         crate::usb::serial_rx_done(buf_end);
+    }
+    else {
+        crate::dbgln!("DMA idle");
     }
 }
 

@@ -183,18 +183,6 @@ pub fn init() {
     // Clear any spurious interrupts.
     usb.ISTR.write(|w| w);
 
-    // TODO - need to cope with USB bus reset.
-
-    // For double buffering, two CHEPnR registers must be used, one for each
-    // direction.
-
-    // 7 chep registers....
-    // 0 : Control
-    // 1 : CDC ACM interrupt, barf.
-    // 2 : CDC ACM IN (us to host)
-    // 3 : CDC ACM OUT (host to us)
-    // Don't bring up 1,2,3 till the set-up is done?
-
     usb_initialize(unsafe {CONTROL_STATE.as_mut()});
 
     interrupt::set_priority(INTERRUPT, 0xff);
@@ -283,15 +271,6 @@ fn usb_isr() {
     }
 
     while istr.CTR().bit() {
-        let item = istr.bits() & 31;
-        let item_bit = 1 << item;
-        // 16, 0, 2, 3, 17
-        static SEEN: UCell<u32> = UCell::new(0);
-        let seen = unsafe {SEEN.as_mut()};
-        if *seen & item_bit == 0 {
-            *seen |= item_bit;
-            dbgln!("SEEN mask {:#010x}, item = {item}", *seen);
-        }
         match istr.bits() & 31 {
             0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
             16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
@@ -329,10 +308,11 @@ fn set_configuration(cfg: u8) -> SetupResult {
         return SetupResult::error();
     }
 
-    // Serial RX.  USB OUT.
-    // Set TOGRX=0. TOGTX=1.
+    // Serial RX.  USB OUT.  Set TOGRX=0. TOGTX=1 to kick off the first read.
     let rx = chep_rx().read();
-    chep_rx().write(|w| w.serial().init(&rx).rx_valid(&rx));
+    chep_rx().write(
+        |w|w.serial().init(&rx).rx_valid(&rx)
+            .dtogrx(&rx, false).dtogtx(&rx, true));
     // According to the datasheet, in double buffer mode, we should be able to
     // rely on STAT_TX=VALID and just use the toggles.
     // FIXME what happens if the buffer is in use?
@@ -381,74 +361,61 @@ fn usb_initialize(cs: &mut ControlState) {
 
 fn serial_rx_handler() {
     let chep = chep_rx().read();
+    srx_dbgln!("serial_rx_handler, CHEP = {:#06x}", chep.bits());
     if !chep.VTRX().bit() {
-        srx_dbgln!("serial_rx_handler spurious!");
+        srx_dbgln!("serial_rx_handler spurious! CHEP = {:#06x}", chep.bits());
         return;
     }
+
+    // On the RX interrupt, the two toggles should be identical, check that.
     let toggle = chep.DTOGRX().bit();
-    let bd = bd_serial_rx(toggle).read();
-    // If we have data, and the GPS TX DMA is idle, then schedule the DMA now.
-    let len = chep_bd_len(bd);
-    if len != 0 && !crate::gps_uart::dma_tx_busy() {
-        srx_dbgln!("serial_rx_handler FWD, CHEP = {:#06x}, len = {len}",
-                   chep.bits());
-        crate::gps_uart::dma_tx(chep_bd_ptr(bd), len as usize);
+    if toggle != chep.DTOGTX().bit() {
+        chep_rx().write(|w| w.serial().VTRX().clear_bit());
+        usb_dbgln!(
+            "serial_rx_handler toggle mismatch, CHEP={:#06x} was {:#06x}",
+            chep_rx().read().bits(), chep.bits());
+        return;
     }
-    else {
-        srx_dbgln!("serial_rx_handler, CHEP = {:#06x}, len = {len}",
-                   chep.bits());
+
+    if !serial_rx_unblock(toggle) {
+        // Clear the VTRX anyway.
+        chep_rx().write(|w| w.serial().VTRX().clear_bit());
     }
-    // Now inspect the next bd.  If it is idle (marked by len==0), then enable
-    // USB to receive it.
-    let next = bd_serial_rx(!toggle).read();
-    let go_next = chep_bd_len(next) != 0;
-    chep_rx().write(|w| w.serial().VTRX().clear_bit().DTOGTX().bit(go_next));
-    srx_dbgln!("Chep now {:#x}, toggled = {go_next}", chep_rx().read().bits());
 }
 
 /// Notification from the consumer that we have finished processing a buffer and
 /// are ready for the next.
-pub fn serial_rx_done(buf_end: *const u8) {
+pub fn serial_rx_done(toggle: bool) {
     let chep = chep_rx().read();
-    // If this is a valid done, then the SW (TX) toggle indicates the buffer
-    // we just processed.
-    let toggle = chep.DTOGTX().bit();
-    let bd_ref = bd_serial_rx(toggle);
-    let bd = bd_ref.read();
 
-    // Calculate the details of the buffer we think we may have just processed.
-    // If it is valid (not empty), and matches the passed in pointer, then it
-    // is what we processed.
-    let bd_len = chep_bd_len(bd);
-    let bd_end = chep_bd_ptr(bd).wrapping_add(bd_len as usize);
-    srx_dbgln!("serial_rx_done, end={buf_end:?} exp={bd_end:?} [{bd_len}]");
+    // FIXME - this can get called after a configure and poison new stuff!
+    srx_dbgln!("serial_rx_done, toggle={toggle}, CHEP={:#06x}", chep.bits());
+    assert!(chep.DTOGTX().bit() != toggle);
 
-    if bd_end != buf_end || bd_len == 0 {
-        // This can happen if new USB data has kicked of the GPS serial before
-        // we get called from the DMA ISR.
-        srx_dbgln!("Serial RX buf out of sync");
-        return
+    if chep.DTOGRX().bit() == chep.DTOGTX().bit() {
+        // We are jammed, waiting for us.  Kick things off.
+        serial_rx_unblock(!toggle);
     }
+}
 
-    // Mark len=0 in the BD to indicate that we're done with it.
-    bd_ref.write(bd & !0x3ff0000);
-
-    if chep.DTOGRX().bit() != toggle {
-        srx_dbgln!("Serial RX already waiting, CHEP={:#x}", chep.bits());
-        return;                         // USB is active, just wait for data.
-    }
-
-    // Kick off USB receive.
-    chep_rx().write(|w| w.serial().DTOGTX().set_bit());
-    srx_dbgln!("Toggled, CHEP = {:#x}", chep_rx().read().bits());
-
-    // Maybe dispatch the next buffer.
-    let bd = bd_serial_rx(!toggle).read();
+/// We must have the two toggles equal when this is called.  If VTRX is set,
+/// then this is what is needed from the ISR.  So we just clear it, even if
+/// not called from the USB isr.
+fn serial_rx_unblock(toggle: bool) -> bool {
+    // If we have data, start the DMA, else just start the next receive.
+    let bd = bd_serial_rx(toggle).read();
     let len = chep_bd_len(bd);
     if len != 0 {
-        srx_dbgln!("serial_rx_done NEXT {:#x?} {len}", chep_bd_ptr(bd));
-        crate::gps_uart::dma_tx(chep_bd_ptr(bd), len as usize);
+        if !crate::gps_uart::dma_tx(chep_bd_ptr(bd), len as usize, toggle) {
+            srx_dbgln!("Unblock. DMA still busy, wait.");
+            return false;
+        }
     }
+
+    chep_rx().write(|w| w.serial().VTRX().clear_bit().DTOGTX().bit(true));
+    srx_dbgln!("Unblock. DMA {len} bytes, continue CHEP = {:#06x}",
+               chep_rx().read().bits());
+    true
 }
 
 fn serial_tx_handler() {
@@ -460,26 +427,31 @@ fn serial_tx_handler() {
         return;                         // Not initialized or reset.
     }
     let toggle = chep.DTOGTX().bit();
-    if !chep.VTTX().bit() || chep.DTOGRX().bit() != toggle {
+    if !chep.VTTX().bit() {
+        stx_dbgln!("serial tx spurious");
+        return;
+    }
+
+    if chep.DTOGRX().bit() != toggle {
         // The state doesn't make sense, it doesn't look like we just wrote
         // something.
-        stx_dbgln!("serial tx spurious");
+        stx_dbgln!("serial tx no toggle, CHEP={:#06x}", chep.bits());
         chep_tx().write(|w| w.serial().VTTX().clear_bit());
         return;
     }
 
-    // Clear the length field.
-    let bd = bd_serial_tx(toggle);
+    // Clear the length field of the buffer we just sent.
+    let bd = bd_serial_tx(!toggle);
     bd.write(bd.read() & 0xffff);
 
     // CHEP 1, BD 2 & 3.  Clear VTTX?  What STATTX value do we want?
     // If the next BD is full, then schedule it now.  Else just clear the
     // interrupt.
-    let next = bd_serial_tx(!toggle).read();
+    let next = bd_serial_tx(toggle).read();
     let tx_next = chep_bd_len(next) == 64;
     chep_tx().write(|w| w.serial().VTTX().clear_bit().DTOGRX().bit(tx_next));
     if tx_next {
-        bd_serial_tx_init(!toggle);
+        bd_serial_tx_init(toggle);
         stx_dbgln!("USB TX next CHEP {:#06x} was {:#06x}",
                    chep_tx().read().bits(), chep.bits());
     }
@@ -507,9 +479,7 @@ fn set_line_coding() -> bool {
     };
     ctrl_dbgln!("USB Set Line Coding, Baud = {}", line_coding.dte_rate);
     // We ignore everything except the baud rate.
-    let result = crate::gps_uart::set_baud_rate(line_coding.dte_rate);
-    usb_tx_interrupt();
-    result
+    crate::gps_uart::set_baud_rate(line_coding.dte_rate)
 }
 
 fn get_line_coding() -> SetupResult {

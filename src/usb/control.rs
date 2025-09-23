@@ -102,7 +102,7 @@ impl ControlState {
                 self.setup = setup;
                 chep_ctrl().write(
                     |w|w.control().VTRX().clear_bit().rx_valid(&chep)
-                    .dtogrx(&chep, true).dtogtx(&chep, false)
+                        // .dtogrx(&chep, true) //.dtogtx(&chep, true)
                 );
                 ctrl_dbgln!("Set-up data rx armed {len}, CHEP = {:#x}",
                             chep_ctrl().read().bits());
@@ -113,8 +113,7 @@ impl ControlState {
                 // needed.  FIXME - do we really want to stall TX, or just NAK?
                 chep_ctrl().write(
                     |w|w.control().VTRX().clear_bit()
-                        .rx_valid(&chep).stat_tx(&chep, 1)
-                        .dtogrx(&chep, false));
+                        .stat_rx(&chep, 1).stat_tx(&chep, 1));
             },
         }
     }

@@ -23,13 +23,22 @@ const DMA_CHANNEL: usize = 0;
 /// USART2 DMA TX.
 const TX_DMA_REQ: u8 = 24;
 
+/// Set to true to loopback our own data instead of processing received data.
+const LOOPBACK: bool = false;
+
 #[derive(Copy)]
 #[derive_const(Clone)]
 struct RxPartial32 {
     part: u32
 }
 
+/// Partial 32-bit word received from the UART.  We need to aggregate into
+/// 32 bit words to match the USBSRAM. :-(
 static RX_PARTIAL: UCell<RxPartial32> = Default::default();
+
+/// Data toggle, if any, of the data buffer with in-flight DMA.  Note that this
+/// is just used for consistency checking - we could actually get rid of it.
+static DMA_TOGGLE: UCell<Option<bool>> = Default::default();
 
 impl const Default for RxPartial32 {
     fn default() -> Self {RxPartial32::new()}
@@ -68,15 +77,6 @@ impl RxPartial32 {
         }
     }
 }
-
-// DMA : EN deasserts in HW when finished.
-// Suspend/resume. SUSP & SUSPF.
-// Abort suspended via CxCR RESET. (Clears EN).
-// FIFO mode.
-// u32->u8 conversion:
-// can unpack, might need byte reorder? Manual says little endian :-)
-// TRIGM=00 I think.
-// In packing mode (PAM[1]=1) BNDT appears to be number of dest bytes.
 
 pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -127,16 +127,26 @@ pub fn get_baud_rate() -> u32 {
     BAUD_RATE.read()
 }
 
-/// Assumes that the DMA channel is idle.
+/// Returns false if the DMA is busy, or true if the DMA is started.
 /// Len must fit in 16 bits.
-pub fn dma_tx(data: *const u8, len: usize) {
+pub fn dma_tx(data: *const u8, len: usize, toggle: bool) -> bool {
+    let dma_toggle = unsafe {DMA_TOGGLE.as_mut()};
+    if let Some(_) = *dma_toggle {
+        crate::dbgln!("DMA busy");
+        return false;                   // Busy
+    }
+    *dma_toggle = Some(toggle);
+
+    if LOOPBACK {
+        for b in unsafe {core::slice::from_raw_parts(data, len)} {
+            if let Some(word) = unsafe{RX_PARTIAL.as_mut()}.push(*b) {
+                crate::usb::serial_tx_push32(word);
+            }
+        }
+    }
     let dma  = unsafe {&*DMA ::ptr()};
     let uart = unsafe {&*UART::ptr()};
     let ch = &dma.C[DMA_CHANNEL];
-    if ch.CR.read().EN().bit() {
-        crate::dbgln!("DMA busy");
-        return;
-    }
 
     crate::dbgln!("DMA about to TX {data:?} {len}, SR={:#x}, CR={:#x}",
                   ch.SR.read().bits(), ch.CR.read().bits());
@@ -154,12 +164,8 @@ pub fn dma_tx(data: *const u8, len: usize) {
     let cr = ch.CR.read().bits();
     crate::cpu::barrier();
     crate::dbgln!("DMA CR now {:#x}", cr);
-}
 
-pub fn dma_tx_busy() -> bool {
-    let dma = unsafe {&*DMA::ptr()};
-    let ch = &dma.C[DMA_CHANNEL];
-    ch.CR.read().EN().bit()
+    true
 }
 
 fn uart_isr() {
@@ -177,7 +183,10 @@ fn uart_isr() {
         // Drain the FIFO.
         let part = unsafe {RX_PARTIAL.as_mut()};
         loop {
-            if let Some(word) = part.push(uart.RDR.read().bits() as u8) {
+            if LOOPBACK {
+                uart.RDR.read(); // Ignore the data.
+            }
+            else if let Some(word) = part.push(uart.RDR.read().bits() as u8) {
                 // Send the word on to the USB.
                 crate::usb::serial_tx_push32(word);
             }
@@ -204,12 +213,13 @@ fn dma_isr() {
     crate::dbgln!("DMA isr, SR={:#x} CR={:#x}", sr.bits(), cr.bits());
 
     if !cr.EN().bit() && sr.bits() & 0x7f00 != 0 {
-        // We completed a transfer, or it errored, and don't have a new transfer
-        // in flight.
-        // FIXME - this calculation of buf_end is incorrect if we error!
-        let buf_end = ch.SAR.read().bits() as *const u8;
-        // This may kick off the next transfer.
-        crate::usb::serial_rx_done(buf_end);
+        // We completed a transfer, or it errored.
+        let dma_toggle = unsafe {DMA_TOGGLE.as_mut()};
+        if let Some(toggle) = *dma_toggle {
+            *dma_toggle = None;
+            // This may kick off the next transfer.
+            crate::usb::serial_rx_done(toggle);
+        }
     }
     else {
         crate::dbgln!("DMA idle");

@@ -4,6 +4,7 @@
 
 use crate::cpu;
 use crate::cpu::interrupt;
+use crate::dma::DMA_Channel;
 use crate::vcell::{UCell, VCell};
 
 use stm32h503::GPDMA1 as DMA;
@@ -82,6 +83,7 @@ pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
     let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
+    let dma   = unsafe {&*DMA ::ptr()};
     let uart  = unsafe {&*UART::ptr()};
 
     rcc.AHB1ENR.modify(|_,w| w.GPDMA1EN().set_bit());
@@ -99,10 +101,11 @@ pub fn init() {
         |w|w.FIFOEN().set_bit().RE().set_bit().RXFNEIE().set_bit()
             .TE().set_bit().UE().set_bit());
 
-    interrupt::set_priority(INTERRUPT, 0xff);
-    interrupt::set_priority(DMA_INTERRUPT, 0xff);
-    interrupt::enable(INTERRUPT);
-    interrupt::enable(DMA_INTERRUPT);
+    let ch = &dma.C[DMA_CHANNEL];
+    ch.writes_to(uart.TDR.as_ptr() as *mut u8, TX_DMA_REQ);
+
+    interrupt::enable_priority(INTERRUPT, 0xff);
+    interrupt::enable_priority(DMA_INTERRUPT, 0xff);
 }
 
 static BAUD_RATE: VCell<u32> = VCell::new(9600);
@@ -132,7 +135,6 @@ pub fn get_baud_rate() -> u32 {
 pub fn dma_tx(data: *const u8, len: usize, toggle: bool) -> bool {
     let dma_toggle = unsafe {DMA_TOGGLE.as_mut()};
     if let Some(_) = *dma_toggle {
-        crate::dbgln!("DMA busy");
         return false;                   // Busy
     }
     *dma_toggle = Some(toggle);
@@ -145,25 +147,11 @@ pub fn dma_tx(data: *const u8, len: usize, toggle: bool) -> bool {
         }
     }
     let dma  = unsafe {&*DMA ::ptr()};
-    let uart = unsafe {&*UART::ptr()};
     let ch = &dma.C[DMA_CHANNEL];
 
-    crate::dbgln!("DMA about to TX {data:?} {len}, SR={:#x}, CR={:#x}",
-                  ch.SR.read().bits(), ch.CR.read().bits());
-    ch.DAR.write(|w| w.bits(uart.TDR.as_ptr() as u32));
-    ch.SAR.write(|w| w.bits(data as u32));
-    ch.BR1.write(|w| w.BNDT().bits(len as u16));
-    // Pack mode, source increment, dest u8, source u32.
-    // Despite what the docs say, it appears only 0 and 1 are supported...
-    //ch.TR1.write(|w| w.PAM().bits(2).SINC().set_bit().SDW_LOG2().B_0x2());
-    ch.TR1.write(|w| w.SINC().set_bit());
-    ch.TR2.write(|w| w.REQSEL().bits(TX_DMA_REQ));
+    ch.write(data as usize, len);
 
-    // TODO - check if TC gets set on error halts!
-    ch.CR.write(|w| w.EN().set_bit().TCIE().set_bit());
-    let cr = ch.CR.read().bits();
     crate::cpu::barrier();
-    crate::dbgln!("DMA CR now {:#x}", cr);
 
     true
 }
@@ -210,7 +198,6 @@ fn dma_isr() {
 
     // Be care to read CR after SR.
     let cr = ch.CR.read();
-    crate::dbgln!("DMA isr, SR={:#x} CR={:#x}", sr.bits(), cr.bits());
 
     if !cr.EN().bit() && sr.bits() & 0x7f00 != 0 {
         // We completed a transfer, or it errored.
@@ -220,9 +207,6 @@ fn dma_isr() {
             // This may kick off the next transfer.
             crate::usb::serial_rx_done(toggle);
         }
-    }
-    else {
-        crate::dbgln!("DMA idle");
     }
 }
 

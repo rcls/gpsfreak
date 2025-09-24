@@ -185,8 +185,7 @@ pub fn init() {
 
     usb_initialize(unsafe {CONTROL_STATE.as_mut()});
 
-    interrupt::set_priority(INTERRUPT, 0xff);
-    interrupt::enable(INTERRUPT);
+    interrupt::enable_priority(INTERRUPT, 0xff);
 }
 
 pub fn serial_tx_push32(word: u32) {

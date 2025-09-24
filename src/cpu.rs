@@ -83,6 +83,7 @@ pub fn init() {
             }
         }
     }
+
     // Leave us on the 32MHz default clock if possible!
     if CPU_FREQ != 32_000_000 {
         // Set up PLL1.
@@ -106,6 +107,10 @@ pub fn init() {
         rcc.CFGR1.write(|w| w.SW().bits(3));
     }
 
+    // Enable the CSI (4MHz) for I2C.
+    rcc.CR.modify(|_,w| w.CSION().set_bit());
+    while !rcc.CR.read().CSIRDY().bit() {}
+
     // Enable ICACHE.
     while icache.SR.read().BUSYF().bit() {
     }
@@ -116,6 +121,7 @@ pub fn init() {
 }
 
 fn bugger() {
+    interrupt::disable_all();
     let fp = unsafe {frameaddress(0)};
     // The exception PC is at +0x18, but then LLVM pushes an additional 8
     // bytes to form the frame.
@@ -160,6 +166,11 @@ pub mod interrupt {
     pub fn set_priority(n: stm32h503::Interrupt, p: u8) {
         let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
         unsafe {nvic.ipr[n as usize].write(p)};
+    }
+
+    pub fn enable_priority(n: stm32h503::Interrupt, p: u8) {
+        set_priority(n, p);
+        enable(n);
     }
 }
 

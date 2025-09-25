@@ -135,6 +135,7 @@ impl ControlState {
                setup.length);
         match (setup.request_type, setup.request) {
             (0x80, 0x00) => SetupResult::tx_data(&0u16), // Status.
+            (0x21, 0x00) => unsafe {crate::cpu::trigger_dfu()},
             (0x00, 0x05) => self.set_address(setup.value_lo), // Set address.
             (0x80, 0x06) => match setup.value_hi { // Get descriptor.
                 1 => SetupResult::tx_data(&DEVICE_DESC),
@@ -151,15 +152,20 @@ impl ControlState {
             // just ACK the set interface message.
             (0x01, 0x0b) => SetupResult::no_data(), // Set interface
 
-            // (0x21, 0x00) => Err(()), // FIXME DFU detach.
             // FIXME - 0xa1 0x03 appears to be GET_COMM_FEATURE?
-            // (0xa1, 0x03) => setup_result(&[0u8, 100, 0, 0, 0, 0]), // DFU status.
+            (0xa1, 0x03) => if setup.index == 2 {
+                SetupResult::tx_data(&[0u8, 100, 0, 0, 0, 0])
+            }
+            else {
+                SetupResult::error()
+            },
 
             (0x21, 0x20) => SetupResult::Rx(7), // Set Line Coding.
             (0xa1, 0x21) => super::get_line_coding(),
 
             // We could flush buffers on a transition from line-down to line-up...
-            (0x21, 0x22) => super::set_control_line_state(setup.value_lo),            _ => {
+            (0x21, 0x22) => super::set_control_line_state(setup.value_lo),
+            _ => {
                 usb_dbgln!("Unknown setup {:02x} {:02x} {:02x} {:02x} -> {}",
                            setup.request_type, setup.request,
                            setup.value_lo, setup.value_hi, setup.length);

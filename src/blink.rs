@@ -23,6 +23,9 @@ mod usb;
 mod utils;
 mod vcell;
 
+#[allow(non_snake_case)]
+mod clock_config;
+
 /// I²C address of the LMK05318(B).
 const LMK05318: u8 = 0xc8;
 
@@ -31,6 +34,7 @@ const TMP117: u8 = 0x92;
 
 pub fn main() -> ! {
     let rcc = unsafe {&*stm32h503::RCC::ptr()};
+
     rcc.AHB2ENR.modify(|_,w| w.GPIOAEN().set_bit().GPIOBEN().set_bit());
 
     cpu::init();
@@ -42,7 +46,9 @@ pub fn main() -> ! {
     if true {gps_uart::init();}
 
     // FIXME - this races with interrupts using debug!
-    dbgln!("Entering main loop!");
+    dbgln!("Debug is up!");
+
+    cpu::maybe_enter_dfu();
 
     if false {gps_reset();}
 
@@ -61,6 +67,10 @@ pub fn main() -> ! {
         syst.cvr.write(0xffffff);
         syst.csr.write(3);
     }
+
+    // Setup the oscillator.
+    let r = clock_setup();
+    dbgln!("Clock setup result = {r:?}");
 
     loop {
         cpu::WFE();
@@ -88,12 +98,28 @@ fn systick_handler() {
     // GPIO0 = 3V3.
     // GPIO1 = GND.  Low = 00.
     // So I2C address is 1100100b. 0xc8, 0xc9.
-    let r = i2c::write(LMK05318, &0u16).wait();
-    dbgln!("Send LMK reg# {:?}", r);
+    let _ = i2c::write(LMK05318, &13u16.to_be()).wait();
+    // dbgln!("Send LMK reg# {:?}", r);
     let mut regs = [0u8; 16];
-    let r = i2c::read(LMK05318, &mut regs).wait();
-    dbgln!("Read LMK regs {:?}", r);
+    let _ = i2c::read(LMK05318, &mut regs).wait();
+    // dbgln!("Read LMK regs {:?}", r);
     dbgln!("Regs {:x?}", regs);
+}
+
+fn clock_setup() -> i2c::Result {
+    for block in clock_config::REG_BLOCKS {
+        i2c::write(LMK05318, block).wait()?;
+    }
+    // Read R12...
+    i2c::write(LMK05318, &[0u8, 12]).wait()?;
+    let mut r12 = 0u8;
+    i2c::read(LMK05318, &mut r12).wait()?;
+    // Write back with PLL cascade and reset.
+    i2c::write(LMK05318, &[0u8, 12, r12 | 0x12]).wait()?;
+    // Write back with PLL cascade.
+    i2c::write(LMK05318, &[0u8, 12, r12 | 0x02]).wait()?;
+
+    Ok(())
 }
 
 fn gps_reset() {

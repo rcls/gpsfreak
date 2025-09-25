@@ -71,6 +71,8 @@ struct Config1ACMCDCplus2 {
     interface1: InterfaceDesc,
     endp1     : EndpointDesc,
     endp2     : EndpointDesc,
+    interface2: InterfaceDesc,
+    dfu       : DFU_FunctionalDesc,
 }
 
 /// Our main configuration descriptor.
@@ -79,7 +81,7 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
         length             : size_of::<ConfigurationDesc>() as u8,
         descriptor_type    : TYPE_CONFIGURATION,
         total_length       : size_of::<Config1ACMCDCplus2>() as u16,
-        num_interfaces     : 2,
+        num_interfaces     : 3,
         configuration_value: 1,
         i_configuration    : string_index("Single ACM"),
         attributes         : 0x80,      // Bus powered.
@@ -146,6 +148,25 @@ static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
     },
     endp1: EndpointDesc::new(0x81, 2, 64, 1), // IN 1, Bulk.
     endp2: EndpointDesc::new(0x01, 2, 64, 1), // OUT 82, Bulk.
+    interface2: InterfaceDesc{
+        length             : size_of::<InterfaceDesc>() as u8,
+        descriptor_type    : TYPE_INTERFACE,
+        interface_number   : 2,
+        alternate_setting  : 0,
+        num_endpoints      : 0,
+        interface_class    : 0xfe,      // Application specific
+        interface_sub_class: 1,         // Device Firmware Upgrade
+        interface_protocol : 1,         // Runtime
+        i_interface        : string_index("DFU"),
+    },
+    dfu: DFU_FunctionalDesc {
+        length             : size_of::<DFU_FunctionalDesc>() as u8,
+        descriptor_type    : TYPE_DFU_FUNCTIONAL,
+        attributes         : 0x0b,
+        detach_time_out    : 1000,
+        transfer_size      : 1024,
+        dfu_version        : 0x011a,
+    },
 };
 
 pub fn init() {

@@ -99,14 +99,15 @@ pub struct DeviceQualifier {
     pub device_class       : u8,
 }
 
-pub const TYPE_DEVICE       : u8 = 1;
-pub const TYPE_CONFIGURATION: u8 = 2;
-pub const TYPE_STRING       : u8 = 3;
-pub const TYPE_INTERFACE    : u8 = 4;
-pub const TYPE_ENDPOINT     : u8 = 5;
-pub const TYPE_DEVICE_QUAL  : u8 = 6;
-pub const TYPE_INTF_ASSOC   : u8 = 11;
-pub const TYPE_CS_INTERFACE : u8 = 0x24;
+pub const TYPE_DEVICE        : u8 = 1;
+pub const TYPE_CONFIGURATION : u8 = 2;
+pub const TYPE_STRING        : u8 = 3;
+pub const TYPE_INTERFACE     : u8 = 4;
+pub const TYPE_ENDPOINT      : u8 = 5;
+pub const TYPE_DEVICE_QUAL   : u8 = 6;
+pub const TYPE_INTF_ASSOC    : u8 = 11;
+pub const TYPE_DFU_FUNCTIONAL: u8 = 0x21;
+pub const TYPE_CS_INTERFACE  : u8 = 0x24;
 
 #[derive_const(Default)]
 #[repr(C)]
@@ -199,6 +200,17 @@ pub struct AbstractControlDesc {
     pub descriptor_type: u8,
     pub sub_type       : u8,
     pub capabilities   : u8,
+}
+
+#[repr(packed)]
+#[allow(non_camel_case_types)]
+pub struct DFU_FunctionalDesc {
+    pub length         : u8,
+    pub descriptor_type: u8,
+    pub attributes     : u8,
+    pub detach_time_out: u16,
+    pub transfer_size  : u16,
+    pub dfu_version    : u16,
 }
 
 #[derive_const(Default)]

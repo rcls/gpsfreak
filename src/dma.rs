@@ -52,10 +52,11 @@ pub trait Flat {
 //impl<T> !Flat for &T {}
 // impl<T> !Flat for &mut T {}
 
-//impl Flat for [u8] {}
+impl Flat for u8 {}
 impl<const N: usize> Flat for [u8; N] {}
 //impl<const N: usize> Flat for [u16; N] {}
 impl Flat for i16 {}
 impl Flat for u16 {}
+impl Flat for [u8] {}
 //impl Flat for u32 {}
 //impl Flat for u64 {}

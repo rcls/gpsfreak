@@ -1,5 +1,11 @@
+use crate::vcell::VCell;
 
 pub const CPU_FREQ: u32 = 160_000_000;
+
+#[cfg(target_os = "none")]
+const SYS_VTOR: u32 = 0x0bf87000;
+const BKPSRAM_BASE: u32 = 0x40036400;
+const DFU_MAGIC: u32 = 0x52434C76;
 
 unsafe extern "C" {
     static mut __bss_start: u8;
@@ -184,6 +190,67 @@ pub fn WFE() {
     else {
         panic!("wfe!");
     }
+}
+
+pub fn maybe_enter_dfu() {
+    let pwr = unsafe {&*stm32h503::PWR::ptr()};
+    let rcc = unsafe {&*stm32h503::RCC::ptr()};
+    // Enable BKPSRAM access,
+    pwr.DBPCR.write(|w| w.DBP().set_bit());
+
+    // Check for magic in the BKPSRAM to reboot into DFU.
+    rcc.AHB1ENR.modify(|_,w| w.BKPRAMEN().set_bit());
+    let magic: &'static VCell<u32> = unsafe {magic_reboot_config()};
+    if magic.read() == DFU_MAGIC {
+        magic.write(0);
+        // Only do this on a software reboot!
+        if rcc.RSR.read().SFTRSTF().bit() {
+            unsafe {goto_sys_flash()};
+        }
+    }
+    rcc.AHB1ENR.modify(|_,w| w.BKPRAMEN().clear_bit());
+}
+
+pub unsafe fn trigger_dfu() -> ! {
+    let rcc = unsafe {&*stm32h503::RCC::ptr()};
+    let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
+
+    //crate::uart_debug::DEBUG.flush();
+
+    rcc.AHB1ENR.modify(|_,w| w.BKPRAMEN().set_bit());
+
+    // Set up the magic number.
+    let magic = unsafe {magic_reboot_config()};
+    magic.write(DFU_MAGIC);
+
+    // Now reboot by writing the appropriate magic number to AIRCR.
+    loop {
+        unsafe {scb.aircr.write(0x05fa0004)};
+    }
+}
+
+pub unsafe fn goto_sys_flash() -> ! {
+    // Reboot into DFU.
+    #[cfg(target_os = "none")]
+    unsafe {
+        let scb = &*cortex_m::peripheral::SCB::PTR;
+        scb.vtor.write(SYS_VTOR);
+        let sp = *(SYS_VTOR as *const u32);
+        let entry = *((SYS_VTOR + 4) as *const u32);
+        core::arch::asm!(
+            "mov sp, {sp}",
+            "bx {entry}",
+            sp = in(reg) sp,
+            entry = in(reg) entry,
+            options(noreturn)
+        );
+    }
+    #[cfg(not(target_os = "none"))]
+    panic!("Only on device!");
+}
+
+unsafe fn magic_reboot_config() -> &'static VCell<u32> {
+    unsafe {&*(BKPSRAM_BASE as *const VCell<u32>)}
 }
 
 #[derive(Clone, Copy)]

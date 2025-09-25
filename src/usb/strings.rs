@@ -1,9 +1,9 @@
 use super::types::SetupResult;
 
-const STRING_LIST: [&str; 7] = [
+const STRING_LIST: [&str; 8] = [
     "\u{0409}", // Languages.
     "Ralph", "GPS REF", "0000", "Single ACM",
-    "CDC", "CDC DATA interface",
+    "CDC", "CDC DATA interface", "DFU",
 ];
 
 pub const fn string_index(s: &str) -> u8 {

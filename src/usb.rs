@@ -32,8 +32,8 @@ use crate::vcell::UCell;
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
 macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
-macro_rules!intr_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
-macro_rules!srx_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
 macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
@@ -135,64 +135,6 @@ fn set_configuration(cfg: u8) {
 }
 
 impl USB_State {
-    fn serial_tx_byte(&mut self, byte: u8) {
-        stx_dbgln!("serial_tx_byte {byte:02x}");
-        if self.tx_len >= 64 {
-            return;                     // We're full.  Drop it.
-        }
-        self.tx_part = (self.tx_part >> 8) + ((byte as u32) << 24);
-        if self.tx_len & 3 == 3 {
-            let ptr = self.tx_base.wrapping_byte_add(self.tx_len - 3);
-            unsafe {*ptr = self.tx_part};
-        }
-        self.tx_len += 1;
-        if self.tx_len < 64 {
-            return;
-        }
-
-        let chep = chep_ser().read();
-        if chep.rx_disabled() {
-            return;                         // Not initialized, or reset.
-        }
-        if chep.tx_active() {
-            stx_dbgln!("USB TX push now full CHEP {:#06x}", chep.bits());
-        }
-
-        self.send_tx_buffer(chep);
-    }
-
-    fn send_tx_buffer(&mut self, chep: hardware::CheprR) {
-        bd_serial().tx_set(self.tx_base as _, self.tx_len);
-        // It's OK to clear VTTX even if we haven't handled the interrupt yet
-        // - we are doing just what the ISR would.
-        chep_ser().write(|w| w.serial().VTTX().clear_bit().tx_valid(&chep));
-        stx_dbgln!("serial tx arm, len {} CHEP {:#06x} was {:#06x}",
-                   self.tx_len, chep_ser().read().bits(), chep.bits());
-
-        // We have two TX buffers, differing only by a single bit.
-        self.tx_base = (self.tx_base as usize ^ 64) as _;
-        self.tx_len = 0;
-    }
-
-    /// On a start-of-frame interrupt, if the serial IN end-point is idle, we
-    /// push through any pending data.  Hopefully quickly enough for the actual
-    /// IN request.
-    fn start_of_frame(&mut self) {
-        // If serial TX is idle, then push through any pending data.
-        let chep = chep_ser().read();
-        if !chep.tx_nakking() || self.tx_len == 0 {
-            return;                         // Not ready for data.
-        }
-
-        // Store any sub-word bytes.
-        if self.tx_len & 3 != 0 {
-            let ptr = self.tx_base.wrapping_byte_add(self.tx_len & !3);
-            unsafe {*ptr = self.tx_part >> 32 - 8 * (self.tx_len & 3)};
-        }
-
-        self.send_tx_buffer(chep);
-    }
-
     fn isr(&mut self) {
         let usb = unsafe {&*stm32h503::USB::ptr()};
         let mut istr = usb.ISTR.read();
@@ -230,6 +172,80 @@ impl USB_State {
         if not_only_sof {
             fast_dbgln!("CHEP0 now {:#010x}\n***", chep_ctrl().read().bits());
         }
+    }
+
+    /// On a start-of-frame interrupt, if the serial IN end-point is idle, we
+    /// push through any pending data.  Hopefully quickly enough for the actual
+    /// IN request.
+    fn start_of_frame(&mut self) {
+        // If serial TX is idle, then push through any pending data.
+        let chep = chep_ser().read();
+        if !chep.tx_nakking() || self.tx_len == 0 {
+            return;                         // Not ready for data.
+        }
+
+        // Store any sub-word bytes.
+        if self.tx_len & 3 != 0 {
+            let ptr = self.tx_base.wrapping_byte_add(self.tx_len & !3);
+            unsafe {*ptr = self.tx_part >> 32 - 8 * (self.tx_len & 3)};
+        }
+
+        self.send_tx_buffer(chep);
+    }
+
+    fn serial_tx_handler(&mut self) {
+        let chep = chep_ser().read();
+        if !chep.VTTX().bit() {
+            stx_dbgln!("serial tx spurious CHEP {:#06x}", chep.bits());
+            return;
+        }
+
+        if !chep.tx_nakking() || self.tx_len < 64 {
+            stx_dbgln!("STX wait for more.  CHEP {:#06x}", chep.bits());
+            chep_ser().write(|w| w.serial().VTTX().clear_bit());
+            return;
+        }
+
+        self.send_tx_buffer(chep);
+    }
+
+    fn serial_tx_byte(&mut self, byte: u8) {
+        fast_dbgln!("serial_tx_byte {byte:02x}");
+        if self.tx_len >= 64 {
+            return;                     // We're full.  Drop it.
+        }
+        self.tx_part = (self.tx_part >> 8) + ((byte as u32) << 24);
+        if self.tx_len & 3 == 3 {
+            let ptr = self.tx_base.wrapping_byte_add(self.tx_len - 3);
+            unsafe {*ptr = self.tx_part};
+        }
+        self.tx_len += 1;
+        if self.tx_len < 64 {
+            return;
+        }
+
+        let chep = chep_ser().read();
+        if chep.rx_disabled() {
+            return;                         // Not initialized, or reset.
+        }
+        if chep.tx_active() {
+            stx_dbgln!("USB TX push now full CHEP {:#06x}", chep.bits());
+        }
+
+        self.send_tx_buffer(chep);
+    }
+
+    fn send_tx_buffer(&mut self, chep: hardware::CheprR) {
+        bd_serial().tx_set(self.tx_base as _, self.tx_len);
+        // It's OK to clear VTTX even if we haven't handled the interrupt yet
+        // - we are doing just what the ISR would.
+        chep_ser().write(|w| w.serial().VTTX().clear_bit().tx_valid(&chep));
+        stx_dbgln!("serial tx arm, len {} CHEP {:#06x} was {:#06x}",
+                   self.tx_len, chep_ser().read().bits(), chep.bits());
+
+        // We have two TX buffers, differing only by a single bit.
+        self.tx_base = (self.tx_base as usize ^ 64) as _;
+        self.tx_len = 0;
     }
 
     fn serial_rx_handler(&mut self) {
@@ -308,22 +324,6 @@ impl USB_State {
         chep_ser().write(|w| w.serial().VTRX().clear_bit().rx_valid(&chep));
         srx_dbgln!("serial_rx_done, unblocked, CHEP {:#06x} was {:#06x}",
                    chep_ser().read().bits(), chep.bits());
-    }
-
-    fn serial_tx_handler(&mut self) {
-        let chep = chep_ser().read();
-        if !chep.VTTX().bit() {
-            stx_dbgln!("serial tx spurious CHEP {:#06x}", chep.bits());
-            return;
-        }
-
-        if !chep.tx_nakking() || self.tx_len < 64 {
-            stx_dbgln!("STX wait for more.  CHEP {:#06x}", chep.bits());
-            chep_ser().write(|w| w.serial().VTTX().clear_bit());
-            return;
-        }
-
-        self.send_tx_buffer(chep);
     }
 
     /// This handles USB interrupt pipe VTTX not CPU interrupts!

@@ -5,7 +5,7 @@
 use crate::cpu;
 use crate::cpu::interrupt;
 use crate::dma::DMA_Channel;
-use crate::vcell::{UCell, VCell};
+use crate::vcell::VCell;
 
 use stm32h503::GPDMA1 as DMA;
 use stm32h503::USART2 as UART;
@@ -27,57 +27,7 @@ const TX_DMA_REQ: u8 = 24;
 /// Set to true to loopback our own data instead of processing received data.
 const LOOPBACK: bool = false;
 
-#[derive(Copy)]
-#[derive_const(Clone)]
-struct RxPartial32 {
-    part: u32
-}
-
-/// Partial 32-bit word received from the UART.  We need to aggregate into
-/// 32 bit words to match the USBSRAM. :-(
-static RX_PARTIAL: UCell<RxPartial32> = Default::default();
-
-/// Data toggle, if any, of the data buffer with in-flight DMA.  Note that this
-/// is just used for consistency checking - we could actually get rid of it.
-static DMA_TOGGLE: UCell<Option<bool>> = Default::default();
-
-impl const Default for RxPartial32 {
-    fn default() -> Self {RxPartial32::new()}
-}
-
-impl RxPartial32 {
-    const fn new() -> RxPartial32 {RxPartial32{part: 128}}
-    fn push(&mut self, b: u8) -> Option<u32> {
-        let updated = (self.part << 8) + b as u32;
-        if self.part < 0x80000000 {
-            // This is not the last byte, just push it.
-            self.part = updated;
-            None
-        }
-        else {
-            self.part = 128;
-            Some(u32::from_be(updated))
-        }
-    }
-    fn flush(&mut self) -> (u32, usize) {
-        let part = self.part;
-        self.part = 128;
-        if part < 0x00800000 {
-            if part < 0x00008000 {
-                (0, 0)
-            }
-            else {
-                (part & 0xff, 1)
-            }
-        }
-        else if part < 0x80000000 {
-            (u32::from_be(part << 16), 2)
-        }
-        else {
-            (u32::from_be(part << 8), 3)
-        }
-    }
-}
+macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -132,18 +82,12 @@ pub fn get_baud_rate() -> u32 {
 
 /// Returns false if the DMA is busy, or true if the DMA is started.
 /// Len must fit in 16 bits.
-pub fn dma_tx(data: *const u8, len: usize, toggle: bool) -> bool {
-    let dma_toggle = unsafe {DMA_TOGGLE.as_mut()};
-    if let Some(_) = *dma_toggle {
-        return false;                   // Busy
-    }
-    *dma_toggle = Some(toggle);
-
+pub fn dma_tx(data: *const u8, len: usize) {
+    dbgln!("UART TX {len} bytes");
     if LOOPBACK {
         for b in unsafe {core::slice::from_raw_parts(data, len)} {
-            if let Some(word) = unsafe{RX_PARTIAL.as_mut()}.push(*b) {
-                crate::usb::serial_tx_push32(word);
-            }
+            // Evil alert - this is broken rust, we grab a second &mut pointer!
+            crate::usb::serial_tx_byte(*b);
         }
     }
     let dma  = unsafe {&*DMA ::ptr()};
@@ -152,8 +96,6 @@ pub fn dma_tx(data: *const u8, len: usize, toggle: bool) -> bool {
     ch.write(data as usize, len);
 
     crate::cpu::barrier();
-
-    true
 }
 
 fn uart_isr() {
@@ -169,14 +111,10 @@ fn uart_isr() {
     // TODO - do we need IDLE interrupt?  We could just poll from SOF.
     if isr.RXFT().bit() || rxfne && isr.IDLE().bit() && cr1.IDLEIE().bit() {
         // Drain the FIFO.
-        let part = unsafe {RX_PARTIAL.as_mut()};
         loop {
-            if LOOPBACK {
-                uart.RDR.read(); // Ignore the data.
-            }
-            else if let Some(word) = part.push(uart.RDR.read().bits() as u8) {
-                // Send the word on to the USB.
-                crate::usb::serial_tx_push32(word);
+            let byte = uart.RDR.read().bits() as u8;
+            if !LOOPBACK {
+                crate::usb::serial_tx_byte(byte);
             }
 
             if !uart.ISR.read().RXFNE().bit() {
@@ -201,17 +139,8 @@ fn dma_isr() {
 
     if !cr.EN().bit() && sr.bits() & 0x7f00 != 0 {
         // We completed a transfer, or it errored.
-        let dma_toggle = unsafe {DMA_TOGGLE.as_mut()};
-        if let Some(toggle) = *dma_toggle {
-            *dma_toggle = None;
-            // This may kick off the next transfer.
-            crate::usb::serial_rx_done(toggle);
-        }
+        crate::usb::serial_rx_done();
     }
-}
-
-pub fn serial_rx_flush() -> (u32, usize) {
-    unsafe {RX_PARTIAL.as_mut()}.flush()
 }
 
 impl crate::cpu::VectorTable {

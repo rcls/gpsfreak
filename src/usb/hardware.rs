@@ -1,12 +1,12 @@
-use stm32h503::usb::chepr::{R as CheprR, W as CheprW};
+pub use stm32h503::usb::chepr::{R as CheprR, W as CheprW};
 
 use crate::{cpu::barrier, vcell::VCell};
 
-pub trait Chepr {
-    fn control(&mut self) -> &mut Self {self.endpoint(0, 1, false)}
+pub trait CheprWriter {
+    fn control(&mut self) -> &mut Self {self.endpoint(0, 1)}
     // The serial data rx & tx are double-buffered CHEPs.
-    fn serial(&mut self) -> &mut Self {self.endpoint(1, 0, true)}
-    fn interrupt(&mut self) -> &mut Self {self.endpoint(2, 3, false)}
+    fn serial(&mut self) -> &mut Self {self.endpoint(1, 0)}
+    fn interrupt(&mut self) -> &mut Self {self.endpoint(2, 3)}
 
     fn init(&mut self, c: &CheprR) -> &mut Self {
         self.stat_rx(c, 0).stat_tx(c, 0).dtogrx(c, false).dtogtx(c, false)
@@ -14,8 +14,9 @@ pub trait Chepr {
 
     fn rx_valid(&mut self, c: &CheprR) -> &mut Self {self.stat_rx(c, 3)}
     fn tx_valid(&mut self, c: &CheprR) -> &mut Self {self.stat_tx(c, 3)}
+    fn tx_nak  (&mut self, c: &CheprR) -> &mut Self {self.stat_tx(c, 2)}
 
-    fn endpoint(&mut self, ea: u8, utype: u8, epkind: bool) -> &mut Self;
+    fn endpoint(&mut self, ea: u8, utype: u8) -> &mut Self;
 
     fn stat_rx(&mut self, c: &CheprR, s: u8) -> &mut Self;
     fn stat_tx(&mut self, c: &CheprR, s: u8) -> &mut Self;
@@ -24,7 +25,7 @@ pub trait Chepr {
     fn dtogtx(&mut self, c: &CheprR, t: bool) -> &mut Self;
 }
 
-impl Chepr for CheprW {
+impl CheprWriter for CheprW {
     fn stat_rx(&mut self, c: &CheprR, v: u8) -> &mut Self {
         self.STATRX().bits(c.STATRX().bits() ^ v)
     }
@@ -37,59 +38,71 @@ impl Chepr for CheprW {
     fn dtogtx(&mut self, c: &CheprR, v: bool) -> &mut Self {
         self.DTOGTX().bit(c.DTOGTX().bit() ^ v)
     }
-    fn endpoint(&mut self, ea: u8, utype: u8, epkind: bool) -> &mut Self {
-        self.UTYPE().bits(utype).EPKIND().bit(epkind).EA().bits(ea)
-            .VTTX().set_bit().VTRX().set_bit()
+    fn endpoint(&mut self, ea: u8, utype: u8) -> &mut Self {
+        self.UTYPE().bits(utype).EA().bits(ea).VTTX().set_bit().VTRX().set_bit()
     }
+}
+
+pub trait CheprReader {
+    fn rx_disabled(&self) -> bool {self.stat_rx() == 0}
+    fn rx_nakking (&self) -> bool {self.stat_rx() == 2}
+
+    fn tx_nakking (&self) -> bool {self.stat_tx() == 2}
+    fn tx_active  (&self) -> bool {self.stat_tx() == 3}
+
+    fn stat_rx(&self) -> u8;
+    fn stat_tx(&self) -> u8;
+}
+
+impl CheprReader for CheprR {
+    fn stat_rx(&self) -> u8 {self.STATRX().bits()}
+    fn stat_tx(&self) -> u8 {self.STATTX().bits()}
 }
 
 const USB_SRAM_BASE: usize = 0x4001_6400;
 pub const CTRL_RX_OFFSET: usize = 0xc0;
 pub const CTRL_TX_OFFSET: usize = 0x80;
-#[allow(dead_code)]
 pub const BULK_RX_OFFSET: usize = 0x100;
-#[allow(dead_code)]
 pub const BULK_TX_OFFSET: usize = 0x200;
-#[allow(dead_code)]
 pub const INTR_TX_OFFSET: usize = 0x40;
 
-pub const CTRL_RX_BUF: *const u8 = (USB_SRAM_BASE + CTRL_RX_OFFSET) as *const u8;
-pub const CTRL_TX_BUF: *mut   u8 = (USB_SRAM_BASE + CTRL_TX_OFFSET) as *mut   u8;
-#[allow(dead_code)]
-pub const BULK_RX_BUF: *const u8 = (USB_SRAM_BASE + BULK_RX_OFFSET) as *const u8;
-#[allow(dead_code)]
-pub const BULK_TX_BUF: *mut   u8 = (USB_SRAM_BASE + BULK_TX_OFFSET) as *mut   u8;
-#[allow(dead_code)]
-pub const INTR_TX_BUF: *mut   u8 = (USB_SRAM_BASE + INTR_TX_OFFSET) as *mut   u8;
+pub const CTRL_RX_BUF: *mut u8 = (USB_SRAM_BASE + CTRL_RX_OFFSET) as *mut u8;
+pub const CTRL_TX_BUF: *mut u8 = (USB_SRAM_BASE + CTRL_TX_OFFSET) as *mut u8;
+pub const BULK_RX_BUF: *mut u8 = (USB_SRAM_BASE + BULK_RX_OFFSET) as *mut u8;
+pub const BULK_TX_BUF: *mut u8 = (USB_SRAM_BASE + BULK_TX_OFFSET) as *mut u8;
+pub const INTR_TX_BUF: *mut u8 = (USB_SRAM_BASE + INTR_TX_OFFSET) as *mut u8;
 
 pub fn chep_ctrl() -> &'static stm32h503::usb::CHEPR {chep_ref(0)}
-pub fn chep_rx  () -> &'static stm32h503::usb::CHEPR {chep_ref(1)}
-pub fn chep_tx  () -> &'static stm32h503::usb::CHEPR {chep_ref(2)}
-pub fn chep_intr() -> &'static stm32h503::usb::CHEPR {chep_ref(3)}
+pub fn chep_ser () -> &'static stm32h503::usb::CHEPR {chep_ref(1)}
+pub fn chep_intr() -> &'static stm32h503::usb::CHEPR {chep_ref(2)}
+
+pub struct BD {
+    pub tx: VCell<u32>,
+    pub rx: VCell<u32>,
+}
+
+impl BD {
+    pub fn tx_set(&self, ptr: *const u8, len: usize) {
+        let offset = ptr as usize - USB_SRAM_BASE;
+        self.tx.write((len * 65536 + offset) as u32);
+    }
+    pub fn rx_set<const BLK_SIZE: usize>(&self, ptr: *mut u8) {
+        self.rx.write(chep_block::<BLK_SIZE>(ptr as usize - USB_SRAM_BASE))
+    }
+}
 
 fn chep_ref(n: usize) -> &'static stm32h503::usb::CHEPR {
     let usb = unsafe {&*stm32h503::USB::ptr()};
     &usb.CHEPR[n]
 }
 
-fn chep_bd() -> &'static [VCell<u32>; 16] {
+fn chep_bd() -> &'static [BD; 8] {
     unsafe {&*(USB_SRAM_BASE as *const _)}
 }
 
-pub type BD = &'static VCell<u32>;
-pub fn bd_control_tx() -> BD {&chep_bd()[0]}
-pub fn bd_control_rx() -> BD {&chep_bd()[1]}
-pub fn bd_serial_rx(toggle: bool) -> BD {&chep_bd()[3 - toggle as usize]}
-pub fn bd_serial_tx(toggle: bool) -> BD {&chep_bd()[4 + toggle as usize]}
-pub fn bd_interrupt() -> BD {&chep_bd()[6]}
-
-pub fn bd_serial_rx_init(toggle: bool) {
-    bd_serial_rx(toggle).write(chep_block::<64>(
-        BULK_RX_OFFSET + 64 - 64 * toggle as usize));
-}
-pub fn bd_serial_tx_init(toggle: bool) {
-    bd_serial_tx(toggle).write(BULK_TX_OFFSET as u32 + 64 * toggle as u32);
-}
+pub fn bd_control() -> &'static BD {&chep_bd()[0]}
+pub fn bd_serial() -> &'static BD {&chep_bd()[1]}
+pub fn bd_interrupt() -> &'static BD {&chep_bd()[2]}
 
 /// Return a Buffer Descriptor value for a RX block.
 pub fn chep_block<const BLK_SIZE: usize>(offset: usize) -> u32 {
@@ -115,19 +128,13 @@ pub fn chep_bd_tx(offset: usize, len: usize) -> u32 {
 }
 
 /// Return the byte count from a Buffer Descriptor value.
-pub fn chep_bd_len(bd: u32) -> u32 {
-    bd >> 16 & 0x3ff
+pub fn chep_bd_len(bd: u32) -> usize {
+    (bd >> 16 & 0x3ff) as usize
 }
 
 /// Return pointer to the buffer for a Buffer Descriptor.
 pub fn chep_bd_ptr(bd: u32) -> *const u8 {
     (USB_SRAM_BASE + (bd as usize & 0xffff)) as *const u8
-}
-
-/// Return pointer to the next write location for a (TX) Buffer Descriptor.
-pub fn chep_bd_tail(bd: u32) -> *mut u32 {
-    let bd = bd as usize;
-    (USB_SRAM_BASE + (bd & 0xffff) + (bd >> 16 & 0x3ff)) as *mut u32
 }
 
 /// The USB SRAM is finicky about 32bit accesses, so we need to jump through

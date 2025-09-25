@@ -2,7 +2,7 @@ use super::hardware::*;
 use super::types::*;
 
 use crate::cpu::barrier;
-use crate::usb::{CONFIG0_DESC, DEVICE_DESC};
+use crate::usb::descriptor::{CONFIG0_DESC, DEVICE_DESC};
 use crate::vcell::UCell;
 
 use super::{ctrl_dbgln, usb_dbgln};
@@ -19,6 +19,8 @@ pub struct ControlState {
     setup_short: bool,
     /// Address received in a SET ADDRESS.  On TX ACK, we apply this.
     pending_address: Option<u8>,
+    /// Are we configured?
+    configured: bool,
 }
 
 pub static CONTROL_STATE: UCell<ControlState> = Default::default();
@@ -80,7 +82,7 @@ impl ControlState {
             let ok = self.setup_rx_data();
             self.setup = SetupHeader::default();
             // Send either a zero-length ACK or an error stall.
-            bd_control_tx().write(chep_bd_tx(CTRL_TX_OFFSET, 0));
+            bd_control().tx.write(chep_bd_tx(CTRL_TX_OFFSET, 0));
             chep_ctrl().write(
                 |w|w.control().VTRX().clear_bit()
                     .stat_tx(&chep, if ok {3} else {1})
@@ -102,7 +104,7 @@ impl ControlState {
                 self.setup = setup;
                 chep_ctrl().write(
                     |w|w.control().VTRX().clear_bit().rx_valid(&chep)
-                        // .dtogrx(&chep, true) //.dtogtx(&chep, true)
+                        .dtogrx(&chep, true) //.dtogtx(&chep, true)
                 );
                 ctrl_dbgln!("Set-up data rx armed {len}, CHEP = {:#x}",
                             chep_ctrl().read().bits());
@@ -124,7 +126,7 @@ impl ControlState {
         self.setup_data = SetupResult::default();
         self.setup = SetupHeader::default();
 
-        let bd = bd_control_rx().read();
+        let bd = bd_control().rx.read();
         let len = bd >> 16 & 0x03ff;
         if len < 8 {
             ctrl_dbgln!("Rx setup len = {len} < 8");
@@ -147,7 +149,7 @@ impl ControlState {
                     SetupResult::error()
                 }
             },
-            (0x00, 0x09) => super::set_configuration(setup.value_lo),
+            (0x00, 0x09) => self.set_configuration(setup.value_lo),
             // We enable our only config when we get an address, so we can
             // just ACK the set interface message.
             (0x01, 0x0b) => SetupResult::no_data(), // Set interface
@@ -215,7 +217,7 @@ impl ControlState {
 
         // If the length is zero, then we are sending an ack.  If the length
         // is non-zero, then we are sending data and expect an ack.
-        bd_control_tx().write(chep_bd_tx(CTRL_TX_OFFSET, len));
+        bd_control().tx.write(chep_bd_tx(CTRL_TX_OFFSET, len));
     }
 
     fn set_address(&mut self, address: u8) -> SetupResult {
@@ -228,5 +230,20 @@ impl ControlState {
         usb_dbgln!("Set address apply {address}");
         let usb = unsafe {&*stm32h503::USB::ptr()};
         usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(address));
+    }
+
+    fn set_configuration(&mut self, config: u8) -> SetupResult {
+        if config == 0 {
+            usb_dbgln!("Set configuration 0 - ignore");
+        }
+        else if config != 1 {
+            usb_dbgln!("Set configuration {config} - error");
+            return SetupResult::error();
+        }
+        else {
+            super::set_configuration(config);
+            self.configured = true;
+        }
+        SetupResult::no_data()
     }
 }

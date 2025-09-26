@@ -271,7 +271,7 @@ impl USB_State {
         // Workaround: Software should ensure that a small delay is included
         // before accessing the SRAM contents. This delay should be
         // 800 ns in Full Speed mode and 6.4 μs in Low Speed mode.
-        for _ in 0 .. crate::cpu::CPU_FREQ / 125000 / 2 {
+        for _ in 0 .. crate::cpu::CPU_FREQ / 1250000 / 2 {
             nothing();
         }
 
@@ -291,15 +291,15 @@ impl USB_State {
             return;
         }
 
-        // Dispatch the block and start the next RX.
-        self.rx_processing = true;
-        crate::gps_uart::dma_tx(chep_bd_ptr(bd), len);
-
         // Start an RX into the other buffer.  It's OK to clear VTRX here!
         bd_serial().rx.write(bd ^ 64);
         chep_ser().write(|w| w.serial().VTRX().clear_bit().rx_valid(&chep));
         srx_dbgln!("SRX continue CHEP {:#06x} was {:#06x}",
                    chep.bits(), chep.bits());
+
+        // Dispatch the block.
+        self.rx_processing = true;
+        crate::gps_uart::dma_tx(chep_bd_ptr(bd), len);
     }
 
     /// Notification from the consumer that we have finished processing a buffer and
@@ -406,8 +406,10 @@ fn usb_initialize(cs: &mut ControlState) {
     bd_control().rx.write(chep_block::<64>(CTRL_RX_OFFSET));
     clear_buffer_descs();
 
-    let chep = chep_ctrl().read();
-    chep_ctrl().write(|w| w.control().rx_valid(&chep));
+    let ctrl = chep_ctrl().read();
+    chep_ctrl().write(
+        |w| w.control().dtogrx(&ctrl, false).dtogtx(&ctrl, false)
+             .rx_valid(&ctrl));
 }
 
 impl crate::cpu::VectorTable {

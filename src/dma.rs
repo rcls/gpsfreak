@@ -9,16 +9,19 @@ pub fn dma() -> &'static Dma {unsafe {&*stm32h503::GPDMA1::ptr()}}
 
 #[allow(non_camel_case_types)]
 pub trait DMA_Channel {
-    // Write to peripheral.  DADDR should be initialized.
-    fn write(&self, data: usize, len: usize) {
-        todo!()}
-    // Read from peripheral. SADDR should be initialized.
-    fn read(&self, data: usize, len: usize) {
-        todo!()}
-    // Configure to write to a peripheral from memory.
+    /// Write to peripheral.  DADDR should be initialized.
+    fn write(&self, data: usize, len: usize);
+
+    /// Read from peripheral. SADDR should be initialized.
+    fn read(&self, data: usize, len: usize);
+
+    /// Configure to write to a peripheral from memory.
     fn writes_to(&self, dst: *mut   u8, request: u8);
-    // Configure to read from a peripheral to memory.
+    /// Configure to read from a peripheral to memory.
     fn read_from(&self, src: *const u8, request: u8);
+
+    /// Stop and cancel an in-process transfer.
+    fn abort(&self);
 }
 
 impl DMA_Channel for Channel {
@@ -42,6 +45,15 @@ impl DMA_Channel for Channel {
         self.TR1.write(|w| w.DINC().set_bit());
         self.TR2.write(|w| w.REQSEL().bits(request));
     }
+    fn abort(&self) {
+        if self.CR.read().EN().bit() {
+            self.CR.write(|w| w.SUSP().set_bit());
+            while !self.SR.read().SUSPF().bit() {}
+            self.CR.write(|w| w.RESET().set_bit());
+            self.FCR.write(|w| w.bits(!0));
+        }
+    }
+
 }
 
 /// Trait Flat is used to check that we pass sane types to read/write.

@@ -77,12 +77,8 @@ pub fn init() {
             .NACKIE().set_bit().ERRIE().set_bit().TCIE().set_bit()
             .STOPIE().set_bit());
 
-    // I2C1_RX to DMA2 channel 2.
     rx_channel().read_from(i2c.RXDR.as_ptr() as *const u8, RX_MUXIN);
     tx_channel().writes_to(i2c.TXDR.as_ptr() as *mut   u8, TX_MUXIN);
-    //rx_channel().SAR.write(|w| w.bits(i2c.RXDR.as_ptr().addr() as u32));
-    // I2C1_TX to DMA2 channel 3.
-    //tx_channel().DAR.write(|w| w.bits(i2c.TXDR.as_ptr().addr() as u32));
 
     if false {
         write_reg(0, 0, &0i16).defer();
@@ -116,6 +112,7 @@ pub fn i2c_isr() {
                 .SADD().bits(cr2.SADD().bits()));
     }
     else if status.STOPF().bit() {
+        // FIXME - if we see a stop when waiting for the above, we'll hang.
         dbgln!("I2C STOPF");
         i2c.ICR.write(|w| w.STOPCF().set_bit());
         *context.outstanding.as_mut() &= !F_I2C;
@@ -126,7 +123,6 @@ pub fn i2c_isr() {
             |w| w.ARLOCF().set_bit().BERRCF().set_bit().NACKCF().set_bit());
         *context.outstanding.as_mut() = 0;
         *context.error.as_mut() = 1;
-        rx_channel().CR.write(|w| w);
     }
     else {
         panic!("Unexpected I2C ISR {:#x} {:#x}",
@@ -138,7 +134,7 @@ pub fn i2c_isr() {
     // leaving the interrupt line high.
     i2c.ISR.read();
 
-    dbgln!("I2C ISR done");
+    dbgln!("I2C ISR done, {}", context.outstanding.read());
 }
 
 pub fn dma_rx_isr() {
@@ -163,24 +159,18 @@ pub fn dma_tx_isr() {
 
 impl I2cContext {
     fn read_reg_start(&self, addr: u8, reg: u8, data: usize, len: usize) {
-        dbgln!("I2C LINE {}", line!());
         // Should only be called while I2C idle...
         let i2c = unsafe {&*I2C::ptr()};
         self.arm();
-        dbgln!("I2C LINE {}", line!());
         self.pending_len.write(len);
-        dbgln!("I2C LINE {}", line!());
 
         // Synchronous I2C start for the reg ptr write.
         // No DMA write is active so the dma req. hopefully just gets ignored.
         i2c.CR2.write(
             |w|w.START().set_bit().NBYTES().bits(1).SADD().bits(addr as u16));
-        dbgln!("I2C LINE {}", line!());
         i2c.TXDR.write(|w| w.bits(reg as u32));
-        dbgln!("I2C LINE {}", line!());
 
         rx_channel().read(data, len);
-        dbgln!("I2C LINE {}", line!());
     }
     #[inline(never)]
     fn read_start(&self, addr: u8, data: usize, len: usize) {
@@ -231,12 +221,27 @@ impl I2cContext {
     }
     fn done(&self) -> bool {self.outstanding.read() == 0}
     fn wait(&self) {
-        dbgln!("I2C LINE {} self = {:#?}", line!(), self as *const _);
         while !self.done() {
             crate::cpu::WFE();
         }
-        dbgln!("I2C LINE {}", line!());
+        if self.error.read() != 0 {
+            self.error_cleanup();
+        }
         barrier();
+    }
+    fn error_cleanup(&self) {
+        dbgln!("I2C error cleanup");
+        let i2c = unsafe {&*I2C::ptr()};
+        // Clean-up the DMA and reset the I2C.
+        i2c.CR1.write(|w| w.PE().clear_bit());
+        tx_channel().abort();
+        rx_channel().abort();
+        rx_channel().read_from(i2c.RXDR.as_ptr() as *const u8, RX_MUXIN);
+        tx_channel().writes_to(i2c.TXDR.as_ptr() as *mut   u8, TX_MUXIN);
+        i2c.CR1.write(
+            |w|w.TXDMAEN().set_bit().RXDMAEN().set_bit().PE().set_bit()
+                .NACKIE().set_bit().ERRIE().set_bit().TCIE().set_bit()
+                .STOPIE().set_bit());
     }
 }
 
@@ -244,9 +249,7 @@ impl Wait<'_> {
     pub fn new() -> Self {Wait(PhantomData)}
     pub fn defer(self) {core::mem::forget(self);}
     pub fn wait(self) -> Result {
-        dbgln!("I2C LINE {}", line!());
         CONTEXT.wait();
-        dbgln!("I2C LINE {}", line!());
         if CONTEXT.error.read() == 0 {Ok(())} else {Err(())}
     }
 }
@@ -274,6 +277,7 @@ pub fn read<'a, T: Flat + ?Sized>(addr: u8, data: &'a mut T) -> Wait<'a> {
     Wait::new()
 }
 
+#[allow(dead_code)]
 pub fn read_reg<'a, T: Flat + ?Sized>(addr: u8, reg: u8, data: &'a mut T) -> Wait<'a> {
     CONTEXT.read_reg_start(addr | 1, reg, data.addr(), size_of_val(data));
     Wait::new()

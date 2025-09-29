@@ -4,10 +4,12 @@ import os
 import re
 import ublox_cfg, ublox_msg, ublox_lists
 
+from typing import Tuple
+
 from ublox_cfg import UBloxCfg
 from ublox_msg import UBloxMsg
 
-def parse_key_list(doc_path: str) -> (list[UBloxCfg], list[UBloxMsg]):
+def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs = []
     messages = []
 

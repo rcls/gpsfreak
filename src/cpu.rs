@@ -1,4 +1,4 @@
-use crate::vcell::VCell;
+use crate::vcell::{UCell, VCell};
 
 pub const CPU_FREQ: u32 = 160_000_000;
 
@@ -20,6 +20,9 @@ unsafe extern "C" {
 #[cfg(not(target_os = "none"))]
 #[allow(non_upper_case_globals)]
 static end_of_ram: u8 = 0;
+
+const SER_NUM_BYTES: usize = 38;
+pub static USB_SERIAL_NUMBER: UCell<[u8; SER_NUM_BYTES]> = UCell::new([0; _]);
 
 pub fn init() {
     let flash  = unsafe {&*stm32h503::FLASH ::ptr()};
@@ -117,6 +120,11 @@ pub fn init() {
     rcc.CR.modify(|_,w| w.CSION().set_bit());
     while !rcc.CR.read().CSIRDY().bit() {}
 
+    // Generate the USB serial number.  ST notes claim that we will hard fault
+    // if we do this with ICACHE enabled.
+    let sn = unsafe {&*(0x8fff800 as *const [u32; 3])};
+    format_serial_number(sn, unsafe {USB_SERIAL_NUMBER.as_mut()});
+
     // Enable ICACHE.
     while icache.SR.read().BUSYF().bit() {
     }
@@ -151,6 +159,20 @@ pub fn nothing() {
 
 #[allow(dead_code)]
 pub mod interrupt {
+    /// Interrupt priority for uart debug, the is the highest priority as debug
+    /// can get used everywhere.
+    pub const PRIO_DEBUG: u8 = 0;
+
+    /// Interrupt priority for USB.
+    pub const PRIO_USB  : u8 = 0x40;
+
+    /// Interrupt priority for I2C.  Same as USB.
+    pub const PRIO_I2C  : u8 = 0x40;
+
+    /// Interrupt priority for systick and application processing.
+    pub const PRIO_APP  : u8 = 0x80;
+
+
     // We don't use disabling interrupts to transfer ownership, so no need for
     // the enable to be unsafe.
     pub fn enable_all() {
@@ -162,21 +184,13 @@ pub mod interrupt {
         cortex_m::interrupt::disable()
     }
 
-    pub fn enable(n: stm32h503::Interrupt) {
+    pub fn enable_priority(n: stm32h503::Interrupt, p: u8) {
         let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
+        unsafe {nvic.ipr[n as usize].write(p)};
+
         let bit: usize = n as usize % 32;
         let idx: usize = n as usize / 32;
         unsafe {nvic.iser[idx].write(1u32 << bit)};
-    }
-
-    pub fn set_priority(n: stm32h503::Interrupt, p: u8) {
-        let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
-        unsafe {nvic.ipr[n as usize].write(p)};
-    }
-
-    pub fn enable_priority(n: stm32h503::Interrupt, p: u8) {
-        set_priority(n, p);
-        enable(n);
     }
 }
 
@@ -213,9 +227,8 @@ pub fn maybe_enter_dfu() {
 
 pub unsafe fn trigger_dfu() -> ! {
     let rcc = unsafe {&*stm32h503::RCC::ptr()};
-    let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
 
-    //crate::uart_debug::DEBUG.flush();
+    // crate::uart_debug::DEBUG.flush();
 
     rcc.AHB1ENR.modify(|_,w| w.BKPRAMEN().set_bit());
 
@@ -223,7 +236,12 @@ pub unsafe fn trigger_dfu() -> ! {
     let magic = unsafe {magic_reboot_config()};
     magic.write(DFU_MAGIC);
 
-    // Now reboot by writing the appropriate magic number to AIRCR.
+    reboot();
+}
+
+pub fn reboot() -> ! {
+    let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
+    // Reboot by writing the appropriate magic number to AIRCR.
     loop {
         unsafe {scb.aircr.write(0x05fa0004)};
     }
@@ -251,6 +269,30 @@ pub unsafe fn goto_sys_flash() -> ! {
 
 unsafe fn magic_reboot_config() -> &'static VCell<u32> {
     unsafe {&*(BKPSRAM_BASE as *const VCell<u32>)}
+}
+
+fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SER_NUM_BYTES]) {
+    // Little endian, start from high address.
+    // 0x08fff808 :
+    //     ASCII lot number.
+    // 0x08fff804 :
+    //     low 8 bits, wafer number, convert to hex.
+    //     high 24 bits, ASCII lot number
+    // 0x08fff800 : 32 bit binary, X&Y wafer coords, convert to hex.
+    // XXXXXXX-XXXXXXXXXX
+    text[0] = text.len() as u8;
+    text[1] = 3;
+    let lot = ((sn[2] as u64) << 32 | sn[1] as u64) >> 8;
+    for i in 0..7 {
+        text[2 * i + 2] = (lot >> i * 8) as u8;
+    }
+    text[16] = '-' as u8;
+    let hex = (sn[1] as u64) << 32 | sn[0] as u64;
+    for i in 0..10 {
+        let nibble = hex >> 36 - i * 4 & 15;
+        text[18 + 2 * i] = nibble as u8 + b'0'
+            + if nibble > 9 {b'a' - b'9' - 1} else {0};
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -300,4 +342,19 @@ unsafe extern "C" {
     #[allow(unused)]
     #[link_name = "llvm.frameaddress"]
     fn frameaddress(level: i32) -> *const u8;
+}
+
+#[test]
+fn test_sn() {
+    let sn = [0x006b0028, 0x31335105, 0x30393436];
+    let mut text = [0; SER_NUM_BYTES];
+    format_serial_number(&sn, &mut text);
+    assert_eq!(text[0] as usize, size_of_val(&text));
+    assert_eq!(text[1], 3);
+    let mut bytes = [0; SER_NUM_BYTES / 2 - 1];
+    for (i, &c) in text[2..].iter().step_by(2).enumerate() {
+        bytes[i] = c as u8;
+    }
+    let str = str::from_utf8(&bytes).unwrap();
+    assert_eq!(str, "Q316490-05006b0028");
 }

@@ -72,6 +72,21 @@ pub struct EndpointDesc {
 }
 const _: () = const {assert!(size_of::<EndpointDesc>() == 7)};
 
+impl InterfaceDesc {
+    pub const fn new(
+        interface_number: u8, num_endpoints: u8,
+        interface_class: u8, interface_sub_class: u8, interface_protocol: u8,
+        i_interface: u8) -> InterfaceDesc
+    {
+        InterfaceDesc {
+             length: 9, descriptor_type: TYPE_INTERFACE,
+             interface_number, alternate_setting: 0, num_endpoints,
+             interface_class, interface_sub_class, interface_protocol,
+             i_interface
+        }
+    }
+}
+
 impl EndpointDesc {
     pub const fn new(endpoint_address: u8, attributes: u8,
                      max_packet_size: u16, interval: u8) -> EndpointDesc {

@@ -3,10 +3,10 @@ pub use stm32h503::usb::chepr::{R as CheprR, W as CheprW};
 use crate::{cpu::barrier, vcell::VCell};
 
 pub trait CheprWriter {
-    fn control(&mut self) -> &mut Self {self.endpoint(0, 1)}
-    // The serial data rx & tx are double-buffered CHEPs.
-    fn serial(&mut self) -> &mut Self {self.endpoint(1, 0)}
+    fn control  (&mut self) -> &mut Self {self.endpoint(0, 1)}
+    fn serial   (&mut self) -> &mut Self {self.endpoint(1, 0)}
     fn interrupt(&mut self) -> &mut Self {self.endpoint(2, 3)}
+    fn main     (&mut self) -> &mut Self {self.endpoint(3, 0)}
 
     fn init(&mut self, c: &CheprR) -> &mut Self {
         self.stat_rx(c, 0).stat_tx(c, 0).dtogrx(c, false).dtogtx(c, false)
@@ -63,18 +63,23 @@ const USB_SRAM_BASE: usize = 0x4001_6400;
 pub const CTRL_RX_OFFSET: usize = 0xc0;
 pub const CTRL_TX_OFFSET: usize = 0x80;
 pub const BULK_RX_OFFSET: usize = 0x100;
-pub const BULK_TX_OFFSET: usize = 0x200;
+pub const BULK_TX_OFFSET: usize = 0x180;
 pub const INTR_TX_OFFSET: usize = 0x40;
+pub const MAIN_RX_OFFSET: usize = 0x200;
+pub const MAIN_TX_OFFSET: usize = 0x240;
 
 pub const CTRL_RX_BUF: *mut u8 = (USB_SRAM_BASE + CTRL_RX_OFFSET) as *mut u8;
 pub const CTRL_TX_BUF: *mut u8 = (USB_SRAM_BASE + CTRL_TX_OFFSET) as *mut u8;
 pub const BULK_RX_BUF: *mut u8 = (USB_SRAM_BASE + BULK_RX_OFFSET) as *mut u8;
 pub const BULK_TX_BUF: *mut u8 = (USB_SRAM_BASE + BULK_TX_OFFSET) as *mut u8;
 pub const INTR_TX_BUF: *mut u8 = (USB_SRAM_BASE + INTR_TX_OFFSET) as *mut u8;
+pub const MAIN_RX_BUF: *mut u8 = (USB_SRAM_BASE + MAIN_RX_OFFSET) as *mut u8;
+pub const MAIN_TX_BUF: *mut u8 = (USB_SRAM_BASE + MAIN_TX_OFFSET) as *mut u8;
 
 pub fn chep_ctrl() -> &'static stm32h503::usb::CHEPR {chep_ref(0)}
 pub fn chep_ser () -> &'static stm32h503::usb::CHEPR {chep_ref(1)}
 pub fn chep_intr() -> &'static stm32h503::usb::CHEPR {chep_ref(2)}
+pub fn chep_main() -> &'static stm32h503::usb::CHEPR {chep_ref(3)}
 
 pub struct BD {
     pub tx: VCell<u32>,
@@ -100,9 +105,10 @@ fn chep_bd() -> &'static [BD; 8] {
     unsafe {&*(USB_SRAM_BASE as *const _)}
 }
 
-pub fn bd_control() -> &'static BD {&chep_bd()[0]}
-pub fn bd_serial() -> &'static BD {&chep_bd()[1]}
+pub fn bd_control()   -> &'static BD {&chep_bd()[0]}
+pub fn bd_serial()    -> &'static BD {&chep_bd()[1]}
 pub fn bd_interrupt() -> &'static BD {&chep_bd()[2]}
+pub fn bd_main()      -> &'static BD {&chep_bd()[3]}
 
 /// Return a Buffer Descriptor value for a RX block.
 pub fn chep_block<const BLK_SIZE: usize>(offset: usize) -> u32 {

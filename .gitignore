@@ -1,4 +1,5 @@
 \#*
+__pycache__/
 fp-info-cache
 *-backups/
 *.kicad_dru

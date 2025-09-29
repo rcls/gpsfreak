@@ -173,7 +173,7 @@ pub fn init() {
         |w|w.FIFOEN().set_bit().TE().set_bit()
             .UE().set_bit().RXFNEIE().set_bit());
 
-    interrupt::enable(INTERRUPT);
+    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_DEBUG);
 
     if false {
         dbg!("");

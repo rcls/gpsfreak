@@ -1,6 +1,11 @@
 use super::types::*;
 use super::strings::string_index;
 
+pub const INTF_ACM_INTR: u8 = 0;
+pub const INTF_ACM_DATA: u8 = 1;
+pub const INTF_MAIN    : u8 = 2;
+pub const INTF_DFU     : u8 = 3;
+
 pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     length            : size_of::<DeviceDesc>() as u8,
     descriptor_type   : TYPE_DEVICE,
@@ -13,14 +18,14 @@ pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     product           : 0xd448, // FIXME
     device            : 0x100,
     i_manufacturer    : string_index("Ralph"),
-    i_product         : string_index("GPS REF"),
-    i_serial          : string_index("0000"),
+    i_product         : string_index("GPS Freak"),
+    i_serial          : super::strings::IDX_SERIAL_NUMBER,
     num_configurations: 1,
 };
 
 #[repr(packed)]
 #[allow(dead_code)]
-pub struct Config1ACMCDCplus2 {
+pub struct FullConfigDesc {
     config    : ConfigurationDesc,
     assoc     : InterfaceAssociation,
     interface0: InterfaceDesc,
@@ -33,18 +38,21 @@ pub struct Config1ACMCDCplus2 {
     endp1     : EndpointDesc,
     endp2     : EndpointDesc,
     interface2: InterfaceDesc,
+    endp3     : EndpointDesc,
+    endp4     : EndpointDesc,
+    interface3: InterfaceDesc,
     dfu       : DFU_FunctionalDesc,
 }
 
 /// Our main configuration descriptor.
-pub static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
+pub static CONFIG0_DESC: FullConfigDesc = FullConfigDesc{
     config: ConfigurationDesc{
         length             : size_of::<ConfigurationDesc>() as u8,
         descriptor_type    : TYPE_CONFIGURATION,
-        total_length       : size_of::<Config1ACMCDCplus2>() as u16,
-        num_interfaces     : 3,
+        total_length       : size_of::<FullConfigDesc>() as u16,
+        num_interfaces     : 4,
         configuration_value: 1,
-        i_configuration    : string_index("Single ACM"),
+        i_configuration    : string_index("Device Configuration"),
         attributes         : 0x80,      // Bus powered.
         max_power          : 200,       // 400mA
     },
@@ -58,17 +66,9 @@ pub static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
         function_protocol : 0,
         i_function        : string_index("CDC"),
     },
-    interface0: InterfaceDesc{
-        length             : size_of::<InterfaceDesc>() as u8,
-        descriptor_type    : TYPE_INTERFACE,
-        interface_number   : 0,
-        alternate_setting  : 0,
-        num_endpoints      : 1,
-        interface_class    : 2,         // Communications
-        interface_sub_class: 2,         // Abstract
-        interface_protocol : 1,         // AT Commands [sic]
-        i_interface        : string_index("CDC"),
-    },
+    // 1 endpoints, Communication, Abstract, AT Commands [sic]
+    interface0: InterfaceDesc::new(
+        INTF_ACM_INTR, 1, 2, 2, 1, string_index("CDC")),
     cdc_header: CDC_Header{
         length             : size_of::<CDC_Header>() as u8,
         descriptor_type    : TYPE_CS_INTERFACE,
@@ -96,30 +96,16 @@ pub static CONFIG0_DESC: Config1ACMCDCplus2 = Config1ACMCDCplus2{
         sub_interface      : [1],
     },
     endp0: EndpointDesc::new(0x82, 3, 64, 4), // IN 2, Interrupt.
-    interface1: InterfaceDesc{
-        length             : size_of::<InterfaceDesc>() as u8,
-        descriptor_type    : TYPE_INTERFACE,
-        interface_number   : 1,
-        alternate_setting  : 0,
-        num_endpoints      : 2,
-        interface_class    : 10,        // CDC data
-        interface_sub_class: 0,
-        interface_protocol : 0,
-        i_interface        : string_index("CDC DATA interface"),
-    },
+    interface1: InterfaceDesc::new(
+        INTF_ACM_DATA, 2, 10, 0, 0, string_index("CDC DATA interface")),
     endp1: EndpointDesc::new(0x81, 2, 64, 1), // IN 1, Bulk.
-    endp2: EndpointDesc::new(0x01, 2, 64, 1), // OUT 82, Bulk.
-    interface2: InterfaceDesc{
-        length             : size_of::<InterfaceDesc>() as u8,
-        descriptor_type    : TYPE_INTERFACE,
-        interface_number   : 2,
-        alternate_setting  : 0,
-        num_endpoints      : 0,
-        interface_class    : 0xfe,      // Application specific
-        interface_sub_class: 1,         // Device Firmware Upgrade
-        interface_protocol : 1,         // Runtime
-        i_interface        : string_index("DFU"),
-    },
+    endp2: EndpointDesc::new(0x01, 2, 64, 1), // OUT 1, Bulk.
+    interface2: InterfaceDesc::new(                          // Vendor specific.
+        INTF_MAIN, 2, 0xff, 0, 0, string_index("Device Control")),
+    endp3: EndpointDesc::new(0x03, 2, 64, 1),
+    endp4: EndpointDesc::new(0x83, 2, 64, 1),
+    interface3: InterfaceDesc::new(           // Application specific / DFU / 1.
+        INTF_DFU, 0, 0xfe, 1, 1, string_index("DFU")),
     dfu: DFU_FunctionalDesc {
         length             : size_of::<DFU_FunctionalDesc>() as u8,
         descriptor_type    : TYPE_DFU_FUNCTIONAL,

@@ -26,19 +26,20 @@ use hardware::*;
 use types::*;
 
 use crate::cpu::{barrier, interrupt, nothing};
-use crate::dbgln;
+use crate::link_assert;
 use crate::vcell::UCell;
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
 macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
 macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+macro_rules!main_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
 macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
 macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 
-pub(crate) use {ctrl_dbgln, intr_dbgln, srx_dbgln, stx_dbgln, usb_dbgln};
+pub(crate) use {ctrl_dbgln, usb_dbgln};
 
 #[allow(non_camel_case_types)]
 struct USB_State {
@@ -79,7 +80,7 @@ pub fn init() {
     while !rcc.CR.read().HSI48RDY().bit() {
     }
     // Route the HSI48 to USB.
-    rcc.CCIPR4.write(|w| w.USBFSSEL().B_0x3());
+    rcc.CCIPR4.modify(|_,w| w.USBFSSEL().B_0x3());
 
     // Configure pins (PA11, PA12).  (PA9 = VBUS?)
     gpioa.AFRH.modify(|_,w| w.AFSEL11().B_0xA().AFSEL12().B_0xA());
@@ -105,7 +106,14 @@ pub fn init() {
 
     usb_initialize(unsafe {CONTROL_STATE.as_mut()});
 
-    interrupt::enable_priority(INTERRUPT, 0xff);
+    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_USB);
+
+    let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
+    let pendsv_prio = &scb.shpr[10];
+    // Cortex-M crate has two different ideas of what the SHPR is, make sure we
+    // are built with the correct one.
+    link_assert!(pendsv_prio as *const _ as usize == 0xe000ed22);
+    unsafe {pendsv_prio.write(crate::cpu::interrupt::PRIO_APP)};
 }
 
 fn usb_isr() {
@@ -127,11 +135,16 @@ fn set_configuration(cfg: u8) {
 
     // Serial.
     let ser = chep_ser().read();
-    chep_ser().write(|w| w.serial().init(&ser).rx_valid(&ser).tx_nak(&ser));
+    chep_ser().write(|w|w.serial().init(&ser).rx_valid(&ser).tx_nak(&ser));
 
     // Interrupt.
     let intr = chep_intr().read();
     chep_intr().write(|w| w.interrupt().init(&intr).tx_nak(&intr));
+
+    // Main.  FIXME - this can happen underneath processing a message, leaving
+    // us in inconsistent state.  We should recover!
+    let main = chep_main().read();
+    chep_main().write(|w| w.main().init(&main).rx_valid(&main).tx_nak(&main));
 }
 
 impl USB_State {
@@ -158,9 +171,11 @@ impl USB_State {
             match istr.bits() & 31 {
                 0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
                 16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
-                17 => self.serial_rx_handler(),
                 1  => self.serial_tx_handler(),
+                17 => self.serial_rx_handler(),
                 2  => self.interrupt_handler(),
+                3  => main_tx_handler(),
+                19 => main_rx_handler(),
                 _  => {
                     dbgln!("Bugger endpoint?, ISTR = {:#010x}", istr.bits());
                     break;  // FIXME, this will hang!
@@ -336,6 +351,57 @@ impl USB_State {
     }
 }
 
+fn main_rx_handler() {
+    let chep = chep_main().read();
+    if !chep.VTRX().bit() {
+        main_dbgln!("main: Spurious RX interrupt, CHEP {:#6x}", chep.bits());
+        return;
+    }
+    main_dbgln!("main: RX interrupt, CHEP {:#6x}", chep.bits());
+
+    // We notify the application by triggering PendSV.  The application
+    // can notify completion, either by transmitting a message or by
+    // by calling the completion function.
+    let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
+    unsafe {scb.icsr.write(1 << 28)};
+
+    chep_main().write(|w| w.main().VTRX().clear_bit());
+}
+
+/// We have finished processing a message by sending a response. Rearm the RX.
+/// TODO: maybe we should also re-arm on a timeout, in case the user doesn't
+/// read the response?
+fn main_tx_handler() {
+    let chep = chep_main().read();
+    if !chep.VTTX().bit() {
+        main_dbgln!("main: Spurious TX interrupt, CHEP {:#6x}", chep.bits());
+        return;
+    }
+    chep_main().write(|w| w.main().rx_valid(&chep).VTTX().clear_bit());
+    main_dbgln!("main: TX done CHEP {:#06x} was {:#06x}",
+                chep_main().read().bits(), chep.bits());
+}
+
+// Called at lower priority and can get interrupted!
+pub fn main_tx_response(message: &[u8]) {
+    // For now we don't support long messages.
+    dbgln!("main tx {} @ {:?}", message.len(), message.as_ptr());
+    let len = message.len().min(64);
+    unsafe {copy_by_dest32(message.as_ptr(), MAIN_TX_BUF, message.len())};
+    dbgln!("in place {:02x?}",
+           unsafe {core::slice::from_raw_parts(MAIN_TX_BUF, len)});
+
+    bd_main().tx_set(MAIN_TX_BUF, len);
+
+    let chep = chep_main().read();
+    chep_main().write(|w| w.main().tx_valid(&chep));
+
+    main_dbgln!("main tx {len} bytes, {}CHEP now {:#06x} was {:#06x}",
+                if chep.tx_active() {"INCORRECT STATE "} else {""},
+                chep_main().read().bits(),
+                chep.bits());
+}
+
 fn set_control_line_state(_value: u8) -> SetupResult {
     usb_tx_interrupt();
     SetupResult::no_data()
@@ -388,6 +454,16 @@ fn usb_tx_interrupt() {
 /// Initialize all the RX BD entries, except for the control ones.
 fn clear_buffer_descs() {
     bd_serial().rx_set::<64>(BULK_RX_BUF);
+    bd_main()  .rx_set::<64>(MAIN_RX_BUF);
+}
+
+/// PendSV ISR for handling device commands at appropriate priority.
+fn command_handler() {
+    main_dbgln!("Command handler entry");
+
+    // Get a point to the message.  TODO - copy!
+    let message = unsafe {&*(MAIN_RX_BUF as *const crate::command::MessageBuf)};
+    crate::command::command_handler(&message, chep_bd_len(bd_main().rx.read()));
 }
 
 fn usb_initialize(cs: &mut ControlState) {
@@ -414,11 +490,13 @@ fn usb_initialize(cs: &mut ControlState) {
 
 impl crate::cpu::VectorTable {
     pub const fn usb(&mut self) -> &mut Self {
+        self.pendsv = command_handler;
         self.isr(INTERRUPT, usb_isr)
     }
 }
 
 #[test]
 fn check_isr() {
+    assert!(crate::VECTORS.pendsv == command_handler);
     assert!(crate::VECTORS.isr[INTERRUPT as usize] == usb_isr);
 }

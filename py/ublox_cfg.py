@@ -1,0 +1,70 @@
+#!/usr/bin/python3
+
+import difflib
+import struct
+
+from dataclasses import dataclass
+from typing import Any, Tuple
+
+UBX_TYPES = {
+    'I1': 'b', 'I2': 'h', 'I4': 'i',
+    'U1': 'B', 'U2': 'H', 'U4': 'I',
+    'E1': 'B', # 'E2': 'H', 'E4': 'I',
+    'X1': 'B', 'X2': 'H', 'X4': 'I', 'X8': 'I',
+    'L' : '?',            'R4': 'f', 'R8': 'd',
+}
+
+CONFIGS_BY_KEY :dict[int, UBloxCfg] = {}
+CONFIGS_BY_NAME:dict[str, UBloxCfg] = {}
+
+@dataclass(slots=True, frozen=True)
+class UBloxCfg:
+    name: str
+    key : int
+    typ : str
+    def __post_init__(self):
+        assert self.typ in UBX_TYPES, self.typ
+        assert 0 <= self.key < 1<<32
+        assert self.key & 0x8f00f000 == 0
+        assert (self.key >> 28, self.typ[-1]) in (
+            (1, 'L'), (2, '1'), (3, '2'), (4, '4'), (5, '8')), \
+            f'{self.key:#x} {self.typ}'
+    def val_bytes(self):
+        return (0, 1, 1, 2, 4, 8)[self.key >> 28]
+    def encode_value(self, v) -> bytes:
+        return struct.pack('<' + UBX_TYPES[self.typ], v)
+    def encode_key_value(self, v) -> bytes:
+        return struct.pack('<I' + UBX_TYPES[self.typ], self.key, v)
+    def decode_value(self, v: bytes):
+        return struct.unpack('<' + UBX_TYPES[self.typ], v)[0]
+    def to_value(self, s: Any) -> Any:
+        '''Typically, s will be a string, but can be anything castable.'''
+        match self.typ[0]:
+            case 'I'|'U'|'E'|'X':
+                return int(s)
+            case 'L': return bool(s)
+            case 'R': return float(s)
+            case _  : assert False
+    def __str__(self):
+        return 'CFG-' + self.name
+    @staticmethod
+    def decode_from(b: bytes) -> Tuple[UBloxCfg, Any, int]:
+        '''Returns (key, value, length)
+           The length is the total byte length of the key+value.'''
+        cfg = CONFIGS_BY_KEY[struct.unpack('<I', b[:4])[0]]
+        length = 4 + cfg.val_bytes()
+        return cfg, cfg.decode_value(b[4:length]), length
+    @staticmethod
+    def get(key: int|str|UBloxCfg) -> UBloxCfg:
+        if type(key) == UBloxCfg:
+            return key
+        if type(key) == int:
+            return CONFIGS_BY_KEY[key]
+        assert type(key) == str
+        key = key.removeprefix('CFG-')
+        try:
+            return CONFIGS_BY_NAME[key]
+        except KeyError:
+            print('Did you mean?',
+                  difflib.get_close_matches(key, CONFIGS_BY_NAME))
+            raise

@@ -87,10 +87,10 @@ pub fn init() {
 
     use interrupt::*;
     use stm32h503::Interrupt::*;
-    enable_priority(I2C1_EV, 0x80);
-    enable_priority(I2C1_ER, 0x80);
-    enable_priority(GPDMA1_CH1, 0x80);
-    enable_priority(GPDMA1_CH2, 0x80);
+    enable_priority(I2C1_EV, PRIO_I2C);
+    enable_priority(I2C1_ER, PRIO_I2C);
+    enable_priority(GPDMA1_CH1, PRIO_I2C);
+    enable_priority(GPDMA1_CH2, PRIO_I2C);
 }
 
 pub fn i2c_isr() {

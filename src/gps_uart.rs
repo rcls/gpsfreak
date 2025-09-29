@@ -2,8 +2,8 @@
 // TX on pin 19 PA8 (USART2 AF4, USART3 AF13)
 // RX on pin 18 PB15 (USART2 AF13, USART1 AF4, LPUART1, AF8)
 
-use crate::cpu;
 use crate::cpu::interrupt;
+use crate::cpu::interrupt::PRIO_USB;
 use crate::dma::DMA_Channel;
 use crate::vcell::VCell;
 
@@ -26,6 +26,8 @@ const TX_DMA_REQ: u8 = 24;
 
 /// Set to true to loopback our own data instead of processing received data.
 const LOOPBACK: bool = false;
+
+static BAUD_RATE: VCell<u32> = VCell::new(9600);
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
@@ -54,18 +56,34 @@ pub fn init() {
     let ch = &dma.C[DMA_CHANNEL];
     ch.writes_to(uart.TDR.as_ptr() as *mut u8, TX_DMA_REQ);
 
-    interrupt::enable_priority(INTERRUPT, 0xff);
-    interrupt::enable_priority(DMA_INTERRUPT, 0xff);
+    // We interact with the USB subsystem, so share its priority.
+    interrupt::enable_priority(INTERRUPT, PRIO_USB);
+    interrupt::enable_priority(DMA_INTERRUPT, PRIO_USB);
 }
 
-static BAUD_RATE: VCell<u32> = VCell::new(9600);
+pub fn gps_reset() {
+    // PB1 is GPS reset.  Pulse it low briefly.
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
+    // Enable the pullup and open drain.
+    gpiob.PUPDR.modify(|_,w| w.PUPD1().B_0x1()); // Pull up
+    gpiob.OTYPER.modify(|_,w| w.OT1().B_0x1());  // Open drain
+    gpiob.BSRR.write(|w| w.BS1().set_bit());     // Drive high.
+    gpiob.MODER.modify(|_,w| w.MODE1().B_0x1()); // Enable output.
+
+    // Pulse it.
+    gpiob.BSRR.write(|w| w.BR1().set_bit());
+    for _ in 0..320000 {
+        crate::cpu::nothing();
+    }
+    gpiob.BSRR.write(|w| w.BS1().set_bit());
+}
 
 pub fn set_baud_rate(baud: u32) -> bool {
     let uart  = unsafe {&*UART::ptr()};
     // We need to disable the UART to udpate the baud rate.
     // FIXME - validate.  FIXME - allow us to recover the baud rate!
     // FIXME - use the prescalar also.
-    let brr = (cpu::CPU_FREQ * 2 + baud) / (baud * 2);
+    let brr = (crate::cpu::CPU_FREQ * 2 + baud) / (baud * 2);
     // We are called from the USB ISR, which is the same priority as our ISRs.
     // So there should be no interrupt to race with.
     let config = uart.CR1.read().bits();

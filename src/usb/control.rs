@@ -1,8 +1,9 @@
+
+use super::descriptor::{CONFIG0_DESC, DEVICE_DESC, INTF_DFU};
 use super::hardware::*;
 use super::types::*;
 
 use crate::cpu::barrier;
-use crate::usb::descriptor::{CONFIG0_DESC, DEVICE_DESC};
 use crate::vcell::UCell;
 
 use super::{ctrl_dbgln, usb_dbgln};
@@ -154,8 +155,7 @@ impl ControlState {
             // just ACK the set interface message.
             (0x01, 0x0b) => SetupResult::no_data(), // Set interface
 
-            // FIXME - 0xa1 0x03 appears to be GET_COMM_FEATURE?
-            (0xa1, 0x03) => if setup.index == 2 {
+            (0xa1, 0x03) => if setup.index == INTF_DFU as u16 { // DFU
                 SetupResult::tx_data(&[0u8, 100, 0, 0, 0, 0])
             }
             else {

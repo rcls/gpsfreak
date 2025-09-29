@@ -2,8 +2,8 @@ use super::types::SetupResult;
 
 const STRING_LIST: [&str; 8] = [
     "\u{0409}", // Languages.
-    "Ralph", "GPS REF", "0000", "Single ACM",
-    "CDC", "CDC DATA interface", "DFU",
+    "Ralph", "GPS Freak", "Device Configuration",
+    "CDC", "CDC DATA interface", "Device Control", "DFU",
 ];
 
 pub const fn string_index(s: &str) -> u8 {
@@ -17,6 +17,7 @@ pub const fn string_index(s: &str) -> u8 {
 }
 
 pub const NUM_STRINGS: usize = STRING_LIST.len();
+pub const IDX_SERIAL_NUMBER: u8 = NUM_STRINGS as u8;
 
 pub type Offset = u8;
 
@@ -53,7 +54,11 @@ static DATA: [u16; TOTAL_LENGTH] = {
 };
 
 pub fn get_descriptor(idx: u8) -> SetupResult {
-    if idx as usize > NUM_STRINGS {
+    if idx == IDX_SERIAL_NUMBER {
+        // Special case.
+        return SetupResult::Tx(crate::cpu::USB_SERIAL_NUMBER.as_ref());
+    }
+    if idx as usize >= NUM_STRINGS {
         return SetupResult::error();
     }
     let offset = OFFSETS[idx as usize] as usize;

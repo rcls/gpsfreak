@@ -1,7 +1,7 @@
 cargo-features = ['different-binary-name']
 
 [package]
-name = 'gpsref'
+name = 'gpsfreak'
 version = '0.1.0'
 edition = '2024'
 

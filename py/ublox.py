@@ -2,8 +2,8 @@
 
 import argparse
 import sys
-import ublox_defs
 
+from ublox_defs import parse_key_list
 from ublox_cfg import UBloxCfg
 from ublox_msg import UBloxMsg
 
@@ -20,6 +20,9 @@ def key_value(s):
 valset = subp.add_parser('set', description='VALSET message')
 valset.add_argument('KV', type=key_value, nargs='+', help='KEY=VALUE pairs')
 
+dump = subp.add_parser('scrape', description='Scrape pdf2txt output')
+dump.add_argument('FILE', help='Text file to parse')
+
 args = argp.parse_args()
 
 if args.command == 'set':
@@ -34,3 +37,17 @@ if args.command == 'set':
         sys.stdout.buffer.write(message)
     else:
         print(message.hex(' '))
+
+if args.command == 'scrape':
+    configs, messages = \
+        parse_key_list(args.FILE)
+    print('import ublox_msg')
+    print('import ublox_cfg')
+    print('from ublox_cfg import UBloxCfg')
+    print('from ublox_msg import UBloxMsg')
+    for tag, items in ('cfg', configs), ('msg', messages):
+        print()
+        print(f'ublox_{tag}.add_{tag}_list([')
+        for item in items:
+            print(f'    {item!r},')
+        print('])')

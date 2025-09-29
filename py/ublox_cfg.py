@@ -47,6 +47,8 @@ class UBloxCfg:
             case _  : assert False
     def __str__(self):
         return 'CFG-' + self.name
+    def __repr__(self):
+        return f'UBloxCfg({self.name!r:}, {self.key:#010x}, {self.typ!r:})'
     @staticmethod
     def decode_from(b: bytes) -> Tuple[UBloxCfg, Any, int]:
         '''Returns (key, value, length)
@@ -68,3 +70,8 @@ class UBloxCfg:
             print('Did you mean?',
                   difflib.get_close_matches(key, CONFIGS_BY_NAME))
             raise
+
+def add_cfg_list(l: list[UBloxCfg]) -> None:
+    for cfg in l:
+        CONFIGS_BY_NAME[cfg.name] = cfg
+        CONFIGS_BY_KEY [cfg.key ] = cfg

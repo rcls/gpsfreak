@@ -52,3 +52,10 @@ class UBloxMsg:
             print('Did you mean?',
                   difflib.get_close_matches(key, MESSAGES_BY_NAME))
             raise
+    def __repr__(self):
+        return f'UBloxMsg({self.name!r}, {self.code:#06x})'
+
+def add_msg_list(l: list[UBloxMsg]) -> None:
+    for msg in l:
+        MESSAGES_BY_NAME[msg.name] = msg
+        MESSAGES_BY_CODE[msg.code] = msg

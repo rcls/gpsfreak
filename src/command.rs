@@ -39,7 +39,9 @@
 //!
 //! Command groups:
 //! 00 xx : Overall device control
-//!    00 00 : PING.  Arbitrary payload.  Response is 80 00.
+//!    00 00 : PING.  Arbitrary payload.  Response is 80 00 and echos the
+//!            payload.  By sending a random token, you can check that
+//!            messages are synchronised.
 //!    80 00 : ACK. Generic Acknowledgement.  Payload is generally empty.
 //!            Ping responses echo the payload.  Otherwise if non-empty,
 //!            then is an informational UTF-8 string.

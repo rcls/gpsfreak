@@ -11,6 +11,14 @@ GPS.
 
 Power and data is supplied via a USB-C connector (USB FS data rate).
 
+License
+=======
+
+The hardware designs in this project are all licensed under CERN Open Hardware
+Licence, strongly reciprocal, CERN-OHL-S.  ([cern_ohl_s_v2.txt]).
+
+All software in this project is licensed under the GNU GPL v3.  ([COPYING.txt])
+
 
 Connectors
 ==========
@@ -33,7 +41,7 @@ Output 4
   supports operating it down to 1Hz.
 
   The connector is DC coupled.  As an input the board is built with 300ohm
-  termination and a divider to match 3.3V drive to the clock chip.  However
+  termination and a divider to match 3.3V drive to the clock chip.  However,
   swapping resistors can change to 50ohm, and can be AC coupled.
 
 Internal Output 5
@@ -63,8 +71,8 @@ revision, drive with a resistor divider, approx. 10k Thevenin resistance or
 less, to N / 25 × VDD, where N is the revision number.  This is revision 0, so
 the pin is grounded.
 
-Cost Reduction Opertunities
-===========================
+Cost Reduction Opportunities
+============================
 
 These will simplify the board layout also...
 

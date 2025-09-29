@@ -15,7 +15,7 @@ def ublox_frame(data: bytes) -> bytes:
         ckA = (ckA + b) & 255
         ckB = (ckB + ckA) & 255
     #ckA = sum(data)
-    #ckB = sum((len(data) - n) * b & 255 for (n, b) in enumerate(data))
+    #ckB = sum((len(data) - n) * b & 255 for n, b in enumerate(data))
     return bytes((0xb5, 0x62)) + data + bytes((ckA & 255, ckB & 255))
 
 def test_ublox_frame_simple() -> None:

@@ -14,6 +14,10 @@ class Message:
     # len is implicit in payload.
     payload: bytes
     # CRC is implied.
+    def frame(self):
+        return frame(self.code, self.payload)
+    def __str__(self):
+        return f'{self.code:#06x} ' + self.payload.hex(' ')
 
 POLY = 0x1021
 CRCTAB = array.array('H', (0, POLY))
@@ -53,3 +57,21 @@ def test_simple():
     code = 0x1234
     payload = b'This is a test'
     assert deframe(frame(code, payload)) == Message(code, payload)
+
+PING=0x0080
+ACK=0x0080
+NACK=0x0180
+
+CPU_REBOOT=0x1080
+GPS_RESET=0x1180
+LMK05138B_RESET=0x1280
+
+PEEK=0x010e
+PEEK_DATA=0x810e
+POKE=0x020e
+
+LMK05138B_I2C_WRITE=0x0fc8
+LMK05138B_I2C_READ=0x0fc9
+
+TMP117_I2C_WRITE=0x0f92
+TMP117_I2C_READ=0x0f93

@@ -127,10 +127,26 @@ impl core::fmt::Write for DebugMarker {
     }
 }
 
+pub struct DebugPriority;
+
+impl DebugPriority {
+    pub fn new() -> DebugPriority {
+        unsafe {cortex_m::register::basepri::write(interrupt::PRIO_USB)};
+        DebugPriority
+    }
+}
+
+impl Drop for DebugPriority {
+    fn drop(&mut self) {
+        unsafe {cortex_m::register::basepri::write(0)};
+    }
+}
+
 #[macro_export]
 macro_rules! dbg {
     ($($tt:tt)*) => {{
         if $crate::uart_debug::ENABLE {
+            let _raise = $crate::uart_debug::DebugPriority::new();
             let _ = core::fmt::Write::write_fmt(
                 &mut $crate::uart_debug::DebugMarker, format_args!($($tt)*));
     }}}
@@ -140,11 +156,13 @@ macro_rules! dbg {
 macro_rules! dbgln {
     () => {{
         if $crate::uart_debug::ENABLE {
+            let _raise = $crate::uart_debug::DebugPriority::new();
             let _ = core::fmt::Write::write_str(
                 &mut $crate::uart_debug::DebugMarker, "\n");
         }}};
     ($($tt:tt)*) => {{
         if $crate::uart_debug::ENABLE {
+            let _raise = $crate::uart_debug::DebugPriority::new();
             let _ = core::fmt::Write::write_fmt(
                 &mut $crate::uart_debug::DebugMarker, format_args_nl!($($tt)*));
         }}};

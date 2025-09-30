@@ -42,11 +42,15 @@ class Field:
 class Address:
     address: int
     fields: list[Field]
+    read_only: int = True
     def __str__(self) -> str:
         return f'R{self.address}'
     def validate(self) -> None:
         mask = 0
         for field in self.fields:
+            assert field.access in ('R', 'R/W', 'R/WSC'), field.access
+            if 'W' in field.access:
+                self.read_only = False
             f_mask = field.mask()
             assert f_mask & mask == 0, f'{self} {field} {f_mask} {mask}'
             mask |= f_mask
@@ -58,6 +62,7 @@ ADDRESSES: list[Address] = []
 class Register:
     name: str
     fields: list[Field]
+    base_address: int = 0
     byte_span: int = 0
     # shift and width are applied before byte swapping.  FIXME - want after.
     shift: int = 0
@@ -76,6 +81,7 @@ class Register:
         last  = self.fields[-1]
         # Everything appears to be big endian
         assert first.address >= last.address, self
+        self.base_address = last.address
         for a, b in zip(self.fields, self.fields[1:]):
             assert a.address == b.address + 1
         self.byte_span = first.address - last.address + 1
@@ -112,7 +118,10 @@ def build_registers(addresses: list[Address]) -> dict[str, Register]:
 ADDRESSES = pickle.load(
     open(os.path.dirname(__file__) + '/lmk05318b-registers.pickle', 'rb'))
 
+ADDRESS_BY_NUM = {}
+
 for address in ADDRESSES:
     address.validate()
+    ADDRESS_BY_NUM[address.address] = address
 
 REGISTERS = build_registers(ADDRESSES)

@@ -108,6 +108,7 @@ pub fn init() {
 
     interrupt::enable_priority(INTERRUPT, interrupt::PRIO_USB);
 
+    // We use the PENDSV exception to dispatch some work at lower priority.
     let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
     let pendsv_prio = &scb.shpr[10];
     // Cortex-M crate has two different ideas of what the SHPR is, make sure we
@@ -385,11 +386,8 @@ fn main_tx_handler() {
 // Called at lower priority and can get interrupted!
 pub fn main_tx_response(message: &[u8]) {
     // For now we don't support long messages.
-    dbgln!("main tx {} @ {:?}", message.len(), message.as_ptr());
     let len = message.len().min(64);
     unsafe {copy_by_dest32(message.as_ptr(), MAIN_TX_BUF, message.len())};
-    dbgln!("in place {:02x?}",
-           unsafe {core::slice::from_raw_parts(MAIN_TX_BUF, len)});
 
     bd_main().tx_set(MAIN_TX_BUF, len);
 

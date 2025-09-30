@@ -93,6 +93,21 @@ eject_field()
 for address in addresses:
     address.validate()
 
+seen = set(address.address for address in addresses)
+
+unknown = [
+    23, 24, 26, 27, 28, 30, 32, 35, 36, 37, 38, 41, 42, 44, 46, 68, 69, 78, 79,
+    104, 105, 115, 112, 128, 139, 146, 147, 149, 150, 151, 152, 153, 154, 159,
+    165, 167, 178, 250, 251, 253, 254, 256, 258, 260, 261, 262, 263, 264, 265,
+    266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280,
+    281, 282, 283, 284, 285, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301,
+    302, 303, 319, 332, 340, 341, 342, 343, 344, 345, 352, 357, 367, 411]
+
+#for address in unknown:
+#    assert not address is seen
+#    # FIXME - what are the actual reserved values?
+#    address.append(Field('RESERVED', 7, 0, 'R', 0, address))
+
 registers = lmk05318b.build_registers(addresses)
 
 dump_path = os.path.dirname(__file__) + '/lmk05318b-registers.pickle'

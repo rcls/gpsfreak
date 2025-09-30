@@ -54,6 +54,10 @@
 //!    00 11 : GPS reset.  Response is generic ACK.
 //!    00 12 : Clock gen reset.  Response is generic ACK (or NACK).
 //!
+//! 0E xx : Low level operations.
+//!    0E 01 : peek.
+//!    0E 02 : poke.
+//!
 //! 0F xx : Raw I²C bus operations
 //!    Note that because we are the (only) bus controller, we don't worry about
 //!    repeated starts.

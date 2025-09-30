@@ -60,7 +60,7 @@ pub fn main() -> ! {
     // In the ARM docs, this is the high byte of SHPR3 (0xE000ED20), so byte
     // address 0xE000ED23.
     link_assert!(&scb.shpr[11] as *const _ as usize == 0xe000ed23);
-    unsafe {scb.shpr[11].write(0xffu8)};
+    unsafe {scb.shpr[11].write(cpu::interrupt::PRIO_APP)};
     unsafe {scb.cpacr.write(0x00f00000)};
 
     // Systick counts at 20MHz.
@@ -72,8 +72,10 @@ pub fn main() -> ! {
     }
 
     // Setup the oscillator.
-    let r = clock_setup();
-    dbgln!("Clock setup result = {r:?}");
+    if false {
+        let r = clock_setup();
+        dbgln!("Clock setup result = {r:?}");
+    }
 
     loop {
         cpu::WFE();

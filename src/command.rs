@@ -208,14 +208,15 @@ pub fn command_handler(message: &MessageBuf, len: usize) {
 }
 
 fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
-    dbgln!("Command handler dispatch {:x?}",
-           unsafe {core::slice::from_raw_parts(message as *const _ as *const u8, len)});
+    // dbgln!("Command handler dispatch {:x?}",
+    //       unsafe {core::slice::from_raw_parts(message as *const _ as *const u8, len)});
     if len < 8 || message.len as usize != len - 8 {
         dbgln!("Length problem {len} {}", message.len);
         return Err((Error::FramingError, 0));
     }
     if message.code & 0x80 != 0 {
         // Wrong message direction, ignore.
+        crate::usb::main_rx_rearm();
         return Ok(());
     }
     if crc::compute(unsafe {core::slice::from_raw_parts(

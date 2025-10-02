@@ -2,6 +2,7 @@
 
 import array
 import struct
+import usb
 
 from dataclasses import dataclass
 
@@ -53,6 +54,20 @@ def deframe(message: bytes) -> Message:
 
     return Message(code, message[6:-2])
 
+def flush(dev: usb.Device) -> None:
+    # Flush any stale data.
+    try:
+        dev.read(0x83, 64, 100)
+    except usb.core.USBTimeoutError:
+        pass
+
+def transact(dev: usb.Device, code: int, payload: bytes) -> Message:
+    dev.write(0x03, frame(code, payload))
+    result = deframe(bytes(dev.read(0x83, 64, 10000)))
+    # FIXME - proper error exception.
+    assert result.code != NACK
+    return result
+
 def test_simple():
     code = 0x1234
     payload = b'This is a test'
@@ -70,8 +85,8 @@ PEEK=0x010e
 PEEK_DATA=0x810e
 POKE=0x020e
 
-LMK05138B_I2C_WRITE=0x0fc8
-LMK05138B_I2C_READ=0x0fc9
+LMK05138B_WRITE=0xc80f
+LMK05138B_READ=0xc90f
 
-TMP117_I2C_WRITE=0x0f92
-TMP117_I2C_READ=0x0f93
+TMP117_WRITE=0x920f
+TMP117_READ=0x930f

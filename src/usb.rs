@@ -383,6 +383,13 @@ fn main_tx_handler() {
                 chep_main().read().bits(), chep.bits());
 }
 
+// Rearm the main RX after ignoring a message.
+pub fn main_rx_rearm() {
+    // TODO - priority?
+    let chep = chep_main().read();
+    chep_main().write(|w| w.main().rx_valid(&chep));
+}
+
 // Called at lower priority and can get interrupted!
 pub fn main_tx_response(message: &[u8]) {
     // For now we don't support long messages.

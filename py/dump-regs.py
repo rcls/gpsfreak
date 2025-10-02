@@ -1,41 +1,59 @@
 #!/usr/bin/python3
 
+import argparse
 import fractions
 import struct
 import sys
+import usb
 
 import freak
 import lmk05318b
 import tics
 
 from fractions import Fraction
+from freak import transact
+from typing import Tuple
 
-wanted_bytes = [False] * 500
+argp = argparse.ArgumentParser(description='LMK05318b register dump')
+argp.add_argument('--usb', '-u', action='store_true',
+                  help='Read USB attached device')
+argp.add_argument('--tics', '-t', metavar='FILE', help='Read TICS .tcs file')
 
-for a in lmk05318b.ADDRESSES:
-    wanted_bytes[a.address] = True
+args = argp.parse_args()
 
-ranges = []
-range = None
+assert 'usb' in args or 'file' in args
 
-for n, b in enumerate(wanted_bytes):
-    if not b:
-        pass
-    elif range is None or range[1] != n or n - range[0] >= 50:
-        range = [n, n + 1]
-        ranges.append(range)
-    else:
-        range[1] = n + 1
+def lmk05318b_bundles() -> list[Tuple[int, int]]:
+    bundles = []
+    address = -100;
+    length = 0;
+    for a in lmk05318b.ADDRESSES:
+        if a.address == address + length and length < 30:
+            length += 1
+            continue
+        if address >= 0:
+            bundles.append((address, length))
+        address = a.address
+        length = 1
+    if address >= 0:
+        bundles.append((address, length))
+    return bundles
 
-print(ranges)
-print(len(ranges))
-print(max(r[1] - r[0] for r in ranges))
-
-data = tics.read_tcs_file(sys.argv[1])
-
-for i, m in enumerate(data.mask):
-    if m != 0 and not i in lmk05318b.ADDRESS_BY_NUM:
-        print(f'R{i} is unwanted value = {data.data[i]:02x}')
+if 'file' in args:
+    data = tics.read_tcs_file(sys.argv[1])
+    for i, m in enumerate(data.mask):
+        if m != 0 and not i in lmk05318b.ADDRESS_BY_NUM:
+            print(f'R{i} is unwanted value = {data.data[i]:02x}')
+else:
+    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    freak.flush(dev)
+    data = tics.MaskedBytes()
+    for address, length in lmk05318b_bundles():
+        transact(dev, freak.LMK05138B_WRITE, struct.pack('<H', address))
+        segment = transact(dev, freak.LMK05138B_READ, struct.pack('<H', length))
+        for a, b in enumerate(segment.payload, address):
+            data.data[a] = b
+            data.mask[a] = 255
 
 config = {}
 

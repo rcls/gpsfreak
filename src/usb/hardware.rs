@@ -153,7 +153,10 @@ pub unsafe fn copy_by_dest32(s: *const u8, d: *mut u8, len: usize) {
         // We potentially overrun the source buffer by up to 3 bytes, which
         // should be harmless, as long as the buffer is not right at the end
         // of flash or RAM.
-        unsafe {*d = core::ptr::read_unaligned(s)};
+        //
+        // It looks like no amount of barriers will correctly tell rustc about
+        // the aliasing; a volatile read eventually got us there.
+        unsafe {*d = core::ptr::read_volatile(s)};
         d = d.wrapping_add(1);
         s = s.wrapping_add(1);
     }

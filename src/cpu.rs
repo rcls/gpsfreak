@@ -149,7 +149,9 @@ fn bugger() {
 
 #[inline(always)]
 pub fn barrier() {
-    core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
+    // The rust library compile_fence isn't behaving as expected.  Use the ASM
+    // version.
+    unsafe {core::arch::asm!("")}
 }
 
 #[inline(always)]

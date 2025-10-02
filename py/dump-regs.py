@@ -49,8 +49,8 @@ else:
     freak.flush(dev)
     data = tics.MaskedBytes()
     for address, length in lmk05318b_bundles():
-        transact(dev, freak.LMK05138B_WRITE, struct.pack('<H', address))
-        segment = transact(dev, freak.LMK05138B_READ, struct.pack('<H', length))
+        transact(dev, freak.LMK05318B_WRITE, struct.pack('<H', address))
+        segment = transact(dev, freak.LMK05318B_READ, struct.pack('<H', length))
         for a, b in enumerate(segment.payload, address):
             data.data[a] = b
             data.mask[a] = 255

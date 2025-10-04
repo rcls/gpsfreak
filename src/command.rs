@@ -193,6 +193,7 @@ impl<P: core::fmt::Debug> Message<P> {
 }
 
 type Ack  = Message<()>;
+// FIXME - get rid of the u16.
 type Nack = Message<(Error, u16)>;
 
 type I2CRead = Message<u16>;
@@ -250,28 +251,38 @@ fn i2c_transact(message: &MessageBuf) -> Result {
             Ok(())
         }
         else {
-            // FIXME - detail.
             Err((Error::Failed, 0))
         }
     }
     else {
         // Get the length...
         // Read.
-        let message = Message::<u16>::from_buf(message)?;
-        let len = message.payload as usize;
-        dbgln!("I2C read {address:#04x} length {}", len);
-        if len > MAX_PAYLOAD {
+        let mlen = message.len as usize;
+        if mlen < 2 {
+            return Err((Error::BadFormat, 0));
+        }
+        let rlen = unsafe {*(&message.payload as *const u8 as *const u16)};
+        let rlen = rlen as usize;
+        dbgln!("I2C read {address:#04x} wlen {} rlen {}", mlen - 2, rlen);
+        if rlen > MAX_PAYLOAD {
             return Err((Error::Failed, 0));
         }
         let mut result = MessageBuf::start(message.code | 0x0080);
-        result.len = len as u16;
-        if let Ok(()) = i2c::read(address, &mut result.payload[..len]).wait() {
+        result.len = rlen as u16;
+        let w;
+        if mlen == 2 {
+            w = i2c::read(address, &mut result.payload[..rlen]);
+        }
+        else {
+            w = i2c::write_read(address, &message.payload[2..mlen],
+                                &mut result.payload[..rlen]);
+        }
+        if let Ok(()) = w.wait() {
             result.set_crc();
             result.send();
             Ok(())
         }
         else {
-            // FIXME - detail.
             Err((Error::Failed, 0))
         }
     }

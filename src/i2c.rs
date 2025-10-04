@@ -38,7 +38,8 @@ pub struct Wait<'a>(PhantomData<&'a()>);
 pub static CONTEXT: UCell<I2cContext> = UCell::default();
 
 const F_I2C: u8 = 1;
-const F_DMA: u8 = 2;
+const F_DMA_RX: u8 = 2;
+const F_DMA_TX: u8 = 4;
 
 pub fn init() {
     let i2c   = unsafe {&*I2C::ptr()};
@@ -83,6 +84,8 @@ pub fn init() {
     if false {
         write_reg(0, 0, &0i16).defer();
         write(0, &0i16).defer();
+        read_reg(0, 0, &mut 0i16).defer();
+        write_read(0, &0i16, &mut 0i16).defer();
     }
 
     use interrupt::*;
@@ -137,23 +140,23 @@ pub fn i2c_isr() {
     dbgln!("I2C ISR done, {}", context.outstanding.read());
 }
 
-pub fn dma_rx_isr() {
+fn dma_rx_isr() {
     dbgln!("I2C DMA RX ISR");
     let ch = rx_channel();
     let sr = ch.SR().read();
     ch.FCR().write(|w| w.bits(sr.bits())); // Clear flags.
     if sr.TCF().bit() {
-        unsafe {*CONTEXT.as_mut().outstanding.as_mut() &= !F_DMA};
+        unsafe {*CONTEXT.as_mut().outstanding.as_mut() &= !F_DMA_RX};
     }
 }
 
-pub fn dma_tx_isr() {
+fn dma_tx_isr() {
     dbgln!("I2C DMA TX ISR");
     let ch = tx_channel();
     let sr = ch.SR().read();
     ch.FCR().write(|w| w.bits(sr.bits())); // Clear flags.
     if sr.TCF().bit() {
-        unsafe {*CONTEXT.as_mut().outstanding.as_mut() &= !F_DMA};
+        unsafe {*CONTEXT.as_mut().outstanding.as_mut() &= !F_DMA_TX};
     }
 }
 
@@ -161,7 +164,7 @@ impl I2cContext {
     fn read_reg_start(&self, addr: u8, reg: u8, data: usize, len: usize) {
         // Should only be called while I2C idle...
         let i2c = unsafe {&*I2C::ptr()};
-        self.arm();
+        self.arm(F_I2C | F_DMA_RX);
         self.pending_len.write(len);
 
         // Synchronous I2C start for the reg ptr write.
@@ -178,7 +181,7 @@ impl I2cContext {
 
         interrupt::disable_all();
         rx_channel().read(data, len);
-        self.arm();
+        self.arm(F_I2C | F_DMA_RX);
         i2c.CR2.write(
             |w|w.START().set_bit().AUTOEND().bit(true).SADD().bits(addr as u16)
                 .RD_WRN().set_bit().NBYTES().bits(len as u8));
@@ -197,7 +200,7 @@ impl I2cContext {
                 . SADD().bits(addr as u16).NBYTES().bits(len as u8 + 1));
         i2c.TXDR.write(|w| w.TXDATA().bits(reg));
         tx_channel().write(data, len);
-        self.arm();
+        self.arm(F_I2C | F_DMA_TX);
         interrupt::enable_all();
     }
     #[inline(never)]
@@ -206,18 +209,30 @@ impl I2cContext {
 
         interrupt::disable_all();
         i2c.CR2.write(
-            |w| w.START().set_bit().AUTOEND().bit(last)
+            |w|w.START().set_bit().AUTOEND().bit(last)
                 . SADD().bits(addr as u16).NBYTES().bits(len as u8));
         // Do the DMA set-up in the shadow of the address handling.  In case
         // we manage to get an I2C error before the DMA set-up is done, we have
         // interrupts disabled.
         tx_channel().write(data, len);
-        self.arm();
+        self.arm(F_I2C | F_DMA_TX);
         interrupt::enable_all();
     }
-    fn arm(&self) {
+    #[inline(never)]
+    fn write_read_start(&self, addr: u8, wdata: usize, wlen: usize,
+                        rdata: usize, rlen: usize) {
+        let i2c = unsafe {&*I2C::ptr()};
+        tx_channel().write(wdata, wlen);
+        rx_channel().read (rdata, rlen);
+        self.pending_len.write(rlen);
+        self.arm(F_I2C | F_DMA_TX | F_DMA_RX);
+        i2c.CR2.write(
+            |w|w.START().set_bit().SADD().bits(addr as u16)
+                .NBYTES().bits(wlen as u8));
+    }
+    fn arm(&self, flags: u8) {
         self.error.write(0);
-        self.outstanding.write(F_I2C | F_DMA);
+        self.outstanding.write(flags);
     }
     fn done(&self) -> bool {self.outstanding.read() == 0}
     fn wait(&self) {
@@ -277,11 +292,18 @@ pub fn read<'a, T: Flat + ?Sized>(addr: u8, data: &'a mut T) -> Wait<'a> {
     Wait::new()
 }
 
-#[allow(dead_code)]
 pub fn read_reg<'a, T: Flat + ?Sized>(addr: u8, reg: u8, data: &'a mut T) -> Wait<'a> {
     CONTEXT.read_reg_start(addr | 1, reg, data.addr(), size_of_val(data));
     Wait::new()
 }
+
+pub fn write_read<'a, T: Flat + ?Sized, U: Flat + ?Sized>(
+    addr: u8, wdata: &'a T, rdata: &'a mut U) -> Wait<'a> {
+    CONTEXT.write_read_start(addr, wdata.addr(), size_of_val(wdata),
+                             rdata.addr(), size_of_val(rdata));
+    Wait::new()
+}
+
 
 impl crate::cpu::VectorTable {
     pub const fn i2c(&mut self) -> &mut Self {

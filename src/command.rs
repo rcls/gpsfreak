@@ -47,7 +47,7 @@
 //!            then is an informational UTF-8 string.
 //!
 //!    80 01 : NAK. Generic failure.  A request could not be
-//!            successfully executed.  Two u16 payload fields.  error and detail
+//!            successfully executed.  A u16 payload field.
 //!            See below for the error enumeration.
 //!
 //!    00 10 : CPU reboot.  No response.
@@ -161,7 +161,7 @@ impl MessageBuf {
         &self.payload[.. self.len as usize]
     }
     fn check_len(&self, len: u16) -> Result<&MessageBuf> {
-        if self.len == len {Ok(self)} else {Err((Error::BadFormat, 0))}
+        if self.len == len {Ok(self)} else {Err(Error::BadFormat)}
     }
 }
 
@@ -193,14 +193,13 @@ impl<P: core::fmt::Debug> Message<P> {
 }
 
 type Ack  = Message<()>;
-// FIXME - get rid of the u16.
-type Nack = Message<(Error, u16)>;
+type Nack = Message<Error>;
 
 type I2CRead = Message<u16>;
 
 const MAGIC: u16 = 0xce93u16.to_be();
 
-type Result<T = ()> = core::result::Result<T, (Error, u16)>;
+type Result<T = ()> = core::result::Result<T, Error>;
 
 pub fn command_handler(message: &MessageBuf, len: usize) {
     if let Err(ed) = command_dispatch(message, len) {
@@ -213,7 +212,7 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
     //       unsafe {core::slice::from_raw_parts(message as *const _ as *const u8, len)});
     if len < 8 || message.len as usize != len - 8 {
         dbgln!("Length problem {len} {}", message.len);
-        return Err((Error::FramingError, 0));
+        return Err(Error::FramingError);
     }
     if message.code & 0x80 != 0 {
         // Wrong message direction, ignore.
@@ -223,14 +222,14 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
     if crc::compute(unsafe {core::slice::from_raw_parts(
         message as *const _ as _, len)}) != 0 {
         dbgln!("CRC error {len} {}", message.len);
-        return Err((Error::FramingError, 0));
+        return Err(Error::FramingError);
     }
 
     match (message.code & 0xff, message.code >> 8) {
         (0x00, 0x00) => ping(message),
         (0x00, 0x01) => crate::cpu::reboot(),
         (0x0f, _)    => i2c_transact(message),
-        _ => Err((Error::UnknownMessage, 0))
+        _ => Err(Error::UnknownMessage)
     }
 }
 
@@ -251,7 +250,7 @@ fn i2c_transact(message: &MessageBuf) -> Result {
             Ok(())
         }
         else {
-            Err((Error::Failed, 0))
+            Err(Error::Failed)
         }
     }
     else {
@@ -259,13 +258,13 @@ fn i2c_transact(message: &MessageBuf) -> Result {
         // Read.
         let mlen = message.len as usize;
         if mlen < 2 {
-            return Err((Error::BadFormat, 0));
+            return Err(Error::BadFormat);
         }
         let rlen = unsafe {*(&message.payload as *const u8 as *const u16)};
         let rlen = rlen as usize;
         dbgln!("I2C read {address:#04x} wlen {} rlen {}", mlen - 2, rlen);
         if rlen > MAX_PAYLOAD {
-            return Err((Error::Failed, 0));
+            return Err(Error::Failed);
         }
         let mut result = MessageBuf::start(message.code | 0x0080);
         result.len = rlen as u16;
@@ -283,7 +282,7 @@ fn i2c_transact(message: &MessageBuf) -> Result {
             Ok(())
         }
         else {
-            Err((Error::Failed, 0))
+            Err(Error::Failed)
         }
     }
 }

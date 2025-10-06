@@ -10,12 +10,25 @@ UBX_TYPES = {
     'I1': 'b', 'I2': 'h', 'I4': 'i',
     'U1': 'B', 'U2': 'H', 'U4': 'I',
     'E1': 'B', # 'E2': 'H', 'E4': 'I',
-    'X1': 'B', 'X2': 'H', 'X4': 'I', 'X8': 'I',
+    'X1': 'B', 'X2': 'H', 'X4': 'I', 'X8': 'Q',
     'L' : '?',            'R4': 'f', 'R8': 'd',
 }
 
 CONFIGS_BY_KEY :dict[int, UBloxCfg] = {}
 CONFIGS_BY_NAME:dict[str, UBloxCfg] = {}
+
+def val_bytes(key: int) -> int:
+    return (0, 1, 1, 2, 4, 8)[key >> 28]
+
+def get_cfg(key: int):
+    if key in CONFIGS_BY_KEY:
+        return CONFIGS_BY_KEY[key]
+    vb = val_bytes(key)
+    if key >> 28 == 1:
+        ty = 'L'
+    else:
+        ty = f'X{vb}'
+    return UBloxCfg(f'UNKNOWN-{key:08x}', key, ty)
 
 @dataclass(slots=True, frozen=True)
 class UBloxCfg:
@@ -30,7 +43,7 @@ class UBloxCfg:
             (1, 'L'), (2, '1'), (3, '2'), (4, '4'), (5, '8')), \
             f'{self.key:#x} {self.typ}'
     def val_bytes(self):
-        return (0, 1, 1, 2, 4, 8)[self.key >> 28]
+        return val_bytes(self.key)
     def encode_value(self, v) -> bytes:
         return struct.pack('<' + UBX_TYPES[self.typ], v)
     def encode_key_value(self, v) -> bytes:

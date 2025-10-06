@@ -21,7 +21,7 @@ argp.add_argument('--tics', '-t', metavar='FILE', help='Read TICS .tcs file')
 
 args = argp.parse_args()
 
-assert 'usb' in args or 'file' in args
+assert args.usb or args.tics is not None
 
 def lmk05318b_bundles() -> list[Tuple[int, int]]:
     bundles = []
@@ -39,8 +39,8 @@ def lmk05318b_bundles() -> list[Tuple[int, int]]:
         bundles.append((address, length))
     return bundles
 
-if 'file' in args:
-    data = tics.read_tcs_file(sys.argv[1])
+if args.tics is not None:
+    data = tics.read_tcs_file(args.tics)
     for i, m in enumerate(data.mask):
         if m != 0 and not i in lmk05318b.ADDRESS_BY_NUM:
             print(f'R{i} is unwanted value = {data.data[i]:02x}')
@@ -49,7 +49,7 @@ else:
     freak.flush(dev)
     data = tics.MaskedBytes()
     for address, length in lmk05318b_bundles():
-        transact(dev, freak.LMK05318B_WRITE, struct.pack('<H', address))
+        transact(dev, freak.LMK05318B_WRITE, struct.pack('>H', address))
         segment = transact(dev, freak.LMK05318B_READ, struct.pack('<H', length))
         for a, b in enumerate(segment.payload, address):
             data.data[a] = b
@@ -58,23 +58,7 @@ else:
 config = {}
 
 for r in lmk05318b.REGISTERS.values():
-    base = r.base_address
-    bb = data.data[base : base + r.byte_span]
-    match r.byte_span:
-        case 1:
-            value = bb[0]
-        case 2:
-            value = struct.unpack('>H', bb)[0]
-        case 3:
-            value = struct.unpack('>I', b'0' + bb)[0]
-        case 4:
-            value = struct.unpack('>I', bb)[0]
-        case 5:
-            value = struct.unpack('>Q', b'000' + bb)[0]
-        case _:
-            assert False, f'span = {r.byte_span}'
-    value = value >> r.shift
-    value &= (1 << r.width) - 1
+    value = r.extract(data.data)
     print(r.name, value, f'{value:#x}')
     config[r.name] = value
 

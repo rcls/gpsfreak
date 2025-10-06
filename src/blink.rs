@@ -77,16 +77,36 @@ pub fn main() -> ! {
         dbgln!("Clock setup result = {r:?}");
     }
 
+    // Blue/red/green are PA1,2,3.
+    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    gpioa.BSRR.write(|w| w.bits(0xe));
+    gpioa.MODER.modify(|_,w| w.MODE1().B_0x1().MODE2().B_0x1().MODE3().B_0x1());
+
+    // EN_REF2 = PB5, deassert high
+    // EN_OUT4 = PB4, assert low
+    // nEN_OUT3 = PB8, assert low
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
+    gpiob.BSRR.write(|w| w.BS4().set_bit().BR5().set_bit().BR8().set_bit());
+    gpiob.MODER.modify(|_,w| w.MODE4().B_0x1().MODE5().B_0x1().MODE8().B_0x1());
+
     loop {
         cpu::WFE();
     }
 }
 
 fn systick_handler() {
+    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    const NEXT: [u8; 8] = [0xe, 4, 8, 0xa, 0, 0xc, 2, 0x6];
+    let led = NEXT[gpioa.ODR().read().bits() as usize >> 1 & 7];
+    gpioa.BSRR.write(|w| w.bits(0xe0000 + led as u32));
+
     let mut temp: i16 = 0;
     if let Ok(_) = i2c::read_reg(TMP117, 0, &mut temp).wait() {
         let temp = i16::from_be(temp);
         dbgln!("Temp {temp:#x} {}", temp as i32 * 100 / 128);
+    }
+    else {
+        dbgln!("Temp read fail");
     }
 }
 

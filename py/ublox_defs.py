@@ -9,9 +9,13 @@ from typing import Tuple
 from ublox_cfg import UBloxCfg
 from ublox_msg import UBloxMsg
 
+last_config = None
+
 def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs = []
     messages = []
+
+    last_config = None
 
     msg_line_re = re.compile(r' *3\.\d+.\d+')
     msg_sect_re = re.compile(r'3\.\d+.\d+$')
@@ -21,6 +25,7 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
 
     cfg_name_re = re.compile(r'CFG-[\w_-]+$')
     cfg_key_re  = re.compile(r'0x[0-9a-f]{8}$', flags=re.I)
+    cfg_cont_re = re.compile(r'[\w_-]+ {40}')
 
     assert msg_sect_re.match('3.9.1')
     assert msg_name_re.match('UBX-NAV2-TIMEUTC')
@@ -35,6 +40,11 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
 
     for L in open(doc_path):
         w = L.strip().split()
+        if cfg_cont_re.match(L) and last_config is not None:
+            configs[-1] = UBloxCfg(
+                last_config.name + w[0], last_config.key, last_config.typ)
+        last_config = None
+
         if msg_line_re.match(L):
             if len(w) < 4:
                 continue
@@ -58,5 +68,6 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
             name = w[0].removeprefix('CFG-')
             key  = int(w[1], 0)
             ty   = w[2]
-            configs.append(UBloxCfg(name, key, ty))
+            last_config = UBloxCfg(name, key, ty)
+            configs.append(last_config)
     return configs, messages

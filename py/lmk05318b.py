@@ -1,6 +1,7 @@
 
 import os
 import pickle
+import struct
 import re
 
 import dataclasses
@@ -64,33 +65,43 @@ class Register:
     fields: list[Field]
     base_address: int = 0
     byte_span: int = 0
-    # shift and width are applied before byte swapping.  FIXME - want after.
     shift: int = 0
     width: int = 0
+    read_only: bool = False
     def __str__(self) -> str:
         return self.name
     def validate(self) -> None:
         '''Check that the fields pack sensibly.'''
         self.fields.sort(key=lambda f: f.reg_lo)
         assert self.fields[0].reg_lo == 0
+        # Everything appears to be big endian
         for a, b in zip(self.fields, self.fields[1:]):
             assert a.reg_hi + 1 == b.reg_lo
             assert a.byte_hi == 7
             assert b.byte_lo == 0
+            assert a.address == b.address + 1
         first = self.fields[ 0]
         last  = self.fields[-1]
-        # Everything appears to be big endian
-        assert first.address >= last.address, self
         self.base_address = last.address
-        for a, b in zip(self.fields, self.fields[1:]):
-            assert a.address == b.address + 1
         self.byte_span = first.address - last.address + 1
         self.shift = first.byte_lo
         self.width = last.reg_hi + 1
+        self.read_only = not 'W' in self.fields[0].access
+        if self.read_only:
+            assert all(not 'W' in field.access for field in self.fields)
+        else:
+            assert all('W' in field.access for field in self.fields)
         # All multibyte fields have any partial byte in the high byte.
         if self.byte_span > 1:
             assert self.shift == 0
         assert self.width == sum(f.byte_hi - f.byte_lo + 1 for f in self.fields)
+    def extract(self, bb: bytes) -> int:
+        base = self.base_address
+        b = bb[base : base + self.byte_span]
+        value = struct.unpack('>Q', (b'\0\0\0\0\0\0\0' + b)[-8:])[0]
+        value = value >> self.shift
+        value &= (1 << self.width) - 1
+        return value
 
 def validate_addresses(addresses: list[Address]) -> None:
     '''Check that each Address has the bytes exactly covered.'''

@@ -90,6 +90,14 @@ for L in open(PATH):
 
 eject_field()
 
+# Not all are documented...
+addresses.append(
+    Address(301, [Field('DPLL_PL_LOCK_THRESH', 7, 0, 'R/W', 0, 301)]))
+addresses.append(
+    Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
+
+addresses.sort(key = lambda address: address.address)
+
 for address in addresses:
     address.validate()
 
@@ -109,6 +117,16 @@ unknown = [
 #    address.append(Field('RESERVED', 7, 0, 'R', 0, address))
 
 registers = lmk05318b.build_registers(addresses)
+
+with open(os.path.dirname(__file__) + '/lmk05318b.list', 'w') as out:
+    for r in registers.values():
+        print(f'{r.name:20}: {r.base_address:3}', file=out, end='')
+        if r.byte_span != 1:
+            print(f' ({r.byte_span})', file=out, end='')
+        print(f' {r.width}b', file=out, end='')
+        if r.shift != 0:
+            print(f' >>{r.shift}', file=out, end='')
+        print(file=out)
 
 dump_path = os.path.dirname(__file__) + '/lmk05318b-registers.pickle'
 pickle.dump(addresses, open(dump_path, 'wb'))

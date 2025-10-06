@@ -1,16 +1,25 @@
 #!/usr/bin/python3
 
-import dataclasses
 import lmk05318b
+import tics
+
+import argparse
+import dataclasses
 import os
 import pickle
 import re
+import sys
 
 from dataclasses import dataclass
-from lmk05318b import Address, Field
+from lmk05318b import Address, Field, Register
 
-'''PATH of the pdftotext output.'''
-PATH = os.path.dirname(__file__) + '/lmk05318b-registers.txt'
+argp = argparse.ArgumentParser(description='LMK05318b scraper')
+argp.add_argument('INPUT', help='Text file from pdftotext run')
+argp.add_argument('--tics', '-t', help='TICS Pro .tcs file')
+argp.add_argument('--output', '-o', help='Output pickle file')
+argp.add_argument('--list', '-l', help='Output list file')
+
+args = argp.parse_args()
 
 '''RE to match start of a section'''
 SECTION_RE = re.compile(r'\d+\.\d+')
@@ -44,7 +53,7 @@ def eject_field():
               field.reset, field.address))
     field = None
 
-for L in open(PATH):
+for L in open(args.INPUT):
     if field is not None:
         # Check for a continuation line.
         c = CONT_RE.match(L)
@@ -96,37 +105,42 @@ addresses.append(
 addresses.append(
     Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
 
+if args.tics:
+    seen = set(address.address for address in addresses)
+    tf = tics.read_tcs_file(args.tics)
+    for a, m in enumerate(tf.mask):
+        if m != 0 and not a in seen:
+            val = tf.data[a]
+            addresses.append(
+                Address(a, [Field(f'UNKNOWN{a}', 7, 0, 'R', val, a)]))
+
 addresses.sort(key = lambda address: address.address)
 
 for address in addresses:
     address.validate()
 
-seen = set(address.address for address in addresses)
-
-unknown = [
-    23, 24, 26, 27, 28, 30, 32, 35, 36, 37, 38, 41, 42, 44, 46, 68, 69, 78, 79,
-    104, 105, 115, 112, 128, 139, 146, 147, 149, 150, 151, 152, 153, 154, 159,
-    165, 167, 178, 250, 251, 253, 254, 256, 258, 260, 261, 262, 263, 264, 265,
-    266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280,
-    281, 282, 283, 284, 285, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301,
-    302, 303, 319, 332, 340, 341, 342, 343, 344, 345, 352, 357, 367, 411]
-
-#for address in unknown:
-#    assert not address is seen
-#    # FIXME - what are the actual reserved values?
-#    address.append(Field('RESERVED', 7, 0, 'R', 0, address))
-
 registers = lmk05318b.build_registers(addresses)
 
-with open(os.path.dirname(__file__) + '/lmk05318b.list', 'w') as out:
+def print_list_file(out, registers: dict[str, Register]) -> None:
     for r in registers.values():
-        print(f'{r.name:20}: {r.base_address:3}', file=out, end='')
+        print(f'{r.name:20}: {r.access:3} {r.base_address:3}', file=out, end='')
+        if r.shift != 0:
+            print(f'.{r.shift}', file=out, end='')
+        print(f':{r.width}', file=out, end='')
         if r.byte_span != 1:
             print(f' ({r.byte_span})', file=out, end='')
-        print(f' {r.width}b', file=out, end='')
-        if r.shift != 0:
-            print(f' >>{r.shift}', file=out, end='')
+        if r.reset != 0:
+            if r.width <= 4:
+                print(f' = {r.reset:}', file=out, end='')
+            else:
+                w = (r.width + 3) // 4 + 2
+                print(f' = {r.reset:#0{w}x}', file=out, end='')
         print(file=out)
 
-dump_path = os.path.dirname(__file__) + '/lmk05318b-registers.pickle'
-pickle.dump(addresses, open(dump_path, 'wb'))
+if args.list is not None:
+    print_list_file(open(args.list, 'w'), registers)
+else:
+    print_list_file(sys.stdout, registers)
+
+if args.output is not None:
+    pickle.dump(addresses, open(args.output, 'wb'))

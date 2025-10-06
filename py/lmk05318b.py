@@ -10,6 +10,8 @@ from dataclasses import dataclass
 '''Extract the bit position suffix from a field name.'''
 SUBNAME_RE = re.compile(r'([^:]+)(_(\d+):(\d+))?$')
 
+BundledBytes = dict[int, bytearray]
+
 @dataclass
 class Field:
     name: str
@@ -43,7 +45,8 @@ class Field:
 class Address:
     address: int
     fields: list[Field]
-    read_only: int = True
+    read_only: bool = True
+
     def __str__(self) -> str:
         return f'R{self.address}'
     def validate(self) -> None:
@@ -57,8 +60,6 @@ class Address:
             mask |= f_mask
         assert mask == 255, f'{self} {mask}'
 
-ADDRESSES: list[Address] = []
-
 @dataclass
 class Register:
     name: str
@@ -67,9 +68,12 @@ class Register:
     byte_span: int = 0
     shift: int = 0
     width: int = 0
-    read_only: bool = False
+    access: str = ''
+    reset: int = 0
+
     def __str__(self) -> str:
         return self.name
+
     def validate(self) -> None:
         '''Check that the fields pack sensibly.'''
         self.fields.sort(key=lambda f: f.reg_lo)
@@ -86,15 +90,17 @@ class Register:
         self.byte_span = first.address - last.address + 1
         self.shift = first.byte_lo
         self.width = last.reg_hi + 1
-        self.read_only = not 'W' in self.fields[0].access
-        if self.read_only:
-            assert all(not 'W' in field.access for field in self.fields)
-        else:
-            assert all('W' in field.access for field in self.fields)
+        self.access = self.fields[0].access
+        assert all(self.access == field.access for field in self.fields)
         # All multibyte fields have any partial byte in the high byte.
         if self.byte_span > 1:
             assert self.shift == 0
         assert self.width == sum(f.byte_hi - f.byte_lo + 1 for f in self.fields)
+        reset = 0
+        for f in self.fields:
+            reset |= f.reset << f.reg_lo
+        self.reset = reset
+
     def extract(self, bb: bytes) -> int:
         base = self.base_address
         b = bb[base : base + self.byte_span]
@@ -102,6 +108,57 @@ class Register:
         value = value >> self.shift
         value &= (1 << self.width) - 1
         return value
+
+DATA_SIZE = 500
+
+def skip(R):
+    return R < 8 or R >= 353 or R in (12, 157, 164)
+
+class MaskedBytes:
+    data: bytearray
+    mask: bytearray
+    def __init__(self):
+        self.data = bytearray(DATA_SIZE)
+        self.mask = bytearray(DATA_SIZE)
+
+    def bundle(self, ro:bool = True, max_block:int = 1000,
+               defaults:MaskedBytes|None = None) -> BundledBytes:
+        result = {}
+        current_addr = 0
+        current_data = None
+        for i in range(DATA_SIZE):
+            data = self.data[i]
+            mask = self.mask[i]
+            if mask == 0:
+                continue
+            if mask != 255 and defaults is not None:
+                data = data & mask | defaults.data[i] & ~mask
+            if not ro and skip(i):
+                continue
+            if current_data is not None \
+               and i == current_addr + len(current_data) \
+               and len(current_data) < max_block:
+                current_data.append(data)
+            else:
+                current_addr = i
+                current_data = bytearray((data,))
+                result[current_addr] = current_data
+        return result
+
+    def extract(self, r: Register) -> int:
+        return r.extract(
+            self.data[r.base_address : r.base_address + r.byte_span])
+    def extract_mask(self, r: Register) -> int:
+        return r.extract(
+            self.mask[r.base_address : r.base_address + r.byte_span])
+    def insert(self, r: Register, value: int) -> None:
+        value = value << r.shift
+        vmask = (1 << r.width) - 1 << r.shift
+        data = struct.pack('>Q', value)[-r.byte_span:]
+        mask = struct.pack('>Q', vmask)[-r.byte_span:]
+        for i in range(r.byte_span):
+            self.data[i] = (self.data[i] & ~mask[i]) | (data[i] & mask[i])
+            self.mask[i] |= mask[i]
 
 def validate_addresses(addresses: list[Address]) -> None:
     '''Check that each Address has the bytes exactly covered.'''
@@ -126,7 +183,7 @@ def build_registers(addresses: list[Address]) -> dict[str, Register]:
 
     return registers
 
-ADDRESSES = pickle.load(
+ADDRESSES: list[Address] = pickle.load(
     open(os.path.dirname(__file__) + '/lmk05318b-registers.pickle', 'rb'))
 
 ADDRESS_BY_NUM = {}

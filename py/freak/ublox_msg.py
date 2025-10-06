@@ -3,7 +3,7 @@
 import difflib
 import io
 import os
-import serhelper
+from freak import serhelper
 import struct
 
 from dataclasses import dataclass
@@ -139,3 +139,5 @@ class UBloxReader:
             self.get_ack(b)
 
         return payload
+
+import freak.ublox_lists

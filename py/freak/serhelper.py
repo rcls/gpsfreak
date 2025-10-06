@@ -1,3 +1,20 @@
+'''pyserial is a bit broken, in that it's .read sematics are very inconvenient
+for variable sized messages.  Instead, a quick little helper that just gives
+us io.FileIO semantics.
+
+You can create a serhelper.Serial object for a serial port.
+
+All the functionality is exposed as plain functions, so that if you end up with
+some other io.IOBase object for a serial port, then you can still use the
+functions.
+
+All the serial-specific functionality silently does nothing if used with
+something that is not a serial port.  This is useful for code that can e.g.,
+use a plain file or a socket instead of a serial port.
+
+We only support raw mode on Posix ttys.  The historical Posix baggage for
+teletype support is ignored.'''
+
 import io
 import os
 import termios

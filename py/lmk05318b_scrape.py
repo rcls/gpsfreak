@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import lmk05318b
-import tics
+from freak import lmk05318b, tics
+from freak.lmk05318b import Address, Field, Register
 
 import argparse
 import dataclasses
@@ -11,7 +11,6 @@ import re
 import sys
 
 from dataclasses import dataclass
-from lmk05318b import Address, Field, Register
 
 argp = argparse.ArgumentParser(description='LMK05318b scraper')
 argp.add_argument('INPUT', help='Text file from pdftotext run')

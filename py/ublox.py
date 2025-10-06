@@ -5,9 +5,11 @@ import serhelper
 import struct
 import sys
 
-from ublox_defs import parse_key_list
-from ublox_cfg import UBloxCfg
-from ublox_msg import UBloxMsg, UBloxReader
+import freak
+
+from freak.ublox_defs import parse_key_list
+from freak.ublox_cfg import UBloxCfg
+from freak.ublox_msg import UBloxMsg, UBloxReader
 
 argp = argparse.ArgumentParser(description='UBLOX utility')
 subp = argp.add_subparsers(dest='command', required=True, help='Command')

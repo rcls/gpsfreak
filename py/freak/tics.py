@@ -1,10 +1,10 @@
 
 import configparser
-import freak
 import struct
 import re
 
-from lmk05318b import BundledBytes, MaskedBytes
+from .lmk05318b import BundledBytes, MaskedBytes
+from .message import Message
 
 def read_tcs_file(path: str) -> MaskedBytes:
     config = configparser.ConfigParser(strict=False)
@@ -26,9 +26,8 @@ def read_tcs_file(path: str) -> MaskedBytes:
         result.mask[reg_addr] = 255
     return result
 
-def make_i2c_transactions(reg_block_list: BundledBytes) -> list[freak.Message]:
+def make_i2c_transactions(reg_block_list: BundledBytes) -> list[Message]:
     messages = []
     for R, B in reg_block_list.items():
-        messages.append(
-            freak.Message(0xc80f, struct.pack('>H', R) + bytes(B)))
+        messages.append(Message(0xc80f, struct.pack('>H', R) + bytes(B)))
     return messages

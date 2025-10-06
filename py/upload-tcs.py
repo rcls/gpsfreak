@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
-import freak
+from freak import message, tics
 import sys
-import tics
 import usb
 
 from usb.core import USBTimeoutError
@@ -16,9 +15,9 @@ print(messages)
 dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
 
 # Flush any stale data.
-freak.flush(dev)
+message.flush(dev)
 
-ping_resp = freak.transact(dev, 0, b'This is a test')
+ping_resp = message.transact(dev, 0, b'This is a test')
 
 print(ping_resp)
 assert ping_resp.code == 0x0080
@@ -26,13 +25,13 @@ assert ping_resp.payload == b'This is a test'
 
 for msg in messages:
     print('Send', msg)
-    reply = freak.transact(dev, msg.code, msg.payload)
+    reply = message.transact(dev, msg.code, msg.payload)
     print(reply)
 
 # Now do the reset dance.
 print('Reset')
-reply = freak.transact(dev, freak.LMK05318B_WRITE, bytes((0, 12, 0x12)))
+reply = message.transact(dev, message.LMK05318B_WRITE, bytes((0, 12, 0x12)))
 print(reply)
 
-reply = freak.transact(dev, freak.LMK05318B_WRITE, bytes((0, 12, 0x02)))
+reply = message.transact(dev, message.LMK05318B_WRITE, bytes((0, 12, 0x02)))
 print(reply)

@@ -1,7 +1,7 @@
-import ublox_msg
-import ublox_cfg
-from ublox_cfg import UBloxCfg
-from ublox_msg import UBloxMsg
+
+from freak import ublox_cfg, ublox_msg
+from .ublox_cfg import UBloxCfg
+from .ublox_msg import UBloxMsg
 
 ublox_cfg.add_cfg_list([
     UBloxCfg('ANA-USE_ANA', 0x10230001, 'L'),

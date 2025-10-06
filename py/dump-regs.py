@@ -1,18 +1,16 @@
 #!/usr/bin/python3
 
+from freak import lmk05318b, message, tics
+from freak.message import LMK05318B_READ, LMK05318B_WRITE, transact
+from freak.lmk05318b import Address, MaskedBytes
+
 import argparse
 import fractions
 import struct
 import sys
 import usb
 
-import freak
-import lmk05318b
-import tics
-
 from fractions import Fraction
-from freak import transact
-from lmk05318b import Address, MaskedBytes
 from typing import Tuple
 
 argp = argparse.ArgumentParser(
@@ -49,11 +47,11 @@ def lmk05318b_bundles() -> list[Tuple[int, int]]:
 
 def usb_load() -> MaskedBytes:
     dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
-    freak.flush(dev)
+    message.flush(dev)
     data = MaskedBytes()
     for address, length in lmk05318b_bundles():
-        transact(dev, freak.LMK05318B_WRITE, struct.pack('>H', address))
-        segment = transact(dev, freak.LMK05318B_READ, struct.pack('<H', length))
+        transact(dev, LMK05318B_WRITE, struct.pack('>H', address))
+        segment = transact(dev, LMK05318B_READ, struct.pack('<H', length))
         for a, b in enumerate(segment.payload, address):
             data.data[a] = b
             data.mask[a] = 255

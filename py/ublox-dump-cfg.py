@@ -3,9 +3,7 @@
 import struct
 import serhelper
 
-import ublox_cfg
-import ublox_defs
-import ublox_msg
+from freak import message, ublox_cfg, ublox_defs, ublox_msg
 
 ser = serhelper.Serial('/dev/ttyACM3', 9600)
 

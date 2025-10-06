@@ -1,17 +1,11 @@
-#!/usr/bin/python3
 
 import os
 import re
-#import ublox_cfg, ublox_msg, ublox_lists
-#import .ublox_cfg, .ublox_msg, .ublox_lists
-#from . import ublox_cfg, ublox_msg, ublox_lists
 
 from typing import Tuple
 
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg
-
-last_config = None
 
 def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs = []

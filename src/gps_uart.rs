@@ -14,7 +14,7 @@ use stm32h503::Interrupt::GPDMA1_CH0 as DMA_INTERRUPT;
 
 // NOTE: In safe boot we seem to need a UU training sequence to get the baud
 // rate sane.
-const BAUD: u32 = 9600;
+const BAUD: u32 = 115200;
 const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
 const _: () = assert!(BRR < 65536);
 
@@ -27,7 +27,7 @@ const TX_DMA_REQ: u8 = 24;
 /// Set to true to loopback our own data instead of processing received data.
 const LOOPBACK: bool = false;
 
-static BAUD_RATE: VCell<u32> = VCell::new(9600);
+static BAUD_RATE: VCell<u32> = VCell::new(BAUD);
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 

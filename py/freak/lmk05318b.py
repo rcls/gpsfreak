@@ -1,11 +1,13 @@
 
+import dataclasses
+import difflib
 import os
 import pickle
 import struct
 import re
 
-import dataclasses
 from dataclasses import dataclass
+from typing import Tuple
 
 '''Extract the bit position suffix from a field name.'''
 SUBNAME_RE = re.compile(r'([^:]+)(_(\d+):(\d+))?$')
@@ -109,6 +111,15 @@ class Register:
         value &= (1 << self.width) - 1
         return value
 
+    @staticmethod
+    def get(key: str) -> Register:
+        try:
+            return REGISTERS[key]
+        except KeyError:
+            print('Did you mean?',
+                  difflib.get_close_matches(key, REGISTERS))
+            raise
+
 DATA_SIZE = 500
 
 def skip(R):
@@ -121,7 +132,7 @@ class MaskedBytes:
         self.data = bytearray(DATA_SIZE)
         self.mask = bytearray(DATA_SIZE)
 
-    def bundle(self, ro:bool = True, max_block:int = 1000,
+    def bundle(self, ro: bool = True, max_block: int = 1000,
                defaults:MaskedBytes|None = None) -> BundledBytes:
         result = {}
         current_addr = 0
@@ -145,20 +156,41 @@ class MaskedBytes:
                 result[current_addr] = current_data
         return result
 
+    def ranges(self, select = lambda m: m != 0,
+               max_block: int = 1000) -> list[Tuple[int, int]]:
+        '''Return a list of (start, count) of indexes with non-zero mask.'''
+        result = []
+        addr = None
+        span = 0
+        for i, m in enumerate(self.mask):
+            if not select(m):
+                continue
+            if addr is not None and addr + span == i:
+                span += 1
+                continue
+            if addr is not None:
+                result.append((addr, span))
+            addr = i
+            span = 1
+        if addr is not None:
+            result.append((addr, span))
+        return result
+
     def extract(self, r: Register) -> int:
-        return r.extract(
-            self.data[r.base_address : r.base_address + r.byte_span])
+        return r.extract(self.data)
+
     def extract_mask(self, r: Register) -> int:
-        return r.extract(
-            self.mask[r.base_address : r.base_address + r.byte_span])
+        return r.extract(self.mask)
+
     def insert(self, r: Register, value: int) -> None:
         value = value << r.shift
         vmask = (1 << r.width) - 1 << r.shift
         data = struct.pack('>Q', value)[-r.byte_span:]
         mask = struct.pack('>Q', vmask)[-r.byte_span:]
         for i in range(r.byte_span):
-            self.data[i] = (self.data[i] & ~mask[i]) | (data[i] & mask[i])
-            self.mask[i] |= mask[i]
+            j = r.base_address + i
+            self.data[j] = (self.data[j] & ~mask[i]) | (data[i] & mask[i])
+            self.mask[j] |= mask[i]
 
 def validate_addresses(addresses: list[Address]) -> None:
     '''Check that each Address has the bytes exactly covered.'''

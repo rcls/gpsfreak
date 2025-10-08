@@ -55,6 +55,7 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
             # Little endian!
             code = int(num1.group(1), 0) + 256 * int(num2.group(1), 0)
             messages.append(UBloxMsg(name, code))
+
         if L.startswith('CFG-'):
             if len(w) < 3:
                 continue
@@ -66,4 +67,5 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
             ty   = w[2]
             last_config = UBloxCfg(name, key, ty)
             configs.append(last_config)
+
     return configs, messages

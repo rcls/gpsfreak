@@ -54,7 +54,7 @@ class UBloxCfg:
         '''Typically, s will be a string, but can be anything castable.'''
         match self.typ[0]:
             case 'I'|'U'|'E'|'X':
-                return int(s)
+                return int(s, 0)
             case 'L': return bool(s)
             case 'R': return float(s)
             case _  : assert False

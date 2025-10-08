@@ -30,7 +30,8 @@ class Serial(io.FileIO):
     def flushread(self):
         flushread(self)
 
-def writeall(f: io.IOBase, b) -> int:
+# We need a FileIO because IOBase appears not to have a write() method.
+def writeall(f: io.FileIO, b) -> int:
     mv = memoryview(b)
     done = 0
     while done < len(mv):
@@ -42,7 +43,7 @@ def writeall(f: io.IOBase, b) -> int:
 
 def flushread(f: io.IOBase):
     if f.isatty():
-        termios.tcflush(f, termios.TCIFLUSH)
+        termios.tcflush(f.fileno(), termios.TCIFLUSH)
 
 def makeraw(f: io.IOBase, speed: int|None):
     if not f.isatty():
@@ -50,18 +51,16 @@ def makeraw(f: io.IOBase, speed: int|None):
     from termios import (
         BRKINT, CS8, CSIZE, ECHO, ECHONL, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR,
         INLCR, ISIG, ISTRIP, IXON, OPOST, PARENB, PARMRK, VMIN, VTIME)
-    attr = termios.tcgetattr(f)
+    attr = termios.tcgetattr(f.fileno())
     attr[0] &= ~(                                        # iflag
         IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON)
     attr[1] &= ~OPOST                                    # oflag
     attr[2] &= ~(CSIZE | PARENB)                         # cflag
     attr[2] |= CS8                                       # cflag
     attr[3] &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN) # lflag
-    print(f'Pre speed {attr[4]} {attr[5]}')
     if speed:
         attr[4] = speed                                  # ispeed
         attr[5] = speed                                  # ospeed
-    print(f'Set speed {attr[4]} {attr[5]}')
     attr[6][VMIN] = 0
     attr[6][VTIME] = 10
-    termios.tcsetattr(f, termios.TCSAFLUSH, attr)
+    termios.tcsetattr(f.fileno(), termios.TCSAFLUSH, attr)

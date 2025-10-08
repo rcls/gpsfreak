@@ -23,11 +23,16 @@ def key_value(s: str) -> Tuple[str, str]:
     K, V = s.split('=', 1)
     return K, V
 
-valset = subp.add_parser('set', description='Set configuration values.')
-valset.add_argument('KV', type=key_value, nargs='+', help='KEY=VALUE pairs')
+valset = subp.add_parser(
+    'set', description='Set configuration values.',
+    help='Set configuration values.')
+valset.add_argument('KV', type=key_value, nargs='+',
+                    metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
-valset = subp.add_parser('get', description='Get configuration values.')
-valset.add_argument('KEY', nargs='+', help='KEYs')
+valget = subp.add_parser(
+    'get', description='Get configuration values.',
+    help='Get configuration values.')
+valget.add_argument('KEY', nargs='+', help='KEYs')
 
 dump = subp.add_parser('dump', description='Retrieve entire config')
 

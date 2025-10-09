@@ -80,7 +80,7 @@ def do_plan(freq_str):
     from fractions import Fraction
     pll1, pll2 = lmk05318b_plan.plan([Fraction(f) for f in freq_str])
     print(f'PLL1')
-    for i, f in enumerate(pll1.freqs, 1):
+    for i, f in enumerate(pll1.freqs):
         if not f:
             continue
         od = lmk05318b_plan.output_divider(i, Fraction(2500) // f)
@@ -98,9 +98,9 @@ def do_plan(freq_str):
     if pll2.freq == pll2.freq_target:
         print()
     else:
-        print(f' (target {float(pll2.freq_target)}) error={pll2.error}')
+        print(f' (target {float(pll2.freq_target)}) error={pll2.error()}')
 
-    for i, (f, (pd, s1, s2)) in enumerate(zip(pll2.freqs, pll2.dividers), 1):
+    for i, (f, (pd, s1, s2)) in enumerate(zip(pll2.freqs, pll2.dividers)):
         if f:
             if s2 == 1:
                 print(f'    Channel {i} freq {f} dividers {pd} {s1}')

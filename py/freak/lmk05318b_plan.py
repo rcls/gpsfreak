@@ -15,8 +15,14 @@ assert SCALE * MHz == 1000000
 BAW_FREQ = 2_500 * MHz
 PLL2_LOW = 5_500 * MHz
 PLL2_HIGH = 6_250 * MHz
-# 1-based index of the big-divide.
-BIG_DIVIDE = 3
+# Index of the channel with a large divider.  Our numbering:
+# 0 = LMK 0,1, GPS Freak 2
+# 1 = LMK 2,3, GPS Freak 1
+# 2 = LMK 4.
+# 3 = LMK 5, GPS Freak U.Fl
+# 4 = LMK 6, GPS Freak 4
+# 5 = LMK 7, GPS Freak 3, can do 1Hz.
+BIG_DIVIDE = 5
 
 @dataclass
 class PLL2Plan:
@@ -71,7 +77,9 @@ class PLL2Plan:
         return (1 << 24) % self.multiplier.denominator == 0
 
     def stage2_even(self) -> bool:
-        _, _, stage2 = self.dividers[BIG_DIVIDE - 1]
+        if BIG_DIVIDE > len(self.dividers):
+            return True
+        _, _, stage2 = self.dividers[BIG_DIVIDE]
         return stage2 == 1 or stage2 % 2 == 0
 
 def fail(*args, **kwargs) -> NoReturn:
@@ -186,8 +194,8 @@ def pll2_plan_low(freqs: list[Fraction|None], freq: Fraction) -> PLL2Plan|None:
     '''Plan for the special case where we only have the BIG_DIVIDE output, and
     the stage2 divider is definitely needed.  Avoid a brute force search.'''
     assert freq < Fraction(PLL2_LOW, 7 * 256)
-    assert freq == freqs[BIG_DIVIDE - 1]
-    assert all(not f for i, f in enumerate(freqs, 1) if i != BIG_DIVIDE)
+    assert freq == freqs[BIG_DIVIDE]
+    assert all(not f for i, f in enumerate(freqs) if i != BIG_DIVIDE)
     # Just like TICS Pro, assume a FPD divider of 18.
     ratio = freq / Fraction(BAW_FREQ, 18)
     factors = qd_factor(ratio.denominator)
@@ -275,7 +283,7 @@ def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLL2Plan|None:
         assert PLL2_LOW <= pll2_freq <= PLL2_HIGH
         postdivs = (1 << 64) - 1
         postdive = (1 << 64) - 1
-        for i, f in enumerate(freqs, 1):
+        for i, f in enumerate(freqs):
             if f is None:               # Not needed.
                 continue
             assert (pll2_freq / f).is_integer()
@@ -315,7 +323,7 @@ def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLL2Plan|None:
         p1 = postdiv_bit >> 3 & 7
         p2 = postdiv_bit & 7
         dividers = []
-        for i, f in enumerate(freqs, 1):
+        for i, f in enumerate(freqs):
             if not f:
                 dividers.append((0, 0, 0))
                 continue
@@ -347,7 +355,7 @@ def plan(freqs: list[Fraction|None]) -> Tuple[PLL1Plan, PLL2Plan|None]:
     # First pull out the divisors of 2.5G...
     pll1: list[Fraction|None] = []
     pll2: list[Fraction|None] = []
-    for i, f in enumerate(freqs, 1):
+    for i, f in enumerate(freqs):
         if not f:
             pll1.append(None)
             pll2.append(None)
@@ -358,10 +366,7 @@ def plan(freqs: list[Fraction|None]) -> Tuple[PLL1Plan, PLL2Plan|None]:
             pll1.append(None)
             pll2.append(f)
         else:
-            fail(f'Frequency {f} {float(f)} is not achievable {i}')
-
-    #pll1_f = [float(f) for f in pll1 if f]
-    #pll2_f = [float(f) for f in pll2 if f]
+            fail(f'Frequency {f} {float(f)} is not achievable on {i}')
 
     # Find the LCM of all the pll2 frequencies...
     first = None
@@ -371,7 +376,6 @@ def plan(freqs: list[Fraction|None]) -> Tuple[PLL1Plan, PLL2Plan|None]:
             break
 
     if not first:
-        #print(f'PLL1 only: {pll1_f}')
         return PLL1Plan(pll1), None
 
     pll2_lcm = first
@@ -385,12 +389,8 @@ def plan(freqs: list[Fraction|None]) -> Tuple[PLL1Plan, PLL2Plan|None]:
         pll2_p = pll2_plan_low(pll2, pll2_lcm)
 
     if pll2_p is None:
-        fail(f'PLL2 planning failed')
+        fail(f'PLL2 planning failed, LCM = {pll2_lcm}')
 
-    #print(f'PLL1: {pll1_f}, PLL2: {pll2_f} error={pll2_p.error} mult=/{pll2_p.fpd_divide} *{pll2_p.multiplier}, VCO={pll2_p.freq}={float(pll2_p.freq)}', end='')
-    #if pll2_p.freq != pll2_p.freq_target:
-    #    print(f' (target {float(pll2_p.freq_target)})', end='')
-    #print(f' postdiv {pll2_p.postdiv_mask:#x}')
     return PLL1Plan(pll1), pll2_p
 
 if __name__ == '__main__':

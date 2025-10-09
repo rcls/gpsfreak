@@ -98,12 +98,19 @@ for L in open(args.INPUT):
 
 eject_field()
 
-# Not all are documented...
+# Not all are documented..
+#
+# The DPLL_PL_{LOCK|UNLK}_THRESH: Not sure how many bits these actually are!
+# The mapping from value to time appears to depend on the loop B/W and appears
+# to be exponential.
 addresses.append(
     Address(301, [Field('DPLL_PL_LOCK_THRESH', 7, 0, 'R/W', 0, 301)]))
 addresses.append(
     Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
 
+# Various undocumented fields are set in the TICS file.  The follow are
+# observed to change with the DPLL B/W: 271, 275, 277, 278, 280, 281, 282, 283,
+# 296, 297, 298.
 if args.tics:
     seen = set(address.address for address in addresses)
     tf = tics.read_tcs_file(args.tics)

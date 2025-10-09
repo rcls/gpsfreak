@@ -109,6 +109,8 @@ pub fn init() {
         let ws = if CPU_FREQ <= 150_000_000 {4} else {5};
         flash.ACR.write(
             |w| w.PRFTEN().set_bit().WRHIGHFREQ().bits(2).LATENCY().bits(ws));
+        // The docs say to read-back ACR.
+        flash.ACR.read();
         // WRHIGH FREQ = 2
         // Wait for the PLL to become ready...
         while !rcc.CR.read().PLL1RDY().bit() {}

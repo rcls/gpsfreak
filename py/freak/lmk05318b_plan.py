@@ -8,6 +8,72 @@ from fractions import Fraction
 from math import ceil, floor, gcd
 from typing import Generator, NoReturn, Tuple
 
+# All the frequencies are in MHz.
+SCALE = 1000000
+MHz = 1000000 // SCALE
+assert SCALE * MHz == 1000000
+BAW_FREQ = 2_500 * MHz
+PLL2_LOW = 5_500 * MHz
+PLL2_HIGH = 6_250 * MHz
+# 1-based index of the big-divide.
+BIG_DIVIDE = 3
+
+@dataclass
+class PLL2Plan:
+    # The actual frequency of PLL2, in MHz
+    freq: Fraction = Fraction(0)
+    # The target frequency of PLL2, in MHz.
+    freq_target: Fraction = Fraction(0)
+    # Fpd divider between BAW and PLL2.  Currently only 18 is supported.
+    fpd_divide: int = 18
+    # Feedback divider value.
+    multiplier: Fraction = Fraction(0)
+    # Postdivider mask.
+    postdiv_mask: int = 0
+    # Post & output dividers by channel
+    dividers: list[Tuple[int, int, int]] \
+        = dataclasses.field(default_factory = lambda: [])
+    # Target output frequency list.
+    freqs: list[Fraction|None] \
+        = dataclasses.field(default_factory = lambda: [])
+
+    def __lt__(self, b: PLL2Plan) -> bool:
+        '''Less is better'''
+        # Prefer no error!
+        a_error = abs(self.error())
+        b_error = abs(b.error())
+        if a_error != b_error:
+            return a_error < b_error
+        # Prefer an even stage2 divider (or one): this gives exactly 50/50
+        # duty cycle.
+        a_even = self.stage2_even()
+        b_even = b.stage2_even()
+        if a_even != b_even:
+            return a_even
+        # Prefer power-of-two (fixed) denomoninator.
+        a_fixed = self.fixed_denom()
+        b_fixed = b.fixed_denom()
+        if a_fixed != b_fixed:
+            return a_fixed
+        # Prefer lower VCO2 frequencies.  Hopefully that is lower power
+        # consumption.
+        if self.freq != b.freq:
+            return self.freq < b.freq
+        return False
+
+    def validate(self):
+        assert self.freq == self.multiplier * BAW_FREQ / fpd_divide
+
+    def error(self) -> float:
+        return float(self.freq / self.freq_target - 1)
+
+    def fixed_denom(self) -> bool:
+        return (1 << 24) % self.multiplier.denominator == 0
+
+    def stage2_even(self) -> bool:
+        _, _, stage2 = self.dividers[BIG_DIVIDE - 1]
+        return stage2 == 1 or stage2 % 2 == 0
+
 def fail(*args, **kwargs) -> NoReturn:
     print(*args, **kwargs)
     sys.exit(1)
@@ -56,35 +122,8 @@ def qd_factor(n: int) -> list[int]:
         factors.append(n)
     return factors
 
-# All the frequencies are in MHz.
-SCALE = 1000000
-MHz = 1000000 // SCALE
-assert SCALE * MHz == 1000000
-BAW_FREQ = 2_500 * MHz
-PLL2_LOW = 5_500 * MHz
-PLL2_HIGH = 6_250 * MHz
-# 1-based index of the big-divide.
-BIG_DIVIDE = 3
-
-@dataclass(order=True)
-class PLL2Plan:
-    # Absolute error.
-    error: float = 0.0
-    # Is stage 2 divider odd (only BIG_DIVIDE has stage2!)
-    stage2_odd: bool = False
-    # Is the denominator fixed or variable?
-    apll2_den_mode: bool = False
-    # The actual frequency of PLL2, in MHz
-    freq: Fraction = Fraction(0)
-    # The target frequency of PLL2, in MHz.
-    freq_target: Fraction = Fraction(0)
-    # Fpd divider between BAW and PLL2.  Currently only 18 is supported.
-    fpd_divide: int = 18
-    # Feedback divider value.
-    multiplier: Fraction = Fraction(0)
-    # Postdivider mask.
-    postdiv_mask: int = 0
-    # Target output frequency list.
+@dataclass
+class PLL1Plan:
     freqs: list[Fraction|None] = dataclasses.field(default_factory = lambda: [])
 
 def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
@@ -189,12 +228,13 @@ def pll2_plan_low(freqs: list[Fraction|None], freq: Fraction) -> PLL2Plan|None:
                 extra = ceil(Fraction(PLL2_LOW / freq) / output_divide)
                 #print(f'extra = {extra}')
                 if extra * output_divide * freq > PLL2_HIGH \
-                   or extra * stage2_div >= (1<<24):
+                   or extra * stage2_div > (1<<24):
                     #print(f'BAD extra = {extra}')
                     continue
                 # Attempt to make the stage2 divide even...
-                if stage2_div % 2 != 0 and \
-                   (extra+1) * output_divide * freq <= PLL2_HIGH:
+                if stage2_div % 2 != 0 \
+                   and (extra+1) * output_divide * freq <= PLL2_HIGH \
+                   and (extra+1) * stage2_div <= (1<<24):
                     extra += 1
                 stage2_div *= extra
                 vco_freq = freq * post_div * stage1_div * stage2_div
@@ -202,14 +242,13 @@ def pll2_plan_low(freqs: list[Fraction|None], freq: Fraction) -> PLL2Plan|None:
                 multiplier = vco_freq / Fraction(BAW_FREQ, 18)
                 assert multiplier.denominator <= 1<<24
                 plan = PLL2Plan(
-                    error = 0.0,
-                    stage2_odd = stage2_div % 2 != 0,
-                    apll2_den_mode = (1<<24) % multiplier.denominator == 0,
                     freq = vco_freq,
                     freq_target = vco_freq,
                     fpd_divide = 18,
                     multiplier = multiplier,
                     postdiv_mask = postdiv_mask(post_div),
+                    dividers = [(0, 0, 0), (0, 0, 0),
+                                (post_div, stage1_div, stage2_div), (0, 0, 0)],
                     freqs = freqs)
                 if best is None or plan < best:
                     best = plan
@@ -229,15 +268,13 @@ def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLL2Plan|None:
     # Range to try for multipliers.
     start = ceil(PLL2_LOW / pll2_lcm)
     end = floor(PLL2_HIGH / pll2_lcm)
-    # Limit the search time.  FIXME, we should be able to do better than this.
-    if end > start + 20000000:
-        end = start + 20000000
-
     best = None
-    for mult in range(start, end + 1):
+    for mult in range(ceil(PLL2_LOW / pll2_lcm),
+                      floor(PLL2_HIGH / pll2_lcm) + 1):
         pll2_freq = mult * pll2_lcm
         assert PLL2_LOW <= pll2_freq <= PLL2_HIGH
         postdivs = (1 << 64) - 1
+        postdive = (1 << 64) - 1
         for i, f in enumerate(freqs, 1):
             if f is None:               # Not needed.
                 continue
@@ -250,37 +287,63 @@ def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLL2Plan|None:
             # Now break the ratio into a post-divider and output divider.
             # FIXME - we should track which give a good stage2!
             postdivs1 = 0
+            postdive1 = 0
             for postdiv in range(2, 8):
-                if ratio % postdiv == 0 \
-                   and output_divider(i, ratio // postdiv) is not None:
-                    postdivs1 |= postdiv_mask(postdiv)
+                if ratio % postdiv != 0:
+                    continue
+                od = output_divider(i, ratio // postdiv)
+                if od is None:
+                    continue
+                s1, s2 = od
+                postdivs1 |= postdiv_mask(postdiv)
+                if s2 == 1 or s2 % 2 == 0:
+                    postdive |= postdiv_mask(postdiv)
             postdivs &= postdivs1
+            postdive &= postdive1
             if postdivs == 0:
-                break
-        if postdivs == 0:
-            continue                    # Doesn't work
-        # Now check the ratio with the BAW.
-        # FIXME - variable predividers.  TICS Pro seems to always use /18
-        # on the PLL2 pre-divider and a PLL2 denominator of 1<<24.
+                break                   # Doesn't work
+        # Compute the multipliers.
         mult_exact = pll2_freq / Fraction (BAW_FREQ, 18)
         mult_actual = mult_exact.limit_denominator(1 << 24)
-        error = abs(float(mult_actual / mult_exact - 1))
+        # Compute the post-dividers.  Use the highest possible pair.
+        if postdivs == 0:
+            continue                    # Doesn't work
+        if postdive != 0:
+            postdiv_bit = postdive.bit_length() - 1
+        else:
+            postdiv_bit = postdivs.bit_length() - 1
+        p1 = postdiv_bit >> 3 & 7
+        p2 = postdiv_bit & 7
+        dividers = []
+        for i, f in enumerate(freqs, 1):
+            if not f:
+                dividers.append((0, 0, 0))
+                continue
+            ratio = int(pll2_freq / f)
+            od = None
+            if ratio % p1 == 0:
+                od = output_divider(i, ratio // p1)
+            if od != None:
+                dividers.append((p1, od[0], od[1]))
+            else:
+                od = output_divider(i, ratio // p2)
+                assert od is not None
+                dividers.append((p2, od[0], od[1]))
+        # TODO - does it matter which is which?
         plan = PLL2Plan(
-            error = error,
-            stage2_odd = False, # FIXME
-            apll2_den_mode = (1<<24) % mult_actual.denominator == 0,
             freq = Fraction(BAW_FREQ, 18) * mult_actual,
             freq_target = pll2_freq,
             fpd_divide = 18,
             multiplier = mult_actual,
             postdiv_mask = postdivs,
+            dividers = dividers,
             freqs = freqs)
 
         if best is None or plan < best:
             best = plan
     return best
 
-def plan(freqs: list[Fraction|None]):
+def plan(freqs: list[Fraction|None]) -> Tuple[PLL1Plan, PLL2Plan|None]:
     # First pull out the divisors of 2.5G...
     pll1: list[Fraction|None] = []
     pll2: list[Fraction|None] = []
@@ -297,8 +360,8 @@ def plan(freqs: list[Fraction|None]):
         else:
             fail(f'Frequency {f} {float(f)} is not achievable {i}')
 
-    pll1_f = [float(f) for f in pll1 if f]
-    pll2_f = [float(f) for f in pll2 if f]
+    #pll1_f = [float(f) for f in pll1 if f]
+    #pll2_f = [float(f) for f in pll2 if f]
 
     # Find the LCM of all the pll2 frequencies...
     first = None
@@ -308,8 +371,8 @@ def plan(freqs: list[Fraction|None]):
             break
 
     if not first:
-        print(f'PLL1 only: {pll1_f}')
-        return
+        #print(f'PLL1 only: {pll1_f}')
+        return PLL1Plan(pll1), None
 
     pll2_lcm = first
     for f in pll2:
@@ -322,13 +385,13 @@ def plan(freqs: list[Fraction|None]):
         pll2_p = pll2_plan_low(pll2, pll2_lcm)
 
     if pll2_p is None:
-        fail(f'PLL2 planning failed {pll2_f}')
+        fail(f'PLL2 planning failed')
 
-    print(f'PLL1: {pll1_f}, PLL2: {pll2_f} error={pll2_p.error} mult=/{pll2_p.fpd_divide} *{pll2_p.multiplier}, VCO={pll2_p.freq}={float(pll2_p.freq)}', end='')
-    if pll2_p.freq != pll2_p.freq_target:
-        print(f' (target {float(pll2_p.freq_target)})', end='')
-    print(f' postdiv {pll2_p.postdiv_mask:#x}')
-
+    #print(f'PLL1: {pll1_f}, PLL2: {pll2_f} error={pll2_p.error} mult=/{pll2_p.fpd_divide} *{pll2_p.multiplier}, VCO={pll2_p.freq}={float(pll2_p.freq)}', end='')
+    #if pll2_p.freq != pll2_p.freq_target:
+    #    print(f' (target {float(pll2_p.freq_target)})', end='')
+    #print(f' postdiv {pll2_p.postdiv_mask:#x}')
+    return PLL1Plan(pll1), pll2_p
 
 if __name__ == '__main__':
     plan([Fraction(s) for s in sys.argv[1:]])

@@ -22,7 +22,7 @@ message.flush(dev)
 ping_resp = message.retrieve(dev, message.PING, b'This is a test')
 
 print(ping_resp)
-assert ping_resp.code == 0x0080
+assert ping_resp.code == 0x80
 assert ping_resp.payload == b'This is a test'
 
 for payload in messages:

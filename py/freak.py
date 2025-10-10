@@ -9,7 +9,7 @@ import struct
 import usb
 import uuid
 
-argp = argparse.ArgumentParser(description='LMK05318b utility')
+argp = argparse.ArgumentParser(description='GPS Freak utility')
 subp = argp.add_subparsers(
     dest='command', metavar='COMMAND', required=True, help='Command')
 

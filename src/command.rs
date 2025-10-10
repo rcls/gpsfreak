@@ -3,23 +3,21 @@
 //! The format is
 //!
 //!     magic   : u16 // Bytes CE 93
-//!     code    : u16 // First byte is grouping
-//!     len     : u16
+//!     code    : u8
+//!     len     : u8
 //!     payload : [u8; len]
 //!     checksum: u16
 //!
 //! The magic is the byte sequence CE 93 (little endian 0x93ce), which is
 //! UTF-8 for 'Γ' (GREEK UPPER CASE GAMMA).
 //!
-//! The code is two bytes, the first byte defines groupings of messages.
-//! The high bit of the first byte is used as a direction: 0 is to the device,
-//! 1 is from the device.  Spontaneous messages from the device always have the
-//! two highest bits set (0xC0 ..= 0xFF) [are we going to do any?].
+//! The code bit identifies the message purpose and format.  The high bit
+//! indicates the direction: 0 is to the device, 1 is from the device.
 //!
 //! Any request to the device gets a response, a ACK or NAK if nothing else.
 //!
 //! Note that if the device gets a request code indicating a message from the
-//! device, then it does not respond.  This avoids
+//! device, then it does not respond.  This avoids message loops!
 //!
 //! `len` is the length of the payload, in bytes.
 //!
@@ -35,51 +33,48 @@
 //! The CRC is then checked by computing the CRC over the entire message, and
 //! checking that the result is zero.
 //!
-//! Command groups:
-//! 00 xx : Overall device control
-//!    00 00 : PING.  Arbitrary payload.  Response is 80 00 and echos the
-//!            payload.  By sending a random token, you can check that
-//!            messages are synchronised.
-//!    80 00 : ACK. Generic Acknowledgement.  Payload is generally empty.
-//!            Ping responses echo the payload.  Otherwise if non-empty,
-//!            then is an informational UTF-8 string.
+//! Commands:
+//!    00 : PING.  Arbitrary payload.  Response is 80 00 and echos the payload.
+//!         By sending a random token, you can check that messages are
+//!         synchronised.
+//!    80 : ACK. Generic Acknowledgement.  Payload is generally empty.
+//!         Ping responses echo the payload.  Otherwise if non-empty, then is an
+//!         informational UTF-8 string.
 //!
-//!    80 01 : NAK. Generic failure.  A request could not be successfully
-//!            executed.  A u16 payload field.  See below for the error
-//!            enumeration.
+//!    01 : NAK. Generic failure.  A request could not be successfully executed.
+//!         A u16 payload field.  See below for the error enumeration.
 //!
-//!    00 02 : Get protocol version.  Response is 80 02 with u32 payload.
-//!    00 03 : Get serial number.  Response is 80 03 with string payload.
+//!    02 : Get protocol version.  Response is 82 with u32 payload.
+//!    03 : Get serial number.  Response is 83 with string payload.
 //!
-//!    00 10 : CPU reboot.  No response.
-//!    00 11 : GPS reset.
-//!    00 12 : Clock gen PDN, one byte payload:
+//!    10 : CPU reboot.  No response.
+//!    11 : GPS reset. u8 payload.
+//!            - 0 assert reset low, 1 deassert reset high, others pulse reset.
+//!    12 : Clock gen PDN (reset), u8 payload:
 //!            - 0 power down, 1 power up, ≥2 reset & power back up.
-//!    00 20 : Set baud rate, u32 payload.  Useful for provisioning, normal
-//!            use cases can use USB CDC ACM.
+//!    1f : Set baud rate, u32 payload.  Useful for provisioning, normal
+//!         use cases can use USB CDC ACM.
 //!
-//! 0E xx : Low level operations.
-//!    0E 01 : peek.  Payload is u32 address followed by u32 length.  Response
-//!            is 8E 01 with address + data payload.
-//!    0E 02 : poke.  Payload is u32 address followed by data bytes.
+//!    60 : LMK05318b I²C write.  Payload is sent in a I²C write transaction.
+//!
+//!    61 : LMK05318b I²C read.  First byte of payload is number of bytes,
+//!         if there are subsequent bytes, then these are sent as a write
+//!         before a repeated-start read.  Reply is E1 with the read bytes
+//!         as payload.
+//!
+//!    62 : TMP117 I²C write.  Just like 60, but to the TMP117.
+//!    63 : TMP117 I²C read.  Just like 61, but to the TMP117.
+//!
+//!    64, 65 : Reserved for GPS I²C.
+//!
+//!    70 : Unsafe operation unlock.  Needs correct magic data payload.
+//!    71 : peek.  Payload is u32 address followed by u8 length.  Response is
+//!         F1 with address + data payload.
+//!    72 : poke.  Payload is u32 address followed by data bytes.
 //!
 //!            Both peek and poke will do 32-bit or 16-bit transfers if address
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
-//!
-//! 0F xx : Raw I²C bus operations
-//!
-//!    xx is the address as per the I²C bus: the low bit determines write (0) or
-//!    read (1).
-//!
-//!    Write operations carry the I²C bytes as a payload.  (length = number of
-//!    bytes).  Write responses are generic acks on successes, or a NAK on
-//!    error.
-//!
-//!    Read operations carry the u16 transaction length as a payload.  If there
-//!    are further bytes, then these are written before the read, using a
-//!    repeated start.  Response are 8F xx followed by the data read, or a
-//!    NAK on error.
 
 use crate::i2c;
 
@@ -122,116 +117,103 @@ const MAGIC: u16 = 0xce93u16.to_be();
 
 /// Maximum message payload size for a message.  Currently we only support
 /// messages up to 64 bytes total.
-const MAX_PAYLOAD: usize = 56;
+const MAX_PAYLOAD: usize = 58;
 
 /// A struct representing a message.
 #[repr(C)]
 pub struct MessageBuf {
     magic  : u16,
-    code   : u16,
-    len    : u16,
+    code   : u8,
+    len    : u8,
     /// The payload includes the CRC.
     payload: [u8; MAX_PAYLOAD + 2],
 }
 const _: () = assert!(size_of::<MessageBuf>() == 64);
 
 #[derive(Debug, Default)]
-#[repr(packed)]
-pub struct Packed<P>(P);
-
-#[derive(Debug, Default)]
 #[repr(C)]
 pub struct Message<P> {
     magic  : u16,
-    code   : u16,
-    len    : u16,
+    code   : u8,
+    len    : u8,
     payload: P,
-    crc    : u16,
+    crc0   : u8,
+    crc1   : u8,
 }
-const _: () = assert!(size_of::<Message::<Packed<u32>>>() == 12);
-const _: () = assert!(align_of::<Message::<Packed<u32>>>() == 2);
 
 impl MessageBuf {
-    fn start(code: u16) -> MessageBuf {
+    fn start(code: u8) -> MessageBuf {
         MessageBuf{magic: MAGIC, code, len: 0, payload: [0; _]}
     }
-    fn new(code: u16, payload: &[u8]) -> MessageBuf{
+    fn new(code: u8, payload: &[u8]) -> MessageBuf{
         let len = payload.len();
         let mut result = MessageBuf{
-            magic: MAGIC, code, len: len as u16, payload: [0; _],
+            magic: MAGIC, code, len: len as u8, payload: [0; _],
         };
         result.payload[..len].copy_from_slice(payload);
-        let crc = crc::compute(unsafe {core::slice::from_raw_parts(
-            &result as *const Self as _, 6 + len
-        )});
-        result.payload[len] = (crc >> 8) as u8;
-        result.payload[len + 1] = crc as u8;
+        result.set_crc();
         result
     }
     fn send(&self) {
-        let len = 6 + self.len + 2;     // Include header and CRC.
+        let len = 4 + self.len as usize + 2;     // Include header and CRC.
         crate::usb::main_tx_response(
             unsafe {core::slice::from_raw_parts(
-                self as *const Self as _, len as usize)});
+                self as *const Self as _, len)});
     }
     fn set_crc(&mut self) {
         let len = self.len as usize;
         let crc = crc::compute(unsafe {core::slice::from_raw_parts(
-            self as *const Self as _, 6 + len
-        )});
+            self as *const Self as _, 4 + len)});
         self.payload[len] = (crc >> 8) as u8;
         self.payload[len + 1] = crc as u8;
     }
     fn get_payload(&self) -> &[u8] {
         &self.payload[.. self.len as usize]
     }
-    fn check_len(&self, len: u16) -> Result<&MessageBuf> {
+    fn check_len(&self, len: u8) -> Result<&MessageBuf> {
         if self.len == len {Ok(self)} else {Err(Error::BadFormat)}
     }
 }
 
 impl<P: core::fmt::Debug> Message<P> {
-    fn new(code: u16, payload: P) -> Message<P> {
+    fn new(code: u8, payload: P) -> Message<P> {
         let mut result = Message{
-            magic: MAGIC, code, len: size_of::<P>() as u16, payload, crc: 0};
+            magic: MAGIC, code, len: size_of::<P>() as u8, payload,
+            crc0: 0, crc1: 0};
         result.set_crc();
         result
     }
-    fn compute_crc(&self) -> u16 {
-        let p: *const u8 = self as *const Self as _;
-        let len = size_of::<Self>() - 2;
-        crc::compute(unsafe {core::slice::from_raw_parts(p, len)})
-    }
     fn set_crc(&mut self) {
-        self.crc = self.compute_crc().to_be();
+        let p: *const u8 = self as *const Self as _;
+        let len = size_of::<P>() + 4;
+        let crc = crc::compute(unsafe {core::slice::from_raw_parts(p, len)});
+        self.crc0 = (crc >> 8) as u8;
+        self.crc1 = crc as u8;
     }
     fn send(&self) {
         dbgln!("Freak TX: @{:?} {:?}", self as *const _, self);
         crate::usb::main_tx_response(
             unsafe {core::slice::from_raw_parts(
-                self as *const Self as _, size_of::<Self>())});
+                self as *const Self as _, 6 + size_of::<P>())});
     }
     fn from_buf(message: &MessageBuf) -> Result<&Self> {
-        message.check_len(size_of::<P>() as u16)?;
+        message.check_len(size_of::<P>() as u8)?;
         Ok(unsafe {&*(message as *const MessageBuf as *const Self)})
     }
 }
 
 pub fn command_handler(message: &MessageBuf, len: usize) {
-    if let Err(ed) = command_dispatch(message, len) {
-        if ed == Error::Succeeded {
-            Ack::new(0x8000u16.to_be(), ()).send();
-        }
-        else {
-            Nack::new(0x8001u16.to_be(), ed).send();
-        }
+    match command_dispatch(message, len) {
+        Err(Error::Succeeded) => Ack::new(0x80, ()).send(),
+        Err(err) => Nack::new(0x81, err).send(),
+        _ => (),
     }
 }
 
 fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
     // dbgln!("Command handler dispatch {:x?}",
     //       unsafe {core::slice::from_raw_parts(message as *const _ as *const u8, len)});
-    if len < 8 || message.len as usize != len - 8 {
+    if message.len as usize + 6 != len {
         dbgln!("Length problem {len} {}", message.len);
         return Err(Error::FramingError);
     }
@@ -246,34 +228,40 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
         return Err(Error::FramingError);
     }
 
-    match (message.code & 0xff, message.code >> 8) {
-        (0x00, 0x00) => ping(message),
-        (0x00, 0x02) => get_protocol_version(message),
-        (0x00, 0x03) => get_serial_number(message),
-        (0x00, 0x10) => crate::cpu::reboot(),
-        (0x00, 0x11) => gps_reset(message),
-        (0x00, 0x12) => lmk_powerdown(message),
-        (0x0f, _)    => i2c_transact(message),
+    match message.code {
+        0x00 => ping(message),
+        0x02 => get_protocol_version(message),
+        0x03 => get_serial_number(message),
+
+        0x10 => crate::cpu::reboot(),
+        0x11 => gps_reset(message),
+        0x12 => lmk_powerdown(message),
+
+        0x60 => i2c_write(0xc8, message),
+        0x61 => i2c_read (0xc9, message),
+        0x62 => i2c_write(0x92, message),
+        0x63 => i2c_read (0x93, message),
+
         _ => Err(Error::UnknownMessage)
     }
 }
 
 fn ping(message: &MessageBuf) -> Result {
     // Send a generic ACK with the same payload.
-    MessageBuf::new(0x8000u16.to_be(), message.get_payload()).send();
+    MessageBuf::new(0x80, message.get_payload()).send();
     Ok(())
 }
 
 fn get_protocol_version(message: &MessageBuf) -> Result {
     Message::<()>::from_buf(message)?;
-    Message::new(0x8002u16.to_be(), Packed(1u32)).send();
+    Message::new(0x82, 1u32).send();
     Ok(())
 }
 
 fn get_serial_number(message: &MessageBuf) -> Result {
     Message::<()>::from_buf(message)?;
     let sn = crate::cpu::SERIAL_NUMBER.as_ref();
-    Message::new(0x8003u16.to_be(), *sn).send();
+    Message::new(0x83, *sn).send();
     Ok(())
 }
 
@@ -313,40 +301,36 @@ fn lmk_powerdown(message: &MessageBuf) -> Result {
     SEND_ACK
 }
 
-fn i2c_transact(message: &MessageBuf) -> Result {
-    // Low bit is RD/WRn.
-    let address = (message.code >> 8) as u8;
-    if address & 1 == 0 {
-        dbgln!("I2C write {address:#04x} length {}", message.len);
-        // Write.
-        if let Ok(()) = i2c::write(address, message.get_payload()).wait() {
-            return SEND_ACK;
-        }
-        else {
-            return Err(Error::Failed);
-        }
+fn i2c_write(address: u8, message: &MessageBuf) -> Result {
+    dbgln!("I2C write {address:#04x} length {}", message.len);
+    // Write.
+    if let Ok(()) = i2c::write(address, message.get_payload()).wait() {
+        SEND_ACK
     }
+    else {
+        Err(Error::Failed)
+    }
+}
 
+fn i2c_read(address: u8, message: &MessageBuf) -> Result {
     // Get the length...
-    // Read.
     let mlen = message.len as usize;
-    if mlen < 2 {
+    if mlen < 1 {
         return Err(Error::BadFormat);
     }
-    let rlen = unsafe {*(&message.payload as *const u8 as *const u16)};
-    let rlen = rlen as usize;
+    let rlen = message.payload[0] as usize;
     dbgln!("I2C read {address:#04x} wlen {} rlen {}", mlen - 2, rlen);
     if rlen > MAX_PAYLOAD {
         return Err(Error::BadParameter);
     }
-    let mut result = MessageBuf::start(message.code | 0x0080);
-    result.len = rlen as u16;
+    let mut result = MessageBuf::start(message.code | 0x80);
+    result.len = rlen as u8;
     let w;
-    if mlen == 2 {
+    if mlen == 1 {
         w = i2c::read(address, &mut result.payload[..rlen]);
     }
     else {
-        w = i2c::write_read(address, &message.payload[2..mlen],
+        w = i2c::write_read(address, &message.payload[1..mlen],
                             &mut result.payload[..rlen]);
     }
     if let Ok(()) = w.wait() {

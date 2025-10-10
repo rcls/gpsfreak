@@ -8,31 +8,31 @@ from dataclasses import dataclass
 
 MAGIC = b'\xce\x93'
 
-ACK=0x0080
-NACK=0x0180
+ACK=0x80
+NACK=0x81
 
-PING=0x0000
+PING=0x00
 
-GET_PROTOCOL_VERSION=0x0200
-GET_PROTOCOL_VERSION_RESULT=0x0280
-GET_SERIAL_NUMBER=0x0300
-GET_SERIAL_NUMBER_RESULT=0x0380
+GET_PROTOCOL_VERSION=0x02
+GET_PROTOCOL_VERSION_RESULT=0x82
+GET_SERIAL_NUMBER=0x03
+GET_SERIAL_NUMBER_RESULT=0x83
 
-CPU_REBOOT=0x1000
-GPS_RESET=0x1100
-LMK05318B_PDN=0x1200
+CPU_REBOOT=0x10
+GPS_RESET=0x11
+LMK05318B_PDN=0x12
 
-PEEK=0x010e
-PEEK_DATA=0x810e
-POKE=0x020e
+PEEK=0x71
+PEEK_DATA=0xf1
+POKE=0x72
 
-LMK05318B_WRITE=0xc80f
-LMK05318B_READ=0xc90f
-LMK05318B_READ_RESULT=0xc98f
+LMK05318B_WRITE=0x60
+LMK05318B_READ=0x61
+LMK05318B_READ_RESULT=0xe1
 
-TMP117_WRITE=0x920f
-TMP117_READ=0x930f
-TMP117_READ_RESULT=0x938f
+TMP117_WRITE=0x62
+TMP117_READ=0x63
+TMP117_READ_RESULT=0xe3
 
 class RequestFailed(RuntimeError):
     pass
@@ -66,22 +66,30 @@ def crc(bb: bytes) -> int:
     return result
 
 assert crc(b'123456789') == 0x31c3
+
 def frame(code: int, payload: bytes) -> bytes:
-    message = MAGIC + struct.pack('<HH', code, len(payload)) + payload
+    message = MAGIC + bytes((code, len(payload))) + payload
     return message + struct.pack('>H', crc(message))
 
 def deframe(message: bytes) -> Message:
-    if len(message) < 8:
+    if len(message) < 6:
         raise ValueError('Under-length message')
     if message[:2] != MAGIC:
         raise ValueError('Incorrect magic')
     if crc(message) != 0:
+        print(message.hex(' '))
+        exp0 = crc(message[:-4])
+        exp1 = crc(message[:-3])
+        exp2 = crc(message[:-2])
+        exp3 = crc(message[:-2] + b'\x00\x00')
+        print(f'{exp0:#06x} {exp1:#06x} {exp2:#06x} {exp3:#06x}')
         raise ValueError('Bad CRC')
-    code, length = struct.unpack('<HH', message[2:6])
-    if len(message) != length + 8:
+    code = message[2]
+    length = message[3]
+    if len(message) != length + 6:
         raise ValueError('Length mismatch')
 
-    return Message(code, message[6:-2])
+    return Message(code, message[4:-2])
 
 def flush(dev: usb.Device) -> None:
     # Flush any stale data.
@@ -94,17 +102,17 @@ def transact(dev: usb.Device, code: int, payload: bytes,
              expect: int|None = None) -> Message:
     dev.write(0x03, frame(code, payload))
     result = deframe(bytes(dev.read(0x83, 64, 10000)))
-    if expect is None and result.code == NACK:
-        raise RequestFailed()
+    if expect != NACK and result.code == NACK:
+        raise RequestFailed(f'Result code is NACK ' + result.payload.hex(' '))
     if expect is not None and result.code != expect:
-        raise RequestFailed()
+        raise RequestFailed(f'Result code is {result.code:#04x}')
     return result
 
 def command(dev: usb.Device, code: int, payload: bytes = b'') -> Message:
     return transact(dev, code, payload, expect=ACK)
 
 def retrieve(dev: usb.Device, code: int, payload: bytes = b'') -> Message:
-    return transact(dev, code, payload, expect= code | 0x0080)
+    return transact(dev, code, payload, expect= code | 0x80)
 
 def test_simple():
     code = 0x1234

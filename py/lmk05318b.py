@@ -80,7 +80,7 @@ args = argp.parse_args()
 def get_ranges(dev, data: MaskedBytes, ranges: list[Tuple[int, int]]) -> None:
     for base, span in ranges:
         segment = retrieve(dev, LMK05318B_READ,
-                           struct.pack('<H', span) + struct.pack('>H', base))
+                           struct.pack('>BH', span, base))
         assert len(segment.payload) == span
         #print(segment)
         data.data[base : base + span] = segment.payload
@@ -278,7 +278,7 @@ def report_drive() -> None:
     dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
     data = MaskedBytes()
     base, length = 50, 24
-    drives_data = retrieve(dev, LMK05318B_READ, bytes((length, 0, 0, base)))
+    drives_data = retrieve(dev, LMK05318B_READ, bytes((length, 0, base)))
     assert len(drives_data.payload) == length
     data.data[base : base + length] = drives_data.payload
 
@@ -301,7 +301,7 @@ def report_drive() -> None:
                 print(name, f'[{tag}]')
                 break
         else:
-            print('sel={sel} mode1={mode1} mode2={mode2}')
+            print(f'sel={sel} mode1={mode1} mode2={mode2}')
 
 if args.command == 'get':
     do_get(args.KEY)

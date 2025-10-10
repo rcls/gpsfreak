@@ -267,15 +267,15 @@ def pll2_plan_low(freqs: list[Fraction|None], freq: Fraction) -> PLLPlan:
     return best
 
 def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLLPlan:
-    # Do the PLL2 planning.  Firstly, if frequency is too high, then we can't
-    # do it.
+    # Firstly, if frequency is too high, then we can't do it.  Good luck
+    # actually getting 3125MHz through the output drivers!
     maxf = max(f for f in freqs if f)
     if maxf > Fraction(PLL2_HIGH, 2):
-        fail('PLL2 frequencies too high: {maxf} {float(maxf)}')
+        fail('Max frequency too high: {maxf} {float(maxf)}')
 
     # Check that some multiple of the LCM is in rangle.
     if ceil(PLL2_LOW / pll2_lcm) > floor(PLL2_HIGH / pll2_lcm):
-        fail(f'PLL2 needs to be a multiple of {float(pll2_lcm)} which is not in range')
+        fail(f'PLL2 needs to be a multiple of {freq_to_str(pll2_lcm)} which is not in range')
 
     # Range to try for multipliers.
     start = ceil(PLL2_LOW / pll2_lcm)
@@ -389,7 +389,7 @@ def plan(freqs: list[Fraction|None]) -> PLLPlan:
 
     if not first:
         plan = PLLPlan()
-        plan.freqs = [0] * len(freqs)
+        plan.freqs = [Fraction(0)] * len(freqs)
         plan.dividers = [(0, 0, 0)] * len(freqs)
         add_pll1(plan, pll1)
         return plan
@@ -406,3 +406,40 @@ def plan(freqs: list[Fraction|None]) -> PLLPlan:
 
     add_pll1(plan, pll1)
     return plan
+
+def str_to_freq(s: str) -> Fraction:
+    s = s.lower()
+    for suffix, scale in ('hz', 1), ('khz', 1000), \
+            ('mhz', 1000_000), ('ghz', 1000_000_000):
+        if s.endswith(suffix):
+            break
+        if suffix != 'hz' and s.endswith(suffix[0]):
+            suffix = suffix[0]
+            break
+    else:
+        suffix = ''
+        scale = 1000000
+
+    return Fraction(s.removesuffix(suffix)) * scale / (1000000 * MHz)
+
+def freq_to_str(freq: Fraction|int|float) -> str:
+    if freq >= 1000000 * MHz:
+        scaled = float(freq / (MHz * 1000000))
+        suffix = 'THz'
+    elif freq >= 10_000 * MHz: # Report VCO frequencies in MHz.
+        scaled = float(freq / (MHz * 1000))
+        suffix = 'GHz'
+    elif freq >= MHz:
+        scaled = float(freq / MHz)
+        suffix = 'MHz'
+    elif freq * 1000 >= MHz:
+        scaled = float(freq * 1000 / MHz)
+        suffix = 'kHz'
+    else:
+        scaled = float(freq * 1000000 / MHz)
+        suffix = 'Hz'
+
+    if scaled == int(scaled):
+        return f'{int(scaled)} {suffix}'
+    else:
+        return f'{scaled} {suffix}'

@@ -46,33 +46,39 @@
 //!            Ping responses echo the payload.  Otherwise if non-empty,
 //!            then is an informational UTF-8 string.
 //!
-//!    80 01 : NAK. Generic failure.  A request could not be
-//!            successfully executed.  A u16 payload field.
-//!            See below for the error enumeration.
+//!    80 01 : NAK. Generic failure.  A request could not be successfully
+//!            executed.  A u16 payload field.  See below for the error
+//!            enumeration.
 //!
 //!    00 10 : CPU reboot.  No response.
-//!    00 11 : GPS reset.  Response is generic ACK.
-//!    00 12 : Clock gen reset.  Response is generic ACK (or NACK).
+//!    00 11 : GPS reset.
+//!    00 12 : Clock gen HW reset.
+//!    00 13 : Get serial number.  Response is 80 03 with string payload.
+//!    00 20 : Set baud rate, u32 payload.  Useful for provisioing, other normal
+//!            use cases can use USB CDC ACM.
 //!
 //! 0E xx : Low level operations.
-//!    0E 01 : peek.
-//!    0E 02 : poke.
+//!    0E 01 : peek.  Payload is u32 address followed by u32 length.  Response
+//!            is 8E 01 with address + data payload.
+//!    0E 02 : poke.  Payload is u32 address followed by data bytes.
+//!
+//!            Both peek and poke will do 32-bit or 16-bit transfers if address
+//!            and length are both sufficiently aligned.  Neither guard against
+//!            crashing the device or making irreversable changes.
 //!
 //! 0F xx : Raw I²C bus operations
-//!    Note that because we are the (only) bus controller, we don't worry about
-//!    repeated starts.
 //!
 //!    xx is the address as per the I²C bus: the low bit determines write (0) or
 //!    read (1).
 //!
 //!    Write operations carry the I²C bytes as a payload.  (length = number of
-//!    bytes).  Write responses are generic acks on successes, or a NAK with
-//!    the error detail giving the number of bytes before the I²C NACK
-//!    (or other failure).
+//!    bytes).  Write responses are generic acks on successes, or a NAK on
+//!    error.
 //!
-//!    Read operations carry the u16 transaction length as a payload.
-//!    (length=2).  Response are 8F xx followed by the data transfered.  If
-//!    an error occurs, then the payload is short.
+//!    Read operations carry the u16 transaction length as a payload.  If there
+//!    are further bytes, then these are written before the read, using a
+//!    repeated start.  Response are 8F xx followed by the data read, or a
+//!    NAK on error.
 
 use crate::i2c;
 

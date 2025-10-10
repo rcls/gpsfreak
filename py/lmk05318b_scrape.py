@@ -108,9 +108,9 @@ addresses.append(
 addresses.append(
     Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
 
-# Various undocumented fields are set in the TICS file.  The follow are
-# observed to change with the DPLL B/W: 271, 275, 277, 278, 280, 281, 282, 283,
-# 296, 297, 298.
+# Various undocumented fields are set in the TICS file.  Some are observed to
+# change with the configuration, and influence output frequencies (PLL2 in
+# particular.)
 if args.tics:
     seen = set(address.address for address in addresses)
     tf = tics.read_tcs_file(args.tics)

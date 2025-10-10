@@ -7,6 +7,8 @@ from freak.lmk05318b import MaskedBytes, Register
 from freak.message import LMK05318B_READ, LMK05318B_WRITE, transact
 import freak.lmk05318b_plan as lmk05318b_plan
 
+from freak.lmk05318b_plan import PLLPlan, str_to_freq, freq_to_str
+
 import argparse
 import struct
 import usb
@@ -53,6 +55,23 @@ freq = subp.add_parser(
 freq.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
 freq.add_argument('-r', '--raw', action='store_true',
                   help='Use LMK05318b channel numbering')
+
+drive = subp.add_parser(
+    'drive', help='Set output drive', description='Set output drive')
+drive.add_argument('DRIVE', type=key_value, nargs='+',
+                   metavar='CH=DRIVE', help='Channel and drive type / strength')
+
+DRIVES = {
+    'off'  : (0, 0, 0, 'Off'),
+    'lvds' : (1, 0, 0, 'LVDS, 4mA'),
+    'lvds4': (1, 0, 0, 'LVDS, 4mA'),
+    'lvds6': (1, 1, 0, 'LVDS, 6mA'),
+    'lvds8': (1, 2, 0, 'LVDS, 8mA'),
+}
+CMOS_DRIVES = ('z', 'hi-z'), ('0', 'low'), ('-', 'inverted'), ('+', 'normal')
+for v1, (l1, d1) in enumerate(CMOS_DRIVES):
+    for v2, (l2, d2) in enumerate(CMOS_DRIVES):
+        DRIVES['cmos' + l1 + l2] = (3, v1, v2, f'CMOS, {d1}, {d2}')
 
 args = argp.parse_args()
 
@@ -105,11 +124,11 @@ def do_set(KV: list[Tuple[str, str]]) -> None:
         data.insert(r, v)
     masked_write(dev, data)
 
-def report_plan(plan: lmk05318b_plan.PLLPlan) -> None:
+def report_plan(plan: PLLPlan) -> None:
     if plan.freq_target == 0:
         print('PLL2 not used')
     else:
-        print(f'PLL2: multiplier = /{plan.fpd_divide} * {plan.multiplier}, VCO2 {float(plan.freq)} MHz', end='')
+        print(f'PLL2: multiplier = /{plan.fpd_divide} * {plan.multiplier}, VCO2 {freq_to_str(plan.freq)}', end='')
         if plan.freq == plan.freq_target:
             print()
         else:
@@ -121,14 +140,8 @@ def report_plan(plan: lmk05318b_plan.PLLPlan) -> None:
         pd, s1, s2 = plan.dividers[index]
         if not f:
             continue
-        if f < lmk05318b_plan.MHz:
-            ff = float(f / lmk05318b_plan.MHz * 1000000)
-            unit = 'Hz'
-        else:
-            ff = float(f / lmk05318b_plan.MHz)
-            unit = 'MHz'
         pll = 1 if pd == 0 else 2
-        print(f'    {name} PLL{pll} {ff} {unit} dividers', end='')
+        print(f'    {name} PLL{pll} {freq_to_str(f)} dividers', end='')
         if pll == 2:
             print(f' {pd}', end='')
         print(f' {s1}', end='')
@@ -141,10 +154,10 @@ def make_freq_list(freqs: list[str]) -> list[Fraction|None]:
     channels = CHANNELS_RAW if args.raw else CHANNELS_COOKED
     result: list[Fraction|None] = [None] * 6
     for (i, _), f in zip(channels, freqs):
-        result[i] = Fraction(f)
+        result[i] = str_to_freq(f)
     return result
 
-def freq_make_data(plan: lmk05318b_plan.PLLPlan) -> dict[str, int]:
+def freq_make_data(plan: PLLPlan) -> dict[str, int]:
     data = { }
     postdiv1 = 0
     postdiv2 = 0
@@ -235,6 +248,26 @@ def do_freq(freq_str: list[str]) -> None:
     # Remove software reset.
     transact(dev, LMK05318B_WRITE, bytes((0, 12, 0x02)))
 
+def do_drive(drives: list[Tuple[str, str]]):
+    data = MaskedBytes()
+    for ch, drive in drives:
+        assert len(ch) == 1 and ch >= '0' and ch < '8'
+        channels = [ch]
+        if drive.startswith('2'):
+            assert ch == '0' or ch == '2'
+            channels.append('1' if ch == '0' else '3')
+            drive = drive[1:]
+        if drive.startswith('cmos'):
+            assert ch >= '4'
+        assert drive in DRIVES
+        sel, mode1, mode2, _ = DRIVES[drive]
+        for c in channels:
+            data.insert(Register.get(f'OUT{c}_SEL'), sel)
+            data.insert(Register.get(f'OUT{c}_MODE1'), mode1)
+            data.insert(Register.get(f'OUT{c}_MODE2'), mode2)
+    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    masked_write(dev, data)
+
 if args.command == 'get':
     do_get(args.KEY)
 
@@ -246,3 +279,6 @@ if args.command == 'plan':
 
 if args.command == 'freq':
     do_freq(args.FREQ)
+
+if args.command == 'drive':
+    do_drive(args.DRIVE)

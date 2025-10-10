@@ -12,10 +12,12 @@ import sys
 from typing import Tuple
 
 argp = argparse.ArgumentParser(description='UBLOX utility')
-subp = argp.add_subparsers(dest='command', required=True, help='Command')
 
-argp.add_argument('--binary', '-b', action='store_true', help='Output binary')
-argp.add_argument('--device', '-d', help='Device (or file) to write')
+subp = argp.add_subparsers(
+    dest='command', metavar='COMMAND', required=True, help='Command')
+
+argp.add_argument('-b', '--binary', action='store_true', help='Output binary')
+argp.add_argument('-d', '--device', help='Device (or file) to write')
 
 def key_value(s: str) -> Tuple[str, str]:
     if not '=' in s:
@@ -34,9 +36,11 @@ valget = subp.add_parser(
     help='Get configuration values.')
 valget.add_argument('KEY', nargs='+', help='KEYs')
 
-dump = subp.add_parser('dump', description='Retrieve entire config')
+dump = subp.add_parser('dump', description='Retrieve entire config',
+                       help='Retrieve entire config')
 
-scrape = subp.add_parser('scrape', description='Scrape pdftotext output')
+scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
+                         help='Scrape pdftotext output')
 scrape.add_argument('FILE', help='Text file to parse')
 
 args = argp.parse_args()

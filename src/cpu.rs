@@ -21,8 +21,11 @@ unsafe extern "C" {
 #[allow(non_upper_case_globals)]
 static end_of_ram: u8 = 0;
 
-const SER_NUM_BYTES: usize = 38;
-pub static USB_SERIAL_NUMBER: UCell<[u8; SER_NUM_BYTES]> = UCell::new([0; _]);
+const SERIAL_LEN: usize = 18;
+const USB_SERIAL_LEN: usize = SERIAL_LEN * 2 + 2;
+pub static SERIAL_NUMBER: UCell<[u8; SERIAL_LEN]> = UCell::new([0; _]);
+pub static USB_SERIAL_NUMBER: UCell<[u8; USB_SERIAL_LEN]> = UCell::new([0; _]);
+
 
 pub fn init() {
     let flash  = unsafe {&*stm32h503::FLASH ::ptr()};
@@ -125,7 +128,8 @@ pub fn init() {
     // Generate the USB serial number.  ST notes claim that we will hard fault
     // if we do this with ICACHE enabled.
     let sn = unsafe {&*(0x8fff800 as *const [u32; 3])};
-    format_serial_number(sn, unsafe {USB_SERIAL_NUMBER.as_mut()});
+    format_serial_number(sn, unsafe {SERIAL_NUMBER.as_mut()},
+                         unsafe {USB_SERIAL_NUMBER.as_mut()});
 
     // Enable ICACHE.
     while icache.SR.read().BUSYF().bit() {
@@ -275,7 +279,8 @@ unsafe fn magic_reboot_config() -> &'static VCell<u32> {
     unsafe {&*(BKPSRAM_BASE as *const VCell<u32>)}
 }
 
-fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SER_NUM_BYTES]) {
+fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN],
+                        usb: &mut [u8; USB_SERIAL_LEN]) {
     // Little endian, start from high address.
     // 0x08fff808 :
     //     ASCII lot number.
@@ -284,18 +289,20 @@ fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SER_NUM_BYTES]) {
     //     high 24 bits, ASCII lot number
     // 0x08fff800 : 32 bit binary, X&Y wafer coords, convert to hex.
     // XXXXXXX-XXXXXXXXXX
-    text[0] = text.len() as u8;
-    text[1] = 3;
     let lot = ((sn[2] as u64) << 32 | sn[1] as u64) >> 8;
     for i in 0..7 {
-        text[2 * i + 2] = (lot >> i * 8) as u8;
+        text[i] = (lot >> i * 8) as u8;
     }
-    text[16] = '-' as u8;
-    let hex = (sn[1] as u64) << 32 | sn[0] as u64;
+    text[7] = '-' as u8;
+    let binary = (sn[1] as u64) << 32 | sn[0] as u64;
     for i in 0..10 {
-        let nibble = hex >> 36 - i * 4 & 15;
-        text[18 + 2 * i] = nibble as u8 + b'0'
-            + if nibble > 9 {b'a' - b'9' - 1} else {0};
+        let hex = binary >> 36 - i * 4 & 15;
+        text[8 + i] = hex as u8 + b'0' + if hex > 9 {b'a' - b'9' - 1} else {0};
+    }
+    usb[0] = usb.len() as u8;
+    usb[1] = 3;
+    for i in 0..SERIAL_LEN {
+        usb[i * 2 + 2] = text[i];
     }
 }
 
@@ -351,14 +358,16 @@ unsafe extern "C" {
 #[test]
 fn test_sn() {
     let sn = [0x006b0028, 0x31335105, 0x30393436];
-    let mut text = [0; SER_NUM_BYTES];
-    format_serial_number(&sn, &mut text);
-    assert_eq!(text[0] as usize, size_of_val(&text));
-    assert_eq!(text[1], 3);
-    let mut bytes = [0; SER_NUM_BYTES / 2 - 1];
-    for (i, &c) in text[2..].iter().step_by(2).enumerate() {
+    let mut text = [0; SERIAL_LEN];
+    let mut usb = [0; USB_SERIAL_LEN];
+    format_serial_number(&sn, &mut text, &mut usb);
+    assert_eq!(usb[0] as usize, size_of_val(&usb));
+    assert_eq!(usb[1], 3);
+    let mut bytes = [0; USB_SERIAL_LEN / 2 - 1];
+    for (i, &c) in usb[2..].iter().step_by(2).enumerate() {
         bytes[i] = c as u8;
     }
     let str = str::from_utf8(&bytes).unwrap();
+    assert_eq!(str, str::from_utf8(&text).unwrap());
     assert_eq!(str, "Q316490-05006b0028");
 }

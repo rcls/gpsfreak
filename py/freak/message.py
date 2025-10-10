@@ -8,6 +8,35 @@ from dataclasses import dataclass
 
 MAGIC = b'\xce\x93'
 
+ACK=0x0080
+NACK=0x0180
+
+PING=0x0000
+
+GET_PROTOCOL_VERSION=0x0200
+GET_PROTOCOL_VERSION_RESULT=0x0280
+GET_SERIAL_NUMBER=0x0300
+GET_SERIAL_NUMBER_RESULT=0x0380
+
+CPU_REBOOT=0x1000
+GPS_RESET=0x1100
+LMK05318B_PDN=0x1200
+
+PEEK=0x010e
+PEEK_DATA=0x810e
+POKE=0x020e
+
+LMK05318B_WRITE=0xc80f
+LMK05318B_READ=0xc90f
+LMK05318B_READ_RESULT=0xc98f
+
+TMP117_WRITE=0x920f
+TMP117_READ=0x930f
+TMP117_READ_RESULT=0x938f
+
+class RequestFailed(RuntimeError):
+    pass
+
 @dataclass
 class Message:
     # Magic is implicit.
@@ -61,32 +90,23 @@ def flush(dev: usb.Device) -> None:
     except usb.core.USBTimeoutError:
         pass
 
-def transact(dev: usb.Device, code: int, payload: bytes) -> Message:
+def transact(dev: usb.Device, code: int, payload: bytes,
+             expect: int|None = None) -> Message:
     dev.write(0x03, frame(code, payload))
     result = deframe(bytes(dev.read(0x83, 64, 10000)))
-    # FIXME - proper error exception.
-    assert result.code != NACK
+    if expect is None and result.code == NACK:
+        raise RequestFailed()
+    if expect is not None and result.code != expect:
+        raise RequestFailed()
     return result
+
+def command(dev: usb.Device, code: int, payload: bytes = b'') -> Message:
+    return transact(dev, code, payload, expect=ACK)
+
+def retrieve(dev: usb.Device, code: int, payload: bytes = b'') -> Message:
+    return transact(dev, code, payload, expect= code | 0x0080)
 
 def test_simple():
     code = 0x1234
     payload = b'This is a test'
     assert deframe(frame(code, payload)) == Message(code, payload)
-
-PING=0x0080
-ACK=0x0080
-NACK=0x0180
-
-CPU_REBOOT=0x1080
-GPS_RESET=0x1180
-LMK05318B_RESET=0x1280
-
-PEEK=0x010e
-PEEK_DATA=0x810e
-POKE=0x020e
-
-LMK05318B_WRITE=0xc80f
-LMK05318B_READ=0xc90f
-
-TMP117_WRITE=0x920f
-TMP117_READ=0x930f

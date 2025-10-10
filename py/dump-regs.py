@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from freak import lmk05318b, message, tics
-from freak.message import LMK05318B_READ, LMK05318B_WRITE, transact
+from freak.message import LMK05318B_READ, LMK05318B_WRITE, retrieve
 from freak.lmk05318b import Address, MaskedBytes
 
 import argparse
@@ -50,8 +50,9 @@ def usb_load() -> MaskedBytes:
     message.flush(dev)
     data = MaskedBytes()
     for address, length in lmk05318b_bundles():
-        transact(dev, LMK05318B_WRITE, struct.pack('>H', address))
-        segment = transact(dev, LMK05318B_READ, struct.pack('<H', length))
+        segment = retrieve(
+            dev, LMK05318B_READ,
+            struct.pack('<H', length) + struct.pack('>H', address))
         for a, b in enumerate(segment.payload, address):
             data.data[a] = b
             data.mask[a] = 255

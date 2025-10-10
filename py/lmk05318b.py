@@ -4,7 +4,8 @@
 assert __name__ == '__main__'
 
 from freak.lmk05318b import MaskedBytes, Register
-from freak.message import LMK05318B_READ, LMK05318B_WRITE, transact
+from freak.message import LMK05318B_READ, LMK05318B_READ_RESULT, \
+    LMK05318B_WRITE, command, retrieve
 import freak.lmk05318b_plan as lmk05318b_plan
 
 from freak.lmk05318b_plan import PLLPlan, str_to_freq, freq_to_str
@@ -27,7 +28,8 @@ CHANNELS_COOKED = [
     (2, 'Spare [4]  ')]
 
 argp = argparse.ArgumentParser(description='LMK05318b utility')
-subp = argp.add_subparsers(dest='command', required=True, help='Command')
+subp = argp.add_subparsers(
+    dest='command', metavar='COMMAND', required=True, help='Command')
 
 def key_value(s: str) -> Tuple[str, str]:
     if not '=' in s:
@@ -58,7 +60,7 @@ freq.add_argument('-r', '--raw', action='store_true',
 
 drive = subp.add_parser(
     'drive', help='Set output drive', description='Set output drive')
-drive.add_argument('DRIVE', type=key_value, nargs='+',
+drive.add_argument('DRIVE', type=key_value, nargs='*',
                    metavar='CH=DRIVE', help='Channel and drive type / strength')
 
 DRIVES = {
@@ -77,7 +79,7 @@ args = argp.parse_args()
 
 def get_ranges(dev, data: MaskedBytes, ranges: list[Tuple[int, int]]) -> None:
     for base, span in ranges:
-        segment = transact(dev, LMK05318B_READ,
+        segment = retrieve(dev, LMK05318B_READ,
                            struct.pack('<H', span) + struct.pack('>H', base))
         assert len(segment.payload) == span
         #print(segment)
@@ -112,8 +114,8 @@ def masked_write(dev, data: MaskedBytes) -> None:
     complete_partials(dev, data)
     ranges = data.ranges(max_block = 30)
     for base, span in ranges:
-        transact(dev, LMK05318B_WRITE,
-                 struct.pack('>H', base) + data.data[base : base+span])
+        command(dev, LMK05318B_WRITE,
+                struct.pack('>H', base) + data.data[base : base+span])
 
 def do_set(KV: list[Tuple[str, str]]) -> None:
     registers = list((Register.get(K), int(V, 0)) for K, V in args.KV)
@@ -150,9 +152,9 @@ def report_plan(plan: PLLPlan) -> None:
         else:
             print(f' {s2}')
 
-def make_freq_list(freqs: list[str]) -> list[Fraction|None]:
+def make_freq_list(freqs: list[str]) -> list[Fraction]:
     channels = CHANNELS_RAW if args.raw else CHANNELS_COOKED
-    result: list[Fraction|None] = [None] * 6
+    result = [Fraction(0)] * 6
     for (i, _), f in zip(channels, freqs):
         result[i] = str_to_freq(f)
     return result
@@ -201,12 +203,13 @@ def freq_make_data(plan: PLLPlan) -> dict[str, int]:
         else:
             assert s2 == 1
 
+    # Power down PLL2 for now, whether or not we need it.  We'll power it up
+    # after configuring it.
+    data['PLL2_PDN'] = 1
     if plan.freq_target == 0:
-        data['PLL2_PDN'] = 1            # PLL2 not used.
         return data
 
     # PLL2 setup...
-    data['PLL2_PDN'] = 0
     pll2_den = plan.multiplier.denominator
     pll2_int = plan.multiplier.numerator // pll2_den
     pll2_num = plan.multiplier.numerator % pll2_den
@@ -242,13 +245,16 @@ def do_freq(freq_str: list[str]) -> None:
         data.insert(Register.get(K), V)
     dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
     # Software reset.
-    transact(dev, LMK05318B_WRITE, bytes((0, 12, 0x12)))
+    command(dev, LMK05318B_WRITE, bytes((0, 12, 0x12)))
     # Write the registers.
     masked_write(dev, data)
+    # If PLL2 is in use, power it up now.
+    if plan.freq_target != 0:
+        command(dev, LMK05318B_WRITE, bytes((0, 100, data.data[100] & 0xfe)))
     # Remove software reset.
-    transact(dev, LMK05318B_WRITE, bytes((0, 12, 0x02)))
+    command(dev, LMK05318B_WRITE, bytes((0, 12, 0x02)))
 
-def do_drive(drives: list[Tuple[str, str]]):
+def do_drive(drives: list[Tuple[str, str]]) -> None:
     data = MaskedBytes()
     for ch, drive in drives:
         assert len(ch) == 1 and ch >= '0' and ch < '8'
@@ -268,17 +274,52 @@ def do_drive(drives: list[Tuple[str, str]]):
     dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
     masked_write(dev, data)
 
+def report_drive() -> None:
+    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    data = MaskedBytes()
+    base, length = 50, 24
+    drives_data = retrieve(dev, LMK05318B_READ, bytes((length, 0, 0, base)))
+    assert len(drives_data.payload) == length
+    data.data[base : base + length] = drives_data.payload
+
+    drives = []
+
+    pdowns = '0_1 0_1 2_3 2_3 4 5 6 7'.split()
+    for i in range(8):
+        pdown = data.extract(f'CH{pdowns[i]}_PD')
+        sel   = data.extract(f'OUT{i}_SEL')
+        mode1 = data.extract(f'OUT{i}_MODE1')
+        mode2 = data.extract(f'OUT{i}_MODE2')
+        drives.append((pdown, sel, mode1, mode2))
+
+    for i, (pdown, sel, mode1, mode2) in enumerate(drives):
+        print(f'Channel {i}: ', end='')
+        if pdown:
+            print('Power down, ', end='')
+        for tag, (s, m1, m2, name) in DRIVES.items():
+            if sel == s and mode1 == m1 and mode2 == m2:
+                print(name, f'[{tag}]')
+                break
+        else:
+            print('sel={sel} mode1={mode1} mode2={mode2}')
+
 if args.command == 'get':
     do_get(args.KEY)
 
-if args.command == 'set':
+elif args.command == 'set':
     do_set(args.KV)
 
-if args.command == 'plan':
+elif args.command == 'plan':
     report_plan(lmk05318b_plan.plan(make_freq_list(args.FREQ)))
 
-if args.command == 'freq':
+elif args.command == 'freq':
     do_freq(args.FREQ)
 
-if args.command == 'drive':
-    do_drive(args.DRIVE)
+elif args.command == 'drive':
+    if args.DRIVE:
+        do_drive(args.DRIVE)
+    else:
+        report_drive()
+
+else:
+    assert None, 'This should never happen'

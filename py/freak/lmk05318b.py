@@ -176,13 +176,19 @@ class MaskedBytes:
             result.append((addr, span))
         return result
 
-    def extract(self, r: Register) -> int:
+    def extract(self, r: Register|str) -> int:
+        if isinstance(r, str):
+            r = Register.get(r)
         return r.extract(self.data)
 
-    def extract_mask(self, r: Register) -> int:
+    def extract_mask(self, r: Register|str) -> int:
+        if isinstance(r, str):
+            r = Register.get(r)
         return r.extract(self.mask)
 
-    def insert(self, r: Register, value: int) -> None:
+    def insert(self, r: Register|str, value: int) -> None:
+        if isinstance(r, str):
+            r = Register.get(r)
         value = value << r.shift
         vmask = (1 << r.width) - 1 << r.shift
         data = struct.pack('>Q', value)[-r.byte_span:]

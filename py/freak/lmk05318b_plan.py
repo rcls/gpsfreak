@@ -15,13 +15,14 @@ assert SCALE * MHz == 1000000
 BAW_FREQ = 2_500 * MHz
 PLL2_LOW = 5_500 * MHz
 PLL2_HIGH = 6_250 * MHz
-# Index of the channel with a large divider.  Our numbering:
+# Our numbering of channels:
 # 0 = LMK 0,1, GPS Freak 2
 # 1 = LMK 2,3, GPS Freak 1
 # 2 = LMK 4.
 # 3 = LMK 5, GPS Freak U.Fl
 # 4 = LMK 6, GPS Freak 4
 # 5 = LMK 7, GPS Freak 3, can do 1Hz.
+# Index of the output with the stage2 divider.
 BIG_DIVIDE = 5
 
 @dataclass
@@ -40,8 +41,8 @@ class PLLPlan:
     # the source is PLL1, otherwise PLL2 is used.
     dividers: list[Tuple[int, int, int]] \
         = dataclasses.field(default_factory = lambda: [])
-    # Target output frequency list.
-    freqs: list[Fraction|None] \
+    # Target output frequency list.  Use zero for output off.
+    freqs: list[Fraction] \
         = dataclasses.field(default_factory = lambda: [])
 
     def __lt__(self, b: PLLPlan) -> bool:
@@ -133,7 +134,7 @@ def qd_factor(n: int) -> list[int]:
 
 @dataclass
 class PLL1Plan:
-    freqs: list[Fraction|None] = dataclasses.field(default_factory = lambda: [])
+    freqs: list[Fraction] = dataclasses.field(default_factory = lambda: [])
 
 def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     if ratio <= 256:
@@ -146,7 +147,7 @@ def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     # and the second stage in [1..=(1<<24)].  Prefer an even second stage
     # divider, as this gives 50% duty cycle.  If the second stage is even,
     # keep the first stage as high as possible.  If the second stage is odd,
-    # keep the second stage as high as possible to keep the duty cycle at
+    # keep the second stage as high as possible to keep the duty cycle near
     # 50%.
 
     # Try even second stage.
@@ -191,7 +192,7 @@ def factor_splitting(number: int, primes: list[int]) \
         -> Generator[Tuple[int, int]]:
     return do_factor_splitting(1, number, primes, 0)
 
-def pll2_plan_low(freqs: list[Fraction|None], freq: Fraction) -> PLLPlan:
+def pll2_plan_low(freqs: list[Fraction], freq: Fraction) -> PLLPlan:
     '''Plan for the special case where we only have the BIG_DIVIDE output, and
     the stage2 divider is definitely needed.  Avoid a brute force search.'''
     assert freq < Fraction(PLL2_LOW, 7 * 256)
@@ -266,7 +267,7 @@ def pll2_plan_low(freqs: list[Fraction|None], freq: Fraction) -> PLLPlan:
         fail(f'PLL2 planning failed, frequency {freq}')
     return best
 
-def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLLPlan:
+def pll2_plan(freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
     # Firstly, if frequency is too high, then we can't do it.  Good luck
     # actually getting 3125MHz through the output drivers!
     maxf = max(f for f in freqs if f)
@@ -288,7 +289,7 @@ def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLLPlan:
         postdivs = (1 << 64) - 1
         postdive = (1 << 64) - 1
         for i, f in enumerate(freqs):
-            if f is None:               # Not needed.
+            if not f:                   # Not needed.
                 continue
             assert (pll2_freq / f).is_integer()
             ratio = int(pll2_freq / f)
@@ -354,7 +355,7 @@ def pll2_plan(freqs: list[Fraction|None], pll2_lcm: Fraction) -> PLLPlan:
         fail(f'PLL2 planning failed, LCM = {pll2_lcm}')
     return best
 
-def add_pll1(plan: PLLPlan, freqs: list[Fraction|None]) -> None:
+def add_pll1(plan: PLLPlan, freqs: list[Fraction]) -> None:
     for i, f in enumerate(freqs):
         if not f:
             continue
@@ -363,19 +364,20 @@ def add_pll1(plan: PLLPlan, freqs: list[Fraction|None]) -> None:
         plan.freqs[i] = f
         plan.dividers[i] = 0, od[0], od[1]
 
-def plan(freqs: list[Fraction|None]) -> PLLPlan:
+def plan(freqs: list[Fraction]) -> PLLPlan:
     # First pull out the divisors of 2.5G...
-    pll1: list[Fraction|None] = []
-    pll2: list[Fraction|None] = []
+    pll1: list[Fraction] = []
+    pll2: list[Fraction] = []
+    zero = Fraction(0)
     for i, f in enumerate(freqs):
         if not f:
-            pll1.append(None)
-            pll2.append(None)
+            pll1.append(zero)
+            pll2.append(zero)
         elif pll1_divider(i, f):
             pll1.append(f)
-            pll2.append(None)
+            pll2.append(zero)
         elif i == BIG_DIVIDE or f >= Fraction(PLL2_LOW, 7 * 256):
-            pll1.append(None)
+            pll1.append(zero)
             pll2.append(f)
         else:
             fail(f'Frequency {f} {float(f)} is not achievable on {i}')
@@ -389,14 +391,14 @@ def plan(freqs: list[Fraction|None]) -> PLLPlan:
 
     if not first:
         plan = PLLPlan()
-        plan.freqs = [Fraction(0)] * len(freqs)
+        plan.freqs = [zero] * len(freqs)
         plan.dividers = [(0, 0, 0)] * len(freqs)
         add_pll1(plan, pll1)
         return plan
 
     pll2_lcm = first
     for f in pll2:
-        if f is not None:
+        if f:
             pll2_lcm, _, _ = fract_lcm(pll2_lcm, f)
 
     if pll2_lcm > 3 * MHz:

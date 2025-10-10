@@ -131,6 +131,7 @@ pub struct DebugPriority;
 
 impl DebugPriority {
     pub fn new() -> DebugPriority {
+        #[cfg(target_os = "none")]
         unsafe {cortex_m::register::basepri::write(interrupt::PRIO_USB)};
         DebugPriority
     }
@@ -138,6 +139,7 @@ impl DebugPriority {
 
 impl Drop for DebugPriority {
     fn drop(&mut self) {
+        #[cfg(target_os = "none")]
         unsafe {cortex_m::register::basepri::write(0)};
     }
 }

@@ -34,7 +34,9 @@ const LMK05318: u8 = 0xc8;
 const TMP117: u8 = 0x92;
 
 pub fn main() -> ! {
-    let rcc = unsafe {&*stm32h503::RCC::ptr()};
+    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
+    let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
 
     rcc.AHB2ENR.modify(|_,w| w.GPIOAEN().set_bit().GPIOBEN().set_bit());
 
@@ -71,6 +73,14 @@ pub fn main() -> ! {
         syst.csr.write(3);
     }
 
+    // LMK05318b PDN pin is on PA4.
+    gpioa.BSRR.write(|w| w.BS4().set_bit());
+    gpioa.MODER.modify(|_,w| w.MODE4().B_0x1());
+
+    // PB1 is the GPS reset.
+    gpiob.BSRR.write(|w| w.BS1().set_bit());
+    gpiob.MODER.modify(|_,w| w.MODE1().B_0x1());
+
     // Setup the oscillator.
     if false {
         let r = clock_setup();
@@ -78,7 +88,6 @@ pub fn main() -> ! {
     }
 
     // Blue/red/green are PA1,2,3.
-    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
     gpioa.BSRR.write(|w| w.bits(0xe));
     gpioa.MODER.modify(|_,w| w.MODE1().B_0x1().MODE2().B_0x1().MODE3().B_0x1());
 

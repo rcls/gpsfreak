@@ -4,7 +4,7 @@ import struct
 import re
 
 from .lmk05318b import BundledBytes, MaskedBytes
-from .message import Message
+from .message import Message, LMK05318B_WRITE
 
 def read_tcs_file(path: str) -> MaskedBytes:
     config = configparser.ConfigParser(strict=False)
@@ -26,8 +26,8 @@ def read_tcs_file(path: str) -> MaskedBytes:
         result.mask[reg_addr] = 255
     return result
 
-def make_i2c_transactions(reg_block_list: BundledBytes) -> list[Message]:
+def make_i2c_transactions(reg_block_list: BundledBytes) -> list[bytes]:
     messages = []
     for R, B in reg_block_list.items():
-        messages.append(Message(0xc80f, struct.pack('>H', R) + bytes(B)))
+        messages.append(struct.pack('>H', R) + bytes(B))
     return messages

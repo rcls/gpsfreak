@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 //! Commands are binary encoded.
 //!
 //! The format is
@@ -50,11 +48,14 @@
 //!            executed.  A u16 payload field.  See below for the error
 //!            enumeration.
 //!
+//!    00 02 : Get protocol version.  Response is 80 02 with u32 payload.
+//!    00 03 : Get serial number.  Response is 80 03 with string payload.
+//!
 //!    00 10 : CPU reboot.  No response.
 //!    00 11 : GPS reset.
-//!    00 12 : Clock gen HW reset.
-//!    00 13 : Get serial number.  Response is 80 03 with string payload.
-//!    00 20 : Set baud rate, u32 payload.  Useful for provisioing, other normal
+//!    00 12 : Clock gen PDN, one byte payload:
+//!            - 0 power down, 1 power up, ≥2 reset & power back up.
+//!    00 20 : Set baud rate, u32 payload.  Useful for provisioning, normal
 //!            use cases can use USB CDC ACM.
 //!
 //! 0E xx : Low level operations.
@@ -92,7 +93,7 @@ pub fn init() {
 
 /// Error codes for Nack responses.
 #[repr(u16)]
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Eq, PartialEq)]
 enum Error {
     #[default]
     /// Generic request attempted but failed.
@@ -105,7 +106,19 @@ enum Error {
     BadFormat      = 4,
     /// Payload parameter value bogus.
     BadParameter   = 5,
+    /// Special number used to indicate that an ACK (not a NACK) should be sent.
+    Succeeded      = 6,
 }
+
+type Result<T = ()> = core::result::Result<T, Error>;
+
+const SEND_ACK: Result = Err(Error::Succeeded);
+
+type Ack  = Message<()>;
+type Nack = Message<Error>;
+
+/// Magic number for message header.
+const MAGIC: u16 = 0xce93u16.to_be();
 
 /// Maximum message payload size for a message.  Currently we only support
 /// messages up to 64 bytes total.
@@ -123,6 +136,10 @@ pub struct MessageBuf {
 const _: () = assert!(size_of::<MessageBuf>() == 64);
 
 #[derive(Debug, Default)]
+#[repr(packed)]
+pub struct Packed<P>(P);
+
+#[derive(Debug, Default)]
 #[repr(C)]
 pub struct Message<P> {
     magic  : u16,
@@ -131,6 +148,8 @@ pub struct Message<P> {
     payload: P,
     crc    : u16,
 }
+const _: () = assert!(size_of::<Message::<Packed<u32>>>() == 12);
+const _: () = assert!(align_of::<Message::<Packed<u32>>>() == 2);
 
 impl MessageBuf {
     fn start(code: u16) -> MessageBuf {
@@ -198,18 +217,14 @@ impl<P: core::fmt::Debug> Message<P> {
     }
 }
 
-type Ack  = Message<()>;
-type Nack = Message<Error>;
-
-type I2CRead = Message<u16>;
-
-const MAGIC: u16 = 0xce93u16.to_be();
-
-type Result<T = ()> = core::result::Result<T, Error>;
-
 pub fn command_handler(message: &MessageBuf, len: usize) {
     if let Err(ed) = command_dispatch(message, len) {
-        Nack::new(0x8001u16.to_be(), ed).send();
+        if ed == Error::Succeeded {
+            Ack::new(0x8000u16.to_be(), ()).send();
+        }
+        else {
+            Nack::new(0x8001u16.to_be(), ed).send();
+        }
     }
 }
 
@@ -233,7 +248,11 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
 
     match (message.code & 0xff, message.code >> 8) {
         (0x00, 0x00) => ping(message),
-        (0x00, 0x01) => crate::cpu::reboot(),
+        (0x00, 0x02) => get_protocol_version(message),
+        (0x00, 0x03) => get_serial_number(message),
+        (0x00, 0x10) => crate::cpu::reboot(),
+        (0x00, 0x11) => gps_reset(message),
+        (0x00, 0x12) => lmk_powerdown(message),
         (0x0f, _)    => i2c_transact(message),
         _ => Err(Error::UnknownMessage)
     }
@@ -241,8 +260,57 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
 
 fn ping(message: &MessageBuf) -> Result {
     // Send a generic ACK with the same payload.
-    MessageBuf::new(0x0080, message.get_payload()).send();
+    MessageBuf::new(0x8000u16.to_be(), message.get_payload()).send();
     Ok(())
+}
+
+fn get_protocol_version(message: &MessageBuf) -> Result {
+    Message::<()>::from_buf(message)?;
+    Message::new(0x8002u16.to_be(), Packed(1u32)).send();
+    Ok(())
+}
+
+fn get_serial_number(message: &MessageBuf) -> Result {
+    Message::<()>::from_buf(message)?;
+    let sn = crate::cpu::SERIAL_NUMBER.as_ref();
+    Message::new(0x8003u16.to_be(), *sn).send();
+    Ok(())
+}
+
+fn gps_reset(message: &MessageBuf) -> Result {
+    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let message = Message::<u8>::from_buf(message)?;
+    if message.payload != 1 {
+        gpioa.BSRR.write(|w| w.BR4().set_bit());
+    }
+    if message.payload > 1 {
+        // Sleep for approx, 1ms.
+        for _ in 0 .. crate::cpu::CPU_FREQ / 2000 {
+            crate::cpu::nothing();
+        }
+    }
+    if message.payload != 0 {
+        gpioa.BSRR.write(|w| w.BR4().set_bit());
+    }
+    SEND_ACK
+}
+
+fn lmk_powerdown(message: &MessageBuf) -> Result {
+    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let message = Message::<u8>::from_buf(message)?;
+    if message.payload != 1 {
+        gpioa.BSRR.write(|w| w.BR4().set_bit());
+    }
+    if message.payload > 1 {
+        // Sleep for approx, 1µs.
+        for _ in 0 .. crate::cpu::CPU_FREQ / 2000000 {
+            crate::cpu::nothing();
+        }
+    }
+    if message.payload != 0 {
+        gpioa.BSRR.write(|w| w.BR4().set_bit());
+    }
+    SEND_ACK
 }
 
 fn i2c_transact(message: &MessageBuf) -> Result {
@@ -252,43 +320,41 @@ fn i2c_transact(message: &MessageBuf) -> Result {
         dbgln!("I2C write {address:#04x} length {}", message.len);
         // Write.
         if let Ok(()) = i2c::write(address, message.get_payload()).wait() {
-            Ack::new(0x0080, ()).send();
-            Ok(())
+            return SEND_ACK;
         }
         else {
-            Err(Error::Failed)
-        }
-    }
-    else {
-        // Get the length...
-        // Read.
-        let mlen = message.len as usize;
-        if mlen < 2 {
-            return Err(Error::BadFormat);
-        }
-        let rlen = unsafe {*(&message.payload as *const u8 as *const u16)};
-        let rlen = rlen as usize;
-        dbgln!("I2C read {address:#04x} wlen {} rlen {}", mlen - 2, rlen);
-        if rlen > MAX_PAYLOAD {
             return Err(Error::Failed);
         }
-        let mut result = MessageBuf::start(message.code | 0x0080);
-        result.len = rlen as u16;
-        let w;
-        if mlen == 2 {
-            w = i2c::read(address, &mut result.payload[..rlen]);
-        }
-        else {
-            w = i2c::write_read(address, &message.payload[2..mlen],
-                                &mut result.payload[..rlen]);
-        }
-        if let Ok(()) = w.wait() {
-            result.set_crc();
-            result.send();
-            Ok(())
-        }
-        else {
-            Err(Error::Failed)
-        }
+    }
+
+    // Get the length...
+    // Read.
+    let mlen = message.len as usize;
+    if mlen < 2 {
+        return Err(Error::BadFormat);
+    }
+    let rlen = unsafe {*(&message.payload as *const u8 as *const u16)};
+    let rlen = rlen as usize;
+    dbgln!("I2C read {address:#04x} wlen {} rlen {}", mlen - 2, rlen);
+    if rlen > MAX_PAYLOAD {
+        return Err(Error::BadParameter);
+    }
+    let mut result = MessageBuf::start(message.code | 0x0080);
+    result.len = rlen as u16;
+    let w;
+    if mlen == 2 {
+        w = i2c::read(address, &mut result.payload[..rlen]);
+    }
+    else {
+        w = i2c::write_read(address, &message.payload[2..mlen],
+                            &mut result.payload[..rlen]);
+    }
+    if let Ok(()) = w.wait() {
+        result.set_crc();
+        result.send();
+        Ok(())
+    }
+    else {
+        Err(Error::Failed)
     }
 }

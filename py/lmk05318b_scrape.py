@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# To generate the input to this script, pdftotext on the TI PDF of the LMK05318b
+# registers.
+
 from freak import lmk05318b, tics
 from freak.lmk05318b import Address, Field, Register
 

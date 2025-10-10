@@ -3,10 +3,10 @@
 # Make sure we don't get confused with freak.lmk05318b
 assert __name__ == '__main__'
 
+from freak import lmk05318b_plan, tics
 from freak.lmk05318b import MaskedBytes, Register
 from freak.message import LMK05318B_READ, LMK05318B_READ_RESULT, \
     LMK05318B_WRITE, command, retrieve
-import freak.lmk05318b_plan as lmk05318b_plan
 
 from freak.lmk05318b_plan import PLLPlan, str_to_freq, freq_to_str
 
@@ -60,8 +60,15 @@ freq.add_argument('-r', '--raw', action='store_true',
 
 drive = subp.add_parser(
     'drive', help='Set output drive', description='Set output drive')
+drive.add_argument('-d', '--defaults', action='store_true',
+                   help='Set default values')
 drive.add_argument('DRIVE', type=key_value, nargs='*',
                    metavar='CH=DRIVE', help='Channel and drive type / strength')
+
+upload = subp.add_parser(
+    'upload', help='Upload TICS Pro .tcs file',
+    description='Upload TICS Pro .tcs file')
+upload.add_argument('FILE', help='Name of .tics file')
 
 DRIVES = {
     'off'  : (0, 0, 0, 'Off'),
@@ -114,6 +121,7 @@ def masked_write(dev, data: MaskedBytes) -> None:
     complete_partials(dev, data)
     ranges = data.ranges(max_block = 30)
     for base, span in ranges:
+        #print(base, span, data.data[base : base+span].hex(' '))
         command(dev, LMK05318B_WRITE,
                 struct.pack('>H', base) + data.data[base : base+span])
 
@@ -254,8 +262,12 @@ def do_freq(freq_str: list[str]) -> None:
     # Remove software reset.
     command(dev, LMK05318B_WRITE, bytes((0, 12, 0x02)))
 
-def do_drive(drives: list[Tuple[str, str]]) -> None:
+def do_drive(drives: list[Tuple[str, str]], defaults) -> None:
     data = MaskedBytes()
+    if defaults:
+        drives = [('0', 'lvds8'), ('1', 'off'), ('2', 'lvds8'), ('3', 'off'),
+                  ('4', 'off'), ('5', 'off'), ('6', 'cmos+z'), ('7', 'lvds8')] \
+                  + drives
     for ch, drive in drives:
         assert len(ch) == 1 and ch >= '0' and ch < '8'
         channels = [ch]
@@ -303,6 +315,11 @@ def report_drive() -> None:
         else:
             print(f'sel={sel} mode1={mode1} mode2={mode2}')
 
+def do_upload(path: str):
+    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    tcs = tics.read_tcs_file(path)
+    masked_write(dev, tcs)
+
 if args.command == 'get':
     do_get(args.KEY)
 
@@ -316,10 +333,13 @@ elif args.command == 'freq':
     do_freq(args.FREQ)
 
 elif args.command == 'drive':
-    if args.DRIVE:
-        do_drive(args.DRIVE)
+    if args.DRIVE or args.defaults:
+        do_drive(args.DRIVE, args.defaults)
     else:
         report_drive()
+
+elif args.command == 'upload':
+    do_upload(args.FILE)
 
 else:
     assert None, 'This should never happen'

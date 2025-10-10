@@ -34,18 +34,18 @@
 //! checking that the result is zero.
 //!
 //! Commands:
-//!    00 : PING.  Arbitrary payload.  Response is 80 00 and echos the payload.
+//!    00 : PING.  Arbitrary payload.  Response is 80 and echos the payload.
 //!         By sending a random token, you can check that messages are
 //!         synchronised.
 //!    80 : ACK. Generic Acknowledgement.  Payload is generally empty.
 //!         Ping responses echo the payload.  Otherwise if non-empty, then is an
 //!         informational UTF-8 string.
 //!
-//!    01 : NAK. Generic failure.  A request could not be successfully executed.
+//!    81 : NAK. Generic failure.  A request could not be successfully executed.
 //!         A u16 payload field.  See below for the error enumeration.
 //!
 //!    02 : Get protocol version.  Response is 82 with u32 payload.
-//!    03 : Get serial number.  Response is 83 with string payload.
+//!    03 : Get serial number.  Response is 83 with ASCII string payload.
 //!
 //!    10 : CPU reboot.  No response.
 //!    11 : GPS reset. u8 payload.
@@ -278,7 +278,7 @@ fn gps_reset(message: &MessageBuf) -> Result {
         }
     }
     if message.payload != 0 {
-        gpioa.BSRR.write(|w| w.BR4().set_bit());
+        gpioa.BSRR.write(|w| w.BS4().set_bit());
     }
     SEND_ACK
 }
@@ -296,7 +296,7 @@ fn lmk_powerdown(message: &MessageBuf) -> Result {
         }
     }
     if message.payload != 0 {
-        gpioa.BSRR.write(|w| w.BR4().set_bit());
+        gpioa.BSRR.write(|w| w.BS4().set_bit());
     }
     SEND_ACK
 }

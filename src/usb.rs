@@ -43,7 +43,7 @@ pub(crate) use {ctrl_dbgln, usb_dbgln};
 
 #[allow(non_camel_case_types)]
 struct USB_State {
-    /// Base of the TX buffer we are accumulating.
+    /// Base of the ACM CDC TX buffer we are accumulating.
     tx_base: *mut u32,
     /// Current number of bytes in TX buffer we are accumulating.
     tx_len: usize,

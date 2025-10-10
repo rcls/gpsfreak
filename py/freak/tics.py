@@ -4,7 +4,6 @@ import struct
 import re
 
 from .lmk05318b import BundledBytes, MaskedBytes
-from .message import Message, LMK05318B_WRITE
 
 def read_tcs_file(path: str) -> MaskedBytes:
     config = configparser.ConfigParser(strict=False)

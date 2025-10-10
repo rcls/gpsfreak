@@ -67,7 +67,8 @@ def crc(bb: bytes) -> int:
 
 assert crc(b'123456789') == 0x31c3
 
-def frame(code: int, payload: bytes) -> bytes:
+def frame(code: int, payload: bytes, limit: int = 64) -> bytes:
+    assert len(payload) + 6 <= limit
     message = MAGIC + bytes((code, len(payload))) + payload
     return message + struct.pack('>H', crc(message))
 

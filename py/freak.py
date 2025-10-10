@@ -33,7 +33,7 @@ lmk_reset.add_argument('-0', '--assert', action='store_true',
 lmk_reset.add_argument('-1', '--deassert', action='store_true',
                        help='De-assert PDN line (high)')
 
-def do_info():
+def do_info() -> None:
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
     print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
 
@@ -49,39 +49,39 @@ def do_info():
     temp = struct.unpack('>H', result.payload)[0] / 128
     print('Int. temperature:', temp, '°C')
 
-def do_reset_line(command):
+def do_reset_line(command: int) -> None:
     print(args)
     assrt = getattr(args, 'assert')
-    desrt = args.deassrt
+    desrt = args.deassert
     if assrt and not desrt:
         payload = b'\x00'
     elif not assrt and desrt:
         payload = b'\x01'
     else:
         payload = b'\x02'
-    message.command(command, payload)
+    message.command(dev, command, payload)
 
 args = argp.parse_args()
 
 dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
 
 # Ping with a UUID and check that we get the same one back...
-uuid = bytes(str(uuid.uuid4()), 'ascii')
-reply = message.command(dev, message.PING, uuid)
-assert reply.payload == uuid
+text = bytes(str(uuid.uuid4()), 'ascii')
+reply = message.command(dev, message.PING, text)
+assert reply.payload == text
 
 if args.command == 'info':
     do_info()
 
 elif args.command == 'reboot':
     # Just send the command blindly, no response.
-    dev.write(0x03, frame(message.REBOOT, b''))
+    dev.write(0x03, message.frame(message.CPU_REBOOT, b''))
 
 elif args.command == 'gps-reset':
     do_reset_line(message.GPS_RESET)
 
 elif args.command == 'lmk-pdn':
-    do_reset_line(message.LMK_RESET)
+    do_reset_line(message.LMK05318B_PDN)
 
 else:
     assert False, 'This should never happen'

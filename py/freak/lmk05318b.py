@@ -165,7 +165,7 @@ class MaskedBytes:
         for i, m in enumerate(self.mask):
             if not select(m):
                 continue
-            if addr is not None and addr + span == i:
+            if addr is not None and addr + span == i and span < max_block:
                 span += 1
                 continue
             if addr is not None:

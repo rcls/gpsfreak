@@ -17,9 +17,9 @@ cortex-m = '*'
 cortex-m = {version = '*', features = ['inline-asm']}
 
 [[bin]]
-name = 'blink'
-filename = 'blink.elf'
-path = 'src/blink.rs'
+name = 'freak'
+filename = 'freak.elf'
+path = 'src/freak.rs'
 
 [profile.dev]
 panic = 'abort'

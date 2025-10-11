@@ -15,6 +15,7 @@ assert SCALE * MHz == 1000000
 BAW_FREQ = 2_500 * MHz
 PLL2_LOW = 5_500 * MHz
 PLL2_HIGH = 6_250 * MHz
+PLL2_MID = (PLL2_LOW + PLL2_HIGH) // 2
 # Our numbering of channels:
 # 0 = LMK 0,1, GPS Freak 2
 # 1 = LMK 2,3, GPS Freak 1
@@ -46,7 +47,7 @@ class PLLPlan:
         = dataclasses.field(default_factory = lambda: [])
 
     def __lt__(self, b: PLLPlan) -> bool:
-        '''Less is better'''
+        '''Less is better.  I.e., return True if self is better than b.'''
         # Prefer no error!
         a_error = abs(self.error())
         b_error = abs(b.error())
@@ -63,10 +64,15 @@ class PLLPlan:
         b_fixed = b.fixed_denom()
         if a_fixed != b_fixed:
             return a_fixed
-        # Prefer lower VCO2 frequencies.  Hopefully that is lower power
-        # consumption.
+        # Prefer VCO2 near the middle of its range.
+        a_df = abs(self.freq - PLL2_MID)
+        b_df = abs(b   .freq - PLL2_MID)
+        if a_df != b_df:
+            return a_df < b_df
+
         if self.freq != b.freq:
             return self.freq < b.freq
+
         return False
 
     def validate(self):
@@ -203,7 +209,7 @@ def pll2_plan_low(freqs: list[Fraction], freq: Fraction) -> PLLPlan:
     factors = qd_factor(ratio.denominator)
     # We only get called for frequencies well below BAW_FREQ/18!
     assert len(factors) != 0
-    # We definitely can't cope with any prime factos > 1<<24.
+    # We definitely can't cope with any prime factors > 1<<24.
     if factors[-1] >= 1<<24:
         fail("Can't acheive {freq}: denominator factor {den_fact[-1][0]} is too big")
     #print(f'freq={freq}, ratio={ratio}, factors={factors}')
@@ -383,23 +389,21 @@ def plan(freqs: list[Fraction]) -> PLLPlan:
             fail(f'Frequency {f} {float(f)} is not achievable on {i}')
 
     # Find the LCM of all the pll2 frequencies...
-    first = None
+    pll2_lcm = None
     for f in pll2:
-        if f:
-            first = f
-            break
+        if not f:
+            pass
+        elif pll2_lcm is None:
+            pll2_lcm = f
+        else:
+            pll2_lcm, _, _ = fract_lcm(pll2_lcm, f)
 
-    if not first:
+    if pll2_lcm is None:
         plan = PLLPlan()
         plan.freqs = [zero] * len(freqs)
         plan.dividers = [(0, 0, 0)] * len(freqs)
         add_pll1(plan, pll1)
         return plan
-
-    pll2_lcm = first
-    for f in pll2:
-        if f:
-            pll2_lcm, _, _ = fract_lcm(pll2_lcm, f)
 
     if pll2_lcm > 3 * MHz:
         plan = pll2_plan(pll2, pll2_lcm)

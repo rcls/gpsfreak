@@ -8,8 +8,12 @@
 #![feature(format_args_nl)]
 #![feature(link_llvm_intrinsics)]
 
+#![feature(const_convert)]
+#![feature(const_ops)]
+
 mod command;
 mod cpu;
+mod crc;
 mod dma;
 mod gps_uart;
 mod i2c;
@@ -37,7 +41,7 @@ pub fn main() -> ! {
 
     uart_debug::init();
 
-    command::init();
+    crc::init();
 
     i2c::init();
     usb::init();

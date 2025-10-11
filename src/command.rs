@@ -33,7 +33,7 @@
 //! The CRC is then checked by computing the CRC over the entire message, and
 //! checking that the result is zero.
 //!
-//! Commands:
+//! Commands (codes are hex):
 //!    00 : PING.  Arbitrary payload.  Response is 80 and echos the payload.
 //!         By sending a random token, you can check that messages are
 //!         synchronised.
@@ -63,7 +63,7 @@
 //!         as payload.
 //!
 //!    62 : TMP117 I²C write.  Just like 60, but to the TMP117.
-//!    63 : TMP117 I²C read.  Just like 61, but to the TMP117.
+//!    63 : TMP117 I²C read.  Just like 61, but from the TMP117.
 //!
 //!    64, 65 : Reserved for GPS I²C.
 //!
@@ -71,23 +71,21 @@
 //!    71 : peek.  Payload is u32 address followed by u32 length.  Response is
 //!         F1 with address + data payload.
 //!    72 : poke.  Payload is u32 address followed by data bytes.
+//!    73 : crc.  Payload is u32 address followed by u32 length.  Response is
+//!         F3 with a 32 bit CRC payload.
 //!    * Sometime we'll overload this to write to flash?
 //!
 //!            Both peek and poke will do 32-bit or 16-bit transfers if address
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
 
-use core::ptr::{read_volatile, write_volatile};
-
 use crate::{gps_uart::GpsPriority, i2c};
+use crate::utils::vcopy_aligned;
 
-mod crc;
+mod crc16;
+mod crc32;
 
 macro_rules!dbgln {($($tt:tt)*) => {if true {crate::dbgln!($($tt)*)}};}
-
-pub fn init() {
-    crc::init();
-}
 
 /// Error codes for Nack responses.
 #[repr(u16)]
@@ -154,10 +152,10 @@ impl MessageBuf {
             magic: MAGIC, code, len: len as u8, payload: [0; _],
         };
         result.payload[..len].copy_from_slice(payload);
-        result.set_crc();
         result
     }
-    fn send(&self) -> Result {
+    fn send(&mut self) -> Result {
+        self.set_crc();
         let len = 4 + self.len as usize + 2;     // Include header and CRC.
         crate::usb::main_tx_response(
             unsafe {core::slice::from_raw_parts(
@@ -166,7 +164,7 @@ impl MessageBuf {
     }
     fn set_crc(&mut self) {
         let len = self.len as usize;
-        let crc = crc::compute(unsafe {core::slice::from_raw_parts(
+        let crc = crc16::compute(unsafe {core::slice::from_raw_parts(
             self as *const Self as _, 4 + len)});
         self.payload[len] = (crc >> 8) as u8;
         self.payload[len + 1] = crc as u8;
@@ -181,21 +179,19 @@ impl MessageBuf {
 
 impl<P: core::fmt::Debug> Message<P> {
     fn new(code: u8, payload: P) -> Message<P> {
-        let mut result = Message{
-            magic: MAGIC, code, len: size_of::<P>() as u8, payload,
-            crc0: 0, crc1: 0};
-        result.set_crc();
-        result
+        Message{magic: MAGIC, code, len: size_of::<P>() as u8,
+                payload, crc0: 0, crc1: 0}
     }
     fn set_crc(&mut self) {
         let p: *const u8 = self as *const Self as _;
         let len = size_of::<P>() + 4;
-        let crc = crc::compute(unsafe {core::slice::from_raw_parts(p, len)});
+        let crc = crc16::compute(unsafe {core::slice::from_raw_parts(p, len)});
         self.crc0 = (crc >> 8) as u8;
         self.crc1 = crc as u8;
     }
-    fn send(&self) -> Result {
+    fn send(&mut self) -> Result {
         dbgln!("Freak TX: @{:?} {:?}", self as *const _, self);
+        self.set_crc();
         crate::usb::main_tx_response(
             unsafe {core::slice::from_raw_parts(
                 self as *const Self as _, 6 + size_of::<P>())});
@@ -227,7 +223,7 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
         crate::usb::main_rx_rearm();
         return Ok(());
     }
-    if crc::compute(unsafe {core::slice::from_raw_parts(
+    if crc16::compute(unsafe {core::slice::from_raw_parts(
         message as *const _ as _, len)}) != 0 {
         dbgln!("CRC error {len} {}", message.len);
         return Err(Error::FramingError);
@@ -250,6 +246,7 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
 
         0x71 => peek(message),
         0x72 => poke(message),
+        0x73 => crc(message),
         0x78 => test_gps_write(message),
 
         _ => Err(Error::UnknownMessage)
@@ -348,7 +345,6 @@ fn i2c_read(address: u8, message: &MessageBuf) -> Result {
                             &mut result.payload[..rlen]);
     }
     if let Ok(()) = w.wait() {
-        result.set_crc();
         result.send()
     }
     else {
@@ -360,13 +356,15 @@ fn peek(message: &MessageBuf) -> Result {
     let message = Message::<(u32, u32)>::from_buf(message)?;
     let (address, length) = message.payload;
     let length = length as usize;
-    if length > MAX_PAYLOAD {
+    if length > MAX_PAYLOAD - 4 {
         return Err(Error::BadParameter);
     }
     let mut result = MessageBuf::start(0xf1);
-    unsafe {vcopy_aligned(address as *mut u8, &result.payload as *const u8,
-                          length)};
-    result.set_crc();
+    // Place the address at the start of the response.
+    result.len = length as u8 + 4;
+    result.payload[..4].copy_from_slice(&address.to_le_bytes());
+    unsafe {vcopy_aligned(&mut result.payload[4] as *mut u8,
+                          address as *const u8, length)};
     result.send()
 }
 
@@ -381,30 +379,10 @@ fn poke(message: &MessageBuf) -> Result {
     SEND_ACK
 }
 
-unsafe fn vcopy_aligned(dest: *mut u8, src: *const u8, length: usize) {
-    let mix = dest as usize | src as usize | length;
-    if mix & 3 == 0 {
-        let dest = dest as *mut u32;
-        let src = src as *mut u32;
-        for i in (0..length).step_by(4) {
-            unsafe {write_volatile(dest.wrapping_byte_add(i),
-                                   read_volatile(src.wrapping_byte_add(i)))};
-        }
-    }
-    else if mix & 1 == 0 {
-        let dest = dest as *mut u16;
-        let src = src as *mut u16;
-        for i in (0..length).step_by(2) {
-            unsafe {write_volatile(dest.wrapping_byte_add(i),
-                                   read_volatile(src.wrapping_byte_add(i)))};
-        }
-    }
-    else {
-        for i in 0 .. length {
-            unsafe {write_volatile(dest.wrapping_byte_add(i),
-                                   read_volatile(src.wrapping_byte_add(i)))};
-        }
-    }
+fn crc(message: &MessageBuf) -> Result {
+    let (address, length) = Message::<(u32, u32)>::from_buf(message)?.payload;
+    let crc = crc32::compute(address as *const u8, length as usize);
+    Message::new(0xf3, crc).send()
 }
 
 fn test_gps_write(message: &MessageBuf) -> Result {

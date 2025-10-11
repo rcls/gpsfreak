@@ -148,7 +148,7 @@ pub struct Priority<const P: u8> {
 impl<const P: u8> Priority<P> {
     pub fn new() -> Self {
         let old;
-        if !cfg!(target_os = "none") {
+        if cfg!(target_os = "none") {
             old = cortex_m::register::basepri::read();
             unsafe {cortex_m::register::basepri::write(P)};
         }
@@ -158,7 +158,7 @@ impl<const P: u8> Priority<P> {
         Priority{old}
     }
     pub fn wfe(&self) {
-        if !cfg!(target_os = "none") {
+        if cfg!(target_os = "none") {
             unsafe {cortex_m::register::basepri::write(self.old)};
             WFE();
             unsafe {cortex_m::register::basepri::write(P)};
@@ -168,7 +168,7 @@ impl<const P: u8> Priority<P> {
 
 impl<const P: u8> Drop for Priority<P> {
     fn drop(&mut self) {
-        if !cfg!(target_os = "none") {
+        if cfg!(target_os = "none") {
             unsafe {cortex_m::register::basepri::write(self.old)};
         }
     }

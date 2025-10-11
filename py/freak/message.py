@@ -25,6 +25,7 @@ LMK05318B_PDN=0x12
 PEEK=0x71
 PEEK_DATA=0xf1
 POKE=0x72
+GET_CRC=0x73
 
 LMK05318B_WRITE=0x60
 LMK05318B_READ=0x61
@@ -78,12 +79,6 @@ def deframe(message: bytes) -> Message:
     if message[:2] != MAGIC:
         raise ValueError('Incorrect magic')
     if crc(message) != 0:
-        print(message.hex(' '))
-        exp0 = crc(message[:-4])
-        exp1 = crc(message[:-3])
-        exp2 = crc(message[:-2])
-        exp3 = crc(message[:-2] + b'\x00\x00')
-        print(f'{exp0:#06x} {exp1:#06x} {exp2:#06x} {exp3:#06x}')
         raise ValueError('Bad CRC')
     code = message[2]
     length = message[3]

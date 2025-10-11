@@ -111,6 +111,12 @@ addresses.append(
 addresses.append(
     Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
 
+# From the TICS GUI APLL2 tab:
+Field('PLL2_ORDER', 2, 0, 'R/W', 0, 139)
+Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139)
+
+Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105)
+
 # Various undocumented fields are set in the TICS file.  Some are observed to
 # change with the configuration, and influence output frequencies (PLL2 in
 # particular.)

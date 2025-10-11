@@ -1,11 +1,12 @@
 
 import os
 import re
+import struct
 
-from typing import Tuple
+from typing import Any, Tuple
 
-from .ublox_cfg import UBloxCfg
-from .ublox_msg import UBloxMsg
+from .ublox_cfg import UBloxCfg, get_cfg
+from .ublox_msg import UBloxMsg, UBloxReader
 
 def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs = []
@@ -69,3 +70,36 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
             configs.append(last_config)
 
     return configs, messages
+
+def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
+        -> list[Tuple[UBloxCfg, Any]]:
+    start = 0
+    items = []
+
+    key_bin = bytes()
+    for key in keys:
+        if isinstance(key, UBloxCfg):
+            key = key.key
+        key_bin += struct.pack('<I', key)
+
+    while True:
+        msg = UBloxMsg.get('CFG-VALGET').frame_payload(
+            struct.pack('<BBH', 0, layer, start) + key_bin)
+        result = reader.transact(msg)
+        assert struct.unpack('<H', result[2:4])[0] == start
+        offset = 4
+        num_items = 0
+        while offset < len(result):
+            num_items += 1
+            assert len(result) - offset > 4
+            key = struct.unpack('<I', result[offset:offset + 4])[0]
+            cfg = get_cfg(key)
+            val_bytes = cfg.val_bytes()
+            #print(repr(cfg), val_bytes)
+            offset += 4 + val_bytes
+            assert offset <= len(result)
+            value = cfg.decode_value(result[offset - val_bytes:offset])
+            items.append((cfg, value))
+        start += num_items
+        if num_items < 64:
+            return items

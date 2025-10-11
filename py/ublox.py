@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from freak import serhelper, ublox_cfg
-from freak.ublox_defs import parse_key_list
+from freak.ublox_defs import parse_key_list, get_cfg_multi
 from freak.ublox_cfg import UBloxCfg
 from freak.ublox_msg import UBloxMsg, UBloxReader
 
@@ -9,15 +9,12 @@ import argparse
 import struct
 import sys
 
-from typing import Tuple
+from typing import Any, Tuple
 
 argp = argparse.ArgumentParser(description='UBLOX utility')
 
 subp = argp.add_subparsers(
     dest='command', metavar='COMMAND', required=True, help='Command')
-
-argp.add_argument('-b', '--binary', action='store_true', help='Output binary')
-argp.add_argument('-d', '--device', help='Device (or file) to write')
 
 def key_value(s: str) -> Tuple[str, str]:
     if not '=' in s:
@@ -28,19 +25,29 @@ def key_value(s: str) -> Tuple[str, str]:
 valset = subp.add_parser(
     'set', description='Set configuration values.',
     help='Set configuration values.')
-valset.add_argument('KV', type=key_value, nargs='+',
-                    metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
 valget = subp.add_parser(
     'get', description='Get configuration values.',
     help='Get configuration values.')
-valget.add_argument('KEY', nargs='+', help='KEYs')
 
 dump = subp.add_parser('dump', description='Retrieve entire config',
                        help='Retrieve entire config')
+dump.add_argument('-l', '--layer', default=0, type=int,
+                  help='Configuration layer to retrieve')
+
+changes = subp.add_parser('changes', description='Report changed config items',
+                          help='Report changed config items')
 
 scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
                          help='Scrape pdftotext output')
+
+for a in valset, valget, dump, changes:
+    a.add_argument('DEVICE', help='Serial port to talk to device')
+
+valget.add_argument('KEY', nargs='+', help='KEYs')
+valset.add_argument('KV', type=key_value, nargs='+',
+                    metavar='KEY=VALUE', help='KEY=VALUE pairs')
+
 scrape.add_argument('FILE', help='Text file to parse')
 
 args = argp.parse_args()
@@ -53,14 +60,19 @@ def do_set(KV: list[Tuple[str, str]]) -> None:
         payload += cfg.encode_key_value(val)
     msg = UBloxMsg.get('CFG-VALSET')
     message = msg.frame_payload(payload)
-    if args.device:
-        device = serhelper.Serial(args.device)
-        reader = UBloxReader(device)
-        reader.command(message)
-    elif args.binary:
-        sys.stdout.buffer.write(message)
+
+    device = serhelper.Serial(args.DEVICE)
+    reader = UBloxReader(device)
+    reader.command(message)
+
+def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
+    hd = cfg.val_bytes() * 2 + 2
+    if cfg.typ[0] in 'EX':
+        return f'{value:#0{hd}x}'
+    elif isinstance(value, int):
+        return f'{value} {value:#0{hd}x}'
     else:
-        print(message.hex(' '))
+        return f'{value}'
 
 def do_get(KEYS: list[str]) -> None:
     payload = b'\0\0\0\0'
@@ -69,18 +81,12 @@ def do_get(KEYS: list[str]) -> None:
         payload += struct.pack('<I', cfg.key)
     msg = UBloxMsg.get('CFG-VALGET')
     message = msg.frame_payload(payload)
-    if args.binary:
-        sys.stdout.buffer.write(message)
-        return
-    elif args.device is None:
-        print(message.hex(' '))
-        return
 
-    device = serhelper.Serial(args.device)
+    device = serhelper.Serial(args.DEVICE)
     reader = UBloxReader(device)
     result = reader.transact(message, ack=True)
     assert result[:4] == b'\1\0\0\0'
-    print('Got', result.hex(' '))
+
     pos = 4
     for cfg in cfg_list:
         key, = struct.unpack('<I', result[pos:pos+4])
@@ -89,50 +95,34 @@ def do_get(KEYS: list[str]) -> None:
         val_bytes = cfg.val_bytes()
         value = cfg.decode_value(result[pos : pos + val_bytes])
         pos += val_bytes
-        if isinstance(value, int):
-            hd = val_bytes * 2 + 2
-            print(f'{cfg.name} = {value} {value:#0{hd}x}')
-        else:
-            print(f'{cfg.name} = {value}')
-        assert pos == len(result)
+        print(cfg, '=', fmt_cfg_value(cfg, value))
 
 def do_dump() -> None:
-    assert args.device is not None
-    device = serhelper.Serial(args.device)
+    assert args.DEVICE is not None
+    device = serhelper.Serial(args.DEVICE)
     reader = UBloxReader(device)
-    start = 0
-    items = []
 
-    while True:
-        msg = UBloxMsg.get('CFG-VALGET').frame_payload(
-            struct.pack('<BBHI', 0, 0, start, 0xffffffff))
-        result = reader.transact(msg)
-        assert struct.unpack('<H', result[2:4])[0] == start
-        offset = 4
-        num_items = 0
-        while offset < len(result):
-            num_items += 1
-            assert len(result) - offset > 4
-            key = struct.unpack('<I', result[offset:offset + 4])[0]
-            cfg = ublox_cfg.get_cfg(key)
-            val_bytes = cfg.val_bytes()
-            #print(repr(cfg), val_bytes)
-            offset += 4 + val_bytes
-            assert offset <= len(result)
-            value = cfg.decode_value(result[offset - val_bytes:offset])
-            if cfg.typ[0] in 'EX':
-                w = int(cfg.typ[1]) * 2 + 2
-                vstr = f'{value:#0{w}x}'
-            else:
-                vstr = f'{value}'
-            items.append((cfg, vstr))
-        start += num_items
-        if num_items < 64:
-            break
-
+    items = get_cfg_multi(reader, args.layer, [0xffffffff])
     items.sort(key=lambda x: x[0].key & 0x0fffffff)
     for cfg, value in items:
-        print(cfg, value)
+        print(cfg, fmt_cfg_value(cfg, value))
+
+def do_changes() -> None:
+    assert args.DEVICE is not None
+    device = serhelper.Serial(args.DEVICE)
+    reader = UBloxReader(device)
+
+    live = get_cfg_multi(reader, 0, [0xffffffff])
+    rom  = get_cfg_multi(reader, 7, [0xffffffff])
+    live.sort(key=lambda x: x[0].key & 0x0fffffff)
+    rom .sort(key=lambda x: x[0].key & 0x0fffffff)
+
+    assert len(live) == len(rom )
+    for (cfg_l, value_l), (cfg_r, value_r) in zip(live, rom):
+        assert cfg_l == cfg_r
+        if value_l != value_r:
+            print(cfg_l, fmt_cfg_value(cfg_l, value_l), 'was',
+                  fmt_cfg_value(cfg_r, value_r))
 
 def do_scrape(FILE):
     configs, messages = parse_key_list(FILE)
@@ -149,11 +139,17 @@ def do_scrape(FILE):
 if args.command == 'set':
     do_set(args.KV)
 
-if args.command == 'get':
+elif args.command == 'get':
     do_get(args.KEY)
 
-if args.command == 'dump':
+elif args.command == 'dump':
     do_dump()
 
-if args.command == 'scrape':
+elif args.command == 'changes':
+    do_changes()
+
+elif args.command == 'scrape':
     do_scrape(args.FILE)
+
+else:
+    assert False, 'This should never happen'

@@ -18,6 +18,8 @@ const BAUD: u32 = 115200;
 const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
 const _: () = assert!(BRR < 65536);
 
+pub type GpsPriority = crate::cpu::Priority<PRIO_USB>;
+
 /// For serial TX we use DMA.
 const DMA_CHANNEL: usize = 0;
 
@@ -100,7 +102,7 @@ pub fn get_baud_rate() -> u32 {
 
 /// Returns false if the DMA is busy, or true if the DMA is started.
 /// Len must fit in 16 bits.
-pub fn dma_tx(data: *const u8, len: usize) {
+pub fn dma_tx(data: *const u8, len: usize) -> bool {
     dbgln!("UART TX {len} bytes");
     if LOOPBACK {
         for b in unsafe {core::slice::from_raw_parts(data, len)} {
@@ -111,9 +113,18 @@ pub fn dma_tx(data: *const u8, len: usize) {
     let dma  = unsafe {&*DMA ::ptr()};
     let ch = &dma.C[DMA_CHANNEL];
 
-    ch.write(data as usize, len);
+    if ch.busy() {
+        return false;
+    }
 
+    ch.write(data as usize, len);
     crate::cpu::barrier();
+    true
+}
+
+pub fn dma_tx_busy() -> bool {
+    let dma = unsafe {&*DMA ::ptr()};
+    dma.C[DMA_CHANNEL].busy()
 }
 
 fn uart_isr() {

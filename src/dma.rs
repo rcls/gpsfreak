@@ -22,6 +22,9 @@ pub trait DMA_Channel {
 
     /// Stop and cancel an in-process transfer.
     fn abort(&self);
+
+    /// Is the channel busy?
+    fn busy(&self) -> bool;
 }
 
 impl DMA_Channel for Channel {
@@ -53,7 +56,9 @@ impl DMA_Channel for Channel {
             self.FCR.write(|w| w.bits(!0));
         }
     }
-
+    fn busy(&self) -> bool {
+        self.CR.read().EN().bit()
+    }
 }
 
 /// Trait Flat is used to check that we pass sane types to read/write.

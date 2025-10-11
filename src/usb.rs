@@ -51,7 +51,19 @@ struct USB_State {
     tx_part: u32,
 
     /// Is software still processing a received buffer?
-    rx_processing: bool,
+    rx_processing: RxProcessing,
+}
+
+/// Status of processing received CDC ACM serial data.
+#[derive(PartialEq)]
+enum RxProcessing {
+    /// Nothing is being processed.
+    Idle,
+    /// The serial handling is currently forwarding some data.
+    Processing,
+    /// The serial handling is currently busy with somebody elses data, but
+    /// we have data for it.
+    Blocked,
 }
 
 unsafe impl Sync for USB_State {}
@@ -62,7 +74,7 @@ impl const Default for USB_State {
             tx_base: BULK_TX_BUF as _,
             tx_len : 0,
             tx_part: 0,
-            rx_processing: false,
+            rx_processing: RxProcessing::Idle,
         }
     }
 }
@@ -301,7 +313,7 @@ impl USB_State {
             return;
         }
 
-        if self.rx_processing {
+        if self.rx_processing != RxProcessing::Idle {
             srx_dbgln!("SRX jammed! CHEP = {:#06x}", chep.bits());
             chep_ser().write(|w| w.serial().VTRX().clear_bit());
             return;
@@ -314,23 +326,33 @@ impl USB_State {
                    chep.bits(), chep.bits());
 
         // Dispatch the block.
-        self.rx_processing = true;
-        crate::gps_uart::dma_tx(chep_bd_ptr(bd), len);
+        if crate::gps_uart::dma_tx(chep_bd_ptr(bd), len) {
+            self.rx_processing = RxProcessing::Processing;
+        }
+        else {
+            self.rx_processing = RxProcessing::Blocked;
+        }
     }
 
-    /// Notification from the consumer that we have finished processing a buffer and
-    /// are ready for the next.
+    /// Notification from the consumer that we have finished processing a buffer
+    /// and are ready for the next.  This is also called when the serial
+    /// handling has processed someone elses data.
     fn serial_rx_done(&mut self) {
+        // If another guy is sending stuff out the serial, then we may get
+        // spurious calls.
+        if self.rx_processing == RxProcessing::Idle {
+            return;
+        }
+
         let chep = chep_ser().read();
 
-        assert!(self.rx_processing);
-
         if !chep.rx_nakking() {
-            self.rx_processing = false;
+            self.rx_processing = RxProcessing::Idle;
             srx_dbgln!("serial_rx_done, now idle.  CHEP={:#06x}", chep.bits());
             return;                     // RX is in progress (or not wanted).
         }
 
+        self.rx_processing = RxProcessing::Processing;
         let bd = bd_serial().rx.read();
         // Start processing the pending block.
         crate::gps_uart::dma_tx(chep_bd_ptr(bd), chep_bd_len(bd));

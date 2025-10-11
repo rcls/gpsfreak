@@ -67,16 +67,19 @@
 //!
 //!    64, 65 : Reserved for GPS I²C.
 //!
-//!    70 : Unsafe operation unlock.  Needs correct magic data payload.
-//!    71 : peek.  Payload is u32 address followed by u8 length.  Response is
+//!    ?70 : Unsafe operation unlock.  Needs correct magic data payload.
+//!    71 : peek.  Payload is u32 address followed by u32 length.  Response is
 //!         F1 with address + data payload.
 //!    72 : poke.  Payload is u32 address followed by data bytes.
+//!    * Sometime we'll overload this to write to flash?
 //!
 //!            Both peek and poke will do 32-bit or 16-bit transfers if address
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
 
-use crate::i2c;
+use core::ptr::{read_volatile, write_volatile};
+
+use crate::{gps_uart::GpsPriority, i2c};
 
 mod crc;
 
@@ -120,7 +123,7 @@ const MAGIC: u16 = 0xce93u16.to_be();
 const MAX_PAYLOAD: usize = 58;
 
 /// A struct representing a message.
-#[repr(C)]
+#[repr(C, align(4))]
 pub struct MessageBuf {
     magic  : u16,
     code   : u8,
@@ -154,11 +157,12 @@ impl MessageBuf {
         result.set_crc();
         result
     }
-    fn send(&self) {
+    fn send(&self) -> Result {
         let len = 4 + self.len as usize + 2;     // Include header and CRC.
         crate::usb::main_tx_response(
             unsafe {core::slice::from_raw_parts(
                 self as *const Self as _, len)});
+        Ok(())
     }
     fn set_crc(&mut self) {
         let len = self.len as usize;
@@ -190,11 +194,12 @@ impl<P: core::fmt::Debug> Message<P> {
         self.crc0 = (crc >> 8) as u8;
         self.crc1 = crc as u8;
     }
-    fn send(&self) {
+    fn send(&self) -> Result {
         dbgln!("Freak TX: @{:?} {:?}", self as *const _, self);
         crate::usb::main_tx_response(
             unsafe {core::slice::from_raw_parts(
                 self as *const Self as _, 6 + size_of::<P>())});
+        Ok(())
     }
     fn from_buf(message: &MessageBuf) -> Result<&Self> {
         message.check_len(size_of::<P>() as u8)?;
@@ -204,8 +209,8 @@ impl<P: core::fmt::Debug> Message<P> {
 
 pub fn command_handler(message: &MessageBuf, len: usize) {
     match command_dispatch(message, len) {
-        Err(Error::Succeeded) => Ack::new(0x80, ()).send(),
-        Err(err) => Nack::new(0x81, err).send(),
+        Err(Error::Succeeded) => {let _ = Ack::new(0x80, ()).send();}
+        Err(err) => {let _ = Nack::new(0x81, err).send();}
         _ => (),
     }
 }
@@ -236,11 +241,16 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
         0x10 => crate::cpu::reboot(),
         0x11 => gps_reset(message),
         0x12 => lmk_powerdown(message),
+        0x1f => set_baud(message),
 
         0x60 => i2c_write(0xc8, message),
         0x61 => i2c_read (0xc9, message),
         0x62 => i2c_write(0x92, message),
         0x63 => i2c_read (0x93, message),
+
+        0x71 => peek(message),
+        0x72 => poke(message),
+        0x78 => test_gps_write(message),
 
         _ => Err(Error::UnknownMessage)
     }
@@ -248,21 +258,18 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
 
 fn ping(message: &MessageBuf) -> Result {
     // Send a generic ACK with the same payload.
-    MessageBuf::new(0x80, message.get_payload()).send();
-    Ok(())
+    MessageBuf::new(0x80, message.get_payload()).send()
 }
 
 fn get_protocol_version(message: &MessageBuf) -> Result {
     Message::<()>::from_buf(message)?;
-    Message::new(0x82, 1u32).send();
-    Ok(())
+    Message::new(0x82, 1u32).send()
 }
 
 fn get_serial_number(message: &MessageBuf) -> Result {
     Message::<()>::from_buf(message)?;
     let sn = crate::cpu::SERIAL_NUMBER.as_ref();
-    Message::new(0x83, *sn).send();
-    Ok(())
+    Message::new(0x83, *sn).send()
 }
 
 fn gps_reset(message: &MessageBuf) -> Result {
@@ -301,6 +308,13 @@ fn lmk_powerdown(message: &MessageBuf) -> Result {
     SEND_ACK
 }
 
+fn set_baud(message: &MessageBuf) -> Result {
+    let message = Message::<u32>::from_buf(message)?;
+    let _prio = GpsPriority::new();
+    crate::gps_uart::set_baud_rate(message.payload);
+    SEND_ACK
+}
+
 fn i2c_write(address: u8, message: &MessageBuf) -> Result {
     dbgln!("I2C write {address:#04x} length {}", message.len);
     // Write.
@@ -335,10 +349,74 @@ fn i2c_read(address: u8, message: &MessageBuf) -> Result {
     }
     if let Ok(()) = w.wait() {
         result.set_crc();
-        result.send();
-        Ok(())
+        result.send()
     }
     else {
         Err(Error::Failed)
     }
+}
+
+fn peek(message: &MessageBuf) -> Result {
+    let message = Message::<(u32, u32)>::from_buf(message)?;
+    let (address, length) = message.payload;
+    let length = length as usize;
+    if length > MAX_PAYLOAD {
+        return Err(Error::BadParameter);
+    }
+    let mut result = MessageBuf::start(0xf1);
+    unsafe {vcopy_aligned(address as *mut u8, &result.payload as *const u8,
+                          length)};
+    result.set_crc();
+    result.send()
+}
+
+fn poke(message: &MessageBuf) -> Result {
+    if message.len < 4 {
+        return Err(Error::BadParameter);
+    }
+    let address = unsafe {* (&message.payload as *const _ as *const u32)};
+    unsafe {
+        vcopy_aligned(address as *mut u8, &message.payload[4] as *const u8,
+                      message.len as usize - 4)};
+    SEND_ACK
+}
+
+unsafe fn vcopy_aligned(dest: *mut u8, src: *const u8, length: usize) {
+    let mix = dest as usize | src as usize | length;
+    if mix & 3 == 0 {
+        let dest = dest as *mut u32;
+        let src = src as *mut u32;
+        for i in (0..length).step_by(4) {
+            unsafe {write_volatile(dest.wrapping_byte_add(i),
+                                   read_volatile(src.wrapping_byte_add(i)))};
+        }
+    }
+    else if mix & 1 == 0 {
+        let dest = dest as *mut u16;
+        let src = src as *mut u16;
+        for i in (0..length).step_by(2) {
+            unsafe {write_volatile(dest.wrapping_byte_add(i),
+                                   read_volatile(src.wrapping_byte_add(i)))};
+        }
+    }
+    else {
+        for i in 0 .. length {
+            unsafe {write_volatile(dest.wrapping_byte_add(i),
+                                   read_volatile(src.wrapping_byte_add(i)))};
+        }
+    }
+}
+
+fn test_gps_write(message: &MessageBuf) -> Result {
+    dbgln!("test_gps_write");
+    let prio = crate::gps_uart::GpsPriority::new();
+    while !crate::gps_uart::dma_tx(
+            &message.payload as *const u8, message.len as usize) {
+        prio.wfe();
+    }
+    // FIXME - we should wait just for our TX not all GPS TX!
+    while crate::gps_uart::dma_tx_busy() {
+        prio.wfe();
+    }
+    SEND_ACK
 }

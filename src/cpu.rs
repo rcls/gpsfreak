@@ -140,6 +140,40 @@ pub fn init() {
     unsafe {scb.scr.write(16)};
 }
 
+#[derive(Debug)]
+pub struct Priority<const P: u8> {
+    old: u8,
+}
+
+impl<const P: u8> Priority<P> {
+    pub fn new() -> Self {
+        let old;
+        if !cfg!(target_os = "none") {
+            old = cortex_m::register::basepri::read();
+            unsafe {cortex_m::register::basepri::write(P)};
+        }
+        else {
+            old = 0;
+        }
+        Priority{old}
+    }
+    pub fn wfe(&self) {
+        if !cfg!(target_os = "none") {
+            unsafe {cortex_m::register::basepri::write(self.old)};
+            WFE();
+            unsafe {cortex_m::register::basepri::write(P)};
+        }
+    }
+}
+
+impl<const P: u8> Drop for Priority<P> {
+    fn drop(&mut self) {
+        if !cfg!(target_os = "none") {
+            unsafe {cortex_m::register::basepri::write(self.old)};
+        }
+    }
+}
+
 fn bugger() {
     interrupt::disable_all();
     let fp = unsafe {frameaddress(0)};

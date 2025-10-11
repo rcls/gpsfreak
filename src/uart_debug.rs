@@ -20,6 +20,9 @@ const FIFO_SIZE: usize = 8;
 /// State for debug logging.
 pub static DEBUG: Debug = Debug::new();
 
+/// Guard for running at the priority for read/write.
+pub type DebugPriority = crate::cpu::Priority::<{interrupt::PRIO_USB}>;
+
 type Index = u8;
 const BUF_SIZE: usize = 256;
 const BUF_MASK: Index = (BUF_SIZE - 1) as Index;
@@ -124,23 +127,6 @@ impl core::fmt::Write for DebugMarker {
         let cc = [c as u8];
         DEBUG.write_bytes(&cc);
         Ok(())
-    }
-}
-
-pub struct DebugPriority;
-
-impl DebugPriority {
-    pub fn new() -> DebugPriority {
-        #[cfg(target_os = "none")]
-        unsafe {cortex_m::register::basepri::write(interrupt::PRIO_USB)};
-        DebugPriority
-    }
-}
-
-impl Drop for DebugPriority {
-    fn drop(&mut self) {
-        #[cfg(target_os = "none")]
-        unsafe {cortex_m::register::basepri::write(0)};
     }
 }
 

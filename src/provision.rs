@@ -65,11 +65,13 @@ pub fn provision() {
         dbgln!("No config found");
         return;
     };
-    let mut data = &c.data[16 .. c.length as usize - 4];
+    let mut data = &c.data[.. c.length as usize - 20];
     while data.len() > 0 {
         // Check for a valid command packet.
+        dbgln!("Next packet @ {:#?}", data.as_ptr());
         if data.len() >= 6 && data[0] == 0xce && data[1] == 0x93 {
             let length = data[3] as usize + 6;
+            dbgln!("Freak packet len {} total len {length}", data[3]);
             if data.len() < length {
                 dbgln!("Config command doesn't fit.");
                 break;
@@ -81,7 +83,9 @@ pub fn provision() {
         }
         // Check for a valid U-Blox message.
         if data.len() >= 8 && data[0] == 'µ' as u8 && data[1] == 'b' as u8 {
-            let length = data[4] as usize + data[5] as usize * 256 + 8;
+            let lfield = data[4] as usize + data[5] as usize * 256;
+            let length = lfield + 8;
+            dbgln!("UBX packet len {lfield} total {length}");
             if data.len() < length {
                 dbgln!("Config u-blox doesn't fit @ {:#?}.", data.as_ptr());
                 break;
@@ -128,7 +132,7 @@ fn run_ublox_command(data: *const u8, length: usize) {
 }
 
 fn config_by_index(i: u8) -> &'static ConfigBlock {
-    let base: usize = 0x0800c000 + if i & 16 != 0 {0x10000} else {0};
+    let base: usize = 0x0800c000 + if i & 8 != 0 {0x10000} else {0};
     const {assert!(0x4000 / CONFIG_MAX_LENGTH == 8)};
     const {assert!(0x4000 == 2 * 8192)};
     let address = base + 2048 * (i as usize & 7);
@@ -143,14 +147,17 @@ fn best_config() -> Option<&'static ConfigBlock> {
 
     for c in indexes.iter().rev().map(|&i| config_by_index(i)) {
         if c.magic != CONFIG_MAGIC {
+            dbgln!("Magic wrong @ {:#?}", c as *const ConfigBlock);
             break;
         }
         let length = c.length as usize;
-        if length >= CONFIG_MAX_LENGTH {
+        if length < 20 || length >= CONFIG_MAX_LENGTH {
+            dbgln!("Length {length} too big @ {:#?}", c as *const ConfigBlock);
             continue;
         }
         if crc32::compute(c as *const ConfigBlock as *const u8, length)
             == VERIFY_MAGIC {
+            dbgln!("CRC good @ {:#?}", c as *const ConfigBlock);
             return Some(c);
         }
     }
@@ -164,8 +171,3 @@ fn config_sort_key(i: &u8) -> (bool, u32, u8) {
         && c.version <= MAX_SUPPORTED_VERSION;
     (c.magic == CONFIG_MAGIC && version_ok, c.generation, *i)
 }
-
-// fn baby_sort<const N: usize, T>(items: &mut [T; N],
-//                                 better: impl Fn(T, T) -> bool) {
-//
-// }

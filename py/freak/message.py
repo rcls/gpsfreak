@@ -5,7 +5,10 @@ import struct
 import usb
 
 from dataclasses import dataclass
+from typing import TypeAlias
 from usb import Device
+
+Target: TypeAlias = Device|bytearray
 
 MAGIC = b'\xce\x93'
 
@@ -95,8 +98,12 @@ def flush(dev: Device) -> None:
     except usb.core.USBTimeoutError:
         pass
 
-def transact(dev: Device, code: int, payload: bytes,
+def transact(dev: Target, code: int, payload: bytes,
              expect: int|None = None) -> Message:
+    data = frame(code, payload)
+    if isinstance(dev, bytearray):
+        dev += data
+        return Message(ACK, b'')
     dev.write(0x03, frame(code, payload))
     result = deframe(bytes(dev.read(0x83, 64, 10000)))
     if expect != NACK and result.code == NACK:
@@ -105,7 +112,7 @@ def transact(dev: Device, code: int, payload: bytes,
         raise RequestFailed(f'Result code is {result.code:#04x}')
     return result
 
-def command(dev: Device, code: int, payload: bytes = b'') -> Message:
+def command(dev: Target, code: int, payload: bytes = b'') -> Message:
     return transact(dev, code, payload, expect=ACK)
 
 def retrieve(dev: Device, code: int, payload: bytes = b'') -> Message:
@@ -117,40 +124,41 @@ def get_device() -> Device:
     flush(dev)
     return dev
 
-def ping(dev: Device, payload: bytes) -> bytes:
+def ping(dev: Target, payload: bytes) -> bytes:
     resp = retrieve(dev, PING, payload)
     assert resp.payload == payload
     return resp.payload
 
-def peek(dev: Device, address: int, length: int) -> bytes:
-    data = retrieve(dev, PEEK, struct.pack('<II', address, length))
-    a, l = struct.unpack('<II', data.payload[:8])
-    assert a == address
-    assert l == length
-    return data.payload[8:]
-
-def get_protocol_version(dev: Device) -> int:
+def get_protocol_version(dev: Target) -> int:
     data = retrieve(dev, GET_PROTOCOL_VERSION, b'')
     return struct.unpack('<I', data.payload)[0]
 
-def get_serial_number(dev: Device) -> bytes:
+def get_serial_number(dev: Target) -> bytes:
     return retrieve(dev, GET_SERIAL_NUMBER, b'').payload
 
-def poke(dev: Device, address: int, data: bytes, chunk_size: int = 32) -> None:
+def peek(dev: Target, address: int, length: int) -> bytes:
+    data = retrieve(dev, PEEK, struct.pack('<II', address, length))
+    a = struct.unpack('<I', data.payload[:4])[0]
+    assert a == address
+    assert len(data.payload) == length + 4
+    return data.payload[4:]
+
+def poke(dev: Target, address: int, data: bytes, chunk_size: int = 32) -> None:
     base = 0
     while base < len(data):
         todo = min(chunk_size, len(data) - base)
-        command(dev, POKE, struct.pack('<I', address) + data[base:base + todo])
+        command(dev, POKE,
+                struct.pack('<I', address + base) + data[base:base + todo])
         base += todo
 
-def crc(dev: Device, address: int, length: int) -> int:
+def crc(dev: Target, address: int, length: int) -> int:
     data = retrieve(dev, GET_CRC, struct.pack('<II', address, length))
     a, l, crc = struct.unpack('<III', data.payload)
     assert a == address
     assert l == length
     return crc
 
-def flash_erase(dev: Device, address: int) -> None:
+def flash_erase(dev: Target, address: int) -> None:
     command(dev, FLASH_ERASE, struct.pack('<I', address))
 
 def lmk05318b_read(dev: Device, address: int, length: int) -> bytes:
@@ -158,13 +166,16 @@ def lmk05318b_read(dev: Device, address: int, length: int) -> bytes:
     assert len(r.payload) == length
     return r.payload
 
-def lmk05318b_write(dev: Device, address: int, data: bytes) -> None:
-    command(dev, LMK05318B_WRITE, struct.pack('>H', address) + data)
+def lmk05318b_write(dev: Target, address: int, *data: bytes|int) -> None:
+    def bb(x: bytes|int) -> bytes:
+        return bytes((x,)) if isinstance(x, int) else x
+    total = b''.join(map(bb, data))
+    command(dev, LMK05318B_WRITE, struct.pack('>H', address) + total)
 
-def tmp117_read(dev: Device, address: int, length: int = 1) -> bytes:
+def tmp117_read(dev: Target, address: int, length: int = 1) -> bytes:
     r = retrieve(dev, TMP117_READ, bytes((length, address)))
     assert len(r.payload) == length
     return r.payload
 
-def tmp117_write(dev: Device, address: int, data: bytes) -> None:
+def tmp117_write(dev: Target, address: int, data: bytes) -> None:
     command(dev, TMP117_WRITE, bytes((address,)) + data)

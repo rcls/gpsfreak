@@ -113,10 +113,10 @@ addresses.append(
     Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
 
 # From the TICS GUI APLL2 tab:
-Field('PLL2_ORDER', 2, 0, 'R/W', 0, 139)
-Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139)
-
-Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105)
+# We should insert these sometime!
+#Field('PLL2_ORDER', 2, 0, 'R/W', 0, 139)
+#Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139)
+#Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105)
 
 # Various undocumented fields are set in the TICS file.  Some are observed to
 # change with the configuration, and influence output frequencies (PLL2 in
@@ -128,7 +128,7 @@ if args.tics:
         if m != 0 and not a in seen:
             val = tf.data[a]
             addresses.append(
-                Address(a, [Field(f'UNKNOWN{a}', 7, 0, 'R', val, a)]))
+                Address(a, [Field(f'UNKNOWN{a}', 7, 0, 'R/W', val, a)]))
 
 addresses.sort(key = lambda address: address.address)
 

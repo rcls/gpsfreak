@@ -48,10 +48,10 @@ pub fn main() -> ! {
 
     i2c::init();
 
+    gps_uart::init();
     provision::provision();
 
     usb::init();
-    if true {gps_uart::init();}
 
     // FIXME - this races with interrupts using debug!
     dbgln!("Debug is up!");

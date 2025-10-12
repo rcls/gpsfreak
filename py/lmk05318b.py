@@ -250,14 +250,14 @@ def do_freq(freq_str: list[str]) -> None:
         data.insert(Register.get(K), V)
     dev = message.get_device()
     # Software reset.
-    message.lmk05318b_write(dev, 12, b'\x12')
+    message.lmk05318b_write(dev, 12, 12)
     # Write the registers.
     masked_write(dev, data)
     # If PLL2 is in use, power it up now.
     if plan.freq_target != 0:
-        message.lmk05318b_write(dev, 100, bytes((data.data[100] & 0xfe,)))
+        message.lmk05318b_write(dev, 100, data.data[100] & 0xfe)
     # Remove software reset.
-    message.lmk05318b_write(dev, 12, b'\x02')
+    message.lmk05318b_write(dev, 12, 2)
 
 def do_drive(drives: list[Tuple[str, str]], defaults: bool) -> None:
     data = MaskedBytes()

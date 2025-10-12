@@ -17,7 +17,7 @@ pub unsafe fn program32(address: usize, data: &Mem32) -> Result {
 
     // Check that the flash block is erased.
     if unsafe{&*(address as *const Mem32)}.iter().any(|&x| x != !0) {
-        dbgln!("FLASH - block is already written.");
+        dbgln!("FLASH - block @ {address:#010x} is already written.");
         return Err(());
     }
     if data.iter().all(|&x| x == !0) {
@@ -121,7 +121,7 @@ fn flash_result() -> Result {
 
     flash.NSCR.write(|w| w.bits(0));
 
-    // Check for errors.  EOP clear is an error, because it means we did
+    // Check for errors.  EOP clear should be an error, because it means we did
     // nothing.
     let errors = flash.NSSR.read().bits();
     flash.NSCCR.write(|w| w.bits(errors & 0xffff0000));
@@ -129,7 +129,13 @@ fn flash_result() -> Result {
     dbgln!("FLASH - result NSSR = {:#010x}", errors);
     dbgln!("FLASH - icache CR = {:#010x}", icache.CR.read().bits());
 
-    if errors & 0xfffe == 0 {Ok(())} else {Err(())}
+    if errors & 0xfffe0000 == 0 {
+        dbgln!("FLASH success");
+        Ok(())
+    } else {
+        dbgln!("FLASH failure");
+        Err(())
+    }
 }
 
 fn busy() -> bool {

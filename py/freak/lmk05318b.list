@@ -60,8 +60,8 @@ INT_AND_OR          : R/W  21.1:1
 INT_EN              : R/W  21:1 = 1
 STAT1_POL           : R/W  22.1:1
 STAT0_POL           : R/W  22:1
-UNKNOWN23           : R    23:8 = 0x55
-UNKNOWN24           : R    24:8 = 0x55
+UNKNOWN23           : R/W  23:8 = 0x55
+UNKNOWN24           : R/W  24:8 = 0x55
 CH7_MUTE            : R/W  25.7:1
 CH6_MUTE            : R/W  25.6:1
 CH5_MUTE            : R/W  25.5:1
@@ -70,30 +70,30 @@ CH3_MUTE            : R/W  25.3:1
 CH2_MUTE            : R/W  25.2:1
 CH1_MUTE            : R/W  25.1:1
 CH0_MUTE            : R/W  25:1
-UNKNOWN26           : R    26:8
-UNKNOWN27           : R    27:8
-UNKNOWN28           : R    28:8 = 0x01
+UNKNOWN26           : R/W  26:8
+UNKNOWN27           : R/W  27:8
+UNKNOWN28           : R/W  28:8 = 0x01
 MUTE_APLL2_LOCK     : R/W  29.4:1 = 1
 MUTE_DPLL_PHLOCK    : R/W  29.2:1
 MUTE_DPLL_FRLOCK    : R/W  29.1:1 = 1
 MUTE_APLL1_LOCK     : R/W  29:1 = 1
-UNKNOWN30           : R    30:8 = 0x40
-UNKNOWN32           : R    32:8 = 0x44
-UNKNOWN35           : R    35:8
-UNKNOWN36           : R    36:8 = 0x03
-UNKNOWN37           : R    37:8
-UNKNOWN38           : R    38:8
+UNKNOWN30           : R/W  30:8 = 0x40
+UNKNOWN32           : R/W  32:8 = 0x44
+UNKNOWN35           : R/W  35:8
+UNKNOWN36           : R/W  36:8 = 0x03
+UNKNOWN37           : R/W  37:8
+UNKNOWN38           : R/W  38:8
 APLL1_DEN_MODE      : R/W  39:1
 SECREF_DC_MODE      : R/W  40.3:1
 PRIREF_DC_MODE      : R/W  40.2:1
 APLL2_DEN_MODE      : R/W  40:1 = 1
-UNKNOWN41           : R    41:8
-UNKNOWN42           : R    42:8 = 0x11
+UNKNOWN41           : R/W  41:8
+UNKNOWN42           : R/W  42:8 = 0x11
 XO_DRV_APLL2_EN     : R/W  43:1
-UNKNOWN44           : R    44:8
+UNKNOWN44           : R/W  44:8
 SECREF_BUF_MODE     : R/W  45.1:1 = 1
 PRIREF_BUF_MODE     : R/W  45:1 = 1
-UNKNOWN46           : R    46:8 = 0x18
+UNKNOWN46           : R/W  46:8 = 0x18
 PLL2_RCLK_SEL       : R/W  47.7:1
 STAT0_SEL           : R/W  48:7 = 0x50
 STAT1_SEL           : R/W  49:7 = 0x4a
@@ -140,8 +140,8 @@ OUT7_MODE1          : R/W  63.2:2 = 2
 OUT7_MODE2          : R/W  63:2
 OUT7_STG2_DIV       : R/W  64:24 (3)
 OUT7_DIV            : R/W  67:8 = 0x18
-UNKNOWN68           : R    68:8 = 0x08
-UNKNOWN69           : R    69:8
+UNKNOWN68           : R/W  68:8 = 0x08
+UNKNOWN69           : R/W  69:8
 PLL2_P2_SYNC_EN     : R/W  70.2:1
 PLL2_P1_SYNC_EN     : R/W  70.1:1
 PLL1_P1_SYNC_EN     : R/W  70:1
@@ -164,8 +164,8 @@ PLL1_VM_BYP         : R/W  75.2:1
 PLL1_CP             : R/W  75:2
 PLL1_P1             : R/W  76:3
 PLL1_DISABLE_3RD4TH : R/W  77:4 = 15
-UNKNOWN78           : R    78:8
-UNKNOWN79           : R    79:8 = 0x11
+UNKNOWN78           : R/W  78:8
+UNKNOWN79           : R/W  79:8 = 0x11
 BAW_LOCK            : R    80.7:1 = 1
 BAW_LOCK_PPM_MAX    : R/W  80:15 (2) = 0x000a
 BAW_LOCK_CNTSTRT    : R/W  82:30 (4) = 0x000e105d
@@ -180,18 +180,18 @@ PLL2_CP             : R/W 101:2 = 1
 PLL2_P2             : R/W 102.4:3 = 2
 PLL2_P1             : R/W 102:3 = 2
 PLL2_DISABLE_3RD4TH : R/W 103:4 = 15
-UNKNOWN104          : R   104:8 = 0x1f
-UNKNOWN105          : R   105:8 = 0x05
+UNKNOWN104          : R/W 104:8 = 0x1f
+UNKNOWN105          : R/W 105:8 = 0x05
 PLL1_NDLYDIV        : R/W 106:12 (2) = 0x064
 PLL1_NDIV           : R/W 108:12 (2) = 0x034
 PLL1_NUM            : R/W 110:40 (5) = 0x140008bcbd
-UNKNOWN115          : R   115:8 = 0x03
+UNKNOWN115          : R/W 115:8 = 0x03
 PLL1_FDEV_EN        : R/W 116.1:1
 PLL1_MODE           : R/W 116:1 = 1
 PLL1_FDEV           : R/W 117:38 (5)
-UNKNOWN122          : R   122:8
+UNKNOWN122          : R/W 122:8
 PLL1_NUM_STAT       : R   123:40 (5) = 0x280011797a
-UNKNOWN128          : R   128:8
+UNKNOWN128          : R/W 128:8
 PLL1_LF_R2          : R/W 129:6 = 0x01
 PLL1_LF_C1          : R/W 130:3
 PLL1_LF_R3          : R/W 131:6 = 0x01
@@ -200,7 +200,7 @@ PLL1_LF_C4          : R/W 133.4:3 = 7
 PLL1_LF_C3          : R/W 133:3 = 7
 PLL2_NDIV           : R/W 134:9 (2) = 0x02b
 PLL2_NUM            : R/W 136:24 (3) = 0x0028e5
-UNKNOWN139          : R   139:8 = 0x03
+UNKNOWN139          : R/W 139:8 = 0x03
 PLL2_LF_R2          : R/W 140:6 = 0x02
 PLL2_LF_C1          : R/W 141:3
 PLL2_LF_R3          : R/W 142:6 = 0x01
@@ -208,14 +208,14 @@ PLL2_LF_R4          : R/W 143:6 = 0x01
 PLL2_LF_C4          : R/W 144.4:3 = 7
 PLL2_LF_C3          : R/W 144:3 = 7
 XO_TIMER            : R/W 145:3 = 1
-UNKNOWN146          : R   146:8 = 0x89
-UNKNOWN147          : R   147:8 = 0x20
-UNKNOWN149          : R   149:8 = 0x0d
-UNKNOWN150          : R   150:8
-UNKNOWN151          : R   151:8 = 0x01
-UNKNOWN152          : R   152:8 = 0x0d
-UNKNOWN153          : R   153:8 = 0x29
-UNKNOWN154          : R   154:8 = 0x24
+UNKNOWN146          : R/W 146:8 = 0x89
+UNKNOWN147          : R/W 147:8 = 0x20
+UNKNOWN149          : R/W 149:8 = 0x0d
+UNKNOWN150          : R/W 150:8
+UNKNOWN151          : R/W 151:8 = 0x01
+UNKNOWN152          : R/W 152:8 = 0x0d
+UNKNOWN153          : R/W 153:8 = 0x29
+UNKNOWN154          : R/W 154:8 = 0x24
 NVMSCRC             : R   155:8 = 0x32
 NVMCNT              : R   156:8 = 0x01
 REGCOMMIT           : R/WSC 157.6:1
@@ -223,16 +223,16 @@ NVMCRCERR           : R   157.5:1
 NVMCOMMIT           : R/WSC 157.3:1
 NVMBUSY             : R   157.2:1
 NVMLCRC             : R   158:8
-UNKNOWN159          : R   159:8
+UNKNOWN159          : R/W 159:8
 MEMADR              : R/W 160:8 = 0xfc
 NVMDAT              : R   161:8 = 0x32
 RAMDAT              : R/W 162:8
 NVMUNLK             : R/W 164:8
-UNKNOWN165          : R   165:8
-UNKNOWN167          : R   167:8 = 0x01
+UNKNOWN165          : R/W 165:8
+UNKNOWN167          : R/W 167:8 = 0x01
 DPLL_PHASE_LOCK     : R   168.2:1
 DPLL_LOCK           : R   168.1:1
-UNKNOWN178          : R   178:8
+UNKNOWN178          : R/W 178:8
 DPLL_TUNING_FREE_RUN: R/W 180:38 (5)
 DPLL_REF_HIST_EN    : R/W 185:1 = 1
 DPLL_REF_HISTCNT    : R/W 186:5 = 0x08
@@ -279,83 +279,83 @@ PRIREF_PH_VALID_THR : R/W 243:6
 SECREF_PH_VALID_THR : R/W 244:6
 DPLL_SECREF_AUTO_PRTY: R/W 249.4:2 = 2
 DPLL_PRIREF_AUTO_PRTY: R/W 249:2 = 1
-UNKNOWN250          : R   250:8
-UNKNOWN251          : R   251:8 = 0x03
+UNKNOWN250          : R/W 250:8
+UNKNOWN251          : R/W 251:8 = 0x03
 DPLL_FASTLOCK_ALWAYS: R/W 252.4:1
 DPLL_HLDOVR_MODE    : R/W 252.2:1 = 1
 DPLL_LOOP_EN        : R/W 252:1 = 1
-UNKNOWN253          : R   253:8
-UNKNOWN254          : R   254:8
-UNKNOWN255          : R   255:8
-UNKNOWN256          : R   256:8
+UNKNOWN253          : R/W 253:8
+UNKNOWN254          : R/W 254:8
+UNKNOWN255          : R/W 255:8
+UNKNOWN256          : R/W 256:8
 DPLL_PRIREF_RDIV    : R/W 257:8 = 0x01
-UNKNOWN258          : R   258:8
+UNKNOWN258          : R/W 258:8
 DPLL_SECREF_RDIV    : R/W 259:8 = 0x01
-UNKNOWN260          : R   260:8 = 0x02
-UNKNOWN261          : R   261:8 = 0x80
-UNKNOWN262          : R   262:8
-UNKNOWN263          : R   263:8
-UNKNOWN264          : R   264:8
-UNKNOWN265          : R   265:8 = 0x02
-UNKNOWN266          : R   266:8 = 0x35
-UNKNOWN267          : R   267:8 = 0xa0
-UNKNOWN268          : R   268:8 = 0x0c
-UNKNOWN269          : R   269:8 = 0x02
-UNKNOWN270          : R   270:8 = 0x02
-UNKNOWN271          : R   271:8 = 0x5b
-UNKNOWN272          : R   272:8
-UNKNOWN273          : R   273:8
-UNKNOWN274          : R   274:8
-UNKNOWN275          : R   275:8 = 0x0a
-UNKNOWN276          : R   276:8 = 0x0c
-UNKNOWN277          : R   277:8 = 0x0a
-UNKNOWN278          : R   278:8 = 0x0d
-UNKNOWN279          : R   279:8 = 0x08
-UNKNOWN280          : R   280:8 = 0x0d
-UNKNOWN281          : R   281:8 = 0x0a
-UNKNOWN282          : R   282:8 = 0x0b
-UNKNOWN283          : R   283:8 = 0x0a
-UNKNOWN284          : R   284:8 = 0x1e
-UNKNOWN285          : R   285:8 = 0x1e
+UNKNOWN260          : R/W 260:8 = 0x02
+UNKNOWN261          : R/W 261:8 = 0x80
+UNKNOWN262          : R/W 262:8
+UNKNOWN263          : R/W 263:8
+UNKNOWN264          : R/W 264:8
+UNKNOWN265          : R/W 265:8 = 0x02
+UNKNOWN266          : R/W 266:8 = 0x35
+UNKNOWN267          : R/W 267:8 = 0xa0
+UNKNOWN268          : R/W 268:8 = 0x0c
+UNKNOWN269          : R/W 269:8 = 0x02
+UNKNOWN270          : R/W 270:8 = 0x02
+UNKNOWN271          : R/W 271:8 = 0x5b
+UNKNOWN272          : R/W 272:8
+UNKNOWN273          : R/W 273:8
+UNKNOWN274          : R/W 274:8
+UNKNOWN275          : R/W 275:8 = 0x0a
+UNKNOWN276          : R/W 276:8 = 0x0c
+UNKNOWN277          : R/W 277:8 = 0x0a
+UNKNOWN278          : R/W 278:8 = 0x0d
+UNKNOWN279          : R/W 279:8 = 0x08
+UNKNOWN280          : R/W 280:8 = 0x0d
+UNKNOWN281          : R/W 281:8 = 0x0a
+UNKNOWN282          : R/W 282:8 = 0x0b
+UNKNOWN283          : R/W 283:8 = 0x0a
+UNKNOWN284          : R/W 284:8 = 0x1e
+UNKNOWN285          : R/W 285:8 = 0x1e
 DPLL_REF_TMR_FL1    : R/W 286:10 (2) = 0x230
 DPLL_REF_TMR_FL2    : R/W 288:10 (2) = 0x0ee
 DPLL_REF_TMR_LCK    : R/W 290:10 (2) = 0x2ca
-UNKNOWN292          : R   292:8 = 0x09
-UNKNOWN293          : R   293:8 = 0x01
-UNKNOWN294          : R   294:8
-UNKNOWN295          : R   295:8 = 0x2c
-UNKNOWN296          : R   296:8 = 0x0e
-UNKNOWN297          : R   297:8 = 0x0a
-UNKNOWN298          : R   298:8 = 0x0e
-UNKNOWN299          : R   299:8 = 0x01
-UNKNOWN300          : R   300:8
+UNKNOWN292          : R/W 292:8 = 0x09
+UNKNOWN293          : R/W 293:8 = 0x01
+UNKNOWN294          : R/W 294:8
+UNKNOWN295          : R/W 295:8 = 0x2c
+UNKNOWN296          : R/W 296:8 = 0x0e
+UNKNOWN297          : R/W 297:8 = 0x0a
+UNKNOWN298          : R/W 298:8 = 0x0e
+UNKNOWN299          : R/W 299:8 = 0x01
+UNKNOWN300          : R/W 300:8
 DPLL_PL_LOCK_THRESH : R/W 301:8
 DPLL_PL_UNLK_THRESH : R/W 302:8
-UNKNOWN303          : R   303:8 = 0x01
+UNKNOWN303          : R/W 303:8 = 0x01
 DPLL_REF_FB_PRE_DIV : R/W 304:4 = 1
 DPLL_REF_FB_DIV     : R/W 305:30 (4) = 0x00000010
 DPLL_REF_NUM        : R/W 309:40 (5) = 0xaaaaaaaaaa
 DPLL_REF_DEN        : R/W 314:40 (5) = 0xffffffffff
-UNKNOWN319          : R   319:8 = 0x03
+UNKNOWN319          : R/W 319:8 = 0x03
 DPLL_REF_LOCKDET_PPM_MAX: R/W 320:15 (2) = 0x000a
 DPLL_REF_LOCKDET_CNTSTRT: R/W 322:30 (4) = 0x00249f00
 DPLL_REF_LOCKDET_VCO_CNTSTRT: R/W 326:30 (4) = 0x00989680
 DPLL_REF_UNLOCKDET_PPM_MAX: R/W 330:15 (2) = 0x0064
-UNKNOWN332          : R   332:8
+UNKNOWN332          : R/W 332:8
 PLL2_DEN            : R/W 333:24 (3) = 0x003d09
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_29_24: R/W 336:6
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_23_16: R/W 337:8 = 0x98
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_15_8: R/W 338:8 = 0x96
 PLL1_24b_NUM_MSB    : R/W 339:8
-UNKNOWN340          : R   340:8
-UNKNOWN341          : R   341:8
-UNKNOWN342          : R   342:8
-UNKNOWN343          : R   343:8
-UNKNOWN344          : R   344:8
-UNKNOWN345          : R   345:8
+UNKNOWN340          : R/W 340:8
+UNKNOWN341          : R/W 341:8
+UNKNOWN342          : R/W 342:8
+UNKNOWN343          : R/W 343:8
+UNKNOWN344          : R/W 344:8
+UNKNOWN345          : R/W 345:8
 DPLL_FDEV_EN        : R/W 346:1
 DPLL_FDEV           : R/W 347:38 (5)
-UNKNOWN352          : R   352:8
-UNKNOWN357          : R   357:8 = 0x28
-UNKNOWN367          : R   367:8
-UNKNOWN411          : R   411:8 = 0x0c
+UNKNOWN352          : R/W 352:8
+UNKNOWN357          : R/W 357:8 = 0x28
+UNKNOWN367          : R/W 367:8
+UNKNOWN411          : R/W 411:8 = 0x0c

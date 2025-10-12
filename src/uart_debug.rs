@@ -20,7 +20,7 @@ const FIFO_SIZE: usize = 8;
 /// State for debug logging.
 pub static DEBUG: Debug = Debug::new();
 
-/// Guard for running at the priority for read/write.
+/// Guard for running at the priority for accessing debug.
 pub type DebugPriority = crate::cpu::Priority::<{interrupt::PRIO_USB}>;
 
 type Index = u8;

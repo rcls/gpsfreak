@@ -15,6 +15,7 @@ mod command;
 mod cpu;
 mod crc;
 mod dma;
+mod flash;
 mod gps_uart;
 mod i2c;
 #[macro_use]
@@ -52,18 +53,20 @@ pub fn main() -> ! {
 
     cpu::maybe_enter_dfu();
 
-    if false {gps_uart::gps_reset();}
-
-    // Enable FPU.
+    // Enable FPU.  We aren't using it yet!!!
     // unsafe {scb.cpacr.write(0x00f00000)};
 
     // LMK05318b PDN pin is on PA4.
-    gpioa.BSRR.write(|w| w.BS4().set_bit());
-    gpioa.MODER.modify(|_,w| w.MODE4().B_0x1());
+    gpioa.PUPDR.write(|w| w.PUPD4().B_0x1());    // Pull-up
+    gpioa.OTYPER.modify(|_,w| w.OT4().B_0x1());  // Open drain
+    gpioa.BSRR.write(|w| w.BS4().set_bit());     // High
+    gpioa.MODER.modify(|_,w| w.MODE4().B_0x1()); // Output
 
     // PB1 is the GPS reset.
-    gpiob.BSRR.write(|w| w.BS1().set_bit());
-    gpiob.MODER.modify(|_,w| w.MODE1().B_0x1());
+    gpiob.PUPDR.modify(|_,w| w.PUPD1().B_0x1()); // Pull up
+    gpiob.OTYPER.modify(|_,w| w.OT1().B_0x1());  // Open drain
+    gpiob.BSRR.write(|w| w.BS1().set_bit());     // High
+    gpiob.MODER.modify(|_,w| w.MODE1().B_0x1()); // Output
 
     // Blue/red/green are PA1,2,3.
     gpioa.BSRR.write(|w| w.bits(0xe));

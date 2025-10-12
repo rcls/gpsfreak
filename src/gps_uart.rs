@@ -63,27 +63,9 @@ pub fn init() {
     interrupt::enable_priority(DMA_INTERRUPT, PRIO_USB);
 }
 
-pub fn gps_reset() {
-    // PB1 is GPS reset.  Pulse it low briefly.
-    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
-    // Enable the pullup and open drain.
-    gpiob.PUPDR.modify(|_,w| w.PUPD1().B_0x1()); // Pull up
-    gpiob.OTYPER.modify(|_,w| w.OT1().B_0x1());  // Open drain
-    gpiob.BSRR.write(|w| w.BS1().set_bit());     // Drive high.
-    gpiob.MODER.modify(|_,w| w.MODE1().B_0x1()); // Enable output.
-
-    // Pulse it.
-    gpiob.BSRR.write(|w| w.BR1().set_bit());
-    for _ in 0..320000 {
-        crate::cpu::nothing();
-    }
-    gpiob.BSRR.write(|w| w.BS1().set_bit());
-}
-
 pub fn set_baud_rate(baud: u32) -> bool {
     let uart  = unsafe {&*UART::ptr()};
-    // We need to disable the UART to udpate the baud rate.
-    // FIXME - validate.  FIXME - allow us to recover the baud rate!
+    // We need to disable the UART to update the baud rate.
     // FIXME - use the prescalar also.
     let brr = (crate::cpu::CPU_FREQ * 2 + baud) / (baud * 2);
     // We are called from the USB ISR, which is the same priority as our ISRs.

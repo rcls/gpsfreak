@@ -71,6 +71,8 @@
 //!    71 : peek.  Payload is u32 address followed by u32 length.  Response is
 //!         F1 with address + data payload.
 //!    72 : poke.  Payload is u32 address followed by data bytes.
+//!         As well as memory writes, flash writes of an aligned 32 byte block
+//!         is supported.
 //!    73 : crc.  Payload is u32 address followed by u32 length.  Response is
 //!         F3 with a 32 bit CRC payload.
 //!    * Sometime we'll overload this to write to flash?
@@ -85,7 +87,7 @@ use crate::utils::vcopy_aligned;
 mod crc16;
 mod crc32;
 
-macro_rules!dbgln {($($tt:tt)*) => {if true {crate::dbgln!($($tt)*)}};}
+macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 /// Error codes for Nack responses.
 #[repr(u16)]
@@ -107,6 +109,10 @@ enum Error {
 }
 
 type Result<T = ()> = core::result::Result<T, Error>;
+
+impl From<()> for Error {
+    fn from(_: ()) -> Error {Error::Failed}
+}
 
 const SEND_ACK: Result = Err(Error::Succeeded);
 
@@ -247,6 +253,7 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
         0x71 => peek(message),
         0x72 => poke(message),
         0x73 => crc(message),
+        0x74 => flash_erase(message),
         0x78 => test_gps_write(message),
 
         _ => Err(Error::UnknownMessage)
@@ -372,10 +379,17 @@ fn poke(message: &MessageBuf) -> Result {
     if message.len < 4 {
         return Err(Error::BadParameter);
     }
-    let address = unsafe {* (&message.payload as *const _ as *const u32)};
-    unsafe {
-        vcopy_aligned(address as *mut u8, &message.payload[4] as *const u8,
-                      message.len as usize - 4)};
+    let address = unsafe {* (&message.payload as *const _ as *const usize)};
+    // Special case writes to flash.
+    if address < 0x20000000 {
+        let message = Message::<(u32, [u32; 8])>::from_buf(message)?;
+        unsafe {crate::flash::program32(address, &message.payload.1)}?;
+    }
+    else {
+        unsafe {
+            vcopy_aligned(address as *mut u8, &message.payload[4] as *const u8,
+                          message.len as usize - 4)};
+    }
     SEND_ACK
 }
 
@@ -383,6 +397,12 @@ fn crc(message: &MessageBuf) -> Result {
     let (address, length) = Message::<(u32, u32)>::from_buf(message)?.payload;
     let crc = crc32::compute(address as *const u8, length as usize);
     Message::new(0xf3, crc).send()
+}
+
+fn flash_erase(message: &MessageBuf) -> Result {
+    let address = Message::<usize>::from_buf(message)?.payload;
+    crate::flash::erase(address)?;
+    SEND_ACK
 }
 
 fn test_gps_write(message: &MessageBuf) -> Result {

@@ -85,7 +85,8 @@ use crate::{gps_uart::GpsPriority, i2c};
 use crate::utils::vcopy_aligned;
 
 mod crc16;
-mod crc32;
+
+pub type Responder = fn(&[u8]);
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
@@ -137,6 +138,12 @@ pub struct MessageBuf {
 }
 const _: () = assert!(size_of::<MessageBuf>() == 64);
 
+impl const Default for MessageBuf {
+    fn default() -> MessageBuf {
+        MessageBuf{magic: 0, code: 0, len: 0, payload: [0; _]}
+    }
+}
+
 #[derive(Debug, Default)]
 #[repr(C)]
 pub struct Message<P> {
@@ -160,12 +167,11 @@ impl MessageBuf {
         result.payload[..len].copy_from_slice(payload);
         result
     }
-    fn send(&mut self) -> Result {
+    fn send(&mut self, r: Responder) -> Result {
         self.set_crc();
         let len = 4 + self.len as usize + 2;     // Include header and CRC.
-        crate::usb::main_tx_response(
-            unsafe {core::slice::from_raw_parts(
-                self as *const Self as _, len)});
+        r(unsafe {core::slice::from_raw_parts(
+            self as *const Self as _, len)});
         Ok(())
     }
     fn set_crc(&mut self) {
@@ -195,12 +201,11 @@ impl<P: core::fmt::Debug> Message<P> {
         self.crc0 = (crc >> 8) as u8;
         self.crc1 = crc as u8;
     }
-    fn send(&mut self) -> Result {
+    fn send(&mut self, r: Responder) -> Result {
         dbgln!("Freak TX: @{:?} {:?}", self as *const _, self);
         self.set_crc();
-        crate::usb::main_tx_response(
-            unsafe {core::slice::from_raw_parts(
-                self as *const Self as _, 6 + size_of::<P>())});
+        r(unsafe {core::slice::from_raw_parts(
+            self as *const Self as _, 6 + size_of::<P>())});
         Ok(())
     }
     fn from_buf(message: &MessageBuf) -> Result<&Self> {
@@ -209,15 +214,15 @@ impl<P: core::fmt::Debug> Message<P> {
     }
 }
 
-pub fn command_handler(message: &MessageBuf, len: usize) {
-    match command_dispatch(message, len) {
-        Err(Error::Succeeded) => {let _ = Ack::new(0x80, ()).send();}
-        Err(err) => {let _ = Nack::new(0x81, err).send();}
+pub fn command_handler(message: &MessageBuf, len: usize, r: Responder) {
+    match command_dispatch(message, len, r) {
+        Err(Error::Succeeded) => {let _ = Ack::new(0x80, ()).send(r);}
+        Err(err) => {let _ = Nack::new(0x81, err).send(r);}
         _ => (),
     }
 }
 
-fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
+fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
     // dbgln!("Command handler dispatch {:x?}",
     //       unsafe {core::slice::from_raw_parts(message as *const _ as *const u8, len)});
     if message.len as usize + 6 != len {
@@ -226,7 +231,7 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
     }
     if message.code & 0x80 != 0 {
         // Wrong message direction, ignore.
-        crate::usb::main_rx_rearm();
+        r(&[]);
         return Ok(());
     }
     if crc16::compute(unsafe {core::slice::from_raw_parts(
@@ -236,9 +241,9 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
     }
 
     match message.code {
-        0x00 => ping(message),
-        0x02 => get_protocol_version(message),
-        0x03 => get_serial_number(message),
+        0x00 => ping(message, r),
+        0x02 => get_protocol_version(message, r),
+        0x03 => get_serial_number(message, r),
 
         0x10 => crate::cpu::reboot(),
         0x11 => gps_reset(message),
@@ -246,13 +251,13 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
         0x1f => set_baud(message),
 
         0x60 => i2c_write(0xc8, message),
-        0x61 => i2c_read (0xc9, message),
+        0x61 => i2c_read (0xc9, message, r),
         0x62 => i2c_write(0x92, message),
-        0x63 => i2c_read (0x93, message),
+        0x63 => i2c_read (0x93, message, r),
 
-        0x71 => peek(message),
+        0x71 => peek(message, r),
         0x72 => poke(message),
-        0x73 => crc(message),
+        0x73 => get_crc(message, r),
         0x74 => flash_erase(message),
         0x78 => test_gps_write(message),
 
@@ -260,20 +265,20 @@ fn command_dispatch(message: &MessageBuf, len: usize) -> Result {
     }
 }
 
-fn ping(message: &MessageBuf) -> Result {
+fn ping(message: &MessageBuf, r: Responder) -> Result {
     // Send a generic ACK with the same payload.
-    MessageBuf::new(0x80, message.get_payload()).send()
+    MessageBuf::new(0x80, message.get_payload()).send(r)
 }
 
-fn get_protocol_version(message: &MessageBuf) -> Result {
+fn get_protocol_version(message: &MessageBuf, r: Responder) -> Result {
     Message::<()>::from_buf(message)?;
-    Message::new(0x82, 1u32).send()
+    Message::new(0x82, 1u32).send(r)
 }
 
-fn get_serial_number(message: &MessageBuf) -> Result {
+fn get_serial_number(message: &MessageBuf, r: Responder) -> Result {
     Message::<()>::from_buf(message)?;
     let sn = crate::cpu::SERIAL_NUMBER.as_ref();
-    Message::new(0x83, *sn).send()
+    Message::new(0x83, *sn).send(r)
 }
 
 fn gps_reset(message: &MessageBuf) -> Result {
@@ -330,7 +335,7 @@ fn i2c_write(address: u8, message: &MessageBuf) -> Result {
     }
 }
 
-fn i2c_read(address: u8, message: &MessageBuf) -> Result {
+fn i2c_read(address: u8, message: &MessageBuf, r: Responder) -> Result {
     // Get the length...
     let mlen = message.len as usize;
     if mlen < 1 {
@@ -352,14 +357,14 @@ fn i2c_read(address: u8, message: &MessageBuf) -> Result {
                             &mut result.payload[..rlen]);
     }
     if let Ok(()) = w.wait() {
-        result.send()
+        result.send(r)
     }
     else {
         Err(Error::Failed)
     }
 }
 
-fn peek(message: &MessageBuf) -> Result {
+fn peek(message: &MessageBuf, r: Responder) -> Result {
     let message = Message::<(u32, u32)>::from_buf(message)?;
     let (address, length) = message.payload;
     let length = length as usize;
@@ -372,7 +377,7 @@ fn peek(message: &MessageBuf) -> Result {
     result.payload[..4].copy_from_slice(&address.to_le_bytes());
     unsafe {vcopy_aligned(&mut result.payload[4] as *mut u8,
                           address as *const u8, length)};
-    result.send()
+    result.send(r)
 }
 
 fn poke(message: &MessageBuf) -> Result {
@@ -393,10 +398,10 @@ fn poke(message: &MessageBuf) -> Result {
     SEND_ACK
 }
 
-fn crc(message: &MessageBuf) -> Result {
+fn get_crc(message: &MessageBuf, r: Responder) -> Result {
     let (address, length) = Message::<(u32, u32)>::from_buf(message)?.payload;
-    let crc = crc32::compute(address as *const u8, length as usize);
-    Message::new(0xf3, crc).send()
+    let crc = crate::crc32::compute(address as *const u8, length as usize);
+    Message::new(0xf3, (address, length, crc)).send(r)
 }
 
 fn flash_erase(message: &MessageBuf) -> Result {

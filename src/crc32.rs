@@ -3,6 +3,8 @@
 
 use crate::crc::POLY32;
 
+pub const VERIFY_MAGIC: u32 = 0x38fb2284;
+
 pub fn compute(address: *const u8, length: usize) -> u32 {
     if cfg!(target_os = "none") {
         hw_compute(address, length)
@@ -29,3 +31,18 @@ pub fn hw_compute(address: *const u8, length: usize) -> u32 {
 }
 
 const TABLE: [u32; 256] = crate::crc::crc_table(POLY32, 32);
+
+#[test]
+fn check_magic() {
+    let first = compute(&[] as _, 0).to_be_bytes();
+    let second = compute(&first as _, 4);
+
+    assert_eq!(second, VERIFY_MAGIC);
+
+    let mut more = [1u8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0];
+    let len = more.len() - 4;
+    let crc = compute(&more as *const u8, len);
+    more[len ..].copy_from_slice(&crc.to_be_bytes());
+
+    assert_eq!(compute(&more as *const u8, more.len()), VERIFY_MAGIC);
+}

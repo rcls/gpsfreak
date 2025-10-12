@@ -14,10 +14,12 @@
 mod command;
 mod cpu;
 mod crc;
+mod crc32;
 mod dma;
 mod flash;
 mod gps_uart;
 mod i2c;
+mod provision;
 #[macro_use]
 mod uart_debug;
 mod usb;
@@ -45,6 +47,9 @@ pub fn main() -> ! {
     crc::init();
 
     i2c::init();
+
+    provision::provision();
+
     usb::init();
     if true {gps_uart::init();}
 

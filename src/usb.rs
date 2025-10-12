@@ -405,15 +405,14 @@ fn main_tx_handler() {
                 chep_main().read().bits(), chep.bits());
 }
 
-// Rearm the main RX after ignoring a message.
-pub fn main_rx_rearm() {
-    // TODO - priority?
-    let chep = chep_main().read();
-    chep_main().write(|w| w.main().rx_valid(&chep));
-}
-
 // Called at lower priority and can get interrupted!
-pub fn main_tx_response(message: &[u8]) {
+fn main_tx_response(message: &[u8]) {
+let chep = chep_main().read();
+    if message.len() == 0 {
+        main_dbgln!("main_tx_response, no data, rearm");
+        chep_main().write(|w| w.main().rx_valid(&chep));
+        return;
+    }
     // For now we don't support long messages.
     let len = message.len().min(64);
     unsafe {copy_by_dest32(message.as_ptr(), MAIN_TX_BUF, message.len())};
@@ -490,7 +489,8 @@ fn command_handler() {
 
     // Get a point to the message.  TODO - copy!
     let message = unsafe {&*(MAIN_RX_BUF as *const crate::command::MessageBuf)};
-    crate::command::command_handler(&message, chep_bd_len(bd_main().rx.read()));
+    crate::command::command_handler(
+        &message, chep_bd_len(bd_main().rx.read()), main_tx_response);
 }
 
 fn usb_initialize(cs: &mut ControlState) {

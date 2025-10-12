@@ -37,7 +37,7 @@ pub fn sw_compute<T>(table: &[T; 256], iv: T, bytes: &[u8]) -> T where
     let mut v = iv;
     let shift = size_of::<T>() * 8 - 8;
     for b in bytes {
-        v = table[v.into() as usize >> 8 ^ *b as usize] ^ v << shift;
+        v = table[v.into() as usize >> shift ^ *b as usize] ^ v << 8;
     }
     v
 }

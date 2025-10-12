@@ -14,6 +14,7 @@ import re
 import sys
 
 from dataclasses import dataclass
+from typing import Any
 
 argp = argparse.ArgumentParser(description='LMK05318b scraper')
 argp.add_argument('INPUT', help='Text file from pdftotext run')
@@ -136,7 +137,7 @@ for address in addresses:
 
 registers = lmk05318b.build_registers(addresses)
 
-def print_list_file(out, registers: dict[str, Register]) -> None:
+def print_list_file(out: Any, registers: dict[str, Register]) -> None:
     for r in registers.values():
         print(f'{r.name:20}: {r.access:3} {r.base_address:3}', file=out, end='')
         if r.shift != 0:

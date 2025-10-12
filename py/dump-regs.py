@@ -8,7 +8,6 @@ import argparse
 import fractions
 import struct
 import sys
-import usb
 
 from fractions import Fraction
 from typing import Tuple
@@ -46,7 +45,7 @@ def lmk05318b_bundles() -> list[Tuple[int, int]]:
     return bundles
 
 def usb_load() -> MaskedBytes:
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    dev = message.get_device()
     message.flush(dev)
     data = MaskedBytes()
     for address, length in lmk05318b_bundles():
@@ -73,7 +72,7 @@ for r in lmk05318b.REGISTERS.values():
     config[r.name] = value
 
 # Report on reserved values & RO.
-def report_changed_ro(data: MaskedBytes, a: Address):
+def report_changed_ro(data: MaskedBytes, a: Address) -> None:
     if data.mask[a.address] == 0:
         print(f'Address {a.address} is not set')
         return

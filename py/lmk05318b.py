@@ -3,16 +3,14 @@
 # Make sure we don't get confused with freak.lmk05318b
 assert __name__ == '__main__'
 
-from freak import lmk05318b_plan, tics
+from freak import lmk05318b_plan, message, tics
 from freak.lmk05318b import MaskedBytes, Register
-from freak.message import LMK05318B_READ, LMK05318B_READ_RESULT, \
-    LMK05318B_WRITE, command, retrieve
 
+from freak.message import Device
 from freak.lmk05318b_plan import PLLPlan, str_to_freq, freq_to_str
 
 import argparse
 import struct
-import usb
 
 from fractions import Fraction
 from typing import Tuple
@@ -84,17 +82,17 @@ for v1, (l1, d1) in enumerate(CMOS_DRIVES):
 
 args = argp.parse_args()
 
-def get_ranges(dev, data: MaskedBytes, ranges: list[Tuple[int, int]]) -> None:
+def get_ranges(dev: Device, data: MaskedBytes,
+               ranges: list[Tuple[int, int]]) -> None:
     for base, span in ranges:
-        segment = retrieve(dev, LMK05318B_READ,
-                           struct.pack('>BH', span, base))
-        assert len(segment.payload) == span
+        segment = message.lmk05318b_read(dev, base, span)
+        assert len(segment) == span
         #print(segment)
-        data.data[base : base + span] = segment.payload
+        data.data[base : base + span] = segment
 
 def do_get(KEYS: list[str]) -> None:
     registers = list(Register.get(key) for key in KEYS)
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    dev = message.get_device()
     data = MaskedBytes()
     for r in registers:
         data.insert(r, 0)
@@ -103,7 +101,7 @@ def do_get(KEYS: list[str]) -> None:
     for r in registers:
         print(r, data.extract(r))
 
-def complete_partials(dev, data: MaskedBytes) -> None:
+def complete_partials(dev: Device, data: MaskedBytes) -> None:
     '''Where the data has only part of a byte, fill in the rest.'''
     # TODO - suppress RESERVED 0 fields, or use a 'pristine' source
     # for them?
@@ -117,17 +115,16 @@ def complete_partials(dev, data: MaskedBytes) -> None:
                 | (gaps.data[i] & ~data.mask[i])
             data.mask[i] = 255
 
-def masked_write(dev, data: MaskedBytes) -> None:
+def masked_write(dev: Device, data: MaskedBytes) -> None:
     complete_partials(dev, data)
     ranges = data.ranges(max_block = 30)
     for base, span in ranges:
         #print(base, span, data.data[base : base+span].hex(' '))
-        command(dev, LMK05318B_WRITE,
-                struct.pack('>H', base) + data.data[base : base+span])
+        message.lmk05318b_write(dev, base, data.data[base : base+span])
 
 def do_set(KV: list[Tuple[str, str]]) -> None:
     registers = list((Register.get(K), int(V, 0)) for K, V in args.KV)
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    dev = message.get_device()
     data = MaskedBytes()
     # Build the mask...
     for r, v in registers:
@@ -251,18 +248,18 @@ def do_freq(freq_str: list[str]) -> None:
     data = MaskedBytes()
     for K, V in freq_make_data(plan).items():
         data.insert(Register.get(K), V)
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    dev = message.get_device()
     # Software reset.
-    command(dev, LMK05318B_WRITE, bytes((0, 12, 0x12)))
+    message.lmk05318b_write(dev, 12, b'\x12')
     # Write the registers.
     masked_write(dev, data)
     # If PLL2 is in use, power it up now.
     if plan.freq_target != 0:
-        command(dev, LMK05318B_WRITE, bytes((0, 100, data.data[100] & 0xfe)))
+        message.lmk05318b_write(dev, 100, bytes((data.data[100] & 0xfe,)))
     # Remove software reset.
-    command(dev, LMK05318B_WRITE, bytes((0, 12, 0x02)))
+    message.lmk05318b_write(dev, 12, b'\x02')
 
-def do_drive(drives: list[Tuple[str, str]], defaults) -> None:
+def do_drive(drives: list[Tuple[str, str]], defaults: bool) -> None:
     data = MaskedBytes()
     if defaults:
         drives = [('0', 'lvds8'), ('1', 'off'), ('2', 'lvds8'), ('3', 'off'),
@@ -283,16 +280,16 @@ def do_drive(drives: list[Tuple[str, str]], defaults) -> None:
             data.insert(Register.get(f'OUT{c}_SEL'), sel)
             data.insert(Register.get(f'OUT{c}_MODE1'), mode1)
             data.insert(Register.get(f'OUT{c}_MODE2'), mode2)
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    dev = message.get_device()
     masked_write(dev, data)
 
 def report_drive() -> None:
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+    dev = message.get_device()
     data = MaskedBytes()
     base, length = 50, 24
-    drives_data = retrieve(dev, LMK05318B_READ, bytes((length, 0, base)))
-    assert len(drives_data.payload) == length
-    data.data[base : base + length] = drives_data.payload
+    drives_data = message.lmk05318b_read(dev, base, length)
+    assert len(drives_data) == length
+    data.data[base : base + length] = drives_data
 
     drives = []
 
@@ -315,8 +312,8 @@ def report_drive() -> None:
         else:
             print(f'sel={sel} mode1={mode1} mode2={mode2}')
 
-def do_upload(path: str):
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+def do_upload(path: str) -> None:
+    dev = message.get_device()
     tcs = tics.read_tcs_file(path)
     masked_write(dev, tcs)
 

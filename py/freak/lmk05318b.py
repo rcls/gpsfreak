@@ -7,7 +7,7 @@ import struct
 import re
 
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Callable, Tuple
 
 '''Extract the bit position suffix from a field name.'''
 SUBNAME_RE = re.compile(r'([^:]+)(_(\d+):(\d+))?$')
@@ -156,7 +156,7 @@ class MaskedBytes:
                 result[current_addr] = current_data
         return result
 
-    def ranges(self, select = lambda m: m != 0,
+    def ranges(self, select: Callable[[int], bool] = lambda m: m != 0,
                max_block: int = 1000) -> list[Tuple[int, int]]:
         '''Return a list of (start, count) of indexes with non-zero mask.'''
         result = []

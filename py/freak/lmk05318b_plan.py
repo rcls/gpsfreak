@@ -6,7 +6,7 @@ import sys
 from dataclasses import dataclass
 from fractions import Fraction
 from math import ceil, floor, gcd
-from typing import Generator, NoReturn, Tuple
+from typing import Any, Generator, NoReturn, Tuple
 
 # All the frequencies are in MHz.
 SCALE = 1000000
@@ -90,7 +90,7 @@ class PLLPlan:
         _, _, stage2 = self.dividers[BIG_DIVIDE]
         return stage2 == 1 or stage2 % 2 == 0
 
-def fail(*args, **kwargs) -> NoReturn:
+def fail(*args: Any, **kwargs: Any) -> NoReturn:
     print(*args, **kwargs)
     sys.exit(1)
 

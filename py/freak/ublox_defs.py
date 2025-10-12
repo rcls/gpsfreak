@@ -94,11 +94,11 @@ def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
             assert len(result) - offset > 4
             key = struct.unpack('<I', result[offset:offset + 4])[0]
             cfg = get_cfg(key)
-            val_bytes = cfg.val_bytes()
-            #print(repr(cfg), val_bytes)
-            offset += 4 + val_bytes
+            val_byte_len = cfg.val_byte_len()
+            #print(repr(cfg), val_byte_len)
+            offset += 4 + val_byte_len
             assert offset <= len(result)
-            value = cfg.decode_value(result[offset - val_bytes:offset])
+            value = cfg.decode_value(result[offset - val_byte_len:offset])
             items.append((cfg, value))
         start += num_items
         if num_items < 64:

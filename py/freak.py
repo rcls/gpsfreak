@@ -6,8 +6,9 @@ import freak.message as message
 
 import argparse
 import struct
-import usb
 import uuid
+
+from freak.message import Device
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
 subp = argp.add_subparsers(
@@ -33,23 +34,23 @@ lmk_reset.add_argument('-0', '--assert', action='store_true',
 lmk_reset.add_argument('-1', '--deassert', action='store_true',
                        help='De-assert PDN line (high)')
 
-def do_info() -> None:
+def do_info(dev: Device) -> None:
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
     print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
 
-    serial = message.retrieve(dev, message.GET_SERIAL_NUMBER)
+    serial = message.get_serial_number(dev)
     try:
-        sn = serial.payload.decode()
+        sn = serial.decode()
     except:
-        sn = str(serial)
+        sn = serial.hex(' ')
     print('Device serial No:', sn)
 
-    result = message.retrieve(dev, message.TMP117_READ, b'\x02\x00\x00')
-    assert len(result.payload) == 2
-    temp = struct.unpack('>H', result.payload)[0] / 128
+    result = message.tmp117_read(dev, 0, 2)
+    assert len(result) == 2
+    temp = struct.unpack('>H', result)[0] / 128
     print('Int. temperature:', temp, '°C')
 
-def do_reset_line(command: int) -> None:
+def do_reset_line(dev: Device, command: int) -> None:
     print(args)
     assrt = getattr(args, 'assert')
     desrt = args.deassert
@@ -63,25 +64,23 @@ def do_reset_line(command: int) -> None:
 
 args = argp.parse_args()
 
-dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+dev = message.get_device()
 
 # Ping with a UUID and check that we get the same one back...
-text = bytes(str(uuid.uuid4()), 'ascii')
-reply = message.command(dev, message.PING, text)
-assert reply.payload == text
+message.ping(dev, bytes(str(uuid.uuid4()), 'ascii'))
 
 if args.command == 'info':
-    do_info()
+    do_info(dev)
 
 elif args.command == 'reboot':
     # Just send the command blindly, no response.
     dev.write(0x03, message.frame(message.CPU_REBOOT, b''))
 
 elif args.command == 'gps-reset':
-    do_reset_line(message.GPS_RESET)
+    do_reset_line(dev, message.GPS_RESET)
 
 elif args.command == 'lmk-pdn':
-    do_reset_line(message.LMK05318B_PDN)
+    do_reset_line(dev, message.LMK05318B_PDN)
 
 else:
     assert False, 'This should never happen'

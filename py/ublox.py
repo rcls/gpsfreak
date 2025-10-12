@@ -66,7 +66,7 @@ def do_set(KV: list[Tuple[str, str]]) -> None:
     reader.command(message)
 
 def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
-    hd = cfg.val_bytes() * 2 + 2
+    hd = cfg.val_byte_len() * 2 + 2
     if cfg.typ[0] in 'EX':
         return f'{value:#0{hd}x}'
     elif isinstance(value, int):
@@ -92,9 +92,9 @@ def do_get(KEYS: list[str]) -> None:
         key, = struct.unpack('<I', result[pos:pos+4])
         assert key == cfg.key
         pos += 4
-        val_bytes = cfg.val_bytes()
-        value = cfg.decode_value(result[pos : pos + val_bytes])
-        pos += val_bytes
+        val_byte_len = cfg.val_byte_len()
+        value = cfg.decode_value(result[pos : pos + val_byte_len])
+        pos += val_byte_len
         print(cfg, '=', fmt_cfg_value(cfg, value))
 
 def do_dump() -> None:

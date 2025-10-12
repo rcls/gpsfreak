@@ -31,7 +31,7 @@ class Serial(io.FileIO):
         flushread(self)
 
 # We need a FileIO because IOBase appears not to have a write() method.
-def writeall(f: io.FileIO, b) -> int:
+def writeall(f: io.FileIO, b: bytes) -> int:
     mv = memoryview(b)
     done = 0
     while done < len(mv):
@@ -41,11 +41,11 @@ def writeall(f: io.FileIO, b) -> int:
         done += progress
     return done
 
-def flushread(f: io.IOBase):
+def flushread(f: io.IOBase) -> None:
     if f.isatty():
         termios.tcflush(f.fileno(), termios.TCIFLUSH)
 
-def makeraw(f: io.IOBase, speed: int|None):
+def makeraw(f: io.IOBase, speed: int|None) -> None:
     if not f.isatty():
         return
     from termios import (

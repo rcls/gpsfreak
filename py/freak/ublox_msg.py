@@ -45,7 +45,7 @@ class UBloxMsg:
     def frame_payload(self, b: bytes) -> bytes:
         return ublox_frame(struct.pack('<HH', self.code, len(b)) + b)
     @staticmethod
-    def get(key: int|str|UBloxMsg):
+    def get(key: int|str|UBloxMsg) -> UBloxMsg:
         if type(key) == UBloxMsg:
             return key
         if type(key) == int:
@@ -58,7 +58,7 @@ class UBloxMsg:
             print('Did you mean?',
                   difflib.get_close_matches(key, MESSAGES_BY_NAME))
             raise
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'UBloxMsg({self.name!r}, {self.code:#06x})'
 
 def add_msg_list(l: list[UBloxMsg]) -> None:
@@ -73,7 +73,7 @@ class UBloxReader:
     def __init__(self, source: io.FileIO):
         self.source = source
         self.current = bytearray()
-    def read_more(self):
+    def read_more(self) -> None:
         data = self.source.read(1024)
         if data == '':
             raise EOFError()
@@ -115,13 +115,13 @@ class UBloxReader:
             #print('Checksum fail')
             more = False
 
-    def command(self, b):
+    def command(self, b: bytes) -> None:
         serhelper.flushread(self.source)
         serhelper.writeall(self.source, b)
         self.source.flush()
         self.get_ack(b)
 
-    def get_ack(self, b):
+    def get_ack(self, b: bytes) -> None:
         code, payload = self.get_msg()
         # Check we have the correct ACK.
         assert code == 0x0105, f'{code:#x}'
@@ -129,7 +129,7 @@ class UBloxReader:
         assert payload[0] == b[2]
         assert payload[1] == b[3]
 
-    def transact(self, b, ack=True) -> bytes:
+    def transact(self, b: bytes, ack: bool = True) -> bytes:
         serhelper.flushread(self.source)
         serhelper.writeall(self.source, b)
         self.source.flush()

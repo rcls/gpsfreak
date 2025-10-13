@@ -148,7 +148,7 @@ def do_info() -> None:
     hwVersion = binstr(result[30:40])
     print(f'Software version {swVersion}, hardware version {hwVersion}')
     for i in range(40, len(result), 30):
-        print('Extension', binstr(result[i : i+10]))
+        print('Extension', binstr(result[i : i+30]))
 
     msg = UBloxMsg.get('MON-HW3')
     message = msg.frame_payload(b'')

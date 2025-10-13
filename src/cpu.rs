@@ -205,14 +205,14 @@ pub mod interrupt {
     /// can get used everywhere.
     pub const PRIO_DEBUG: u8 = 0;
 
-    /// Interrupt priority for USB.
-    pub const PRIO_USB  : u8 = 0x40;
+    /// Interrupt priority for USB / I2C / serial related interrupts.
+    pub const PRIO_COMMS: u8 = 0x40;
 
     /// Interrupt priority for I2C.  Same as USB.
-    pub const PRIO_I2C  : u8 = 0x40;
+    pub const PRIO_I2C: u8 = PRIO_COMMS;
 
-    /// Interrupt priority for systick and application processing.
-    pub const PRIO_APP  : u8 = 0x80;
+    /// Interrupt priority for application processing.
+    pub const PRIO_APP: u8 = 0x80;
 
 
     // We don't use disabling interrupts to transfer ownership, so no need for

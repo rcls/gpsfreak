@@ -180,6 +180,7 @@ def postdiv_mask(div: int) -> int:
 
 def do_factor_splitting(left: int, right: int, primes: list[int], index: int) \
         -> Generator[Tuple[int, int]]:
+    '''Worker function for factor_splitting below'''
     if index >= len(primes):
         if left <= 1<<24 and right <= 1<<24:
             yield left, right
@@ -196,6 +197,9 @@ def do_factor_splitting(left: int, right: int, primes: list[int], index: int) \
 
 def factor_splitting(number: int, primes: list[int]) \
         -> Generator[Tuple[int, int]]:
+    '''Return all possible factorisations of number into two factors, with
+    the constraint that both are less than pow(2,24).  The list primes should
+    contain at least all prime factors of number.'''
     return do_factor_splitting(1, number, primes, 0)
 
 def pll2_plan_low(freqs: list[Fraction], freq: Fraction) -> PLLPlan:
@@ -241,6 +245,8 @@ def pll2_plan_low(freqs: list[Fraction], freq: Fraction) -> PLLPlan:
                 output_divide = post_div * stage1_div * stage2_div
                 # Now attempt to multiply stage2_div by something to get us
                 # into the VCO range.
+                # FIXME - target middle of PLL2 range not the bottom.  But
+                # make sure we have room for the gymnastics below!
                 extra = ceil(Fraction(PLL2_LOW / freq) / output_divide)
                 #print(f'extra = {extra}')
                 if extra * output_divide * freq > PLL2_HIGH \
@@ -428,24 +434,41 @@ def str_to_freq(s: str) -> Fraction:
 
     return Fraction(s.removesuffix(suffix)) * scale / (1000000 * MHz)
 
+FRACTIONS = {
+    Fraction(0): '',
+    Fraction(1, 3): '⅓',
+    Fraction(2, 3): '⅔',
+    Fraction(1, 6): '⅙',
+    Fraction(5, 6): '⅚',
+    Fraction(1, 7): '⅐',
+    Fraction(1, 9): '⅑',
+}
+
 def freq_to_str(freq: Fraction|int|float) -> str:
     if freq >= 1000000 * MHz:
-        scaled = float(freq / (MHz * 1000000))
+        scaled = freq / (MHz * 1000000)
         suffix = 'THz'
     elif freq >= 10_000 * MHz: # Report VCO frequencies in MHz.
-        scaled = float(freq / (MHz * 1000))
+        scaled = freq / (MHz * 1000)
         suffix = 'GHz'
     elif freq >= MHz:
-        scaled = float(freq / MHz)
+        scaled = freq / MHz
         suffix = 'MHz'
     elif freq * 1000 >= MHz:
-        scaled = float(freq * 1000 / MHz)
+        scaled = freq * 1000 / MHz
         suffix = 'kHz'
     else:
-        scaled = float(freq * 1000000 / MHz)
+        scaled = freq * 1000000 / MHz
         suffix = 'Hz'
 
-    if scaled == int(scaled):
-        return f'{int(scaled)} {suffix}'
+    fract = scaled % 1
+    fract_str = None
+    if fract in FRACTIONS:
+        fract_str = FRACTIONS[fract]
+    elif fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19:
+        fract_str = f'+' + str(fract)
+
+    if fract_str is not None:
+        return f'{int(scaled)}{fract_str} {suffix}'
     else:
-        return f'{scaled} {suffix}'
+        return f'{float(scaled)} {suffix}'

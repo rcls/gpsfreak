@@ -212,8 +212,9 @@ def set_ubx(config: bytearray, kv: list[Tuple[UBloxCfg, Any]]) -> None:
     config += msg.frame_payload(payload)
 
 message.serial_sync(config, 100000)
-message.set_baud(config, baud_rom)
-message.serial_sync(config, 10000)
+if baud_rom != 9600:
+    message.set_baud(config, baud_rom)
+    message.serial_sync(config, 10000)
 if baud_now != baud_rom:
     set_ubx(config, [(cfg_baud, baud_now)])
     message.serial_sync(config, 10000)

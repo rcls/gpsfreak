@@ -3,7 +3,7 @@
 // RX on pin 18 PB15 (USART2 AF13, USART1 AF4, LPUART1, AF8)
 
 use crate::cpu::WFE;
-use crate::cpu::interrupt::{self, PRIO_USB};
+use crate::cpu::interrupt::{self, PRIO_COMMS};
 use crate::dma::DMA_Channel;
 use crate::vcell::VCell;
 
@@ -14,11 +14,16 @@ use stm32h503::Interrupt::GPDMA1_CH0 as DMA_INTERRUPT;
 
 // NOTE: In safe boot we seem to need a UU training sequence to get the baud
 // rate sane.
+
+/// Default baud rate at power up.  9600 matches the factory default of the
+/// MAX-F10S.
 const BAUD: u32 = 9600;
+
+/// BRR setting to match BAUD.
 const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
 const _: () = assert!(BRR > 32 && BRR < 65536);
 
-pub type GpsPriority = crate::cpu::Priority<PRIO_USB>;
+pub type GpsPriority = crate::cpu::Priority<PRIO_COMMS>;
 
 /// For serial TX we use DMA.
 const DMA_CHANNEL: usize = 0;
@@ -59,8 +64,8 @@ pub fn init() {
     ch.writes_to(uart.TDR.as_ptr() as *mut u8, TX_DMA_REQ);
 
     // We interact with the USB subsystem, so share its priority.
-    interrupt::enable_priority(INTERRUPT, PRIO_USB);
-    interrupt::enable_priority(DMA_INTERRUPT, PRIO_USB);
+    interrupt::enable_priority(INTERRUPT, PRIO_COMMS);
+    interrupt::enable_priority(DMA_INTERRUPT, PRIO_COMMS);
 }
 
 pub fn set_baud_rate(baud: u32) -> bool {

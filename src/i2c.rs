@@ -83,9 +83,7 @@ pub fn init() {
 
     if false {
         write_reg(0, 0, &0i16).defer();
-        write(0, &0i16).defer();
         read_reg(0, 0, &mut 0i16).defer();
-        write_read(0, &0i16, &mut 0i16).defer();
     }
 
     use interrupt::*;

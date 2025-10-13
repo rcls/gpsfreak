@@ -21,7 +21,7 @@ const FIFO_SIZE: usize = 8;
 pub static DEBUG: Debug = Debug::new();
 
 /// Guard for running at the priority for accessing debug.
-pub type DebugPriority = crate::cpu::Priority::<{interrupt::PRIO_USB}>;
+pub type DebugPriority = crate::cpu::Priority::<{interrupt::PRIO_COMMS}>;
 
 type Index = u8;
 const BUF_SIZE: usize = 256;

@@ -118,7 +118,7 @@ pub fn init() {
 
     usb_initialize(unsafe {CONTROL_STATE.as_mut()});
 
-    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_USB);
+    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_COMMS);
 
     // We use the PENDSV exception to dispatch some work at lower priority.
     let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};

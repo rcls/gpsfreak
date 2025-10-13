@@ -3,11 +3,11 @@
 # Make sure we don't get confused with freak.lmk05318b
 assert __name__ == '__main__'
 
-from freak import lmk05318b_plan, message, tics
+from freak import lmk05318b, lmk05318b_plan, message, tics
 from freak.lmk05318b import MaskedBytes, Register
 
 from freak.message import Device
-from freak.lmk05318b_plan import PLLPlan, str_to_freq, freq_to_str
+from freak.lmk05318b_plan import PLLPlan, SCALE, str_to_freq, freq_to_str
 
 import argparse
 import struct
@@ -15,15 +15,15 @@ import struct
 from fractions import Fraction
 from typing import Tuple
 
-CHANNELS_RAW = list(enumerate(
-    f'Channel {s:3}' for s in '0_1 2_3 4 5 6 7'.split()))
+CHANNELS_RAW = list(
+    (i, f'Channel {s:3}', s) for i, s in enumerate('0_1 2_3 4 5 6 7'.split()))
 CHANNELS_COOKED = [
-    (1, 'Out 1 [2_3]'),
-    (0, 'Out 2 [0_1]'),
-    (5, 'Out 3 [7]  '),
-    (4, 'Out 4 [6]  '),
-    (3, 'U.Fl  [5]  '),
-    (2, 'Spare [4]  ')]
+    (1, 'Out 1 [2_3]', '2_3'),
+    (0, 'Out 2 [0_1]', '0_1'),
+    (5, 'Out 3 [7]  ', '7'),
+    (4, 'Out 4 [6]  ', '6'),
+    (3, 'U.Fl  [5]  ', '5'),
+    (2, 'Spare [4]  ', '4')]
 
 argp = argparse.ArgumentParser(description='LMK05318b utility')
 subp = argp.add_subparsers(
@@ -45,14 +45,19 @@ valget = subp.add_parser(
 valget.add_argument('KEY', nargs='+', help='KEYs')
 
 plan = subp.add_parser(
-    'plan', help='Frequency planning', description='Frequency planning')
+    'plan', help='Frequency planning',
+    description='''Compute and print a frequency plan without programming it to
+    the device.''')
 plan.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
 plan.add_argument('-r', '--raw', action='store_true',
                   help='Use LMK05318b channel numbering')
 
 freq = subp.add_parser(
-    'freq', help='Program frequencies', description='Program frequencies')
-freq.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
+    'freq', aliases=['frequency'], help='Program/report frequencies',
+    description='''Program or frequencies
+    If a list of frequencies is given, these are programmed to the device.
+    With no arguments, report the current device frequencies.''')
+freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
 freq.add_argument('-r', '--raw', action='store_true',
                   help='Use LMK05318b channel numbering')
 
@@ -142,13 +147,13 @@ def report_plan(plan: PLLPlan) -> None:
             print(f' (target {float(plan.freq_target)} MHz) error={plan.error()}')
 
     channels = CHANNELS_RAW if args.raw else CHANNELS_COOKED
-    for index, name in channels:
+    for index, name, _ in channels:
         f = plan.freqs[index]
         pd, s1, s2 = plan.dividers[index]
         if not f:
             continue
         pll = 1 if pd == 0 else 2
-        print(f'    {name} PLL{pll} {freq_to_str(f)} dividers', end='')
+        print(f'    {name} {freq_to_str(f)} PLL{pll} dividers', end='')
         if pll == 2:
             print(f' {pd}', end='')
         print(f' {s1}', end='')
@@ -159,8 +164,8 @@ def report_plan(plan: PLLPlan) -> None:
 
 def make_freq_list(freqs: list[str]) -> list[Fraction]:
     channels = CHANNELS_RAW if args.raw else CHANNELS_COOKED
-    result = [Fraction(0)] * 6
-    for (i, _), f in zip(channels, freqs):
+    result = [Fraction(0)] * max(6, len(freqs))
+    for (i, _, _), f in zip(channels, freqs):
         result[i] = str_to_freq(f)
     return result
 
@@ -312,6 +317,62 @@ def report_drive() -> None:
         else:
             print(f'sel={sel} mode1={mode1} mode2={mode2}')
 
+def report_freq() -> None:
+    dev = message.get_device()
+    data = MaskedBytes()
+    # For now, pull everything...
+    for a in lmk05318b.ADDRESSES:
+        data.mask[a.address] = 0xff
+    ranges = data.ranges(max_block = 30)
+    get_ranges(dev, data, ranges)
+    # FIXME - retrieve it!
+    reference = Fraction(8844582, SCALE)
+    dpll_priref_rdiv    = data.extract('DPLL_PRIREF_RDIV')
+    dpll_ref_fb_pre_div = data.extract('DPLL_REF_FB_PRE_DIV') + 2
+    dpll_ref_fb_div     = data.extract('DPLL_REF_FB_DIV')
+    dpll_ref_num        = data.extract('DPLL_REF_NUM')
+    dpll_ref_den        = data.extract('DPLL_REF_DEN')
+
+    pll2_rdiv_pre       = data.extract('PLL2_RDIV_PRE') + 3
+    pll2_rdiv_sec       = data.extract('PLL2_RDIV_SEC') + 1
+    pll2_ndiv           = data.extract('PLL2_NDIV')
+    pll2_num            = data.extract('PLL2_NUM')
+    apll2_den_mode      = data.extract('APLL2_DEN_MODE')
+    if apll2_den_mode == 0:
+        pll2_den = 1 << 24
+    else:
+        pll2_den        = data.extract('PLL2_DEN')
+    pll2_p1             = data.extract('PLL2_P1') + 1
+    pll2_p2             = data.extract('PLL2_P2') + 1
+
+    assert dpll_priref_rdiv != 0
+    baw_freq = Fraction(reference) / dpll_priref_rdiv \
+        * 2 * dpll_ref_fb_pre_div * (
+            dpll_ref_fb_div + Fraction(dpll_ref_num, dpll_ref_den))
+    print(f'BAW frequency = {freq_to_str(baw_freq)}')
+
+    pll2_freq = baw_freq / pll2_rdiv_pre / pll2_rdiv_sec * (
+        pll2_ndiv + Fraction(pll2_num, pll2_den))
+    print(f'PLL2 frequency = {freq_to_str(pll2_freq)}')
+
+    for _, name, ch in CHANNELS_RAW if args.raw else CHANNELS_COOKED:
+        mux = data.extract(f'CH{ch}_MUX')
+        div = data.extract(f'OUT{ch}_DIV') + 1
+        s2div = 1
+        if ch == '7':
+            s2div = data.extract('OUT7_STG2_DIV') + 1
+        muxed = baw_freq
+        if mux == 2:
+            muxed = pll2_freq / pll2_p1
+        elif mux == 3:
+            muxed = pll2_freq / pll2_p2
+        ch_freq = muxed / div / s2div
+        if data.extract(f'CH{ch}_PD'):
+            pd = ' (power down)'
+        else:
+            pd = ''
+        print(f'{name} frequency = {freq_to_str(ch_freq)}{pd}')
+
 def do_upload(path: str) -> None:
     dev = message.get_device()
     tcs = tics.read_tcs_file(path)
@@ -327,7 +388,10 @@ elif args.command == 'plan':
     report_plan(lmk05318b_plan.plan(make_freq_list(args.FREQ)))
 
 elif args.command == 'freq':
-    do_freq(args.FREQ)
+    if len(args.FREQ) != 0:
+        do_freq(args.FREQ)
+    else:
+        report_freq()
 
 elif args.command == 'drive':
     if args.DRIVE or args.defaults:

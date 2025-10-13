@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 
-# Make sure we don't get confused with freak.lmk05318b
-assert __name__ == '__main__'
-
 from freak import lmk05318b, lmk05318b_plan, message, tics
 from freak.lmk05318b import MaskedBytes, Register
 
@@ -25,54 +22,6 @@ CHANNELS_COOKED = [
     (3, 'U.Fl  [5]  ', '5'),
     (2, 'Spare [4]  ', '4')]
 
-argp = argparse.ArgumentParser(description='LMK05318b utility')
-subp = argp.add_subparsers(
-    dest='command', metavar='COMMAND', required=True, help='Command')
-
-def key_value(s: str) -> Tuple[str, str]:
-    if not '=' in s:
-        raise ValueError('Key/value pairs must be in the form KEY=VALUE')
-    K, V = s.split('=', 1)
-    return K, V
-
-valset = subp.add_parser(
-    'set', help='Set registers', description='Set registers')
-valset.add_argument('KV', type=key_value, nargs='+',
-                    metavar='KEY=VALUE', help='KEY=VALUE pairs')
-
-valget = subp.add_parser(
-    'get', help='Get registers', description='Get registers')
-valget.add_argument('KEY', nargs='+', help='KEYs')
-
-plan = subp.add_parser(
-    'plan', help='Frequency planning',
-    description='''Compute and print a frequency plan without programming it to
-    the device.''')
-plan.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
-plan.add_argument('-r', '--raw', action='store_true',
-                  help='Use LMK05318b channel numbering')
-
-freq = subp.add_parser(
-    'freq', aliases=['frequency'], help='Program/report frequencies',
-    description='''Program or frequencies
-    If a list of frequencies is given, these are programmed to the device.
-    With no arguments, report the current device frequencies.''')
-freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
-freq.add_argument('-r', '--raw', action='store_true',
-                  help='Use LMK05318b channel numbering')
-
-drive = subp.add_parser(
-    'drive', help='Set output drive', description='Set output drive')
-drive.add_argument('-d', '--defaults', action='store_true',
-                   help='Set default values')
-drive.add_argument('DRIVE', type=key_value, nargs='*',
-                   metavar='CH=DRIVE', help='Channel and drive type / strength')
-
-upload = subp.add_parser(
-    'upload', help='Upload TICS Pro .tcs file',
-    description='Upload TICS Pro .tcs file')
-upload.add_argument('FILE', help='Name of .tics file')
-
 DRIVES = {
     'off'  : (0, 0, 0, 'Off'),
     'lvds' : (1, 0, 0, 'LVDS, 4mA'),
@@ -84,8 +33,6 @@ CMOS_DRIVES = ('z', 'hi-z'), ('0', 'low'), ('-', 'inverted'), ('+', 'normal')
 for v1, (l1, d1) in enumerate(CMOS_DRIVES):
     for v2, (l2, d2) in enumerate(CMOS_DRIVES):
         DRIVES['cmos' + l1 + l2] = (3, v1, v2, f'CMOS, {d1}, {d2}')
-
-args = argp.parse_args()
 
 def get_ranges(dev: Device, data: MaskedBytes,
                ranges: list[Tuple[int, int]]) -> None:
@@ -128,7 +75,7 @@ def masked_write(dev: Device, data: MaskedBytes) -> None:
         message.lmk05318b_write(dev, base, data.data[base : base+span])
 
 def do_set(KV: list[Tuple[str, str]]) -> None:
-    registers = list((Register.get(K), int(V, 0)) for K, V in args.KV)
+    registers = list((Register.get(K), int(V, 0)) for K, V in KV)
     dev = message.get_device()
     data = MaskedBytes()
     # Build the mask...
@@ -136,7 +83,7 @@ def do_set(KV: list[Tuple[str, str]]) -> None:
         data.insert(r, v)
     masked_write(dev, data)
 
-def report_plan(plan: PLLPlan) -> None:
+def report_plan(plan: PLLPlan, raw: bool) -> None:
     if plan.freq_target == 0:
         print('PLL2 not used')
     else:
@@ -146,7 +93,7 @@ def report_plan(plan: PLLPlan) -> None:
         else:
             print(f' (target {float(plan.freq_target)} MHz) error={plan.error()}')
 
-    channels = CHANNELS_RAW if args.raw else CHANNELS_COOKED
+    channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     for index, name, _ in channels:
         f = plan.freqs[index]
         pd, s1, s2 = plan.dividers[index]
@@ -162,8 +109,8 @@ def report_plan(plan: PLLPlan) -> None:
         else:
             print(f' {s2}')
 
-def make_freq_list(freqs: list[str]) -> list[Fraction]:
-    channels = CHANNELS_RAW if args.raw else CHANNELS_COOKED
+def make_freq_list(freqs: list[str], raw: bool) -> list[Fraction]:
+    channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     result = [Fraction(0)] * max(6, len(freqs))
     for (i, _, _), f in zip(channels, freqs):
         result[i] = str_to_freq(f)
@@ -247,9 +194,9 @@ def freq_make_data(plan: PLLPlan) -> dict[str, int]:
     data['PLL2_LF_C3'] = 7
     return data
 
-def do_freq(freq_str: list[str]) -> None:
-    plan = lmk05318b_plan.plan(make_freq_list(freq_str))
-    report_plan(plan)
+def do_freq(freq_str: list[str], raw: bool) -> None:
+    plan = lmk05318b_plan.plan(make_freq_list(freq_str, raw))
+    report_plan(plan, raw)
     data = MaskedBytes()
     for K, V in freq_make_data(plan).items():
         data.insert(Register.get(K), V)
@@ -317,7 +264,7 @@ def report_drive() -> None:
         else:
             print(f'sel={sel} mode1={mode1} mode2={mode2}')
 
-def report_freq() -> None:
+def report_freq(raw: bool) -> None:
     dev = message.get_device()
     data = MaskedBytes()
     # For now, pull everything...
@@ -355,7 +302,7 @@ def report_freq() -> None:
         pll2_ndiv + Fraction(pll2_num, pll2_den))
     print(f'PLL2 frequency = {freq_to_str(pll2_freq)}')
 
-    for _, name, ch in CHANNELS_RAW if args.raw else CHANNELS_COOKED:
+    for _, name, ch in CHANNELS_RAW if raw else CHANNELS_COOKED:
         mux = data.extract(f'CH{ch}_MUX')
         div = data.extract(f'OUT{ch}_DIV') + 1
         s2div = 1
@@ -378,29 +325,84 @@ def do_upload(path: str) -> None:
     tcs = tics.read_tcs_file(path)
     masked_write(dev, tcs)
 
-if args.command == 'get':
-    do_get(args.KEY)
+def add_to_argparse(argp: argparse.ArgumentParser,
+                    dest: str = 'command', metavar: str = 'COMMAND') -> None:
+    def key_value(s: str) -> Tuple[str, str]:
+        if not '=' in s:
+            raise ValueError('Key/value pairs must be in the form KEY=VALUE')
+        K, V = s.split('=', 1)
+        return K, V
 
-elif args.command == 'set':
-    do_set(args.KV)
+    subp = argp.add_subparsers(
+        dest=dest, metavar=metavar, required=True, help='Command')
 
-elif args.command == 'plan':
-    report_plan(lmk05318b_plan.plan(make_freq_list(args.FREQ)))
+    valset = subp.add_parser(
+        'set', help='Set registers', description='Set registers')
+    valset.add_argument('KV', type=key_value, nargs='+',
+                        metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
-elif args.command == 'freq':
-    if len(args.FREQ) != 0:
-        do_freq(args.FREQ)
+    valget = subp.add_parser(
+        'get', help='Get registers', description='Get registers')
+    valget.add_argument('KEY', nargs='+', help='KEYs')
+
+    plan = subp.add_parser(
+        'plan', help='Frequency planning',
+        description='''Compute and print a frequency plan without programming it
+        to the device.''')
+    plan.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
+
+    freq = subp.add_parser(
+        'freq', aliases=['frequency'], help='Program/report frequencies',
+        description='''Program or frequencies If a list of frequencies is given,
+        these are programmed to the device.  With no arguments, report the
+        current device frequencies.''')
+    freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
+
+    drive = subp.add_parser('drive', help='Set/get output drive',
+                            description='Set/get output drive')
+    drive.add_argument('-d', '--defaults', action='store_true',
+                       help='Set default values')
+    drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='CH=DRIVE',
+                       help='Channel and drive type / strength')
+
+    upload = subp.add_parser(
+        'upload', help='Upload TICS Pro .tcs file',
+        description='Upload TICS Pro .tcs file')
+    upload.add_argument('FILE', help='Name of .tics file')
+
+def run_command(args: argparse.Namespace, command: str) -> None:
+    if command == 'get':
+        do_get(args.KEY)
+
+    elif command == 'set':
+        do_set(args.KV)
+
+    elif command == 'plan':
+        plan = lmk05318b_plan.plan(make_freq_list(args.FREQ, True))
+        report_plan(plan, True)
+
+    elif command == 'freq':
+        if len(args.FREQ) != 0:
+            do_freq(args.FREQ, True)
+        else:
+            report_freq(True)
+
+    elif command == 'drive':
+        if args.DRIVE or args.defaults:
+            do_drive(args.DRIVE, bool(args.defaults))
+        else:
+            report_drive()
+
+    elif command == 'upload':
+        do_upload(args.FILE)
+
     else:
-        report_freq()
+        print(args)
+        assert None, f'This should never happen {command}'
 
-elif args.command == 'drive':
-    if args.DRIVE or args.defaults:
-        do_drive(args.DRIVE, args.defaults)
-    else:
-        report_drive()
+if __name__ == '__main__':
+    argp = argparse.ArgumentParser(description='LMK05318b utility')
+    add_to_argparse(argp)
 
-elif args.command == 'upload':
-    do_upload(args.FILE)
-
-else:
-    assert None, 'This should never happen'
+    args = argp.parse_args()
+    run_command(args, args.command)

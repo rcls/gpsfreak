@@ -463,9 +463,10 @@ def freq_to_str(freq: Fraction|int|float) -> str:
 
     fract = scaled % 1
     fract_str = None
-    if fract in FRACTIONS:
+    if not isinstance(fract, float) and fract in FRACTIONS:
         fract_str = FRACTIONS[fract]
-    elif fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19:
+    elif isinstance(fract, Fraction) and (
+            fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19):
         fract_str = f'+' + str(fract)
 
     if fract_str is not None:

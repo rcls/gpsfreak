@@ -156,7 +156,7 @@ headers = get_headers(dev)
 current = best_header(dev, headers)
 
 generation = 1 if current is None else headers[current].generation + 1
-print(f'Current = {current}, next generation {generation}')
+print(f'Current = index {current}, next generation {generation}')
 
 config = bytearray(struct.pack('<IIII', MAGIC, VERSION, generation, 0))
 
@@ -212,9 +212,8 @@ def set_ubx(config: bytearray, kv: list[Tuple[UBloxCfg, Any]]) -> None:
     config += msg.frame_payload(payload)
 
 message.serial_sync(config, 100000)
-if baud_rom != 9600:
-    message.set_baud(config, baud_rom)
-    message.serial_sync(config, 10000)
+message.set_baud(config, baud_rom)
+message.serial_sync(config, 10000)
 if baud_now != baud_rom:
     set_ubx(config, [(cfg_baud, baud_now)])
     message.serial_sync(config, 10000)

@@ -97,7 +97,7 @@ def test_simple() -> None:
 def flush(dev: Device) -> None:
     # Flush any stale data.
     try:
-        dev.read(0x83, 64, 100)
+        dev.read(0x83, 64, 10)
     except usb.core.USBTimeoutError:
         pass
 

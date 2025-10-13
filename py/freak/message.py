@@ -23,6 +23,9 @@ CPU_REBOOT=0x10
 GPS_RESET=0x11
 LMK05318B_PDN=0x12
 
+SERIAL_SYNC=0x1e
+SET_BAUD=0x1f
+
 LMK05318B_WRITE=0x60
 LMK05318B_READ=0x61
 
@@ -135,6 +138,12 @@ def get_protocol_version(dev: Target) -> int:
 
 def get_serial_number(dev: Target) -> bytes:
     return retrieve(dev, GET_SERIAL_NUMBER, b'').payload
+
+def serial_sync(dev: Target, microseconds: int) -> None:
+    command(dev, SERIAL_SYNC, struct.pack('<I', microseconds))
+
+def set_baud(dev: Target, baud: int) -> None:
+    command(dev, SET_BAUD, struct.pack('<I', baud))
 
 def peek(dev: Target, address: int, length: int) -> bytes:
     data = retrieve(dev, PEEK, struct.pack('<II', address, length))

@@ -1,17 +1,15 @@
 #!/usr/bin/python3
 
-from freak import crc32, lmk05318b, message, serhelper, ublox_msg
+from freak import crc32, lmk05318b, message, serhelper, ublox_defs, ublox_msg
 from freak.lmk05318b import ADDRESSES, MaskedBytes, Register
 from freak.message import Device, lmk05318b_write
+from freak.ublox_cfg import UBloxCfg
 
 import struct
 import sys
 
 from dataclasses import dataclass
-from typing import Tuple
-
-ser = serhelper.Serial('/dev/ttyACM1')
-ubx = ublox_msg.UBloxReader(ser)
+from typing import Any, Tuple
 
 # U+03C1 GREEK SMALL LETTER RHO UTF-8: 0xCF 0x81
 # U+03A6 GREEK CAPITAL LETTER PHI UTF-8: 0xCE 0xA6
@@ -63,7 +61,7 @@ CRC_EMPTY_CONFIG = 0xfe8baafc
 def test_crc_empty_config() -> None:
     assert CRC_EMPTY_CONFIG == crc32.crc32(b'\xff' * 2048)
 
-def header_is_empty(dev: Device, headers: Headers, i: int) -> bool:
+def config_is_empty(dev: Device, headers: Headers, i: int) -> bool:
     '''Check if a config is empty.  First check the header, if that's ok,
     CRC the block, and then read the entire block.'''
     h = headers[i]
@@ -82,7 +80,7 @@ def header_is_empty(dev: Device, headers: Headers, i: int) -> bool:
         length -= todo
     return True
 
-def next_header(dev: Device, headers: Headers, current: int) -> int:
+def next_header(dev: Device, headers: Headers, current: int|None) -> int:
     '''Get the index of the next header to write.  Erase a flash sector if
     necessary.'''
     # Prefer entries in the same sector as the current config, if it is in the
@@ -92,12 +90,12 @@ def next_header(dev: Device, headers: Headers, current: int) -> int:
     else:
         scan = list(range(8, 16))
     for i in scan:
-        if header_is_empty(dev, headers, i):
+        if config_is_empty(dev, headers, i):
             return i
     index = scan[4]
     sector = config_address(index)
-    assert False, f'Would erase {config_address(index):#010x}'
-    message.erase_flash(dev, config_address(index))
+    #assert False, f'Would erase {config_address(index):#010x}'
+    message.flash_erase(dev, config_address(index))
     return index
 
 def compare_data(dev: Device, headers: Headers, index: int|None,
@@ -108,7 +106,7 @@ def compare_data(dev: Device, headers: Headers, index: int|None,
     h = headers[index]
     magic, version, generation, length = struct.unpack('<IIII', new[:16])
     if magic != h.magic or version != h.version or length != h.length:
-        print('Old header different')
+        #print('Old header different', h)
         return False
     address = config_address(index)
     new_csum = crc32.crc32(new[16:-4])
@@ -121,15 +119,15 @@ def compare_data(dev: Device, headers: Headers, index: int|None,
     while base < end:
         todo = min(48, end - base)
         data = message.peek(dev, address + base, todo)
-        if data != new[base : base + todo]:
+        if data != bytes(new[base : base + todo]):
             print('Difference @ {todo}')
             return False
         base += todo
     print('Config matches')
     return True
 
-# Skip the NVM related addresses.
-skip = 155, 156, 157, 158, 159, 161, 162, 164
+# Skip some feedback and the NVM related addresses.
+skip = 123, 124, 125, 126, 127, 155, 156, 157, 158, 159, 161, 162, 164
 
 def load_lmk05318b() -> MaskedBytes:
     # Loadup the whole damn thing...
@@ -141,7 +139,7 @@ def load_lmk05318b() -> MaskedBytes:
     # Now grab the data...
     for address, length in data.ranges(max_block = 32):
         segment = message.lmk05318b_read(dev, address, length)
-        print(f'@ {address} : {segment.hex(" ")}')
+        #print(f'@ {address} : {segment.hex(" ")}')
         assert len(segment) == length, f'{length} {segment.hex(" ")}'
         data.data[address : address+length] = segment
     assert len(data.data) == len(data.mask)
@@ -152,7 +150,7 @@ test_crc_empty_config()
 dev = message.get_device()
 
 lmk_config = load_lmk05318b()
-print('Config', lmk_config.data.hex(' '))
+#print('Config', lmk_config.data.hex(' '))
 
 headers = get_headers(dev)
 current = best_header(dev, headers)
@@ -180,7 +178,7 @@ def set_reg(r: Register) -> None:
 set_reg(sw_reset)
 
 for address, chunk in lmk_config.bundle(max_block = 32).items():
-    print(f'@ {address} : {chunk.hex(" ")}')
+    #print(f'@ {address} : {chunk.hex(" ")}')
     lmk05318b_write(config, address, chunk)
 
 lmk_config.insert(sw_reset, orig_sw_reset)
@@ -194,15 +192,52 @@ if orig_pll1_pdn != 1:
 if orig_pll2_pdn != 1:
     set_reg(pll2_pdn)
 
-config[12:16] = struct.pack('<I', len(config) + 4)
-config += struct.pack('>I', crc32.crc32(config))
+ser = serhelper.Serial('/dev/ttyACM0')
+ubx = ublox_msg.UBloxReader(ser)
+
+print('Baud rate....')
+
+# Load the GPS config.  First, the baud rates...
+cfg_baud = UBloxCfg.get('UART1-BAUDRATE')
+(_, baud_rom), = ublox_defs.get_cfg_multi(ubx, 7, [cfg_baud])
+(_, baud_now), = ublox_defs.get_cfg_multi(ubx, 0, [cfg_baud])
+
+def set_ubx(config: bytearray, kv: list[Tuple[UBloxCfg, Any]]) -> None:
+    # Only do one request.
+    payload = bytearray(b'\x00\x01\x00\x00')
+    for cfg, val in kv:
+        print(cfg, val)
+        payload += cfg.encode_key_value(val)
+    msg = ublox_msg.UBloxMsg.get('CFG-VALSET')
+    config += msg.frame_payload(payload)
+
+message.serial_sync(config, 100000)
+message.set_baud(config, baud_rom)
+message.serial_sync(config, 10000)
+if baud_now != baud_rom:
+    set_ubx(config, [(cfg_baud, baud_now)])
+    message.serial_sync(config, 10000)
+    message.set_baud(config, baud_now)
+    message.serial_sync(config, 100000)
+
+print('UBlox config changes....')
+
+changes = [(key, now) for key, now, _ in ublox_defs.get_cfg_changes(ubx)
+           if key != cfg_baud]
+# Do them 8 at a time...
+for base in range(0, len(changes), 8):
+    todo = min(8, len(changes) - base)
+    set_ubx(config, changes[base : base + todo])
 
 print(len(config))
-print(config.hex(' '))
+
+config[12:16] = struct.pack('<I', len(config) + 4)
+config += struct.pack('>I', crc32.crc32(config))
 
 assert crc32.crc32(config) == crc32.VERIFY_MAGIC
 print('Best header', current)
 
+# For some reason we always get config changes...
 if compare_data(dev, headers, current, config):
     print('No config changes - not saving')
     sys.exit(0)

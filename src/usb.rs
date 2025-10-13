@@ -440,7 +440,13 @@ fn set_line_coding() -> bool {
         )
     };
     ctrl_dbgln!("USB Set Line Coding, Baud = {}", line_coding.dte_rate);
-    // We ignore everything except the baud rate.
+    // We ignore everything except the baud rate.  Also !@#$@!#$ linux randomly
+    // sets serial ports to 9600 baud, which no-one has actually used for 30
+    // years.  So silently ignore that.  Set a baud rate of 9601 if you really
+    // want 9600 baud.
+    if line_coding.dte_rate == 9600 {
+        return true;
+    }
     crate::gps_uart::set_baud_rate(line_coding.dte_rate)
 }
 

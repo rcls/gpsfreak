@@ -63,7 +63,7 @@ pub fn erase(address: usize) -> Result {
     write_unlock()?;
 
     let swapped = flash.OPTCR.read().SWAP_BANK().bit();
-    let snb = if bank {address >> 13 & 7} else {0};
+    let snb = if bank {0} else {address >> 13 & 7};
 
     dbgln!("FLASH - bank {bank} swapped {swapped} sector number {snb}");
 

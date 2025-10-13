@@ -3,10 +3,12 @@ import os
 import re
 import struct
 
-from typing import Any, Tuple
+from typing import Any, Tuple, TypeAlias
 
 from .ublox_cfg import UBloxCfg, get_cfg
 from .ublox_msg import UBloxMsg, UBloxReader
+
+KeyValue: TypeAlias = Tuple[UBloxCfg, Any]
 
 def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs = []
@@ -72,7 +74,7 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     return configs, messages
 
 def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
-        -> list[Tuple[UBloxCfg, Any]]:
+        -> list[KeyValue]:
     start = 0
     items = []
 
@@ -103,3 +105,17 @@ def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
         start += num_items
         if num_items < 64:
             return items
+
+def get_cfg_changes(dev: UBloxReader) -> list[Tuple[UBloxCfg, Any, Any]]:
+    live = get_cfg_multi(dev, 0, [0xffffffff])
+    rom  = get_cfg_multi(dev, 7, [0xffffffff])
+    live.sort(key=lambda x: x[0].key & 0x0fffffff)
+    rom .sort(key=lambda x: x[0].key & 0x0fffffff)
+
+    assert len(live) == len(rom )
+    result = []
+    for (cfg_l, value_l), (cfg_r, value_r) in zip(live, rom):
+        assert cfg_l == cfg_r
+        if value_l != value_r:
+            result.append((cfg_l, value_l, value_r))
+    return result

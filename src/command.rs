@@ -52,6 +52,7 @@
 //!            - 0 assert reset low, 1 deassert reset high, others pulse reset.
 //!    12 : Clock gen PDN (reset), u8 payload:
 //!            - 0 power down, 1 power up, ≥2 reset & power back up.
+//!    1e : Serial sync / delay.  Used in provisioning.
 //!    1f : Set baud rate, u32 payload.  Useful for provisioning, normal
 //!         use cases can use USB CDC ACM.
 //!
@@ -248,6 +249,8 @@ fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
         0x10 => crate::cpu::reboot(),
         0x11 => gps_reset(message),
         0x12 => lmk_powerdown(message),
+
+        0x1e => serial_sync(message),
         0x1f => set_baud(message),
 
         0x60 => i2c_write(0xc8, message),
@@ -282,10 +285,10 @@ fn get_serial_number(message: &MessageBuf, r: Responder) -> Result {
 }
 
 fn gps_reset(message: &MessageBuf) -> Result {
-    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let message = Message::<u8>::from_buf(message)?;
     if message.payload != 1 {
-        gpioa.BSRR.write(|w| w.BR4().set_bit());
+        gpiob.BSRR.write(|w| w.BR1().set_bit());
     }
     if message.payload > 1 {
         // Sleep for approx, 1ms.
@@ -294,7 +297,7 @@ fn gps_reset(message: &MessageBuf) -> Result {
         }
     }
     if message.payload != 0 {
-        gpioa.BSRR.write(|w| w.BS4().set_bit());
+        gpiob.BSRR.write(|w| w.BS1().set_bit());
     }
     SEND_ACK
 }
@@ -314,6 +317,19 @@ fn lmk_powerdown(message: &MessageBuf) -> Result {
     if message.payload != 0 {
         gpioa.BSRR.write(|w| w.BS4().set_bit());
     }
+    SEND_ACK
+}
+
+fn serial_sync(message: &MessageBuf) -> Result {
+    let message = Message::<u32>::from_buf(message)?;
+    if message.payload > 1000000 {
+        return Err(Error::BadParameter);
+    }
+    crate::gps_uart::wait_for_tx_idle();
+    for _ in 0 .. message.payload * (crate::cpu::CPU_FREQ / 2000000) {
+        crate::cpu::nothing();
+    }
+    crate::gps_uart::wait_for_tx_idle();
     SEND_ACK
 }
 

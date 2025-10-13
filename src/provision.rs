@@ -31,11 +31,13 @@
 //! - Write it to a blank sector in the second flash bank.  If there is none,
 //!   then erase a sector in the second flash bank that does not contain the
 //!   current config.
-//! 
+//!
 //! That procedure should ensure that an interrupted config update leaves us
 //! still using the previous one.
 
-use crate::{crc32::{self, VERIFY_MAGIC}, vcell::UCell};
+use crate::crc32::{self, VERIFY_MAGIC};
+use crate::gps_uart::GpsPriority;
+use crate::vcell::UCell;
 
 const CONFIG_MAGIC: u32 = 0x4b72a6ce;
 
@@ -122,13 +124,16 @@ fn run_command_packet(data: &[u8]) {
 
 fn run_ublox_command(data: *const u8, length: usize) {
     dbgln!("Run U-Blox packet @{data:#?} {length} bytes");
-    if !crate::gps_uart::dma_tx(data, length) {
-        dbgln!("Whoops, GPS TX busy!");
-    }
-    while crate::gps_uart::dma_tx_busy() {
+    loop {
+        let prio = GpsPriority::new();
+        let ok = crate::gps_uart::dma_tx(data, length);
+        drop(prio);
+        if ok {
+            break;
+        }
         crate::cpu::WFE();
     }
-    // FIXME - wait for the last bytes to drain!
+    crate::gps_uart::wait_for_tx_idle();
 }
 
 fn config_by_index(i: u8) -> &'static ConfigBlock {

@@ -42,6 +42,8 @@ pub fn main() -> ! {
 
     cpu::init();
 
+    cpu::maybe_enter_dfu();
+
     uart_debug::init();
 
     crc::init();
@@ -52,11 +54,6 @@ pub fn main() -> ! {
     provision::provision();
 
     usb::init();
-
-    // FIXME - this races with interrupts using debug!
-    dbgln!("Debug is up!");
-
-    cpu::maybe_enter_dfu();
 
     // Enable FPU.  We aren't using it yet!!!
     // unsafe {scb.cpacr.write(0x00f00000)};

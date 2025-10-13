@@ -1,13 +1,23 @@
 #!/usr/bin/python3
 
 from freak import serhelper, ublox_cfg
-from freak.ublox_defs import parse_key_list, get_cfg_multi
+from freak.ublox_defs import parse_key_list, get_cfg_changes, get_cfg_multi
 from freak.ublox_cfg import UBloxCfg
 from freak.ublox_msg import UBloxMsg, UBloxReader
 
 import argparse
 import struct
 import sys
+
+# My current changes:
+# CFG-TP-PULSE_DEF 0x01 was 0x00
+# CFG-TP-FREQ_LOCK_TP1 8844582 0x0086f526 was 1 0x00000001
+# CFG-TP-DUTY_LOCK_TP1 50.0 was 10.0
+# CFG-TP-PULSE_LENGTH_DEF 0x00 was 0x01
+# CFG-SBAS-USE_TESTMODE True 0x01 was False 0x00
+# CFG-SBAS-PRNSCANMASK 0x0000000000000000 was 0x000000000003ab88
+# CFG-UART1-BAUDRATE 115200 0x0001c200 was 9600 0x00002580
+
 
 from typing import Any, Tuple
 
@@ -35,13 +45,16 @@ dump = subp.add_parser('dump', description='Retrieve entire config',
 dump.add_argument('-l', '--layer', default=0, type=int,
                   help='Configuration layer to retrieve')
 
+info = subp.add_parser('info', description='Basic GPS unit info',
+                       help='Basic GPS unit info')
+
 changes = subp.add_parser('changes', description='Report changed config items',
                           help='Report changed config items')
 
 scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
                          help='Scrape pdftotext output')
 
-for a in valset, valget, dump, changes:
+for a in valset, valget, dump, changes, info:
     a.add_argument('DEVICE', help='Serial port to talk to device')
 
 valget.add_argument('KEY', nargs='+', help='KEYs')
@@ -112,17 +125,60 @@ def do_changes() -> None:
     device = serhelper.Serial(args.DEVICE)
     reader = UBloxReader(device)
 
-    live = get_cfg_multi(reader, 0, [0xffffffff])
-    rom  = get_cfg_multi(reader, 7, [0xffffffff])
-    live.sort(key=lambda x: x[0].key & 0x0fffffff)
-    rom .sort(key=lambda x: x[0].key & 0x0fffffff)
+    for cfg, now, rom in get_cfg_changes(reader):
+        print(cfg, fmt_cfg_value(cfg, now), 'was', fmt_cfg_value(cfg, rom))
 
-    assert len(live) == len(rom )
-    for (cfg_l, value_l), (cfg_r, value_r) in zip(live, rom):
-        assert cfg_l == cfg_r
-        if value_l != value_r:
-            print(cfg_l, fmt_cfg_value(cfg_l, value_l), 'was',
-                  fmt_cfg_value(cfg_r, value_r))
+def do_info() -> None:
+    def binstr(b: bytes) -> str:
+        b = b.rstrip(b'\0')
+        try:
+            return str(b, 'utf-8')
+        except:
+            return b.hex(' ')
+
+    assert args.DEVICE is not None
+    device = serhelper.Serial(args.DEVICE)
+    reader = UBloxReader(device)
+
+    msg = UBloxMsg.get('MON-VER')
+    message = msg.frame_payload(b'')
+    result = reader.transact(message, ack=False)
+    assert len(result) % 30 == 10 and len(result) >= 40
+    swVersion = binstr(result[:30])
+    hwVersion = binstr(result[30:40])
+    print(f'Software version {swVersion}, hardware version {hwVersion}')
+    for i in range(40, len(result), 30):
+        print('Extension', binstr(result[i : i+10]))
+
+    msg = UBloxMsg.get('MON-HW3')
+    message = msg.frame_payload(b'')
+    result = reader.transact(message, ack=False)
+    version, nPins, flags = result[:3]
+    hwVersion = binstr(result[3:13])
+    print(f'HW Version = {hwVersion}')
+    print(f'RTC is {"" if flags & 1 else "NOT "}calibrated')
+    print(f'Boot mode is {"Safe" if flags & 2 else "Normal"}')
+    print(f'XTAL is {"Absent" if flags & 4 else "Present"}')
+    assert len(result) == 22 + nPins * 6
+    for i in range(nPins):
+        data = result[22 + i * 6 : 28 + i * 6]
+        _, pinId, pinMask0, pinMask1, VP, _ = data
+        pio = 'PIO' if pinMask0 & 1 else 'Peripheral'
+        bank = 'ABCDEFGH'[pinMask0 & 14 >> 1]
+        direction = 'Output' if pinMask0 & 16 else 'Input'
+        value = 'High' if pinMask0 & 32 else 'Low'
+        virtual = 'Virtual' if pinMask0 & 64 else 'Non-Virtual'
+        irq_enabled = 'Enabled' if pinMask0 & 128 else 'Disabled'
+        if pinMask1 & 3 == 1:
+            pull = ' Pull-up'
+        elif pinMask1 & 3 == 2:
+            pull = ' Pull-down'
+        elif pinMask1 & 3 == 3:
+            pull = ' Pull-both'
+        else:
+            pull = ''
+
+        print(f'Pin {pinId} {pio} bank {bank} {direction} {value} {virtual} IRQ {irq_enabled} Virt.Pin {VP}{pull}')
 
 def do_scrape(FILE):
     configs, messages = parse_key_list(FILE)
@@ -136,6 +192,7 @@ def do_scrape(FILE):
             print(f'    {item!r},')
         print('])')
 
+
 if args.command == 'set':
     do_set(args.KV)
 
@@ -147,6 +204,9 @@ elif args.command == 'dump':
 
 elif args.command == 'changes':
     do_changes()
+
+elif args.command == 'info':
+    do_info()
 
 elif args.command == 'scrape':
     do_scrape(args.FILE)

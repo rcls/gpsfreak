@@ -2,8 +2,8 @@
 // TX on pin 19 PA8 (USART2 AF4, USART3 AF13)
 // RX on pin 18 PB15 (USART2 AF13, USART1 AF4, LPUART1, AF8)
 
-use crate::cpu::interrupt;
-use crate::cpu::interrupt::PRIO_USB;
+use crate::cpu::WFE;
+use crate::cpu::interrupt::{self, PRIO_USB};
 use crate::dma::DMA_Channel;
 use crate::vcell::VCell;
 
@@ -14,9 +14,9 @@ use stm32h503::Interrupt::GPDMA1_CH0 as DMA_INTERRUPT;
 
 // NOTE: In safe boot we seem to need a UU training sequence to get the baud
 // rate sane.
-const BAUD: u32 = 115200;
+const BAUD: u32 = 9600;
 const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
-const _: () = assert!(BRR < 65536);
+const _: () = assert!(BRR > 32 && BRR < 65536);
 
 pub type GpsPriority = crate::cpu::Priority<PRIO_USB>;
 
@@ -53,7 +53,7 @@ pub fn init() {
     uart.CR3.write(|w| w.RXFTCFG().bits(5).RXFTIE().set_bit().DMAT().set_bit());
     uart.CR1.write(
         |w|w.FIFOEN().set_bit().RE().set_bit().RXFNEIE().set_bit()
-            .TE().set_bit().UE().set_bit());
+            .TCIE().set_bit().TE().set_bit().UE().set_bit());
 
     let ch = &dma.C[DMA_CHANNEL];
     ch.writes_to(uart.TDR.as_ptr() as *mut u8, TX_DMA_REQ);
@@ -83,7 +83,8 @@ pub fn get_baud_rate() -> u32 {
 }
 
 /// Returns false if the DMA is busy, or true if the DMA is started.
-/// Len must fit in 16 bits.
+/// Len must fit in 16 bits.  This is called at the same priority as our
+/// interrupt handlers, so we do not race with our ISRs.
 pub fn dma_tx(data: *const u8, len: usize) -> bool {
     dbgln!("UART TX {len} bytes");
     if LOOPBACK {
@@ -109,12 +110,24 @@ pub fn dma_tx_busy() -> bool {
     dma.C[DMA_CHANNEL].busy()
 }
 
+pub fn wait_for_tx_idle() {
+    let uart = unsafe {&*UART::ptr()};
+    while dma_tx_busy() || !uart.ISR.read().TC().bit() {
+        // Arm the TC interrupt.
+        let prio = GpsPriority::new();
+        uart.CR1().modify(|_,w| w.TCIE().set_bit());
+        drop(prio);
+        WFE();
+    }
+}
+
 fn uart_isr() {
     let uart = unsafe {&*UART::ptr()};
     let isr = uart.ISR.read();
     let cr1 = uart.CR1.read();
-    // Attempt to clear all the interrupts.
-    uart.ICR.write(|w| w.bits(isr.bits()));
+    // Attempt to clear all the interrupts.  Except we don't clear the TC
+    // flag, instead we clear the TCIE.
+    uart.ICR.write(|w| w.bits(isr.bits()).TCCF().clear_bit());
     //crate::dbg!("UART ISR = {:#010x}", isr.bits());
 
     let rxfne = isr.RXFNE().bit();
@@ -135,7 +148,8 @@ fn uart_isr() {
     }
 
     uart.CR1.write(
-        |w| w.bits(cr1.bits()).RXFNEIE().bit(!rxfne).IDLEIE().bit(rxfne));
+        |w| w.bits(cr1.bits()).RXFNEIE().bit(!rxfne).IDLEIE().bit(rxfne)
+             .TCIE().bit(cr1.TCIE().bit() & !isr.TC().bit()));
 }
 
 fn dma_isr() {

@@ -21,61 +21,62 @@ import sys
 
 from typing import Any, Tuple
 
-argp = argparse.ArgumentParser(description='UBLOX utility')
+def add_to_argparse(argp: argparse.ArgumentParser,
+                    dest: str = 'command', metavar: str = 'COMMAND') -> None:
+    subp = argp.add_subparsers(dest=dest, metavar=metavar,
+                               required=True, help='Sub-command')
 
-subp = argp.add_subparsers(
-    dest='command', metavar='COMMAND', required=True, help='Command')
+    info = subp.add_parser('info', description='Basic GPS unit info.',
+                           help='Basic GPS unit info.')
 
-def key_value(s: str) -> Tuple[str, str]:
-    if not '=' in s:
-        raise ValueError('Key/value pairs must be in the form KEY=VALUE')
-    K, V = s.split('=', 1)
-    return K, V
+    def key_value(s: str) -> Tuple[str, str]:
+        if not '=' in s:
+            raise ValueError('Key/value pairs must be in the form KEY=VALUE')
+        K, V = s.split('=', 1)
+        return K, V
 
-valset = subp.add_parser(
-    'set', description='Set configuration values.',
-    help='Set configuration values.')
+    valset = subp.add_parser(
+        'set', description='Set configuration values.',
+        help='Set configuration values.')
 
-valget = subp.add_parser(
-    'get', description='Get configuration values.',
-    help='Get configuration values.')
+    valget = subp.add_parser(
+        'get', description='Get configuration values.',
+        help='Get configuration values.')
 
-dump = subp.add_parser('dump', description='Retrieve entire config',
-                       help='Retrieve entire config')
-dump.add_argument('-l', '--layer', default=0, type=int,
-                  help='Configuration layer to retrieve')
+    dump = subp.add_parser('dump', description='Retrieve entire config',
+                           help='Retrieve entire config.')
+    dump.add_argument('-l', '--layer', default=0, type=int,
+                      help='Configuration layer to retrieve.')
 
-info = subp.add_parser('info', description='Basic GPS unit info',
-                       help='Basic GPS unit info')
+    changes = subp.add_parser(
+        'changes', help='Report changed config items',
+        description='''Report changed config items.  Running configuration items
+        that differ from the GPS unit factory default configuration are listed.
+        Note that listed changes are not necessarily saved in the persistent
+        device config.''')
 
-changes = subp.add_parser('changes', description='Report changed config items',
-                          help='Report changed config items')
+    scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
+                             help='Scrape pdftotext output')
 
-scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
-                         help='Scrape pdftotext output')
+    for a in valset, valget, dump, changes, info:
+        a.add_argument('DEVICE', help='Serial port to talk to device')
 
-for a in valset, valget, dump, changes, info:
-    a.add_argument('DEVICE', help='Serial port to talk to device')
+    valget.add_argument('KEY', nargs='+', help='KEYs')
+    valset.add_argument('KV', type=key_value, nargs='+',
+                        metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
-valget.add_argument('KEY', nargs='+', help='KEYs')
-valset.add_argument('KV', type=key_value, nargs='+',
-                    metavar='KEY=VALUE', help='KEY=VALUE pairs')
+    scrape.add_argument('FILE', help='Text file to parse')
 
-scrape.add_argument('FILE', help='Text file to parse')
-
-args = argp.parse_args()
-
-def do_set(KV: list[Tuple[str, str]]) -> None:
+def do_set(reader: UBloxReader, KV: list[Tuple[str, str]]) -> None:
+    # TODO - this only copes with 64 values!
     payload = bytes((0, 1, 0, 0))
     for K, V in KV:
         cfg = UBloxCfg.get(K)
         val = cfg.to_value(V)
         payload += cfg.encode_key_value(val)
     msg = UBloxMsg.get('CFG-VALSET')
-    message = msg.frame_payload(payload)
 
-    device = serhelper.Serial(args.DEVICE)
-    reader = UBloxReader(device)
+    message = msg.frame_payload(payload)
     reader.command(message)
 
 def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
@@ -87,7 +88,7 @@ def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
     else:
         return f'{value}'
 
-def do_get(KEYS: list[str]) -> None:
+def do_get(reader: UBloxReader, KEYS: list[str]) -> None:
     payload = b'\0\0\0\0'
     cfg_list = [UBloxCfg.get(K) for K in KEYS]
     for cfg in cfg_list:
@@ -95,8 +96,6 @@ def do_get(KEYS: list[str]) -> None:
     msg = UBloxMsg.get('CFG-VALGET')
     message = msg.frame_payload(payload)
 
-    device = serhelper.Serial(args.DEVICE)
-    reader = UBloxReader(device)
     result = reader.transact(message, ack=True)
     assert result[:4] == b'\1\0\0\0'
 
@@ -110,35 +109,23 @@ def do_get(KEYS: list[str]) -> None:
         pos += val_byte_len
         print(cfg, '=', fmt_cfg_value(cfg, value))
 
-def do_dump() -> None:
-    assert args.DEVICE is not None
-    device = serhelper.Serial(args.DEVICE)
-    reader = UBloxReader(device)
-
-    items = get_cfg_multi(reader, args.layer, [0xffffffff])
+def do_dump(reader: UBloxReader, layer: int) -> None:
+    items = get_cfg_multi(reader, layer, [0xffffffff])
     items.sort(key=lambda x: x[0].key & 0x0fffffff)
     for cfg, value in items:
         print(cfg, fmt_cfg_value(cfg, value))
 
-def do_changes() -> None:
-    assert args.DEVICE is not None
-    device = serhelper.Serial(args.DEVICE)
-    reader = UBloxReader(device)
-
+def do_changes(reader: UBloxReader) -> None:
     for cfg, now, rom in get_cfg_changes(reader):
         print(cfg, fmt_cfg_value(cfg, now), 'was', fmt_cfg_value(cfg, rom))
 
-def do_info() -> None:
+def do_info(reader: UBloxReader) -> None:
     def binstr(b: bytes) -> str:
         b = b.rstrip(b'\0')
         try:
             return str(b, 'utf-8')
         except:
             return b.hex(' ')
-
-    assert args.DEVICE is not None
-    device = serhelper.Serial(args.DEVICE)
-    reader = UBloxReader(device)
 
     msg = UBloxMsg.get('MON-VER')
     message = msg.frame_payload(b'')
@@ -193,23 +180,35 @@ def do_scrape(FILE):
         print('])')
 
 
-if args.command == 'set':
-    do_set(args.KV)
+def run_command(args: argparse.Namespace, command: str) -> None:
+    if command == 'scrape':
+        do_scrape(args.FILE)
+        return
 
-elif args.command == 'get':
-    do_get(args.KEY)
+    device = serhelper.Serial(args.DEVICE)
+    reader = UBloxReader(device)
 
-elif args.command == 'dump':
-    do_dump()
+    # All other commands actually talk to the device...
+    if command == 'set':
+        do_set(reader, args.KV)
 
-elif args.command == 'changes':
-    do_changes()
+    elif command == 'get':
+        do_get(reader, args.KEY)
 
-elif args.command == 'info':
-    do_info()
+    elif command == 'dump':
+        do_dump(reader, args.layer)
 
-elif args.command == 'scrape':
-    do_scrape(args.FILE)
+    elif command == 'changes':
+        do_changes(reader)
 
-else:
-    assert False, 'This should never happen'
+    elif command == 'info':
+        do_info(reader)
+
+    else:
+        assert False, 'This should never happen'
+
+if __name__ == '__main__':
+    argp = argparse.ArgumentParser(description='UBlox GPS utilities')
+    add_to_argparse(argp)
+    args = argp.parse_args()
+    run_command(args, args.command)

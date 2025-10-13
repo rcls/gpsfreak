@@ -5,6 +5,7 @@ assert __name__ == '__main__'
 import freak.lmk05318b_plan as lmk05318b_plan
 import freak.lmk05318b_util as lmk05318b_util
 import freak.message as message
+import freak.ublox_util as ublox_util
 
 import argparse
 import struct
@@ -58,10 +59,12 @@ clock_p = subp.add_parser(
     use the device case numbering.''')
 lmk05318b_util.add_to_argparse(clock_p, dest='clock', metavar='SUB-COMMAND')
 
-def do_info(dev: Device) -> None:
-    pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
-    print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
+gps_p = subp.add_parser(
+    'gps', aliases=['ublox'], help='UBlox GPS maintenance.',
+    description='''Sub-commands for operation on the UBlox GPS module.''')
+ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 
+def do_info(dev: Device) -> None:
     serial = message.get_serial_number(dev)
     try:
         sn = serial.decode()
@@ -73,6 +76,9 @@ def do_info(dev: Device) -> None:
     assert len(result) == 2
     temp = struct.unpack('>H', result)[0] / 128
     print('Int. temperature:', temp, '°C')
+
+    pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
+    print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
 
 def do_reset_line(dev: Device, command: int) -> None:
     print(args)
@@ -121,6 +127,9 @@ elif args.command == 'lmk-pdn':
 
 elif args.command in ('clock', 'lmk05318b'):
     lmk05318b_util.run_command(args, args.clock)
+
+elif args.command in ('gps', 'ublox'):
+    ublox_util.run_command(args, args.gps)
 
 else:
     print(args)

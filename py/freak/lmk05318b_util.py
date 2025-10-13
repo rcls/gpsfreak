@@ -334,7 +334,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         return K, V
 
     subp = argp.add_subparsers(
-        dest=dest, metavar=metavar, required=True, help='Command')
+        dest=dest, metavar=metavar, required=True, help='Sub-command')
 
     valset = subp.add_parser(
         'set', help='Set registers', description='Set registers')

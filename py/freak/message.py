@@ -24,7 +24,7 @@ GPS_RESET=0x11
 LMK05318B_PDN=0x12
 
 SERIAL_SYNC=0x1e
-SET_BAUD=0x1f
+GET_SET_BAUD=0x1f
 
 LMK05318B_WRITE=0x60
 LMK05318B_READ=0x61
@@ -112,7 +112,7 @@ def command(dev: Target, code: int, payload: bytes = b'') -> Message:
     return transact(dev, code, payload, expect=ACK)
 
 def retrieve(dev: Device, code: int, payload: bytes = b'') -> Message:
-    return transact(dev, code, payload, expect= code | 0x80)
+    return transact(dev, code, payload, expect = code | 0x80)
 
 def ping(dev: Target, payload: bytes) -> bytes:
     resp = retrieve(dev, PING, payload)
@@ -130,18 +130,23 @@ def serial_sync(dev: Target, microseconds: int) -> None:
     command(dev, SERIAL_SYNC, struct.pack('<I', microseconds))
 
 def set_baud(dev: Target, baud: int) -> None:
-    retrieve(dev, SET_BAUD, struct.pack('<I', baud))
+    retrieve(dev, GET_SET_BAUD, struct.pack('<I', baud))
 
-def get_baud(dev: Target, baud: int) -> int:
-    resp = retrieve(dev, SET_BAUD, b'')
+def get_baud(dev: Target) -> int:
+    resp = retrieve(dev, GET_SET_BAUD, b'')
     return struct.unpack('<I', resp.payload)[0]
 
 def peek(dev: Target, address: int, length: int) -> bytes:
-    data = retrieve(dev, PEEK, struct.pack('<II', address, length))
-    a = struct.unpack('<I', data.payload[:4])[0]
-    assert a == address
-    assert len(data.payload) == length + 4
-    return data.payload[4:]
+    result = b''
+    while len(result) < length:
+        todo = min(length - len(result), 48)
+        a = address + len(result)
+        data = retrieve(dev, PEEK, struct.pack('<II', a, todo))
+        aa = struct.unpack('<I', data.payload[:4])[0]
+        assert a == aa
+        assert len(data.payload) == todo + 4
+        result += data.payload[4:]
+    return result
 
 def poke(dev: Target, address: int, data: bytes, chunk_size: int = 32) -> None:
     base = 0

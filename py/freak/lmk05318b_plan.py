@@ -421,8 +421,8 @@ def plan(freqs: list[Fraction]) -> PLLPlan:
 
 def str_to_freq(s: str) -> Fraction:
     s = s.lower()
-    for suffix, scale in ('hz', 1), ('khz', 1000), \
-            ('mhz', 1000_000), ('ghz', 1000_000_000):
+    for suffix, scale in ('khz', 1000), ('mhz', 1000_000), \
+            ('ghz', 1000_000_000), ('hz', 1):
         if s.endswith(suffix):
             break
         if suffix != 'hz' and s.endswith(suffix[0]):

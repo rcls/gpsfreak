@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
-from freak import message, message_util, serhelper, ublox_cfg
+from freak import config, message, message_util, serhelper, ublox_cfg
 from .freak_util import Device
 from .ublox_defs import parse_key_list, get_cfg_changes, get_cfg_multi
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
-import argparse
-import struct
-import sys
+import argparse, usb, struct, sys, time
 
 # My current changes:
 # CFG-TP-PULSE_DEF 0x01 was 0x00
@@ -17,8 +15,8 @@ import sys
 # CFG-TP-PULSE_LENGTH_DEF 0x00 was 0x01
 # CFG-SBAS-USE_TESTMODE True 0x01 was False 0x00
 # CFG-SBAS-PRNSCANMASK 0x0000000000000000 was 0x000000000003ab88
-# CFG-UART1-BAUDRATE 115200 0x0001c200 was 9600 0x00002580
-
+# CFG-UART1-BAUDRATE 230400 0x00038400 was 9600 0x00002580
+# CFG-MSGOUT-NMEA_ID_GSV_UART1 1 0x01 was 5 0x05
 
 from typing import Any, Tuple
 
@@ -28,7 +26,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
                                required=True, help='Sub-command')
 
     info = subp.add_parser('info', description='Basic GPS unit info.',
-                           help='Basic GPS unit info.')
+                           help='Basic GPS unit info')
 
     def key_value(s: str) -> Tuple[str, str]:
         if not '=' in s:
@@ -42,7 +40,6 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     valset.add_argument('KV', type=key_value, nargs='+',
                         metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
-
     valget = subp.add_parser(
         'get', description='Get configuration values.',
         help='Get configuration values.')
@@ -53,22 +50,33 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     dump.add_argument('-l', '--layer', default=0, type=int,
                       help='Configuration layer to retrieve.')
 
+    save = subp.add_parser(
+        'save', help='Save GPS configuration to flash',
+        description='''Save currently running GPS configuration to flash.  Other
+        configuration saved in flash, such as the LMK05318b clock generator
+        configuration, will be preserved.''')
+    save.add_argument('-n', '--dry-run', action='store_true', default=False,
+                      help="Don't actually write to flash.")
+
     message_util.add_reset_command(subp, 'GPS unit')
 
     changes = subp.add_parser(
         'changes', help='Report changed config items',
         description='''Report changed config items.  Running configuration items
         that differ from the GPS unit factory default configuration are listed.
-        Note that listed changes are not necessarily saved in the persistent
-        device config.''')
+        Note that listed changes are not necessarily saved in flash.''')
+
+    release = subp.add_parser(
+        'release', help='Release serial port back to OS',
+        description='''Release the GPS serial port back to the operating system,
+        making it available to other applications.''')
 
     baud = subp.add_parser(
         'baud', help='Get/set baud rate for GPS',
-        description='''Get/set baud rate that the device CPU uses for
-        communicatation with the GPS module.''',
-        epilog='''Note that this does NOT update the baud rate that the
-        GPS unit uses.  If you are changing baud rate, then you need to update
-        both the CPU and the GPS module.''')
+        description='''Get/set baud rate between the CPU and the GPS module.''',
+        epilog='''This attempts to set the baud rate in the GPS module, and
+        always changes the baud rate on the CPU.  If anything goes wrong, then
+        there is a change that the two will be left inconsistent.''')
     baud.add_argument('BAUD', type=int, nargs='?', help='Baud rate to set')
 
     scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
@@ -121,6 +129,20 @@ def do_dump(reader: UBloxReader, layer: int) -> None:
     items.sort(key=lambda x: x[0].key & 0x0fffffff)
     for cfg, value in items:
         print(cfg, fmt_cfg_value(cfg, value))
+
+def do_baud(device: Device, baud: int) -> None:
+    # Send the baud message to the GPS unit, don't worry about the response.
+    baudrate = UBloxCfg.get('UART1-BAUDRATE')
+    payload = bytes((0, 1, 0, 0)) + baudrate.encode_key_value(baud)
+    valset = UBloxMsg.get('CFG-VALSET')
+    msg = valset.frame_payload(payload)
+    serhelper.writeall(device.get_serial(), msg)
+    serhelper.flushread(device.get_serial())
+    time.sleep(0.1)
+    message.set_baud(device.get_usb(), baud)
+    time.sleep(0.1)
+    # Now try the UBX again, check the response.
+    device.get_ublox().command(msg)
 
 def do_changes(reader: UBloxReader) -> None:
     for cfg, now, rom in get_cfg_changes(reader):
@@ -204,15 +226,24 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     elif command == 'dump':
         do_dump(device.get_ublox(), args.layer)
 
+    elif command == 'save':
+        config.save_config(device, save_ubx=True, save_lmk = False,
+                           dry_run = args.dry_run)
+
     elif command == 'baud':
         if args.BAUD is None:
-            print('Baud rate is',
-                  message.get_baud(device.get_usb(), args.BAUD))
+            print('Baud rate is', message.get_baud(device.get_usb()))
         else:
-            message.set_baud(device.get_usb(), args.BAUD)
+            do_baud(device, args.BAUD)
 
     elif command == 'changes':
         do_changes(device.get_ublox())
+
+    elif command == 'release':
+        try:
+            device.get_usb().attach_kernel_driver(0)
+        except usb.core.USBError:
+            pass
 
     elif command == 'reset':
         message_util.do_reset_line(device.get_usb(), message.GPS_RESET, args)

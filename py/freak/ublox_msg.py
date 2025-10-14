@@ -24,7 +24,7 @@ def checksum(data: bytes) -> Tuple[int, int]:
 
 def ublox_frame(data: bytes) -> bytes:
     ckA, ckB = checksum(data)
-    return bytes((0xb5, 0x62)) + data + bytes((ckA & 255, ckB & 255))
+    return bytes((0xb5, 0x62)) + data + bytes((ckA, ckB))
 
 def test_ublox_frame_simple() -> None:
     raw = bytes((0x06, 0x8A, 0x09, 0x00, 0x00, 0x01, 0x00, 0x00,

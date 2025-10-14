@@ -10,13 +10,13 @@ import usb
 from usb.core import Device as USBDevice
 
 class Device:
-    args: argparse.Namespace
+    args: argparse.Namespace | None
 
     usb: USBDevice | None = None
     serial: io.IOBase | None = None
 
     def __init__(self, args: argparse.Namespace|None = None):
-        self.args = args if args is not None else argparse.Namespace()
+        self.args = args
 
     def get_usb(self) -> USBDevice:
         if self.usb is not None:
@@ -38,7 +38,7 @@ class Device:
         if self.serial is not None:
             return self.serial
 
-        if self.args.serial is not None:
+        if self.args is not None and self.args.serial is not None:
             self.serial = Serial(self.args.serial)
         else:
             self.serial = USBEndpointIO(self.get_usb(), 0, 0x01, 0x81)

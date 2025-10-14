@@ -23,6 +23,8 @@ ublox_cfg.add_cfg_list([
     UBloxCfg('HW-ANT_SUP_SHORT_PIN', 0x20a30037, 'U1'),
     UBloxCfg('HW-ANT_SUP_OPEN_PIN', 0x20a30038, 'U1'),
     UBloxCfg('HW-ANT_ON_SHORT_US', 0x30a3003c, 'U2'),
+    # This is not listed in documentation!
+    UBloxCfg('HW-ANT_MODULE_TYPE', 0x50a30049, 'X8'),
     UBloxCfg('HW-ANT_SUP_ENGINE', 0x20a30054, 'E1'),
     UBloxCfg('HW-ANT_SUP_SHORT_THR', 0x20a30055, 'U1'),
     UBloxCfg('HW-ANT_SUP_OPEN_THR', 0x20a30056, 'U1'),

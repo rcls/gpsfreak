@@ -4,12 +4,13 @@ assert __name__ == '__main__'
 
 import freak.lmk05318b_plan as lmk05318b_plan
 import freak.lmk05318b_util as lmk05318b_util
+import freak.config as config
 import freak.message as message
 import freak.ublox_util as ublox_util
 
-import argparse, struct, sys, uuid
-
 from freak.freak_util import Device
+
+import argparse, struct, sys, uuid
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
 
@@ -36,6 +37,11 @@ planp = subp.add_parser(
     description='''Compute and print a frequency plan without programming it
     to the device.''')
 planp.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
+
+configp = subp.add_parser(
+    'config', help='Save & manipulate device configuration',
+    description='Save and/or manipulate device configuration')
+config.add_to_argparse(configp, dest='config', metavar='SUB-COMMAND')
 
 reboot = subp.add_parser(
     'reboot', help='Cold restart entire device',
@@ -100,6 +106,9 @@ elif args.command == 'freq':
         lmk05318b_util.do_freq(device, args.FREQ, False)
     else:
         lmk05318b_util.report_freq(device, False)
+
+elif args.command == 'config':
+    config.run_command(args, device, args.config)
 
 elif args.command == 'reboot':
     dev = device.get_usb()

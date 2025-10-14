@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from freak import lmk05318b, lmk05318b_plan, message, message_util, tics
+from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 from .lmk05318b import MaskedBytes, Register
 
 from .freak_util import Device
@@ -332,12 +332,6 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp = argp.add_subparsers(
         dest=dest, metavar=metavar, required=True, help='Sub-command')
 
-    plan = subp.add_parser(
-        'plan', help='Frequency planning',
-        description='''Compute and print a frequency plan without programming it
-        to the device.''')
-    plan.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
-
     freq = subp.add_parser(
         'freq', aliases=['frequency'], help='Program/report frequencies',
         description='''Program or frequencies If a list of frequencies is given,
@@ -345,12 +339,25 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         current device frequencies.''')
     freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
 
+    plan = subp.add_parser(
+        'plan', help='Frequency planning',
+        description='''Compute and print a frequency plan without programming it
+        to the device.''')
+    plan.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
+
     drive = subp.add_parser('drive', help='Set/get output drive',
                             description='Set/get output drive')
     drive.add_argument('-d', '--defaults', action='store_true',
                        help='Set default values')
     drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='CH=DRIVE',
                        help='Channel and drive type / strength')
+
+    save = subp.add_parser(
+        'save', help='Save running frequencies to flash.',
+        description='''Save running LMK05318b configuration to CPU flash.
+        Other configuration saved in flash, such as GPS, will be preserved.''')
+    save.add_argument('-n', '--dry-run', action='store_true', default=False,
+                      help="Don't actually write to flash.")
 
     message_util.add_reset_command(subp, 'LMK05318b')
 
@@ -369,21 +376,15 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     valget.add_argument('KEY', nargs='+', help='KEYs')
 
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
-    if command == 'get':
-        do_get(device, args.KEY)
-
-    elif command == 'set':
-        do_set(device, args.KV)
-
-    elif command == 'plan':
-        plan = lmk05318b_plan.plan(make_freq_list(args.FREQ, True))
-        report_plan(plan, True)
-
-    elif command == 'freq':
+    if command == 'freq':
         if len(args.FREQ) != 0:
             do_freq(device, args.FREQ, True)
         else:
             report_freq(device, True)
+
+    elif command == 'plan':
+        plan = lmk05318b_plan.plan(make_freq_list(args.FREQ, True))
+        report_plan(plan, True)
 
     elif command == 'drive':
         if args.DRIVE or args.defaults:
@@ -391,11 +392,21 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         else:
             report_drive(device)
 
+    elif command == 'save':
+        config.save_config(device, save_ubx=False, save_lmk = True,
+                           dry_run = args.dry_run)
+
     elif command == 'reset':
         message_util.do_reset_line(device, message.LMK05318B_PDN, args)
 
     elif command == 'upload':
         do_upload(device, args.FILE)
+
+    elif command == 'get':
+        do_get(device, args.KEY)
+
+    elif command == 'set':
+        do_set(device, args.KV)
 
     else:
         print(args)

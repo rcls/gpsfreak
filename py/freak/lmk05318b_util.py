@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
 from freak import lmk05318b, lmk05318b_plan, message, message_util, tics
-from freak.lmk05318b import MaskedBytes, Register
+from .lmk05318b import MaskedBytes, Register
 
-from freak.message import Device
-from freak.lmk05318b_plan import PLLPlan, SCALE, str_to_freq, freq_to_str
+from .freak_util import Device
+from .lmk05318b_plan import PLLPlan, SCALE, str_to_freq, freq_to_str
 
 import argparse
 import struct
@@ -37,14 +37,13 @@ for v1, (l1, d1) in enumerate(CMOS_DRIVES):
 def get_ranges(dev: Device, data: MaskedBytes,
                ranges: list[Tuple[int, int]]) -> None:
     for base, span in ranges:
-        segment = message.lmk05318b_read(dev, base, span)
+        segment = message.lmk05318b_read(dev.get_usb(), base, span)
         assert len(segment) == span
         #print(segment)
         data.data[base : base + span] = segment
 
-def do_get(KEYS: list[str]) -> None:
+def do_get(dev: Device, KEYS: list[str]) -> None:
     registers = list(Register.get(key) for key in KEYS)
-    dev = message.get_device()
     data = MaskedBytes()
     for r in registers:
         data.insert(r, 0)
@@ -70,13 +69,13 @@ def complete_partials(dev: Device, data: MaskedBytes) -> None:
 def masked_write(dev: Device, data: MaskedBytes) -> None:
     complete_partials(dev, data)
     ranges = data.ranges(max_block = 30)
+    udev = dev.get_usb()
     for base, span in ranges:
         #print(base, span, data.data[base : base+span].hex(' '))
-        message.lmk05318b_write(dev, base, data.data[base : base+span])
+        message.lmk05318b_write(udev, base, data.data[base : base+span])
 
-def do_set(KV: list[Tuple[str, str]]) -> None:
+def do_set(dev: Device, KV: list[Tuple[str, str]]) -> None:
     registers = list((Register.get(K), int(V, 0)) for K, V in KV)
-    dev = message.get_device()
     data = MaskedBytes()
     # Build the mask...
     for r, v in registers:
@@ -194,24 +193,24 @@ def freq_make_data(plan: PLLPlan) -> dict[str, int]:
     data['PLL2_LF_C3'] = 7
     return data
 
-def do_freq(freq_str: list[str], raw: bool) -> None:
+def do_freq(dev: Device, freq_str: list[str], raw: bool) -> None:
     plan = lmk05318b_plan.plan(make_freq_list(freq_str, raw))
     report_plan(plan, raw)
     data = MaskedBytes()
     for K, V in freq_make_data(plan).items():
         data.insert(Register.get(K), V)
-    dev = message.get_device()
     # Software reset.
     message.lmk05318b_write(dev, 12, 12)
     # Write the registers.
     masked_write(dev, data)
     # If PLL2 is in use, power it up now.
     if plan.freq_target != 0:
-        message.lmk05318b_write(dev, 100, data.data[100] & 0xfe)
+        message.lmk05318b_write(dev.get_usb(), 100, data.data[100] & 0xfe)
     # Remove software reset.
-    message.lmk05318b_write(dev, 12, 2)
+    message.lmk05318b_write(dev.get_usb(), 12, 2)
 
-def do_drive(drives: list[Tuple[str, str]], defaults: bool) -> None:
+def do_drive(dev: Device, drives: list[Tuple[str, str]],
+             defaults: bool) -> None:
     data = MaskedBytes()
     if defaults:
         drives = [('0', 'lvds8'), ('1', 'off'), ('2', 'lvds8'), ('3', 'off'),
@@ -232,14 +231,13 @@ def do_drive(drives: list[Tuple[str, str]], defaults: bool) -> None:
             data.insert(Register.get(f'OUT{c}_SEL'), sel)
             data.insert(Register.get(f'OUT{c}_MODE1'), mode1)
             data.insert(Register.get(f'OUT{c}_MODE2'), mode2)
-    dev = message.get_device()
+
     masked_write(dev, data)
 
-def report_drive() -> None:
-    dev = message.get_device()
+def report_drive(dev: Device) -> None:
     data = MaskedBytes()
     base, length = 50, 24
-    drives_data = message.lmk05318b_read(dev, base, length)
+    drives_data = message.lmk05318b_read(dev.get_usb(), base, length)
     assert len(drives_data) == length
     data.data[base : base + length] = drives_data
 
@@ -264,8 +262,7 @@ def report_drive() -> None:
         else:
             print(f'sel={sel} mode1={mode1} mode2={mode2}')
 
-def report_freq(raw: bool) -> None:
-    dev = message.get_device()
+def report_freq(dev: Device, raw: bool) -> None:
     data = MaskedBytes()
     # For now, pull everything...
     for a in lmk05318b.ADDRESSES:
@@ -320,8 +317,7 @@ def report_freq(raw: bool) -> None:
             pd = ''
         print(f'{name} frequency = {freq_to_str(ch_freq)}{pd}')
 
-def do_upload(path: str) -> None:
-    dev = message.get_device()
+def do_upload(dev: Device, path: str) -> None:
     tcs = tics.read_tcs_file(path)
     masked_write(dev, tcs)
 
@@ -372,12 +368,12 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         'get', help='Get registers', description='Get registers')
     valget.add_argument('KEY', nargs='+', help='KEYs')
 
-def run_command(args: argparse.Namespace, command: str) -> None:
+def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'get':
-        do_get(args.KEY)
+        do_get(device, args.KEY)
 
     elif command == 'set':
-        do_set(args.KV)
+        do_set(device, args.KV)
 
     elif command == 'plan':
         plan = lmk05318b_plan.plan(make_freq_list(args.FREQ, True))
@@ -385,22 +381,21 @@ def run_command(args: argparse.Namespace, command: str) -> None:
 
     elif command == 'freq':
         if len(args.FREQ) != 0:
-            do_freq(args.FREQ, True)
+            do_freq(device, args.FREQ, True)
         else:
-            report_freq(True)
+            report_freq(device, True)
 
     elif command == 'drive':
         if args.DRIVE or args.defaults:
-            do_drive(args.DRIVE, bool(args.defaults))
+            do_drive(device, args.DRIVE, bool(args.defaults))
         else:
-            report_drive()
+            report_drive(device)
 
     elif command == 'reset':
-        dev = message.get_device()
-        message_util.do_reset_line(dev, message.LMK05318B_PDN, args)
+        message_util.do_reset_line(device, message.LMK05318B_PDN, args)
 
     elif command == 'upload':
-        do_upload(args.FILE)
+        do_upload(device, args.FILE)
 
     else:
         print(args)
@@ -411,4 +406,4 @@ if __name__ == '__main__':
     add_to_argparse(argp)
 
     args = argp.parse_args()
-    run_command(args, args.command)
+    run_command(args, Device(args), args.command)

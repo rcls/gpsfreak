@@ -27,7 +27,7 @@ use types::*;
 
 use crate::cpu::{barrier, interrupt, nothing};
 use crate::link_assert;
-use crate::vcell::UCell;
+use crate::vcell::{UCell, VCell};
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
@@ -80,6 +80,12 @@ impl const Default for USB_State {
 }
 
 static USB_STATE: UCell<USB_State> = Default::default();
+
+/// Operating systems appear to think that changing baud rates on serial ports
+/// at random is fine.  It is not.  So we ignore the CDC ACM baud rate
+/// and do our own thing.  But we still fake baud rate responses just to
+/// keep random OSes happy.
+static FAKE_BAUD: VCell<u32> = VCell::new(9600);
 
 pub fn init() {
     let crs   = unsafe {&*stm32h503::CRS  ::ptr()};
@@ -429,14 +435,8 @@ fn set_line_coding() -> bool {
         )
     };
     ctrl_dbgln!("USB Set Line Coding, Baud = {}", line_coding.dte_rate);
-    // We ignore everything except the baud rate.  Also !@#$@!#$ linux randomly
-    // sets serial ports to 9600 baud, which no-one has actually used for 30
-    // years.  So silently ignore that.  Set a baud rate of 9601 if you really
-    // want 9600 baud.
-    if line_coding.dte_rate == 9600 {
-        return true;
-    }
-    crate::gps_uart::set_baud_rate(line_coding.dte_rate)
+    FAKE_BAUD.write(line_coding.dte_rate);
+    true
 }
 
 fn get_line_coding() -> SetupResult {
@@ -444,14 +444,15 @@ fn get_line_coding() -> SetupResult {
     static LINE_CODING: UCell<LineCoding> = Default::default();
     let lc = unsafe {LINE_CODING.as_mut()};
     *lc = LineCoding {
-        dte_rate: crate::gps_uart::get_baud_rate(),
+        // "Yes honey, whatever you say."
+        dte_rate: FAKE_BAUD.read(),
         char_format: 0, parity_type: 0, data_bits: 8};
     SetupResult::tx_data(lc)
 }
 
 fn usb_tx_interrupt() {
     intr_dbgln!("Sending USB interrupt");
-    // Just send a canned response, because USB sucks.  We don't care one
+    // Just send a canned response, because USB sucks.  We don't care if one
     // response stomps on a previous one, because we always send the same data.
     #[allow(dead_code)]
     #[repr(C)]

@@ -73,9 +73,9 @@ def add_msg_list(l: list[UBloxMsg]) -> None:
 MAX_LENGTH = 1024
 
 class UBloxReader:
-    source: io.FileIO
+    source: io.IOBase
     current: bytearray
-    def __init__(self, source: io.FileIO):
+    def __init__(self, source: io.IOBase):
         self.source = source
         self.current = bytearray()
     def read_more(self) -> None:

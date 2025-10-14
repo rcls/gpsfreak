@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 from freak import message, message_util, serhelper, ublox_cfg
-from freak.ublox_defs import parse_key_list, get_cfg_changes, get_cfg_multi
-from freak.ublox_cfg import UBloxCfg
-from freak.ublox_msg import UBloxMsg, UBloxReader
+from .freak_util import Device
+from .ublox_defs import parse_key_list, get_cfg_changes, get_cfg_multi
+from .ublox_cfg import UBloxCfg
+from .ublox_msg import UBloxMsg, UBloxReader
 
 import argparse
 import struct
@@ -38,10 +39,14 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     valset = subp.add_parser(
         'set', description='Set configuration values.',
         help='Set configuration values.')
+    valset.add_argument('KV', type=key_value, nargs='+',
+                        metavar='KEY=VALUE', help='KEY=VALUE pairs')
+
 
     valget = subp.add_parser(
         'get', description='Get configuration values.',
         help='Get configuration values.')
+    valget.add_argument('KEY', nargs='+', help='KEYs')
 
     dump = subp.add_parser('dump', description='Retrieve entire config',
                            help='Retrieve entire config.')
@@ -51,24 +56,23 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     message_util.add_reset_command(subp, 'GPS unit')
 
     changes = subp.add_parser(
-        'changes', help='Report changed config items.',
+        'changes', help='Report changed config items',
         description='''Report changed config items.  Running configuration items
         that differ from the GPS unit factory default configuration are listed.
         Note that listed changes are not necessarily saved in the persistent
         device config.''')
 
+    baud = subp.add_parser(
+        'baud', help='Get/set baud rate for GPS',
+        description='''Get/set baud rate that the device CPU uses for
+        communicatation with the GPS module.''',
+        epilog='''Note that this does NOT update the baud rate that the
+        GPS unit uses.  If you are changing baud rate, then you need to update
+        both the CPU and the GPS module.''')
+    baud.add_argument('BAUD', type=int, nargs='?', help='Baud rate to set')
+
     scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
                              help='Scrape pdftotext output')
-
-    for a in info, valset, valget, changes, dump:
-        a.add_argument('-s', '--serial', help='Serial port to talk to device',
-                       default='/dev/freak')
-        a.add_argument('-b', '--baud', type=int,
-                       help='Baud rate to set.  (Default is no change.)')
-
-    valget.add_argument('KEY', nargs='+', help='KEYs')
-    valset.add_argument('KV', type=key_value, nargs='+',
-                        metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
     scrape.add_argument('FILE', help='Text file to parse')
 
@@ -187,35 +191,34 @@ def do_scrape(FILE):
             print(f'    {item!r},')
         print('])')
 
-
-def run_command(args: argparse.Namespace, command: str) -> None:
-    if command == 'scrape':
-        do_scrape(args.FILE)
-        return
-
-    if command == 'reset':
-        dev = message.get_device()
-        message_util.do_reset_line(dev, message.GPS_RESET, args)
-        return
-
-    # All other commands actually talk to the device...
-    device = serhelper.Serial(args.serial, args.baud)
-    reader = UBloxReader(device)
-
+def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'info':
-        do_info(reader)
+        do_info(device.get_ublox())
 
     elif command == 'set':
-        do_set(reader, args.KV)
+        do_set(device.get_ublox(), args.KV)
 
     elif command == 'get':
-        do_get(reader, args.KEY)
+        do_get(device.get_ublox(), args.KEY)
 
     elif command == 'dump':
-        do_dump(reader, args.layer)
+        do_dump(device.get_ublox(), args.layer)
+
+    elif command == 'baud':
+        if args.BAUD is None:
+            print('Baud rate is',
+                  message.get_baud(device.get_usb(), args.BAUD))
+        else:
+            message.set_baud(device.get_usb(), args.BAUD)
 
     elif command == 'changes':
-        do_changes(reader)
+        do_changes(device.get_ublox())
+
+    elif command == 'reset':
+        message_util.do_reset_line(device.get_usb(), message.GPS_RESET, args)
+
+    elif command == 'scrape':
+        do_scrape(args.FILE)
 
     else:
         assert False, f'This should never happen {command}'
@@ -224,4 +227,4 @@ if __name__ == '__main__':
     argp = argparse.ArgumentParser(description='UBlox GPS utilities')
     add_to_argparse(argp)
     args = argp.parse_args()
-    run_command(args, args.command)
+    run_command(args, Device(args), args.command)

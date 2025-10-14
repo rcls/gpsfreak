@@ -53,8 +53,8 @@
 //!    12 : Clock gen PDN (reset), u8 payload:
 //!            - 0 power down, 1 power up, ≥2 reset & power back up.
 //!    1e : Serial sync / delay.  Used in provisioning.
-//!    1f : Set baud rate, u32 payload.  Useful for provisioning, normal
-//!         use cases can use USB CDC ACM.
+//!    1f : Get/Set baud rate, optional u32 payload has baud rate, Response
+//!         is 9f with baud rate.
 //!
 //!    60 : LMK05318b I²C write.  Payload is sent in a I²C write transaction.
 //!
@@ -251,7 +251,7 @@ fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
         0x12 => lmk_powerdown(message),
 
         0x1e => serial_sync(message),
-        0x1f => set_baud(message),
+        0x1f => set_get_baud(message, r),
 
         0x60 => i2c_write(0xc8, message),
         0x61 => i2c_read (0xc9, message, r),
@@ -333,11 +333,13 @@ fn serial_sync(message: &MessageBuf) -> Result {
     SEND_ACK
 }
 
-fn set_baud(message: &MessageBuf) -> Result {
-    let message = Message::<u32>::from_buf(message)?;
+fn set_get_baud(message: &MessageBuf, r: Responder) -> Result {
     let _prio = GpsPriority::new();
-    crate::gps_uart::set_baud_rate(message.payload);
-    SEND_ACK
+    if message.len > 0 {
+        let message = Message::<u32>::from_buf(message)?;
+        crate::gps_uart::set_baud_rate(message.payload);
+    }
+    Message::<u32>::new(0x9f, crate::gps_uart::get_baud_rate()).send(r)
 }
 
 fn i2c_write(address: u8, message: &MessageBuf) -> Result {

@@ -9,9 +9,15 @@ import freak.ublox_util as ublox_util
 
 import argparse, struct, sys, uuid
 
-from freak.message import Device
+from freak.freak_util import Device
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
+
+argp.add_argument('-s', '--serial',
+                  help='Serial port for GPS comms (default is direct USB)')
+argp.add_argument('-b', '--baud', type=int,
+                  help='Baud rate for serial (Default is no change)')
+
 subp = argp.add_subparsers(
     dest='command', metavar='COMMAND', required=True, help='Command')
 
@@ -53,7 +59,8 @@ gps_p = subp.add_parser(
     description='''Sub-commands for operation on the UBlox GPS module.''')
 ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 
-def do_info(dev: Device) -> None:
+def do_info(device: Device) -> None:
+    dev = device.get_usb()
     # Ping with a UUID and check that we get the same one back...
     message.ping(dev, bytes(str(uuid.uuid4()), 'ascii'))
 
@@ -78,9 +85,10 @@ if len(sys.argv) < 2:
 
 args = argp.parse_args()
 
+device = Device(args)
+
 if args.command == 'info':
-    dev = message.get_device()
-    do_info(dev)
+    do_info(device)
 
 elif args.command == 'plan':
     freqs = lmk05318b_util.make_freq_list(args.FREQ, False)
@@ -89,12 +97,12 @@ elif args.command == 'plan':
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:
-        lmk05318b_util.do_freq(args.FREQ, False)
+        lmk05318b_util.do_freq(device, args.FREQ, False)
     else:
-        lmk05318b_util.report_freq(False)
+        lmk05318b_util.report_freq(device, False)
 
 elif args.command == 'reboot':
-    dev = message.get_device()
+    dev = device.get_usb()
     # Leave these in reset until the reboot takes effect.
     message.command(dev, message.LMK05318B_PDN, b'\0')
     message.command(dev, message.GPS_RESET, b'\0')
@@ -102,14 +110,14 @@ elif args.command == 'reboot':
 
 elif args.command == 'cpu-reset':
     # Just send the command blindly, no response.
-    dev = message.get_device()
-    dev.write(0x03, message.frame(message.CPU_REBOOT, b''))
+    device.get_usb().write(
+        0x03, message.frame(message.CPU_REBOOT, b''))
 
 elif args.command in ('clock', 'lmk05318b'):
-    lmk05318b_util.run_command(args, args.clock)
+    lmk05318b_util.run_command(args, device, args.clock)
 
 elif args.command in ('gps', 'ublox'):
-    ublox_util.run_command(args, args.gps)
+    ublox_util.run_command(args, device, args.gps)
 
 else:
     print(args)

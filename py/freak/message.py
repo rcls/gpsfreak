@@ -94,13 +94,6 @@ def test_simple() -> None:
     payload = b'This is a test'
     assert deframe(frame(code, payload)) == Message(code, payload)
 
-def flush(dev: Device) -> None:
-    # Flush any stale data.
-    try:
-        dev.read(0x83, 64, 10)
-    except usb.core.USBTimeoutError:
-        pass
-
 def transact(dev: Target, code: int, payload: bytes,
              expect: int|None = None) -> Message:
     data = frame(code, payload)
@@ -121,12 +114,6 @@ def command(dev: Target, code: int, payload: bytes = b'') -> Message:
 def retrieve(dev: Device, code: int, payload: bytes = b'') -> Message:
     return transact(dev, code, payload, expect= code | 0x80)
 
-def get_device() -> Device:
-    dev = usb.core.find(idVendor=0xf055, idProduct=0xd448)
-    # Flush any stale data.
-    flush(dev)
-    return dev
-
 def ping(dev: Target, payload: bytes) -> bytes:
     resp = retrieve(dev, PING, payload)
     assert resp.payload == payload
@@ -143,7 +130,11 @@ def serial_sync(dev: Target, microseconds: int) -> None:
     command(dev, SERIAL_SYNC, struct.pack('<I', microseconds))
 
 def set_baud(dev: Target, baud: int) -> None:
-    command(dev, SET_BAUD, struct.pack('<I', baud))
+    retrieve(dev, SET_BAUD, struct.pack('<I', baud))
+
+def get_baud(dev: Target, baud: int) -> int:
+    resp = retrieve(dev, SET_BAUD, b'')
+    return struct.unpack('<I', resp.payload)[0]
 
 def peek(dev: Target, address: int, length: int) -> bytes:
     data = retrieve(dev, PEEK, struct.pack('<II', address, length))

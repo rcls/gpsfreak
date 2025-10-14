@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from freak import lmk05318b, message, tics
+from freak import lmk05318b, freak_util, message, tics
 from freak.message import LMK05318B_READ, LMK05318B_WRITE, retrieve
 from freak.lmk05318b import Address, MaskedBytes
 
@@ -45,8 +45,7 @@ def lmk05318b_bundles() -> list[Tuple[int, int]]:
     return bundles
 
 def usb_load() -> MaskedBytes:
-    dev = message.get_device()
-    message.flush(dev)
+    dev = freak_util.Device().get_usb()
     data = MaskedBytes()
     for address, length in lmk05318b_bundles():
         segment = retrieve(

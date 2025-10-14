@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
-from freak import crc32, lmk05318b, message, serhelper, ublox_defs, ublox_msg
+from freak import crc32, freak_util, lmk05318b, message, ublox_defs, ublox_msg
 from freak.lmk05318b import ADDRESSES, MaskedBytes, Register
-from freak.message import Device, lmk05318b_write
+from freak.message import lmk05318b_write
 from freak.ublox_cfg import UBloxCfg
+
+from usb.core import Device
 
 import struct
 import sys
@@ -147,7 +149,9 @@ def load_lmk05318b() -> MaskedBytes:
 
 test_crc_empty_config()
 
-dev = message.get_device()
+device = freak_util.Device()
+dev = device.get_usb()
+ubx = dev.get_ublox()
 
 lmk_config = load_lmk05318b()
 #print('Config', lmk_config.data.hex(' '))
@@ -191,9 +195,6 @@ if orig_pll1_pdn != 1:
     set_reg(pll1_pdn)
 if orig_pll2_pdn != 1:
     set_reg(pll2_pdn)
-
-ser = serhelper.Serial('/dev/ttyACM0')
-ubx = ublox_msg.UBloxReader(ser)
 
 print('Baud rate....')
 

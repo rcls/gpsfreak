@@ -7,15 +7,20 @@ import freak.lmk05318b_util as lmk05318b_util
 import freak.message as message
 import freak.ublox_util as ublox_util
 
-import argparse
-import struct
-import uuid
+import argparse, struct, sys, uuid
 
 from freak.message import Device
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
 subp = argp.add_subparsers(
     dest='command', metavar='COMMAND', required=True, help='Command')
+
+freq = subp.add_parser(
+    'freq', aliases=['frequency'], help='Program/report frequencies',
+    description='''Program or frequencies If a list of frequencies is given,
+    these are programmed to the device.  With no arguments, report the
+    current device frequencies.''')
+freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
 
 info = subp.add_parser(
     'info', help='Basic device info', description='Basic device info')
@@ -26,13 +31,6 @@ planp = subp.add_parser(
     to the device.''')
 planp.add_argument('FREQ', nargs='+', help='Frequencies in MHz')
 
-freq = subp.add_parser(
-    'freq', aliases=['frequency'], help='Program/report frequencies',
-    description='''Program or frequencies If a list of frequencies is given,
-    these are programmed to the device.  With no arguments, report the
-    current device frequencies.''')
-freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
-
 reboot = subp.add_parser(
     'reboot', help='Cold restart entire device',
     description='''Cold restart entire device.  This is equivalent to
@@ -42,7 +40,7 @@ cpu_reset = subp.add_parser(
     'cpu-reset', help='Reset device CPU', description='Reset device CPU')
 
 clock_p = subp.add_parser(
-    'clock', aliases=['lmk05318b'], help='LMK05318b clock-gen maintenance.',
+    'clock', aliases=['lmk05318b'], help='LMK05318b clock-gen maintenance',
     description='''Sub-commands for operating on the LMK05318b clock generator
     chip.''',
     epilog='''Note that these sub-commands use the internal LMK05318b numbering
@@ -51,7 +49,7 @@ clock_p = subp.add_parser(
 lmk05318b_util.add_to_argparse(clock_p, dest='clock', metavar='SUB-COMMAND')
 
 gps_p = subp.add_parser(
-    'gps', aliases=['ublox'], help='UBlox GPS maintenance.',
+    'gps', aliases=['ublox'], help='UBlox GPS maintenance',
     description='''Sub-commands for operation on the UBlox GPS module.''')
 ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 
@@ -73,6 +71,10 @@ def do_info(dev: Device) -> None:
 
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
     print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
+
+if len(sys.argv) < 2:
+    argp.print_help()
+    sys.exit(1)
 
 args = argp.parse_args()
 

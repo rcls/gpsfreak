@@ -34,21 +34,12 @@ freq = subp.add_parser(
 freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
 
 reboot = subp.add_parser(
-    'reboot', help='Reboot device CPU', description='Reboot device CPU')
+    'reboot', help='Cold restart entire device',
+    description='''Cold restart entire device.  This is equivalent to
+    power-cycling.''')
 
-gps_reset = subp.add_parser(
-    'gps-reset', help='Reset GPS unit', description='Reset GPS unit')
-gps_reset.add_argument('-0', '--assert', action='store_true',
-                       help='Assert reset line (low)')
-gps_reset.add_argument('-1', '--deassert', action='store_true',
-                       help='De-assert reset line (high)')
-
-lmk_reset = subp.add_parser(
-    'lmk-pdn', help='LMK05318b power down', description='LMK05318b power down')
-lmk_reset.add_argument('-0', '--assert', action='store_true',
-                       help='Assert PDN line (low)')
-lmk_reset.add_argument('-1', '--deassert', action='store_true',
-                       help='De-assert PDN line (high)')
+cpu_reset = subp.add_parser(
+    'cpu-reset', help='Reset device CPU', description='Reset device CPU')
 
 clock_p = subp.add_parser(
     'clock', aliases=['lmk05318b'], help='LMK05318b clock-gen maintenance.',
@@ -65,6 +56,9 @@ gps_p = subp.add_parser(
 ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 
 def do_info(dev: Device) -> None:
+    # Ping with a UUID and check that we get the same one back...
+    message.ping(dev, bytes(str(uuid.uuid4()), 'ascii'))
+
     serial = message.get_serial_number(dev)
     try:
         sn = serial.decode()
@@ -80,22 +74,7 @@ def do_info(dev: Device) -> None:
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
     print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
 
-def do_reset_line(dev: Device, command: int) -> None:
-    print(args)
-    assrt = getattr(args, 'assert')
-    desrt = args.deassert
-    if assrt and not desrt:
-        payload = b'\x00'
-    elif not assrt and desrt:
-        payload = b'\x01'
-    else:
-        payload = b'\x02'
-    message.command(dev, command, payload)
-
 args = argp.parse_args()
-
-# Ping with a UUID and check that we get the same one back...
-#message.ping(dev, bytes(str(uuid.uuid4()), 'ascii'))
 
 if args.command == 'info':
     dev = message.get_device()
@@ -113,17 +92,16 @@ elif args.command == 'freq':
         lmk05318b_util.report_freq(False)
 
 elif args.command == 'reboot':
+    dev = message.get_device()
+    # Leave these in reset until the reboot takes effect.
+    message.command(dev, message.LMK05318B_PDN, b'\0')
+    message.command(dev, message.GPS_RESET, b'\0')
+    dev.write(0x03, message.frame(message.CPU_REBOOT, b''))
+
+elif args.command == 'cpu-reset':
     # Just send the command blindly, no response.
     dev = message.get_device()
     dev.write(0x03, message.frame(message.CPU_REBOOT, b''))
-
-elif args.command == 'gps-reset':
-    dev = message.get_device()
-    do_reset_line(dev, message.GPS_RESET)
-
-elif args.command == 'lmk-pdn':
-    dev = message.get_device()
-    do_reset_line(dev, message.LMK05318B_PDN)
 
 elif args.command in ('clock', 'lmk05318b'):
     lmk05318b_util.run_command(args, args.clock)

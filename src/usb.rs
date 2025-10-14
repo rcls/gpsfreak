@@ -181,6 +181,9 @@ impl USB_State {
         }
 
         while istr.CTR().bit() {
+            if istr.DIR().bit() {
+                errata_delay();
+            }
             match istr.bits() & 31 {
                 0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
                 16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
@@ -287,20 +290,6 @@ impl USB_State {
             srx_dbgln!("SRX extra! CHEP {:#06x} was {:#06x}",
                        chep_ser().read().bits(), chep.bits());
             return;
-        }
-
-        // ERRATA:
-        //
-        // During OUT transfers, the correct transfer interrupt (CTR) is
-        // triggered a little before the last USB SRAM accesses have completed.
-        // If the software responds quickly to the interrupt, the full buffer
-        // contents may not be correct.
-        //
-        // Workaround: Software should ensure that a small delay is included
-        // before accessing the SRAM contents. This delay should be
-        // 800 ns in Full Speed mode and 6.4 μs in Low Speed mode.
-        for _ in 0 .. crate::cpu::CPU_FREQ / 1250000 / 2 {
-            nothing();
         }
 
         let bd = bd_serial().rx.read();
@@ -519,6 +508,22 @@ fn usb_initialize(cs: &mut ControlState) {
     chep_ctrl().write(
         |w| w.control().dtogrx(&ctrl, false).dtogtx(&ctrl, false)
              .rx_valid(&ctrl));
+}
+
+fn errata_delay() {
+    // ERRATA:
+    //
+    // During OUT transfers, the correct transfer interrupt (CTR) is
+    // triggered a little before the last USB SRAM accesses have completed.
+    // If the software responds quickly to the interrupt, the full buffer
+    // contents may not be correct.
+    //
+    // Workaround: Software should ensure that a small delay is included
+    // before accessing the SRAM contents. This delay should be
+    // 800 ns in Full Speed mode and 6.4 μs in Low Speed mode.
+    for _ in 0 .. crate::cpu::CPU_FREQ / 1250000 / 2 {
+        nothing();
+    }
 }
 
 impl crate::cpu::VectorTable {

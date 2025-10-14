@@ -75,6 +75,7 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
 
 def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
         -> list[KeyValue]:
+    assert len(keys) <= 64
     start = 0
     items = []
 
@@ -84,10 +85,10 @@ def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
             key = key.key
         key_bin += struct.pack('<I', key)
 
+    valget = UBloxMsg.get('CFG-VALGET')
     while True:
-        msg = UBloxMsg.get('CFG-VALGET').frame_payload(
-            struct.pack('<BBH', 0, layer, start) + key_bin)
-        result = reader.transact(msg)
+        result = reader.transact(
+            valget, struct.pack('<BBH', 0, layer, start) + key_bin, ack = True)
         assert struct.unpack('<H', result[2:4])[0] == start
         offset = 4
         num_items = 0

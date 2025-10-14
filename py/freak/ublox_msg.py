@@ -51,7 +51,12 @@ class UBloxMsg:
         if type(key) == int:
             return MESSAGES_BY_CODE[key]
         assert type(key) == str
-        key = key.removeprefix('UBLOX-')
+        # Normalisation:
+        # Upper case.
+        # Remove 'UBLOX-' prefix.
+        # '-' not '_'
+        key = key.upper().removeprefix('UBX-')
+        key = key.replace('_', '-', 1)
         try:
             return MESSAGES_BY_NAME[key]
         except KeyError:
@@ -129,12 +134,16 @@ class UBloxReader:
         assert payload[0] == b[2]
         assert payload[1] == b[3]
 
-    def transact(self, b: bytes, ack: bool = True) -> bytes:
+    def transact(self, msg: UBloxMsg|int|str,
+                 payload: bytes = b'', ack: bool = False) -> bytes:
         serhelper.flushread(self.source)
-        serhelper.writeall(self.source, b)
+        msg = UBloxMsg.get(msg)
+        b = msg.frame_payload(payload)
+        serhelper.writeall(self.source,
+                           UBloxMsg.get(msg).frame_payload(payload))
         self.source.flush()
         code, payload = self.get_msg()
-        assert code == struct.unpack('<H', b[2:4])[0], f'{code:#x}'
+        assert code == msg.code, f'{code:#x}'
         if ack:
             self.get_ack(b)
 

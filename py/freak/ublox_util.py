@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from freak import serhelper, ublox_cfg
+from freak import message, message_util, serhelper, ublox_cfg
 from freak.ublox_defs import parse_key_list, get_cfg_changes, get_cfg_multi
 from freak.ublox_cfg import UBloxCfg
 from freak.ublox_msg import UBloxMsg, UBloxReader
@@ -48,8 +48,10 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     dump.add_argument('-l', '--layer', default=0, type=int,
                       help='Configuration layer to retrieve.')
 
+    message_util.add_reset_command(subp, 'GPS unit')
+
     changes = subp.add_parser(
-        'changes', help='Report changed config items',
+        'changes', help='Report changed config items.',
         description='''Report changed config items.  Running configuration items
         that differ from the GPS unit factory default configuration are listed.
         Note that listed changes are not necessarily saved in the persistent
@@ -58,8 +60,11 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     scrape = subp.add_parser('scrape', description='Scrape pdftotext output',
                              help='Scrape pdftotext output')
 
-    for a in valset, valget, dump, changes, info:
-        a.add_argument('DEVICE', help='Serial port to talk to device')
+    for a in info, valset, valget, changes, dump:
+        a.add_argument('-s', '--serial', help='Serial port to talk to device',
+                       default='/dev/freak')
+        a.add_argument('-b', '--baud', type=int,
+                       help='Baud rate to set.  (Default is no change.)')
 
     valget.add_argument('KEY', nargs='+', help='KEYs')
     valset.add_argument('KV', type=key_value, nargs='+',
@@ -93,10 +98,8 @@ def do_get(reader: UBloxReader, KEYS: list[str]) -> None:
     cfg_list = [UBloxCfg.get(K) for K in KEYS]
     for cfg in cfg_list:
         payload += struct.pack('<I', cfg.key)
-    msg = UBloxMsg.get('CFG-VALGET')
-    message = msg.frame_payload(payload)
 
-    result = reader.transact(message, ack=True)
+    result = reader.transact('CFG-VALGET', payload, ack=True)
     assert result[:4] == b'\1\0\0\0'
 
     pos = 4
@@ -127,9 +130,7 @@ def do_info(reader: UBloxReader) -> None:
         except:
             return b.hex(' ')
 
-    msg = UBloxMsg.get('MON-VER')
-    message = msg.frame_payload(b'')
-    result = reader.transact(message, ack=False)
+    result = reader.transact('MON-VER')
     assert len(result) % 30 == 10 and len(result) >= 40
     swVersion = binstr(result[:30])
     hwVersion = binstr(result[30:40])
@@ -137,9 +138,16 @@ def do_info(reader: UBloxReader) -> None:
     for i in range(40, len(result), 30):
         print('Extension', binstr(result[i : i+30]))
 
-    msg = UBloxMsg.get('MON-HW3')
-    message = msg.frame_payload(b'')
-    result = reader.transact(message, ack=False)
+    result = reader.transact('UBX-SEC-UNIQID')
+    # The UBX docs give version 1 with a 9 byte payload and 5 byte id, we
+    # actually get version 2 with a 10 byte payload and 6 byte id.
+    assert len(result) > 0
+    assert result[0] in (1, 2)
+    assert len(result) == 8 + result[0]
+    uniq_id = result[4:].hex(' ')
+    print(f'Unique ID {uniq_id}')
+
+    result = reader.transact('MON-HW3')
     version, nPins, flags = result[:3]
     hwVersion = binstr(result[3:13])
     print(f'HW Version = {hwVersion}')
@@ -185,11 +193,19 @@ def run_command(args: argparse.Namespace, command: str) -> None:
         do_scrape(args.FILE)
         return
 
-    device = serhelper.Serial(args.DEVICE)
-    reader = UBloxReader(device)
+    if command == 'reset':
+        dev = message.get_device()
+        message_util.do_reset_line(dev, message.GPS_RESET, args)
+        return
 
     # All other commands actually talk to the device...
-    if command == 'set':
+    device = serhelper.Serial(args.serial, args.baud)
+    reader = UBloxReader(device)
+
+    if command == 'info':
+        do_info(reader)
+
+    elif command == 'set':
         do_set(reader, args.KV)
 
     elif command == 'get':
@@ -201,11 +217,8 @@ def run_command(args: argparse.Namespace, command: str) -> None:
     elif command == 'changes':
         do_changes(reader)
 
-    elif command == 'info':
-        do_info(reader)
-
     else:
-        assert False, 'This should never happen'
+        assert False, f'This should never happen {command}'
 
 if __name__ == '__main__':
     argp = argparse.ArgumentParser(description='UBlox GPS utilities')

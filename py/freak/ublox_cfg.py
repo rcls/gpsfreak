@@ -85,7 +85,12 @@ class UBloxCfg:
         if type(key) == int:
             return CONFIGS_BY_KEY[key]
         assert type(key) == str
-        key = key.removeprefix('CFG-')
+        # Normalisation:
+        # Upper case.
+        # Remove 'CFG-' prefix.
+        # First '-' or '_' is '-', subsequent are '_'.
+        key = key.upper().removeprefix('CFG-')
+        key = key.replace('-', '_').replace('_', '-', 1)
         try:
             return CONFIGS_BY_NAME[key]
         except KeyError:

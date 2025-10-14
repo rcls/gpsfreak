@@ -211,9 +211,9 @@ def set_ubx(config: bytearray, kv: list[Tuple[UBloxCfg, Any]]) -> None:
     msg = ublox_msg.UBloxMsg.get('CFG-VALSET')
     config += msg.frame_payload(payload)
 
-message.serial_sync(config, 100000)
 message.set_baud(config, baud_rom)
-message.serial_sync(config, 10000)
+message.serial_sync(config, 100000)
+#message.serial_sync(config, 10000)
 if baud_now != baud_rom:
     set_ubx(config, [(cfg_baud, baud_now)])
     message.serial_sync(config, 10000)

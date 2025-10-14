@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from freak import lmk05318b, lmk05318b_plan, message, tics
+from freak import lmk05318b, lmk05318b_plan, message, message_util, tics
 from freak.lmk05318b import MaskedBytes, Register
 
 from freak.message import Device
@@ -87,7 +87,7 @@ def report_plan(plan: PLLPlan, raw: bool) -> None:
     if plan.freq_target == 0:
         print('PLL2 not used')
     else:
-        print(f'PLL2: multiplier = /{plan.fpd_divide} * {plan.multiplier}, VCO2 {freq_to_str(plan.freq)}', end='')
+        print(f'PLL2: VCO {freq_to_str(plan.freq)}, multiplier = /{plan.fpd_divide} * {plan.multiplier}', end='')
         if plan.freq == plan.freq_target:
             print()
         else:
@@ -336,15 +336,6 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp = argp.add_subparsers(
         dest=dest, metavar=metavar, required=True, help='Sub-command')
 
-    valset = subp.add_parser(
-        'set', help='Set registers', description='Set registers')
-    valset.add_argument('KV', type=key_value, nargs='+',
-                        metavar='KEY=VALUE', help='KEY=VALUE pairs')
-
-    valget = subp.add_parser(
-        'get', help='Get registers', description='Get registers')
-    valget.add_argument('KEY', nargs='+', help='KEYs')
-
     plan = subp.add_parser(
         'plan', help='Frequency planning',
         description='''Compute and print a frequency plan without programming it
@@ -365,10 +356,21 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='CH=DRIVE',
                        help='Channel and drive type / strength')
 
+    message_util.add_reset_command(subp, 'LMK05318b')
+
     upload = subp.add_parser(
         'upload', help='Upload TICS Pro .tcs file',
         description='Upload TICS Pro .tcs file')
     upload.add_argument('FILE', help='Name of .tics file')
+
+    valset = subp.add_parser(
+        'set', help='Set registers', description='Set registers')
+    valset.add_argument('KV', type=key_value, nargs='+',
+                        metavar='KEY=VALUE', help='KEY=VALUE pairs')
+
+    valget = subp.add_parser(
+        'get', help='Get registers', description='Get registers')
+    valget.add_argument('KEY', nargs='+', help='KEYs')
 
 def run_command(args: argparse.Namespace, command: str) -> None:
     if command == 'get':
@@ -393,12 +395,16 @@ def run_command(args: argparse.Namespace, command: str) -> None:
         else:
             report_drive()
 
+    elif command == 'reset':
+        dev = message.get_device()
+        message_util.do_reset_line(dev, message.LMK05318B_PDN, args)
+
     elif command == 'upload':
         do_upload(args.FILE)
 
     else:
         print(args)
-        assert None, f'This should never happen {command}'
+        assert None, f'This should never happen: {command}'
 
 if __name__ == '__main__':
     argp = argparse.ArgumentParser(description='LMK05318b utility')

@@ -13,8 +13,16 @@ SCALE = 1000000
 MHz = 1000000 // SCALE
 assert SCALE * MHz == 1000000
 BAW_FREQ = 2_500 * MHz
+
+# This is the official range of the LMK05318b...
 PLL2_LOW = 5_500 * MHz
 PLL2_HIGH = 6_250 * MHz
+
+# We push it by 110MHz in each direction, to cover all frequencies up to
+# 800MHz
+PLL2_HIGH=6410
+PLL2_LOW=5340
+
 PLL2_MID = (PLL2_LOW + PLL2_HIGH) // 2
 # Our numbering of channels:
 # 0 = LMK 0,1, GPS Freak 2
@@ -305,12 +313,12 @@ def pll2_plan(freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
                 continue
             assert (pll2_freq / f).is_integer()
             ratio = int(pll2_freq / f)
-            # FIXME - we only have two post-dividers!
             if ratio <= 1:
                 postdivs = 0
                 break
             # Now break the ratio into a post-divider and output divider.
-            # FIXME - we should track which give a good stage2!
+            # Attempt to track which gives an even final stage divider, for
+            # 50% duty cycle - fixme we don't get that quite right.
             postdivs1 = 0
             postdive1 = 0
             for postdiv in range(2, 8):
@@ -343,14 +351,18 @@ def pll2_plan(freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
         for i, f in enumerate(freqs):
             if not f:
                 continue
-            ratio = int(pll2_freq / f)
+            ratio = round(pll2_freq / f)
+            assert isinstance(ratio, int)
             od = None
             if ratio % p1 == 0:
                 od = output_divider(i, ratio // p1)
-            if od == None:
+            if od is not None:
+                dividers[i] = p1, od[0], od[1]
+            else:
+                assert ratio % p2 == 0
                 od = output_divider(i, ratio // p2)
                 assert od is not None
-            dividers[i] = p2, od[0], od[1]
+                dividers[i] = p2, od[0], od[1]
         # TODO - does it matter which is which?
         plan = PLLPlan(
             freq = Fraction(BAW_FREQ, 18) * mult_actual,
@@ -411,7 +423,7 @@ def plan(freqs: list[Fraction]) -> PLLPlan:
         add_pll1(plan, pll1)
         return plan
 
-    if pll2_lcm > 3 * MHz:
+    if pll2_lcm > 2 * MHz:
         plan = pll2_plan(pll2, pll2_lcm)
     else:
         plan = pll2_plan_low(pll2, pll2_lcm)

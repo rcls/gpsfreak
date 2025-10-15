@@ -200,7 +200,7 @@ def do_freq(dev: Device, freq_str: list[str], raw: bool) -> None:
     for K, V in freq_make_data(plan).items():
         data.insert(Register.get(K), V)
     # Software reset.
-    message.lmk05318b_write(dev, 12, 12)
+    message.lmk05318b_write(dev.get_usb(), 12, 12)
     # Write the registers.
     masked_write(dev, data)
     # If PLL2 is in use, power it up now.
@@ -353,7 +353,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
                        help='Channel and drive type / strength')
 
     save = subp.add_parser(
-        'save', help='Save running frequencies to flash.',
+        'save', help='Save clock gen config to flash.',
         description='''Save running LMK05318b configuration to CPU flash.
         Other configuration saved in flash, such as GPS, will be preserved.''')
     save.add_argument('-n', '--dry-run', action='store_true', default=False,

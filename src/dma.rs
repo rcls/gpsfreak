@@ -70,7 +70,7 @@ pub trait Flat {
 // impl<T> !Flat for &mut T {}
 
 impl Flat for u8 {}
-impl<const N: usize> Flat for [u8; N] {}
+impl<const N: usize, T: Flat> Flat for [T; N] {}
 //impl<const N: usize> Flat for [u16; N] {}
 impl Flat for i16 {}
 impl Flat for u16 {}

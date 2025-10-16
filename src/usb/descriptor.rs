@@ -86,6 +86,7 @@ pub static CONFIG0_DESC: FullConfigDesc = FullConfigDesc{
         length             : size_of::<AbstractControlDesc>() as u8,
         descriptor_type    : TYPE_CS_INTERFACE,
         sub_type           : 2,         // Abstract Control Mgmt Functional Desc
+        // TODO - this is not correct
         capabilities       : 6,         // "Line coding and serial state"
     },
     union_desc: UnionFunctionalDesc::<1>{

@@ -5,6 +5,10 @@ use crate::dma::{Channel, DMA_Channel, Flat};
 use crate::vcell::{UCell, VCell};
 use crate::cpu::{barrier, interrupt};
 
+/// Interrupt priority for the I2C and its DMA interrupt handlers.  Users of
+/// this code should run at no higher than that priority.
+use interrupt::PRIO_COMMS as PRIORITY;
+
 pub type I2C = stm32h503::I2C1;
 
 pub type Result = core::result::Result<(), ()>;
@@ -88,10 +92,10 @@ pub fn init() {
 
     use interrupt::*;
     use stm32h503::Interrupt::*;
-    enable_priority(I2C1_EV, PRIO_I2C);
-    enable_priority(I2C1_ER, PRIO_I2C);
-    enable_priority(GPDMA1_CH1, PRIO_I2C);
-    enable_priority(GPDMA1_CH2, PRIO_I2C);
+    enable_priority(I2C1_EV, PRIORITY);
+    enable_priority(I2C1_ER, PRIORITY);
+    enable_priority(GPDMA1_CH1, PRIORITY);
+    enable_priority(GPDMA1_CH2, PRIORITY);
 }
 
 pub fn i2c_isr() {

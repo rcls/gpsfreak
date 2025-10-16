@@ -68,6 +68,9 @@ pub fn provision() {
         return;
     };
     let mut data = &c.data[.. c.length as usize - 20];
+    let blue = unsafe {crate::led::BLUE.as_mut()};
+    blue.set(true);
+
     while data.len() > 0 {
         // Check for a valid command packet.
         dbgln!("Next packet @ {:#?}", data.as_ptr());
@@ -99,6 +102,7 @@ pub fn provision() {
         dbgln!("Unknown data in config @ {:#?}.", data.as_ptr());
         break;
     }
+    blue.set(false);
 }
 
 static COM_BUF: UCell<crate::command::MessageBuf> = Default::default();

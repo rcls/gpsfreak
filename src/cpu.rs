@@ -26,6 +26,10 @@ const USB_SERIAL_LEN: usize = SERIAL_LEN * 2 + 2;
 pub static SERIAL_NUMBER: UCell<[u8; SERIAL_LEN]> = UCell::new([0; _]);
 pub static USB_SERIAL_NUMBER: UCell<[u8; USB_SERIAL_LEN]> = UCell::new([0; _]);
 
+/// Key for writes to AIRCR.  We include the PRIGROUP value we use:
+/// 3 priority bits, 5 sub-priority bits (but only the top one actually
+/// implemented in our CPU.)
+const AIRCR_KEY: u32 = 0x05fa0500;
 
 pub fn init() {
     let flash  = unsafe {&*stm32h503::FLASH ::ptr()};
@@ -138,6 +142,8 @@ pub fn init() {
 
     // We use sev-on-pend to avoid trivial interrupt handlers.
     unsafe {scb.scr.write(16)};
+    // Set the interrupt priority grouping.
+    unsafe {scb.aircr.write(AIRCR_KEY)};
 }
 
 #[derive(Debug)]
@@ -199,7 +205,6 @@ pub fn nothing() {
     unsafe {core::arch::asm!("", options(nomem))}
 }
 
-#[allow(dead_code)]
 pub mod interrupt {
     /// Interrupt priority for uart debug, the is the highest priority as debug
     /// can get used everywhere.
@@ -208,8 +213,9 @@ pub mod interrupt {
     /// Interrupt priority for USB / I2C / serial related interrupts.
     pub const PRIO_COMMS: u8 = 0x40;
 
-    /// Interrupt priority for I2C.  Same as USB.
-    pub const PRIO_I2C: u8 = PRIO_COMMS;
+    /// LED handling runs at same priority, but lower priority group, than
+    /// comms.
+    pub const PRIO_LED: u8 = PRIO_COMMS | 0x10;
 
     /// Interrupt priority for application processing.
     pub const PRIO_APP: u8 = 0x80;
@@ -285,7 +291,7 @@ pub fn reboot() -> ! {
     let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
     // Reboot by writing the appropriate magic number to AIRCR.
     loop {
-        unsafe {scb.aircr.write(0x05fa0004)};
+        unsafe {scb.aircr.write(AIRCR_KEY | 4)};
     }
 }
 

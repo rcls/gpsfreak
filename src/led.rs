@@ -11,22 +11,23 @@ use core::num::Wrapping as W;
 use stm32h503::TIM3 as TIM;
 use stm32h503::Interrupt::TIM3 as INTERRUPT;
 
-type FiveHz = UCell<LedTimer<10000, 10000, LedLine>>;
+use crate::cpu::interrupt::PRIO_LED as PRIORITY;
+type Priority = crate::cpu::Priority<PRIORITY>;
+
+type FiveHz = UCell<LedTimer<1000, 1000, LedLine>>;
 
 pub static BLUE : FiveHz = new(1);
-pub static RED  : FiveHz = new(2);
-pub static GREEN: FiveHz = new(3);
+pub static GREEN: FiveHz = new(2);
+pub static RED  : FiveHz = new(3);
 
-const fn new<const ON: i16, const OFF: i16>(line: u8) -> UCell<LedTimer<ON, OFF>> {
-    UCell::new(LedTimer{led: LedLine{line}, ..LedTimer::default()})
-}
+macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::PTR};
     let rcc = unsafe {&*stm32h503::RCC::PTR};
     let tim = unsafe {&*TIM::PTR};
 
-    // Blue/red/green are PA1,2,3.
+    // Blue/green/red are PA1,2,3.
     gpioa.BSRR.write(|w| w.bits(0xe));
     gpioa.MODER.modify(|_,w| w.MODE1().B_0x1().MODE2().B_0x1().MODE3().B_0x1());
 
@@ -36,13 +37,13 @@ pub fn init() {
     tim.CCMR1_Output().write(|w| w.OC1CE().set_bit().OC1M1().B_0x1());
     const PSC: u16 = (crate::cpu::CPU_FREQ / 10000) as u16 - 1;
     const {assert!((PSC as u32 + 1) * 10000 == crate::cpu::CPU_FREQ)};
-    tim.PSC.write(|w| w.bits(0));
+    tim.PSC.write(|w| w.bits(PSC));
     tim.CR1.write(|w| w.CEN().set_bit());
 
     use crate::cpu::interrupt;
     // Both the interrupt, and the callers into this code, should run at the
     // same priority.
-    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_APP);
+    interrupt::enable_priority(INTERRUPT, PRIORITY);
 
     if false {
         unsafe {BLUE.as_mut()}.set(true);
@@ -82,6 +83,10 @@ pub struct LedTimer<const ON: i16, const OFF: i16, Led = LedLine> {
     expiry: Option<W<i16>>,
 }
 
+const fn new<const ON: i16, const OFF: i16>(line: u8) -> UCell<LedTimer<ON, OFF>> {
+    UCell::new(LedTimer{led: LedLine{line}, ..LedTimer::default()})
+}
+
 fn schedule(deadline: Option<W<i16>>) {
     let tim = unsafe {&*TIM::PTR};
     let Some(deadline) = deadline else {return};
@@ -99,6 +104,7 @@ fn trigger(deadline: W<i16>) {
     if W(now) - deadline >= W(0) {
         // We've already expired.  Instead of potentially recursing, do a
         // software trigger.
+        dbgln!("Immediate");
         let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
         unsafe {nvic.stir.write(INTERRUPT as u32)};
     }
@@ -106,12 +112,14 @@ fn trigger(deadline: W<i16>) {
 
 impl<const ON: i16, const OFF: i16, Led: LedTrait> LedTimer<ON, OFF, Led> {
     pub fn set(&mut self, state: bool) {
+        let _guard = Priority::new();
         let tim = unsafe {&*TIM::PTR};
         let now = tim.CNT.read().bits() as i16;
         schedule(self.request(state, now));
     }
 
     pub fn pulse(&mut self, state: bool) {
+        let _guard = Priority::new();
         let tim = unsafe {&*TIM::PTR};
         let now = tim.CNT.read().bits() as i16;
         schedule(self.request_pulse(state, now));
@@ -177,19 +185,18 @@ impl<const ON: i16, const OFF: i16, Led: LedTrait> LedTimer<ON, OFF, Led> {
     }
 
     fn expiry_time(&mut self, now: i16, duration: i16) -> Option<W<i16>> {
-        debug_assert_eq!(self.expiry, None);
         if duration != 0 {
             self.expiry = Some(W(now) + W(duration));
-            self.expiry
         }
         else {
-            None
+            self.expiry = None;
         }
+        self.expiry
     }
 }
 
 fn isr() {
-    crate::dbgln!("LED isr");
+    dbgln!("LED isr");
     let tim = unsafe {&*TIM::PTR};
     tim.SR.write(|w| w.bits(0));
 
@@ -208,10 +215,11 @@ fn isr() {
     // We make sure that the time is always scheduled in the future, even if
     // there is nothing to do.  Otherwise we need to deal with the ambiguity
     // between timers in the past being processed or late.
-    let deadline = W(now) + W(10000);
+    let deadline = W(now) + W(30000);
     let deadline = min(deadline, blue.expiry);
     let deadline = min(deadline, red.expiry);
     let deadline = min(deadline, green.expiry);
+    dbgln!("LED {now} {deadline}");
 
     trigger(deadline);
 }
@@ -220,7 +228,6 @@ impl LedTrait for bool {
     fn set(&mut self, state: bool) {*self = state}
     fn get(&self) -> bool {*self}
 }
-
 
 impl crate::cpu::VectorTable {
     pub const fn led(&mut self) -> &mut Self {

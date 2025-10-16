@@ -31,9 +31,9 @@ use crate::vcell::{UCell, VCell};
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
-macro_rules!ctrl_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false  {dbgln!($($tt)*)}};}
 macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
-macro_rules!main_dbgln {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
+macro_rules!main_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
@@ -173,7 +173,7 @@ impl USB_State {
         let not_only_sof = istr.RST_DCON().bit() || istr.CTR().bit();
         if not_only_sof {
             fast_dbgln!("*** USB isr ISTR = {:#010x} FN={}",
-            istr.bits(), usb.FNR.read().FN().bits());
+                        istr.bits(), usb.FNR.read().FN().bits());
         }
         // Write zero to the interrupt bits we wish to acknowledge.
         usb.ISTR.write(|w| w.bits(!istr.bits() & !0x37fc0));
@@ -207,6 +207,7 @@ impl USB_State {
         }
 
         if not_only_sof {
+            unsafe {crate::led::BLUE.as_mut()}.pulse(true);
             fast_dbgln!("CHEP0 now {:#010x}\n***", chep_ctrl().read().bits());
         }
     }

@@ -20,6 +20,7 @@ mod flash;
 mod gps_uart;
 mod i2c;
 mod led;
+mod lmk05318b;
 mod provision;
 #[macro_use]
 mod uart_debug;
@@ -27,12 +28,6 @@ mod usb;
 #[macro_use]
 mod utils;
 mod vcell;
-
-// I²C address of the LMK05318(B).
-// const LMK05318: u8 = 0xc8;
-
-// I²C address of the TMP117.  ADD0 on the TMP117 connects to 3V3.
-// const TMP117: u8 = 0x92;
 
 pub fn main() -> ! {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -55,6 +50,8 @@ pub fn main() -> ! {
     gps_uart::init();
     provision::provision();
 
+    lmk05318b::init();
+
     usb::init();
 
     // Enable FPU.  We aren't using it yet!!!
@@ -75,7 +72,6 @@ pub fn main() -> ! {
     // EN_REF2 = PB5, deassert high
     // EN_OUT4 = PB4, assert low
     // nEN_OUT3 = PB8, assert low
-    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     gpiob.BSRR.write(|w| w.BS4().set_bit().BR5().set_bit().BR8().set_bit());
     gpiob.MODER.modify(|_,w| w.MODE4().B_0x1().MODE5().B_0x1().MODE8().B_0x1());
 
@@ -88,5 +84,5 @@ pub fn main() -> ! {
 #[unsafe(link_section = ".vectors")]
 pub static VECTORS: cpu::VectorTable = {
     let mut vtor = cpu::VectorTable::default();
-    *vtor.debug().usb().gps_uart().i2c().led()
+    *vtor.debug().gps_uart().i2c().led().lmk05318b().usb()
 };

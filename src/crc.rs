@@ -12,7 +12,7 @@ pub fn init() {
 
 }
 
-pub const fn crc_table<T> (poly: T, bits: u32) -> [T; 256] where 
+pub const fn crc_table<T> (poly: T, bits: u32) -> [T; 256] where
     T: Copy + [const] PartialEq + [const] From<u8>,
     T: [const] BitAnd<Output=T> + [const] BitXor<Output=T>,
     T: [const] Shl<u32, Output=T>,

@@ -61,12 +61,13 @@
 //!    61 : LMK05318b I²C read.  First byte of payload is number of bytes,
 //!         if there are subsequent bytes, then these are sent as a write
 //!         before a repeated-start read.  Reply is E1 with the read bytes
-//!         as payload.
 //!
 //!    62 : TMP117 I²C write.  Just like 60, but to the TMP117.
 //!    63 : TMP117 I²C read.  Just like 61, but from the TMP117.
 //!
 //!    64, 65 : Reserved for GPS I²C.
+//!
+//!    68 : Update LMK05318b status.
 //!
 //!    ?70 : Unsafe operation unlock.  Needs correct magic data payload.
 //!    71 : peek.  Payload is u32 address followed by u32 length.  Response is
@@ -90,6 +91,9 @@ mod crc16;
 pub type Responder = fn(&[u8]);
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+
+/// I²C address of the TMP117.  ADD0 on the TMP117 connects to 3V3.
+pub const TMP117: u8 = 0x92;
 
 /// Error codes for Nack responses.
 #[repr(u16)]
@@ -216,9 +220,6 @@ impl<P: core::fmt::Debug> Message<P> {
 }
 
 pub fn command_handler(message: &MessageBuf, len: usize, r: Responder) {
-    let blue = unsafe {crate::led::BLUE.as_mut()};
-    blue.pulse(true);
-
     match command_dispatch(message, len, r) {
         Err(Error::Succeeded) => {let _ = Ack::new(0x80, ()).send(r);}
         Err(err) => {let _ = Nack::new(0x81, err).send(r);}
@@ -256,10 +257,12 @@ fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
         0x1e => serial_sync(message),
         0x1f => set_get_baud(message, r),
 
-        0x60 => i2c_write(0xc8, message),
-        0x61 => i2c_read (0xc9, message, r),
-        0x62 => i2c_write(0x92, message),
-        0x63 => i2c_read (0x93, message, r),
+        0x60 => i2c_write(crate::lmk05318b::LMK05318 & !1, message),
+        0x61 => i2c_read (crate::lmk05318b::LMK05318 |  1, message, r),
+        0x62 => i2c_write(TMP117 & !1, message),
+        0x63 => i2c_read (TMP117 |  1, message, r),
+
+        0x68 => lmk05318b_status(message),
 
         0x71 => peek(message, r),
         0x72 => poke(message),
@@ -383,6 +386,14 @@ fn i2c_read(address: u8, message: &MessageBuf, r: Responder) -> Result {
     else {
         Err(Error::Failed)
     }
+}
+
+fn lmk05318b_status(message: &MessageBuf) -> Result {
+    Message::<()>::from_buf(message)?;
+    // We run at the correct priority, so we can just call the appropriate ISR
+    // directly!
+    crate::lmk05318b::update_status();
+    SEND_ACK
 }
 
 fn peek(message: &MessageBuf, r: Responder) -> Result {

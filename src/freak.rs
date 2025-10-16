@@ -19,6 +19,7 @@ mod dma;
 mod flash;
 mod gps_uart;
 mod i2c;
+mod led;
 mod provision;
 #[macro_use]
 mod uart_debug;
@@ -47,6 +48,7 @@ pub fn main() -> ! {
     uart_debug::init();
 
     crc::init();
+    led::init();
 
     i2c::init();
 
@@ -70,10 +72,6 @@ pub fn main() -> ! {
     gpiob.BSRR.write(|w| w.BS1().set_bit());     // High
     gpiob.MODER.modify(|_,w| w.MODE1().B_0x1()); // Output
 
-    // Blue/red/green are PA1,2,3.
-    gpioa.BSRR.write(|w| w.bits(0xe));
-    gpioa.MODER.modify(|_,w| w.MODE1().B_0x1().MODE2().B_0x1().MODE3().B_0x1());
-
     // EN_REF2 = PB5, deassert high
     // EN_OUT4 = PB4, assert low
     // nEN_OUT3 = PB8, assert low
@@ -90,5 +88,5 @@ pub fn main() -> ! {
 #[unsafe(link_section = ".vectors")]
 pub static VECTORS: cpu::VectorTable = {
     let mut vtor = cpu::VectorTable::default();
-    *vtor.debug().usb().gps_uart().i2c()
+    *vtor.debug().usb().gps_uart().i2c().led()
 };

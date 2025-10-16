@@ -216,6 +216,9 @@ impl<P: core::fmt::Debug> Message<P> {
 }
 
 pub fn command_handler(message: &MessageBuf, len: usize, r: Responder) {
+    let blue = unsafe {crate::led::BLUE.as_mut()};
+    blue.pulse(true);
+
     match command_dispatch(message, len, r) {
         Err(Error::Succeeded) => {let _ = Ack::new(0x80, ()).send(r);}
         Err(err) => {let _ = Nack::new(0x81, err).send(r);}

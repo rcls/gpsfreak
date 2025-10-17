@@ -123,7 +123,7 @@ def next_header(dev: USBDevice, headers: Configs,
 
     erase_base = headers[scan[4]]
     assert erase_base.address in (0x0801c000, 0x0801e000)
-    #assert False, f'Would erase {config_address(index):#010x}'
+    #assert False, f'Would erase {erase_base.address:#010x}'
     message.flash_erase(dev, erase_base.address)
     return erase_base
 
@@ -312,6 +312,8 @@ def make_config(device: Device, headers: Configs, active: Config | None,
             #print('No changes - not saving')
             return None
 
+    config += b'\xff' * (31 & -len(config))
+
     #print('Changed!')
     return config
 
@@ -335,7 +337,7 @@ def save_config(device: Device, save_ubx: bool, save_lmk: bool,
         print('Dry run, not writing config')
     else:
         print('Writing config to flash')
-        write_config(device, headers, active, cfg)
+        write_config(dev, headers, active, cfg)
     return True
 
 def add_to_argparse(argp: argparse.ArgumentParser,

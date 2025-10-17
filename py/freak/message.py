@@ -28,6 +28,7 @@ GET_SET_BAUD=0x1f
 
 LMK05318B_WRITE=0x60
 LMK05318B_READ=0x61
+LMK05318B_STATUS=0x68
 
 TMP117_WRITE=0x62
 TMP117_READ=0x63
@@ -152,6 +153,7 @@ def poke(dev: Target, address: int, data: bytes, chunk_size: int = 32) -> None:
     base = 0
     while base < len(data):
         todo = min(chunk_size, len(data) - base)
+        #print(f'POKE @ {address+base:#010x} + {todo}')
         command(dev, POKE,
                 struct.pack('<I', address + base) + data[base:base + todo])
         base += todo
@@ -176,6 +178,9 @@ def lmk05318b_write(dev: Target, address: int, *data: bytes|int) -> None:
         return bytes((x,)) if isinstance(x, int) else x
     total = b''.join(map(bb, data))
     command(dev, LMK05318B_WRITE, struct.pack('>H', address) + total)
+
+def lmk05318b_status(dev: Target) -> None:
+    command(dev, LMK05318B_STATUS)
 
 def tmp117_read(dev: Target, address: int, length: int = 1) -> bytes:
     r = retrieve(dev, TMP117_READ, bytes((length, address)))

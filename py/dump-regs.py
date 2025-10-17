@@ -48,10 +48,8 @@ def usb_load() -> MaskedBytes:
     dev = freak_util.Device().get_usb()
     data = MaskedBytes()
     for address, length in lmk05318b_bundles():
-        segment = retrieve(
-            dev, LMK05318B_READ,
-            struct.pack('<H', length) + struct.pack('>H', address))
-        for a, b in enumerate(segment.payload, address):
+        segment = message.lmk05318b_read(dev, address, length)
+        for a, b in enumerate(segment, address):
             data.data[a] = b
             data.mask[a] = 255
     return data

@@ -88,6 +88,8 @@ class PLLPlan:
 
     def error(self) -> float:
         return float(self.freq / self.freq_target - 1)
+    def error_hz(self) -> Fraction:
+        return self.freq - self.freq_target
 
     def fixed_denom(self) -> bool:
         return (1 << 24) % self.multiplier.denominator == 0

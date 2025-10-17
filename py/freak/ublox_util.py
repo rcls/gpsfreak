@@ -44,6 +44,8 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         'get', description='Get configuration values.',
         help='Get configuration values.')
     valget.add_argument('KEY', nargs='+', help='KEYs')
+    valget.add_argument('-l', '--layer', default=0, type=int,
+                        help='Configuration layer to retrieve.')
 
     dump = subp.add_parser('dump', description='Retrieve entire config',
                            help='Retrieve entire config.')
@@ -105,24 +107,9 @@ def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
     else:
         return f'{value}'
 
-def do_get(reader: UBloxReader, KEYS: list[str]) -> None:
-    payload = b'\0\0\0\0'
-    cfg_list = [UBloxCfg.get(K) for K in KEYS]
-    for cfg in cfg_list:
-        payload += struct.pack('<I', cfg.key)
-
-    result = reader.transact('CFG-VALGET', payload, ack=True)
-    assert result[:4] == b'\1\0\0\0'
-
-    pos = 4
-    for cfg in cfg_list:
-        key, = struct.unpack('<I', result[pos:pos+4])
-        assert key == cfg.key
-        pos += 4
-        val_byte_len = cfg.val_byte_len()
-        value = cfg.decode_value(result[pos : pos + val_byte_len])
-        pos += val_byte_len
-        print(cfg, '=', fmt_cfg_value(cfg, value))
+def do_get(reader: UBloxReader, layer: int, KEYS: list[str]) -> None:
+    for key, value in get_cfg_multi(reader, 0, KEYS):
+        print(key, '=', fmt_cfg_value(key, value))
 
 def do_dump(reader: UBloxReader, layer: int) -> None:
     items = get_cfg_multi(reader, layer, [0xffffffff])
@@ -221,7 +208,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         do_set(device.get_ublox(), args.KV)
 
     elif command == 'get':
-        do_get(device.get_ublox(), args.KEY)
+        do_get(device.get_ublox(), args.layer, args.KEY)
 
     elif command == 'dump':
         do_dump(device.get_ublox(), args.layer)

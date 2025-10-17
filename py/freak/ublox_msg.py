@@ -94,6 +94,7 @@ class UBloxReader:
             if mu < 0:
                 self.current = bytearray()
                 continue
+            #print('Reader got µ')
             del self.current[:mu]
             if len(self.current) < 8:   # Minimum packet length.
                 continue
@@ -101,6 +102,7 @@ class UBloxReader:
                 #print('No b', self.current)
                 del self.current[:2]
                 continue
+            #print('Reader got b')
             length, = struct.unpack('<H', self.current[4:6])
             if length > MAX_LENGTH:
                 #print(f'Too long {length}')

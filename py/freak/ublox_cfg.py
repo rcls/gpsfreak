@@ -20,16 +20,6 @@ CONFIGS_BY_NAME:dict[str, UBloxCfg] = {}
 def val_byte_len(key: int) -> int:
     return (0, 1, 1, 2, 4, 8)[key >> 28]
 
-def get_cfg(key: int) -> UBloxCfg:
-    if key in CONFIGS_BY_KEY:
-        return CONFIGS_BY_KEY[key]
-    vb = val_byte_len(key)
-    if key >> 28 == 1:
-        ty = 'L'
-    else:
-        ty = f'X{vb}'
-    return UBloxCfg(f'UNKNOWN-{key:08x}', key, ty)
-
 @dataclass(slots=True, frozen=True)
 class UBloxCfg:
     name: str
@@ -102,5 +92,27 @@ def add_cfg_list(l: list[UBloxCfg]) -> None:
     for cfg in l:
         CONFIGS_BY_NAME[cfg.name] = cfg
         CONFIGS_BY_KEY [cfg.key ] = cfg
+
+def get_cfg(key: int) -> UBloxCfg:
+    if key in CONFIGS_BY_KEY:
+        return CONFIGS_BY_KEY[key]
+    vb = val_byte_len(key)
+    if key >> 28 == 1:
+        ty = 'L'
+    else:
+        ty = f'X{vb}'
+    return UBloxCfg(f'UNKNOWN-{key:08x}', key, ty)
+
+def get_key(cfg: UBloxCfg|str|int) -> int:
+    if isinstance(cfg, int):
+        return cfg
+    if isinstance(cfg, UBloxCfg):
+        return cfg.key
+    # String...
+    try:
+        return int(cfg, 0)
+    except ValueError:
+        pass
+    return UBloxCfg.get(cfg).key
 
 import freak.ublox_lists

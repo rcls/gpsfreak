@@ -29,10 +29,10 @@ DRIVES = {
     'lvds6': (1, 1, 0, 'LVDS, 6mA'),
     'lvds8': (1, 2, 0, 'LVDS, 8mA'),
 }
-CMOS_DRIVES = ('z', 'hi-z'), ('0', 'low'), ('-', 'inverted'), ('+', 'normal')
+CMOS_DRIVES = ('z', 'hi-Z'), ('0', 'low'), ('-', 'inverted'), ('+', 'normal')
 for v1, (l1, d1) in enumerate(CMOS_DRIVES):
     for v2, (l2, d2) in enumerate(CMOS_DRIVES):
-        DRIVES['cmos' + l1 + l2] = (3, v1, v2, f'CMOS, {d1}, {d2}')
+        DRIVES['cmos' + l1 + l2] = (3, v1, v2, f'CMOS, {d1}+{d2}')
 
 def get_ranges(dev: Device, data: MaskedBytes,
                ranges: list[Tuple[int, int]]) -> None:
@@ -47,7 +47,7 @@ def do_get(dev: Device, KEYS: list[str]) -> None:
     data = MaskedBytes()
     for r in registers:
         data.insert(r, 0)
-    ranges = data.ranges(max_block = 30)
+    ranges = data.ranges(max_block = 32)
     get_ranges(dev, data, ranges)
     for r in registers:
         print(r, data.extract(r))
@@ -57,7 +57,7 @@ def complete_partials(dev: Device, data: MaskedBytes) -> None:
     # TODO - suppress RESERVED 0 fields, or use a 'pristine' source
     # for them?
     ranges = data.ranges(
-        max_block = 30, select = lambda x: x != 0 and x != 255)
+        max_block = 32, select = lambda x: x != 0 and x != 255)
     gaps = MaskedBytes()
     get_ranges(dev, gaps, ranges)
     for start, length in ranges:
@@ -67,11 +67,13 @@ def complete_partials(dev: Device, data: MaskedBytes) -> None:
             data.mask[i] = 255
 
 def masked_write(dev: Device, data: MaskedBytes) -> None:
+    for i in 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13 ,14:
+        data.mask[i] = 0;
     complete_partials(dev, data)
-    ranges = data.ranges(max_block = 30)
+    ranges = data.ranges(max_block = 32)
     udev = dev.get_usb()
     for base, span in ranges:
-        #print(base, span, data.data[base : base+span].hex(' '))
+        #print(base, span, ':', data.data[base : base+span].hex(' '))
         message.lmk05318b_write(udev, base, data.data[base : base+span])
 
 def do_set(dev: Device, KV: list[Tuple[str, str]]) -> None:
@@ -90,7 +92,7 @@ def report_plan(plan: PLLPlan, raw: bool) -> None:
         if plan.freq == plan.freq_target:
             print()
         else:
-            print(f' (target {float(plan.freq_target)} MHz) error={plan.error()}')
+            print(f' (target {float(plan.freq_target)} MHz) error={freq_to_str(plan.error_hz())}')
 
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     for index, name, _ in channels:
@@ -163,6 +165,7 @@ def freq_make_data(plan: PLLPlan) -> dict[str, int]:
     # after configuring it.
     data['PLL2_PDN'] = 1
     if plan.freq_target == 0:
+        data['LOL_PLL2_MASK'] = 1
         return data
 
     # PLL2 setup...
@@ -180,6 +183,7 @@ def freq_make_data(plan: PLLPlan) -> dict[str, int]:
     data['PLL2_NUM']  = pll2_num
     data['PLL2_DEN']  = pll2_den
     # Canned values...
+    data['LOL_PLL2_MASK'] = 0
     data['PLL2_RCLK_SEL'] = 0
     data['PLL2_RDIV_PRE'] = 0
     data['PLL2_RDIV_SEC'] = 5
@@ -208,6 +212,8 @@ def do_freq(dev: Device, freq_str: list[str], raw: bool) -> None:
         message.lmk05318b_write(dev.get_usb(), 100, data.data[100] & 0xfe)
     # Remove software reset.
     message.lmk05318b_write(dev.get_usb(), 12, 2)
+    # Force an update of the status LEDs.
+    message.lmk05318b_status(dev.get_usb())
 
 def do_drive(dev: Device, drives: list[Tuple[str, str]],
              defaults: bool) -> None:
@@ -317,6 +323,18 @@ def report_freq(dev: Device, raw: bool) -> None:
             pd = ''
         print(f'{name} frequency = {freq_to_str(ch_freq)}{pd}')
 
+def do_status(dev: Device) -> None:
+    data = MaskedBytes()
+    get_ranges(dev, data, [(13, 20)])
+    #print(data.data[13:20])
+    for a in range(13, 15):
+        address = lmk05318b.ADDRESS_BY_NUM[a]
+        for field in address.fields:
+            reg = field.basename
+            if reg != 'RESERVED':
+                value = data.extract(reg)
+                print(f'{field} = {value}')
+
 def do_upload(dev: Device, path: str) -> None:
     tcs = tics.read_tcs_file(path)
     masked_write(dev, tcs)
@@ -334,9 +352,11 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     freq = subp.add_parser(
         'freq', aliases=['frequency'], help='Program/report frequencies',
-        description='''Program or frequencies If a list of frequencies is given,
-        these are programmed to the device.  With no arguments, report the
-        current device frequencies.''')
+        description='''Program or report frequencies.  If a list of frequencies
+        is given, these are programmed to the device.  With no arguments, report
+        the current device frequencies.''',
+        epilog='''Each frequency on the command line corresponds to a single
+        LMK05318b output.   Use 0 to turn an output off.''')
     freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
 
     plan = subp.add_parser(
@@ -351,6 +371,9 @@ def add_to_argparse(argp: argparse.ArgumentParser,
                        help='Set default values')
     drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='CH=DRIVE',
                        help='Channel and drive type / strength')
+
+    status = subp.add_parser('status', help='Report oscillator status',
+                             description='Report oscillator status.')
 
     save = subp.add_parser(
         'save', help='Save clock gen config to flash.',
@@ -391,6 +414,9 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
             do_drive(device, args.DRIVE, bool(args.defaults))
         else:
             report_drive(device)
+
+    elif command == 'status':
+        do_status(device)
 
     elif command == 'save':
         config.save_config(device, save_ubx=False, save_lmk = True,

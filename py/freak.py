@@ -24,9 +24,12 @@ subp = argp.add_subparsers(
 
 freq = subp.add_parser(
     'freq', aliases=['frequency'], help='Program/report frequencies',
-    description='''Program or frequencies If a list of frequencies is given,
-    these are programmed to the device.  With no arguments, report the
-    current device frequencies.''')
+    description='''Program or report frequencies.  If a list of frequencies is
+    given, these are programmed to the device.  With no arguments, report
+    the current device frequencies.''',
+    epilog='''Each frequency on the command line corresponds to a device output
+    connector.  Use 0 to turn an output off.''')
+
 freq.add_argument('FREQ', nargs='*', help='Frequencies in MHz')
 
 info = subp.add_parser(

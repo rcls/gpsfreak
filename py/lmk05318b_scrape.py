@@ -131,6 +131,8 @@ if args.tics:
                 Address(a, [Field(f'UNKNOWN{a}', 7, 0, 'R/W', val, a)]))
 
 addresses.sort(key = lambda address: address.address)
+for index, a in enumerate(addresses):
+    assert a.address == index
 
 for address in addresses:
     address.validate()

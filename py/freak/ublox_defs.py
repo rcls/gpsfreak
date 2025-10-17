@@ -3,9 +3,9 @@ import os
 import re
 import struct
 
-from typing import Any, Tuple, TypeAlias
+from typing import Any, Sequence, Tuple, TypeAlias
 
-from .ublox_cfg import UBloxCfg, get_cfg
+from .ublox_cfg import UBloxCfg, get_cfg, get_key
 from .ublox_msg import UBloxMsg, UBloxReader
 
 KeyValue: TypeAlias = Tuple[UBloxCfg, Any]
@@ -73,7 +73,8 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
 
     return configs, messages
 
-def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
+def get_cfg_multi(reader: UBloxReader, layer: int,
+                  keys: Sequence[int|str|UBloxCfg]) \
         -> list[KeyValue]:
     assert len(keys) <= 64
     start = 0
@@ -81,9 +82,7 @@ def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
 
     key_bin = bytes()
     for key in keys:
-        if isinstance(key, UBloxCfg):
-            key = key.key
-        key_bin += struct.pack('<I', key)
+        key_bin += struct.pack('<I', get_key(key))
 
     valget = UBloxMsg.get('CFG-VALGET')
     while True:
@@ -107,9 +106,10 @@ def get_cfg_multi(reader: UBloxReader, layer: int, keys: list[int|UBloxCfg]) \
         if num_items < 64:
             return items
 
-def get_cfg_changes(dev: UBloxReader) -> list[Tuple[UBloxCfg, Any, Any]]:
-    live = get_cfg_multi(dev, 0, [0xffffffff])
-    rom  = get_cfg_multi(dev, 7, [0xffffffff])
+def get_cfg_changes(dev: UBloxReader,
+                    key: int = 0xffffffff) -> list[Tuple[UBloxCfg, Any, Any]]:
+    live = get_cfg_multi(dev, 0, [key])
+    rom  = get_cfg_multi(dev, 7, [key])
     live.sort(key=lambda x: x[0].key & 0x0fffffff)
     rom .sort(key=lambda x: x[0].key & 0x0fffffff)
 

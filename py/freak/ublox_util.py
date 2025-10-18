@@ -28,6 +28,9 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     info = subp.add_parser('info', description='Basic GPS unit info.',
                            help='Basic GPS unit info')
 
+    subp.add_parser('status', description='Basic GPS status info.',
+                    help='Basic GPS status info')
+
     def key_value(s: str) -> Tuple[str, str]:
         if not '=' in s:
             raise ValueError('Key/value pairs must be in the form KEY=VALUE')
@@ -188,6 +191,38 @@ def do_info(reader: UBloxReader) -> None:
 
         print(f'Pin {pinId} {pio} bank {bank} {direction} {value} {virtual} IRQ {irq_enabled} Virt.Pin {VP}{pull}')
 
+def do_status(reader: UBloxReader) -> None:
+    result = reader.transact('NAV-STATUS')
+    assert len(result) == 16
+
+    iTOW, gpsFix, flags, fixStat, flags2, ttff, msss \
+        = struct.unpack('<IBBBBII', result)
+
+    print(f'iTOW = {iTOW / 1000} seconds')
+
+    FIXES = 'no fix,dead reckoning,2D-fix,3D-fix,GPS + dr,Time only'.split(',')
+    if gpsFix < len(FIXES):
+        fix = FIXES[gpsFix]
+    else:
+        fix = f'{gpsFix:#04x}'
+    print(f'GPS Fix: {fix}')
+
+    flags_bits = [flags & 1 << i != 0 for i in range(8)]
+    print(f'GPS Fix OK: {flags_bits[0]}')
+    print(f'Diff soln applied: {flags_bits[1]}')
+    print(f'Week number valid: {flags_bits[2]}')
+    print(f'Time of week valid: {flags_bits[3]}')
+    fixStat_bits = [fixStat & 1 << i != 0 for i in range(8)]
+    print(f'Differential Corr.: {fixStat_bits[0]}')
+    print(f'carrSoln valid: {fixStat_bits[1]}')
+    print(f'Map matching: {fixStat_bits[3] * 2 + fixStat_bits[2]}')
+
+    print(f'Power save mode:', flags2 & 3)
+    print(f'Spoof detection mode:', flags2 >> 2 & 3)
+    print(f'Carrier phase range status:', flags2 >> 4 & 3)
+    print(f'Time to first fix: {ttff / 1000} seconds')
+    print(f'Seconds since start: {msss / 1000} seconds')
+
 def do_scrape(FILE):
     configs, messages = parse_key_list(FILE)
     print('from freak import ublox_cfg, ublox_msg')
@@ -203,6 +238,9 @@ def do_scrape(FILE):
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'info':
         do_info(device.get_ublox())
+
+    elif command == 'status':
+        do_status(device.get_ublox())
 
     elif command == 'set':
         do_set(device.get_ublox(), args.KV)

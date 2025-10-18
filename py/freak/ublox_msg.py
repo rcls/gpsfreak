@@ -70,6 +70,7 @@ def add_msg_list(l: list[UBloxMsg]) -> None:
     for msg in l:
         MESSAGES_BY_NAME[msg.name] = msg
         MESSAGES_BY_CODE[msg.code] = msg
+
 MAX_LENGTH = 1024
 
 class UBloxReader:
@@ -84,7 +85,7 @@ class UBloxReader:
             raise EOFError()
         #print(repr(data))
         self.current += data
-    def get_msg(self) -> Tuple[int, bytes]:
+    def get_msg(self, expected: list[int]|None = None) -> Tuple[int, bytes]:
         more = False
         while True:
             if more:
@@ -116,11 +117,15 @@ class UBloxReader:
             message = bytes(self.current[:msg_len])
             #print('Try', message)
             del self.current[:msg_len]
-            ckA, ckB = checksum(message[2:-2])
-            if message[-2] == ckA and message[-1] == ckB:
-                return struct.unpack('<H', message[2:4])[0], message[6:-2]
-            #print('Checksum fail')
             more = False
+            ckA, ckB = checksum(message[2:-2])
+            if message[-2] != ckA or message[-1] != ckB:
+                print('Checksum failure')
+                continue
+            code = struct.unpack('<H', message[2:4])[0]
+            if expected is None or code in expected or \
+               code in (0x0105, 0x0005):
+                return code, message[6:-2]
 
     def command(self, b: bytes) -> None:
         serhelper.flushread(self.source)
@@ -129,7 +134,7 @@ class UBloxReader:
         self.get_ack(b)
 
     def get_ack(self, b: bytes) -> None:
-        code, payload = self.get_msg()
+        code, payload = self.get_msg(expected = [])
         # Check we have the correct ACK.
         assert code == 0x0105, f'{code:#x}'
         assert len(payload) == 2
@@ -144,7 +149,7 @@ class UBloxReader:
         serhelper.writeall(self.source,
                            UBloxMsg.get(msg).frame_payload(payload))
         self.source.flush()
-        code, payload = self.get_msg()
+        code, payload = self.get_msg(expected = [msg.code])
         assert code == msg.code, f'{code:#x}'
         if ack:
             self.get_ack(b)

@@ -7,7 +7,7 @@ import struct
 import re
 
 from dataclasses import dataclass
-from typing import Callable, Tuple
+from typing import Any, Callable, Tuple
 
 '''Extract the bit position suffix from a field name.'''
 SUBNAME_RE = re.compile(r'([^:]+)(_(\d+):(\d+))?$')
@@ -116,8 +116,9 @@ class Register:
         try:
             return REGISTERS[key]
         except KeyError:
-            print('Did you mean?',
-                  difflib.get_close_matches(key, REGISTERS))
+            prompt = ' '.join(difflib.get_close_matches(key, REGISTERS))
+            if prompt:
+                print(f'Did you mean: {prompt}?')
             raise
 
 DATA_SIZE = 500
@@ -197,6 +198,23 @@ class MaskedBytes:
             j = r.base_address + i
             self.data[j] = (self.data[j] & ~mask[i]) | (data[i] & mask[i])
             self.mask[j] |= mask[i]
+
+    def __getattr__(self, key: str) -> int:
+        try:
+            reg = Register.get(key)
+        except KeyError:
+            raise AttributeError()
+        return self.extract(reg)
+
+    def __setattr__(self, key: str, value: Any) -> None:
+        if key in ('data', 'mask'):
+            super.__setattr__(self, key, value)
+            return
+        try:
+            reg = Register.get(key)
+        except KeyError:
+            raise AttributeError()
+        self.insert(reg, int(value))
 
 def validate_addresses(addresses: list[Address]) -> None:
     '''Check that each Address has the bytes exactly covered.'''

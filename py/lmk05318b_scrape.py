@@ -40,7 +40,7 @@ FIELD_RE = re.compile(
 is split over multiple lines.'''
 CONT_RE = re.compile(r'\s{12,28}([\w:]+)\b')
 
-addresses = []
+addresses = {}
 address = None
 # Field currently being processed.
 field = None
@@ -80,7 +80,8 @@ for L in open(args.INPUT):
         rnum_hex = int(rs.group(2), 16)
         assert rnum_dec == rnum_hex
         address = Address(rnum_dec, [])
-        addresses.append(address)
+        assert not rnum_dec in addresses
+        addresses[rnum_dec] = address
 
     f = FIELD_RE.match(L)
     if not f:
@@ -102,54 +103,99 @@ for L in open(args.INPUT):
 
 eject_field()
 
+# Validate what we read from the .txt file.
+for address in addresses.values():
+    address.validate()
+
 # Not all are documented..
 #
 # The DPLL_PL_{LOCK|UNLK}_THRESH: Not sure how many bits these actually are!
 # The mapping from value to time appears to depend on the loop B/W and appears
 # to be exponential.
-addresses.append(
-    Address(301, [Field('DPLL_PL_LOCK_THRESH', 7, 0, 'R/W', 0, 301)]))
-addresses.append(
-    Address(302, [Field('DPLL_PL_UNLK_THRESH', 7, 0, 'R/W', 0, 302)]))
+# (They appear to be six bits.)
 
-# From the TICS GUI APLL2 tab:
-# We should insert these sometime!
-#Field('PLL2_ORDER', 2, 0, 'R/W', 0, 139)
-#Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139)
-#Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105)
-
-# Various undocumented fields are set in the TICS file.  Some are observed to
-# change with the configuration, and influence output frequencies (PLL2 in
-# particular.)
-if args.tics:
-    seen = set(address.address for address in addresses)
-    tf = tics.read_tcs_file(args.tics)
-    for a, m in enumerate(tf.mask):
-        if m != 0 and not a in seen:
-            val = tf.data[a]
-            addresses.append(
-                Address(a, [Field(f'UNKNOWN{a}', 7, 0, 'R/W', val, a)]))
-
-addresses.sort(key = lambda address: address.address)
-for index, a in enumerate(addresses):
-    assert a.address == index
-
-for address in addresses:
+def extra_field(field):
+    if field.address in addresses:
+        address = addresses[field.address]
+        address.fields.append(field)
+    else:
+        address = Address(field.address, [field])
+        addresses[field.address] = address
+    #print()
+    #for f in address.fields:
+    #    print(repr(f))
+    # Now redo the reserved fields...
+    unseen = [True] * 8
+    reset = 0
+    new_fields = []
+    for f in address.fields:
+        reset |= f.reset << f.byte_lo
+        if f.name != 'RESERVED':
+            new_fields.append(f)
+            for i in range(f.byte_lo, f.byte_hi + 1):
+                unseen[i] = False
+    base = None
+    #print(unseen)
+    for i, u in enumerate(unseen):
+        if not u:
+            continue
+        if base is None:
+            base = i
+        if i == 7 or not unseen[i+1]:
+            rst = reset >> base & (1 << i - base + 1) - 1
+            new_fields.append(Field(
+                'RESERVED', i, base, 'R', rst, address.address))
+            base = None
+    new_fields.sort(key = lambda f: -f.byte_lo)
+    address.fields = new_fields
+    #print()
+    #for f in address.fields:
+    #    print(repr(f))
     address.validate()
 
-registers = lmk05318b.build_registers(addresses)
+# From the TICS GUI:
+
+extra_field(Field('DPLL_PL_LOCK_THRESH', 5, 0, 'R/W', 0, 301))
+extra_field(Field('DPLL_PL_UNLK_THRESH', 5, 0, 'R/W', 0, 302))
+
+extra_field(Field('SYNC_SW', 6, 6, 'R/W', 0, 12))
+extra_field(Field('SYNC_MUTE', 3, 3, 'R/W', 0, 12))
+extra_field(Field('SYNC_AUTO_APLL', 4, 4, 'R/W', 0, 12))
+extra_field(Field('PLL2_ORDER', 2, 0, 'R/W', 0, 139))
+extra_field(Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139))
+extra_field(Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105))
+
+# Various undocumented fields are set in the TICS file.  Some are observed to
+# change with the configuration, and influence outputs.
+if args.tics:
+    tf = tics.read_tcs_file(args.tics)
+    for a, m in enumerate(tf.mask):
+        if m != 0 and not a in addresses:
+            val = tf.data[a]
+            addresses[a] = \
+                Address(a, [Field(f'UNKNOWN{a}', 7, 0, 'R/W', val, a)])
+
+for address in addresses.values():
+    address.validate()
+
+address_list = list(addresses.values())
+address_list.sort(key = lambda a: a.address)
+
+registers = lmk05318b.build_registers(address_list)
 
 def print_list_file(out: Any, registers: dict[str, Register]) -> None:
-    for r in registers.values():
+    regs = list(registers.values())
+    regs.sort(key = lambda r: (r.base_address, -r.shift))
+    for r in regs:
         print(f'{r.name:20}: {r.access:3} {r.base_address:3}', file=out, end='')
-        if r.shift != 0:
+        if r.shift != 0 or r.width < 8:
             print(f'.{r.shift}', file=out, end='')
         print(f':{r.width}', file=out, end='')
         if r.byte_span != 1:
             print(f' ({r.byte_span})', file=out, end='')
         if r.reset != 0:
             if r.width <= 4:
-                print(f' = {r.reset:}', file=out, end='')
+                print(f' = {r.reset}', file=out, end='')
             else:
                 w = (r.width + 3) // 4 + 2
                 print(f' = {r.reset:#0{w}x}', file=out, end='')
@@ -161,4 +207,4 @@ else:
     print_list_file(sys.stdout, registers)
 
 if args.output is not None:
-    pickle.dump(addresses, open(args.output, 'wb'))
+    pickle.dump(address_list, open(args.output, 'wb'))

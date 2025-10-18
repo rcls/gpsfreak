@@ -13,11 +13,10 @@ from dataclasses import dataclass
 from typing import Any, Generator, Tuple
 from usb.core import Device as USBDevice
 
-# U+03C1 GREEK SMALL LETTER RHO UTF-8: 0xCF 0x81
 # U+03A6 GREEK CAPITAL LETTER PHI UTF-8: 0xCE 0xA6
 # r 0x72
 # K 0x4b
-# ΦrK is ce a6 72 4b
+# ΦrK UTF-8 is CE A6 72 4B
 '''Magic number for the config structure.'''
 MAGIC = 0x4b72a6ce
 
@@ -25,7 +24,11 @@ MAGIC = 0x4b72a6ce
 VERSION = 1
 
 # For the LMK05318b, we skip some feedback and the NVM related addresses.
-SKIP = 123, 124, 125, 126, 127, 155, 156, 157, 158, 159, 161, 162, 164
+SKIP = list(range(12))         # Not writeable.
+SKIP += 13, 14, 17, 18, 19, 20 # LOL flags and their interrupts.
+SKIP += 123, 124, 125, 126, 127 # PLL1 volatile.
+SKIP += 155, 156, 157, 158, 159, 161, 162, 164 # NVM.
+SKIP += 168, # DPLL status.
 
 # Addresses of the configs in flash.
 ADDRESSES = list(range(0x0800c000, 0x08010000, 2048)) + \
@@ -56,7 +59,7 @@ def load_lmk05318b(dev: USBDevice) -> MaskedBytes:
     data = MaskedBytes()
 
     for a in lmk05318b.ADDRESSES:
-        if a.address >= 12 and not a.address in SKIP:
+        if not a.address in SKIP:
             data.mask[a.address] = 0xff
     # Now grab the data...
     for address, length in data.ranges(max_block = 32):
@@ -152,39 +155,21 @@ def compare_config(dev: USBDevice, h: Config, new: bytes) -> bool:
 def add_live_lmk05318b(dev: USBDevice, b: bytearray) -> None:
     lmk_config = load_lmk05318b(dev)
 
-    reset_sw = lmk05318b.Register.get('RESET_SW')
-    pll1_pdn = lmk05318b.Register.get('PLL1_PDN')
-    pll2_pdn = lmk05318b.Register.get('PLL2_PDN')
+    orig_reset_sw = lmk_config.RESET_SW
 
-    orig_reset_sw = lmk_config.extract(reset_sw)
-    orig_pll1_pdn = lmk_config.extract(pll1_pdn)
-    orig_pll2_pdn = lmk_config.extract(pll2_pdn)
+    lmk_config.RESET_SW = 1
 
-    # FIXME - we want RESET_SW=1 here?
-    lmk_config.insert(reset_sw, 0)
-    lmk_config.insert(pll1_pdn, 1)
-    lmk_config.insert(pll2_pdn, 1)
-
-    def set_reg(r: Register) -> None:
-        lmk05318b_write(b, r.base_address, lmk_config.data[r.base_address])
-
-    set_reg(reset_sw)
+    # Send the RESET_SW first.
+    lmk05318b_write(b, 12, lmk_config.data[12])
 
     for address, chunk in lmk_config.bundle(max_block = 32).items():
         #print(f'@ {address} : {chunk.hex(" ")}')
         lmk05318b_write(b, address, chunk)
 
-    lmk_config.insert(reset_sw, orig_reset_sw)
-    lmk_config.insert(pll1_pdn, orig_pll1_pdn)
-    lmk_config.insert(pll2_pdn, orig_pll2_pdn)
-
-    # FIXME and here.
-    if orig_reset_sw != 0:
-        set_reg(reset_sw)
-    if orig_pll1_pdn != 1:
-        set_reg(pll1_pdn)
-    if orig_pll2_pdn != 1:
-        set_reg(pll2_pdn)
+    # Clear RESET_SW.
+    if orig_reset_sw != 1:
+        lmk_config.RESET_SW = orig_reset_sw
+        lmk05318b_write(b, 12, lmk_config.data[12])
 
 def set_ubx(b: bytearray, kv: list[Tuple[UBloxCfg, Any]]) -> None:
     # We could be smarter about the chunking...
@@ -345,8 +330,9 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp = argp.add_subparsers(dest=dest, metavar=metavar,
                                required=True, help='Sub-command')
     save = subp.add_parser(
-        'save', description='Save device configuration to flash.',
-        help='Save device config to flash')
+        'save', help='Save device config to flash',
+        description='''Save full device configuration to flash.  This saves
+        changes both to the clock generator and GPS configuration.''')
     save.add_argument('-n', '--dry-run', action='store_true', default=False,
                       help="Don't actually write to flash.")
 

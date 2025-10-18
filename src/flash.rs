@@ -6,7 +6,7 @@ pub type Mem32 = [u32; 8];
 
 pub type Result = core::result::Result<(), ()>;
 
-macro_rules!dbgln {($($tt:tt)*) => {if true {crate::dbgln!($($tt)*)}};}
+macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub unsafe fn program32(address: usize, data: &Mem32) -> Result {
     let flash = unsafe {&*stm32h503::FLASH::ptr()};

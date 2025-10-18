@@ -220,6 +220,10 @@ pub mod interrupt {
     /// Interrupt priority for application processing.
     pub const PRIO_APP: u8 = 0x80;
 
+    /// Interrupt priority for status led updates.  Lowest priority, incase it
+    /// spins.  TODO - rate limit that interrupt.
+    pub const PRIO_STATUS: u8 = PRIO_APP | 0x10;
+
 
     // We don't use disabling interrupts to transfer ownership, so no need for
     // the enable to be unsafe.

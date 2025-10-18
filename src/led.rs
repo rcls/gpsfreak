@@ -14,11 +14,10 @@ use stm32h503::Interrupt::TIM3 as INTERRUPT;
 use crate::cpu::interrupt::PRIO_LED as PRIORITY;
 type Priority = crate::cpu::Priority<PRIORITY>;
 
-type FiveHz = UCell<LedTimer<1000, 1000, LedLine>>;
+type FiveHz<T> = UCell<LedTimer<1000, 1000, T>>;
 
-pub static BLUE : FiveHz = new(1);
-pub static GREEN: FiveHz = new(2);
-pub static RED  : FiveHz = new(3);
+pub static BLUE : FiveHz<Blue> = Default::default();
+pub static RED_GREEN: FiveHz<RedGreen> = Default::default();
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
@@ -44,24 +43,39 @@ pub fn init() {
     // Both the interrupt, and the callers into this code, should run at the
     // same priority.
     interrupt::enable_priority(INTERRUPT, PRIORITY);
-
-    if false {
-        unsafe {BLUE.as_mut()}.set(true);
-    }
 }
 
 #[derive_const(Default)]
-pub struct LedLine{line: u8}
+pub struct Blue;
 
-impl LedTrait for LedLine {
+impl LedTrait for Blue {
     fn set(&mut self, state: bool) {
         let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        // This gives negative polarity as wanted.
-        gpioa.BSRR.write(|w| w.bits(1 << self.line + 16 * state as u8));
+        // We drive low for on.
+        gpioa.BSRR.write(|w| w.BR1().set_bit().BS1().bit(!state));
     }
     fn get(&self) -> bool {
         let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        gpioa.ODR.read().bits() & 1 << self.line == 0
+        !gpioa.ODR.read().OD1().bit()
+    }
+}
+
+/// Pair of red and green LEDs.  Positive logic indicator, true = good = green.
+/// Red is PA3, green is PA2.
+#[derive_const(Default)]
+pub struct RedGreen;
+
+impl LedTrait for RedGreen {
+    fn set(&mut self, state: bool) {
+        let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
+        // This gives negative polarity as wanted.
+        gpioa.BSRR.write(
+            |w|w.BR2().set_bit().BR3().set_bit()
+                .BS2().bit(!state).BS3().bit(state));
+    }
+    fn get(&self) -> bool {
+        let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
+        gpioa.ODR.read().OD3().bit()
     }
 }
 
@@ -72,7 +86,7 @@ pub trait LedTrait {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[derive_const(Default)]
-pub struct LedTimer<const ON: i16, const OFF: i16, Led = LedLine> {
+pub struct LedTimer<const ON: i16, const OFF: i16, Led> {
     /// Current state of the LED.
     led: Led,
     /// Next state to move to.
@@ -81,10 +95,6 @@ pub struct LedTimer<const ON: i16, const OFF: i16, Led = LedLine> {
     target: bool,
     /// Time at which the current setting expires.
     expiry: Option<W<i16>>,
-}
-
-const fn new<const ON: i16, const OFF: i16>(line: u8) -> UCell<LedTimer<ON, OFF>> {
-    UCell::new(LedTimer{led: LedLine{line}, ..LedTimer::default()})
 }
 
 fn schedule(deadline: Option<W<i16>>) {
@@ -208,17 +218,17 @@ fn isr() {
             (a, None) => a,
         }
     };
-    let (blue, red, green) = unsafe{(BLUE.as_mut(), RED.as_mut(), GREEN.as_mut())};
+
+    let (blue, red_green) = unsafe{(BLUE.as_mut(), RED_GREEN.as_mut())};
     blue.isr(now);
-    red.isr(now);
-    green.isr(now);
+    red_green.isr(now);
+
     // We make sure that the time is always scheduled in the future, even if
     // there is nothing to do.  Otherwise we need to deal with the ambiguity
     // between timers in the past being processed or late.
     let deadline = W(now) + W(30000);
     let deadline = min(deadline, blue.expiry);
-    let deadline = min(deadline, red.expiry);
-    let deadline = min(deadline, green.expiry);
+    let deadline = min(deadline, red_green.expiry);
     dbgln!("LED {now} {deadline}");
 
     trigger(deadline);

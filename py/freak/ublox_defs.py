@@ -5,7 +5,7 @@ import struct
 
 from typing import Any, Sequence, Tuple, TypeAlias
 
-from .ublox_cfg import UBloxCfg, get_cfg, get_key
+from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
 KeyValue: TypeAlias = Tuple[UBloxCfg, Any]
@@ -73,8 +73,8 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
 
     return configs, messages
 
-def get_cfg_multi(reader: UBloxReader, layer: int,
-                  keys: Sequence[int|str|UBloxCfg]) \
+def get_config(reader: UBloxReader, layer: int,
+               keys: Sequence[int|str|UBloxCfg]) \
         -> list[KeyValue]:
     assert len(keys) <= 64
     start = 0
@@ -82,7 +82,7 @@ def get_cfg_multi(reader: UBloxReader, layer: int,
 
     key_bin = bytes()
     for key in keys:
-        key_bin += struct.pack('<I', get_key(key))
+        key_bin += struct.pack('<I', UBloxCfg.get_int_key(key))
 
     valget = UBloxMsg.get('CFG-VALGET')
     while True:
@@ -95,7 +95,7 @@ def get_cfg_multi(reader: UBloxReader, layer: int,
             num_items += 1
             assert len(result) - offset > 4
             key = struct.unpack('<I', result[offset:offset + 4])[0]
-            cfg = get_cfg(key)
+            cfg = UBloxCfg.get_key_for_int(key)
             val_byte_len = cfg.val_byte_len()
             #print(repr(cfg), val_byte_len)
             offset += 4 + val_byte_len
@@ -106,10 +106,10 @@ def get_cfg_multi(reader: UBloxReader, layer: int,
         if num_items < 64:
             return items
 
-def get_cfg_changes(dev: UBloxReader,
-                    key: int = 0xffffffff) -> list[Tuple[UBloxCfg, Any, Any]]:
-    live = get_cfg_multi(dev, 0, [key])
-    rom  = get_cfg_multi(dev, 7, [key])
+def get_config_changes(dev: UBloxReader, key: int = 0xffffffff) \
+        -> list[Tuple[UBloxCfg, Any, Any]]:
+    live = get_config(dev, 0, [key])
+    rom  = get_config(dev, 7, [key])
     live.sort(key=lambda x: x[0].key & 0x0fffffff)
     rom .sort(key=lambda x: x[0].key & 0x0fffffff)
 

@@ -24,8 +24,9 @@ subp = argp.add_subparsers(
 
 FREQ_EPILOG='''Each frequency on the command line corresponds to a device output
     connector.  Use 0 to turn an output off.  The frequency can be specified as
-    either fraction (315/88) or a decimal number (3.579545), with an optional
-    unit that defaults to MHz.  Note that fractions avoid rounding errors.'''
+    either a fraction (315/88) or a floating-point number (3.579545), with an
+    optional unit that defaults to MHz.  Note that fractions avoid rounding
+    errors.'''
 
 freq = subp.add_parser(
     'freq', aliases=['frequency'], help='Program/report frequencies',
@@ -36,6 +37,9 @@ freq = subp.add_parser(
 
 freq.add_argument('FREQ', nargs='*', type=lmk05318b_plan.str_to_freq,
                   help='Frequencies for each output')
+
+subp.add_parser(
+    'drive', help='Report output drive', description='Report output drive.')
 
 info = subp.add_parser(
     'info', help='Basic device info', description='Basic device info')
@@ -122,6 +126,9 @@ elif args.command == 'freq':
         lmk05318b_util.do_freq(device, args.FREQ, False)
     else:
         lmk05318b_util.report_freq(device, False)
+
+elif args.command == 'drive':
+    lmk05318b_util.report_driveout(device)
 
 elif args.command == 'save':
     config.save_config(device, save_ubx=False, save_lmk = True,

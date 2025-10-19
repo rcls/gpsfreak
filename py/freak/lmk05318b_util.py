@@ -24,23 +24,23 @@ CHANNELS_COOKED = [
 
 DRIVES = {
     'off'  : (0, 0, 0, 'Off'),
-    'lvds' : (1, 0, 0, 'LVDS, 4mA'),
-    'lvds4': (1, 0, 0, 'LVDS, 4mA'),
-    'lvds6': (1, 1, 0, 'LVDS, 6mA'),
-    'lvds8': (1, 2, 0, 'LVDS, 8mA'),
+    'lvds' : (1, 0, 0, 'LVDS 4mA'),
+    'lvds4': (1, 0, 0, 'LVDS 4mA'),
+    'lvds6': (1, 1, 0, 'LVDS 6mA'),
+    'lvds8': (1, 2, 0, 'LVDS 8mA'),
 }
 CMOS_DRIVES = ('z', 'hi-Z'), ('0', 'low'), ('-', 'inverted'), ('+', 'normal')
 for v1, (l1, d1) in enumerate(CMOS_DRIVES):
     for v2, (l2, d2) in enumerate(CMOS_DRIVES):
         DRIVES['cmos' + l1 + l2] = (3, v1, v2, f'CMOS, {d1}+{d2}')
+DRIVES_BY_SEL = {
+    (s, d, e): (tag, name) for tag, (s, d, e, name) in DRIVES.items()}
 
 def get_ranges(dev: Device, data: MaskedBytes,
                ranges: list[Tuple[int, int]]) -> None:
     for base, span in ranges:
-        segment = message.lmk05318b_read(dev.get_usb(), base, span)
-        assert len(segment) == span
-        #print(segment)
-        data.data[base : base + span] = segment
+        data.data[base : base + span] = \
+            message.lmk05318b_read(dev.get_usb(), base, span)
 
 def do_get(dev: Device, registers: list[Register]) -> None:
     data = MaskedBytes()
@@ -86,20 +86,18 @@ def report_plan(plan: PLLPlan, raw: bool) -> None:
     if plan.freq_target == 0:
         print('PLL2 not used')
     else:
-        print(f'PLL2: VCO {freq_to_str(plan.freq)}, multiplier = /{plan.fpd_divide} * {plan.multiplier}', end='')
-        if plan.freq == plan.freq_target:
-            print()
-        else:
-            print(f' (target {float(plan.freq_target)} MHz) error={freq_to_str(plan.error_hz())}')
+        print(f'PLL2: {freq_to_str(plan.freq)} = 2500 / {plan.fpd_divide} * {plan.multiplier}')
+        if plan.freq != plan.freq_target:
+            print(f'    target {freq_to_str(plan.freq_target)}, error {freq_to_str(plan.error())}')
 
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     for index, name, _ in channels:
         f = plan.freqs[index]
-        pd, s1, s2 = plan.dividers[index]
         if not f:
             continue
+        pd, s1, s2 = plan.dividers[index]
         pll = 1 if pd == 0 else 2
-        print(f'    {name} {freq_to_str(f)} PLL{pll} dividers', end='')
+        print(f'{name} {freq_to_str(f)} PLL{pll} dividers', end='')
         if pll == 2:
             print(f' {pd}', end='')
         print(f' {s1}', end='')
@@ -212,58 +210,129 @@ def do_freq(dev: Device, freq: list[Fraction], raw: bool) -> None:
     # Force an update of the status LEDs.
     message.lmk05318b_status(dev.get_usb())
 
+def set_drives(dev: Device, drives: list[str | None]) -> None:
+    data = MaskedBytes()
+
+    assert len(drives) == 8
+    for ch, drive in enumerate(drives):
+        if drive is None:
+            continue
+        if drive.startswith('cmos'):
+            assert ch >= 4
+        assert drive in DRIVES
+        sel, mode1, mode2, _ = DRIVES[drive]
+        data.insert(f'OUT{ch}_SEL', sel)
+        data.insert(f'OUT{ch}_MODE1', mode1)
+        data.insert(f'OUT{ch}_MODE2', mode2)
+
+    masked_write(dev, data)
+
+
 def do_drive(dev: Device, drives: list[Tuple[str, str]],
              defaults: bool) -> None:
-    data = MaskedBytes()
     if defaults:
         drives = [('0', 'lvds8'), ('1', 'off'), ('2', 'lvds8'), ('3', 'off'),
                   ('4', 'off'), ('5', 'off'), ('6', 'cmos+z'), ('7', 'lvds8')] \
                   + drives
+    expanded: list[None|str] = [None] * 8
     for ch, drive in drives:
         assert len(ch) == 1 and ch >= '0' and ch < '8'
-        channels = [ch]
-        if drive.startswith('2'):
-            assert ch == '0' or ch == '2'
-            channels.append('1' if ch == '0' else '3')
-            drive = drive[1:]
         if drive.startswith('cmos'):
             assert ch >= '4'
-        assert drive in DRIVES
-        sel, mode1, mode2, _ = DRIVES[drive]
-        for c in channels:
-            data.insert(Register.get(f'OUT{c}_SEL'), sel)
-            data.insert(Register.get(f'OUT{c}_MODE1'), mode1)
-            data.insert(Register.get(f'OUT{c}_MODE2'), mode2)
+        if drive.startswith('2'):
+            assert ch == '0' or ch == '2'
+            drive = drive[1:]
+            expanded[int(ch)+1] = drive
+        expanded[int(ch)] = drive
 
-    masked_write(dev, data)
+    set_drives(dev, expanded)
+
+def do_driveout(dev: Device, drives: list[Tuple[str, str]],
+                defaults: bool) -> None:
+    indexes = {'1': 2, '2': 0, '3': 7, '4': 6, '5': 5, '4': 4}
+    expanded: list[str | None] = [None] * 8
+    for ch, drive in drives:
+        index = indexes[ch]
+        if index >= 4:
+            expanded[index] = drive
+        elif drive.startswith('2'):
+            expanded[index] = expanded[index+1] = drive[1:]
+        elif drive.startswith('lvds'):
+            split = {'': '40', '4': '40', '6': '60', '8': '80',
+                     '10': '64', '12': '66', '14': '86', '16': '88'}[drive[4:]]
+            expanded[index] = 'lvds{split[0]}' if split[0] != '0' else 'off'
+            expanded[index+1] = 'lvds{split[1]}' if split[1] != '0' else 'off'
+        else:
+            expanded[index] = drive
+            expanded[index+1] = 'off'
+
+    set_drives(dev, expanded)
+
+def drive_description(sel: int, mode1: int, mode2: int) -> str:
+    '''Return a description of a LMK05313b output, given the three config
+    registers for it.'''
+    try:
+        tag, name = DRIVES_BY_SEL[sel, mode1, mode2]
+        return f'{name} [{tag}]'
+    except KeyError:
+        return f'sel={sel} mode1={mode1} mode2={mode2}'
+
+def drive_config(data: MaskedBytes, num: int|str) -> Tuple[int, int, int]:
+    '''Return the three config registers for a LMK05313b output.'''
+    sel   = data.extract(f'OUT{num}_SEL')
+    mode1 = data.extract(f'OUT{num}_MODE1')
+    mode2 = data.extract(f'OUT{num}_MODE2')
+    return sel, mode1, mode2
 
 def report_drive(dev: Device) -> None:
     data = MaskedBytes()
     base, length = 50, 24
     drives_data = message.lmk05318b_read(dev.get_usb(), base, length)
-    assert len(drives_data) == length
     data.data[base : base + length] = drives_data
 
-    drives = []
-
     pdowns = '0_1 0_1 2_3 2_3 4 5 6 7'.split()
-    for i in range(8):
-        pdown = data.extract(f'CH{pdowns[i]}_PD')
-        sel   = data.extract(f'OUT{i}_SEL')
-        mode1 = data.extract(f'OUT{i}_MODE1')
-        mode2 = data.extract(f'OUT{i}_MODE2')
-        drives.append((pdown, sel, mode1, mode2))
 
-    for i, (pdown, sel, mode1, mode2) in enumerate(drives):
-        print(f'Channel {i}: ', end='')
-        if pdown:
-            print('Power down, ', end='')
-        for tag, (s, m1, m2, name) in DRIVES.items():
-            if sel == s and mode1 == m1 and mode2 == m2:
-                print(name, f'[{tag}]')
-                break
-        else:
-            print(f'sel={sel} mode1={mode1} mode2={mode2}')
+    for i, pd in enumerate(pdowns):
+        pdown = ' Power down,' if data.extract(f'CH{pd}_PD') else ''
+        print(f'Channel {i}:{pdown}',
+              drive_description(*drive_config(data, i)))
+
+def report_driveout(dev: Device) -> None:
+    '''Describe the device output drives.'''
+    data = MaskedBytes()
+    base, length = 50, 24
+    drives_data = message.lmk05318b_read(dev.get_usb(), base, length)
+    data.data[base : base + length] = drives_data
+
+    for _, name, outs in CHANNELS_COOKED:
+        pdown = ' Power down,' if data.extract(f'CH{outs}_PD') else ''
+        sel, mode1, mode2 = drive_config(data, outs[0])
+        if len(outs) == 1:
+            # The simple case, a single LMK05318b output drives the device
+            # output.
+            print(f'{name}:{pdown}', drive_description(sel, mode1, mode2))
+            continue
+        selb, mode1b, mode2b = drive_config(data, outs[2])
+        # If both are LVDS, then report the total current.  Otherwise
+        # just report ad hoc.
+        if sel in (0, 3) and selb in (0, 3):
+            print(f'{name}:{pdown} Off [2off]')
+            continue
+        if not sel == 2 and not selb == 2:
+            # One is LVDS and the other is either LVDS or off.
+            ca = (4, 6, 8, 8)[mode1] if sel == 1 else 0
+            cb = (4, 6, 8, 8)[mode1b] if selb == 1 else 0
+            c = ca + cb
+            if ca == cb:
+                tag = f'2lvds{ca}'
+            else:
+                ta = f'lvds{ca}' if ca else 'off'
+                tb = f'lvds{cb}' if cb else 'off'
+                tag = f'{ta} {tb}'
+            print(f'{name}:{pdown} LVDS {c}mA [{tag}]')
+            continue
+        print(f'{name}:{pdown}', drive_description(sel, mode1, mode2),
+              '+', drive_description(selb, mode1b, mode2b))
 
 def report_freq(dev: Device, raw: bool) -> None:
     data = MaskedBytes()
@@ -296,11 +365,9 @@ def report_freq(dev: Device, raw: bool) -> None:
     baw_freq = Fraction(reference) / dpll_priref_rdiv \
         * 2 * dpll_ref_fb_pre_div * (
             dpll_ref_fb_div + Fraction(dpll_ref_num, dpll_ref_den))
-    print(f'BAW frequency = {freq_to_str(baw_freq)}')
 
     pll2_freq = baw_freq / pll2_rdiv_pre / pll2_rdiv_sec * (
         pll2_ndiv + Fraction(pll2_num, pll2_den))
-    print(f'PLL2 frequency = {freq_to_str(pll2_freq)}')
 
     for _, name, ch in CHANNELS_RAW if raw else CHANNELS_COOKED:
         mux = data.extract(f'CH{ch}_MUX')
@@ -318,7 +385,9 @@ def report_freq(dev: Device, raw: bool) -> None:
             pd = ' (power down)'
         else:
             pd = ''
-        print(f'{name} frequency = {freq_to_str(ch_freq)}{pd}')
+        print(f'{name} {freq_to_str(ch_freq)}{pd}')
+    print(f'BAW         {freq_to_str(baw_freq)}')
+    print(f'PLL2        {freq_to_str(pll2_freq)}')
 
 def do_status(dev: Device) -> None:
     data = MaskedBytes()
@@ -360,12 +429,19 @@ def add_to_argparse(argp: argparse.ArgumentParser,
             raise ValueError
     register_lookup.__name__ = 'register name'
 
-    def key_value(s: str) -> Tuple[Register, int]:
+    def reg_key_value(s: str) -> Tuple[Register, int]:
         if not '=' in s:
             raise ValueError('Key/value pairs must be in the form KEY=VALUE')
         K, V = s.split('=', 1)
         return register_lookup(K), int(V, 0)
-    key_value.__name__ = 'key / value pair'
+    reg_key_value.__name__ = 'register key=value pair'
+
+    def key_value(s: str) -> Tuple[str, str]:
+        if not '=' in s:
+            raise ValueError('Key/value pairs must be in the form KEY=VALUE')
+        k, v =  s.split('=', 1)
+        return k, v
+    key_value.__name__ = 'key=value pair'
 
     subp = argp.add_subparsers(
         dest=dest, metavar=metavar, required=True, help='Sub-command')
@@ -417,7 +493,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     valset = subp.add_parser(
         'set', help='Set registers', description='Set registers')
-    valset.add_argument('KV', type=key_value, nargs='+',
+    valset.add_argument('KV', type=reg_key_value, nargs='+',
                         metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
     valget = subp.add_parser(

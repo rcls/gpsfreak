@@ -6,6 +6,7 @@ from .lmk05318b import MaskedBytes, Register
 from .message import lmk05318b_read, lmk05318b_write
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxReader
+from .ublox_defs import get_config_changes
 
 import argparse, struct
 
@@ -184,8 +185,8 @@ def set_ubx(b: bytearray, kv: list[Tuple[UBloxCfg, Any]]) -> None:
 def add_live_baud_rate(ubx: UBloxReader, b: bytearray) -> None:
     # Load the GPS config.  First, the baud rates...
     cfg_baud = UBloxCfg.get('UART1-BAUDRATE')
-    (_, baud_rom), = ublox_defs.get_cfg_multi(ubx, 7, [cfg_baud])
-    (_, baud_now), = ublox_defs.get_cfg_multi(ubx, 0, [cfg_baud])
+    (_, baud_rom), = ublox_defs.get_config(ubx, 7, [cfg_baud])
+    (_, baud_now), = ublox_defs.get_config(ubx, 0, [cfg_baud])
 
     message.set_baud(b, baud_rom)
     message.serial_sync(b, 100000)
@@ -198,7 +199,7 @@ def add_live_baud_rate(ubx: UBloxReader, b: bytearray) -> None:
 
 def add_live_ublox(ubx: UBloxReader, b: bytearray) -> None:
     cfg_baud = UBloxCfg.get('UART1-BAUDRATE')
-    changes = [(key, now) for key, now, _ in ublox_defs.get_cfg_changes(ubx)
+    changes = [(key, now) for key, now, _ in get_config_changes(ubx)
                if key != cfg_baud]
     set_ubx(b, changes)
 
@@ -330,7 +331,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp = argp.add_subparsers(dest=dest, metavar=metavar,
                                required=True, help='Sub-command')
     save = subp.add_parser(
-        'save', help='Save device config to flash',
+        'save', help='Save all device config to flash',
         description='''Save full device configuration to flash.  This saves
         changes both to the clock generator and GPS configuration.''')
     save.add_argument('-n', '--dry-run', action='store_true', default=False,

@@ -70,11 +70,16 @@ class UBloxCfg:
 
     @staticmethod
     def get(key: int|str|UBloxCfg) -> UBloxCfg:
-        if type(key) == UBloxCfg:
+        if isinstance(key, UBloxCfg):
             return key
-        if type(key) == int:
+        if isinstance(key, str):
+            try:
+                key = int(key, 0)
+            except ValueError:
+                pass
+        if isinstance(key, int):
             return CONFIGS_BY_KEY[key]
-        assert type(key) == str
+
         # Normalisation:
         # Upper case.
         # Remove 'CFG-' prefix.
@@ -88,31 +93,34 @@ class UBloxCfg:
                   difflib.get_close_matches(key, CONFIGS_BY_NAME))
             raise
 
+    @staticmethod
+    def get_int_key(key: int|str|UBloxCfg) -> int:
+        '''Return an integer for a key.  An unknown key can be specified as
+        a number or a numeric string.'''
+        if isinstance(key, int):
+            return key
+        if isinstance(key, str):
+            try:
+                return int(key, 0)
+            except ValueError:
+                pass
+        return UBloxCfg.get(key).key
+
+    @staticmethod
+    def get_key_for_int(key: int) -> UBloxCfg:
+        '''Invent a key if none can be found'''
+        if key in CONFIGS_BY_KEY:
+            return CONFIGS_BY_KEY[key]
+        vb = val_byte_len(key)
+        if key >> 28 == 1:
+            ty = 'L'
+        else:
+            ty = f'X{vb}'
+        return UBloxCfg(f'UNKNOWN-{key:08x}', key, ty)
+
 def add_cfg_list(l: list[UBloxCfg]) -> None:
     for cfg in l:
         CONFIGS_BY_NAME[cfg.name] = cfg
         CONFIGS_BY_KEY [cfg.key ] = cfg
-
-def get_cfg(key: int) -> UBloxCfg:
-    if key in CONFIGS_BY_KEY:
-        return CONFIGS_BY_KEY[key]
-    vb = val_byte_len(key)
-    if key >> 28 == 1:
-        ty = 'L'
-    else:
-        ty = f'X{vb}'
-    return UBloxCfg(f'UNKNOWN-{key:08x}', key, ty)
-
-def get_key(cfg: UBloxCfg|str|int) -> int:
-    if isinstance(cfg, int):
-        return cfg
-    if isinstance(cfg, UBloxCfg):
-        return cfg.key
-    # String...
-    try:
-        return int(cfg, 0)
-    except ValueError:
-        pass
-    return UBloxCfg.get(cfg).key
 
 import freak.ublox_lists

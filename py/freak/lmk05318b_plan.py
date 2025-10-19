@@ -57,8 +57,8 @@ class PLLPlan:
     def __lt__(self, b: PLLPlan) -> bool:
         '''Less is better.  I.e., return True if self is better than b.'''
         # Prefer no error!
-        a_error = abs(self.error())
-        b_error = abs(b.error())
+        a_error = abs(self.error_ratio())
+        b_error = abs(b.error_ratio())
         if a_error != b_error:
             return a_error < b_error
         # Prefer an even stage2 divider (or one): this gives exactly 50/50
@@ -86,9 +86,9 @@ class PLLPlan:
     def validate(self):
         assert self.freq == self.multiplier * BAW_FREQ / fpd_divide
 
-    def error(self) -> float:
+    def error_ratio(self) -> float:
         return float(self.freq / self.freq_target - 1)
-    def error_hz(self) -> Fraction:
+    def error(self) -> Fraction:
         return self.freq - self.freq_target
 
     def fixed_denom(self) -> bool:
@@ -286,7 +286,7 @@ def pll2_plan_low(freqs: list[Fraction], freq: Fraction) -> PLLPlan:
                 if best is None or plan < best:
                     best = plan
     if best is None:
-        fail(f'PLL2 planning failed, frequency {freq}')
+        fail(f'PLL2 planning failed (low), frequency {freq_to_str(freq)}')
     return best
 
 def pll2_plan(freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
@@ -378,7 +378,7 @@ def pll2_plan(freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
         if best is None or plan < best:
             best = plan
     if best is None:
-        fail(f'PLL2 planning failed, LCM = {pll2_lcm}')
+        fail(f'PLL2 planning failed, LCM = {freq_to_str(pll2_lcm)}')
     return best
 
 def add_pll1(plan: PLLPlan, freqs: list[Fraction]) -> None:
@@ -447,6 +447,9 @@ def str_to_freq(s: str) -> Fraction:
         scale = 1000000
 
     return Fraction(s.removesuffix(suffix)) * scale / (1000000 * MHz)
+
+# Set the name of str_to_freq to give sensible argparse help test.
+str_to_freq.__name__ = 'frequency'
 
 FRACTIONS = {
     Fraction(0): '',

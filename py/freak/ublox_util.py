@@ -2,7 +2,7 @@
 
 from freak import config, message, message_util, serhelper, ublox_cfg
 from .freak_util import Device
-from .ublox_defs import parse_key_list, get_cfg_changes, get_cfg_multi
+from .ublox_defs import parse_key_list, get_config_changes, get_config
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
@@ -31,22 +31,32 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp.add_parser('status', description='Basic GPS status info.',
                     help='Basic GPS status info')
 
-    def key_value(s: str) -> Tuple[str, str]:
+    def key_value(s: str) -> Tuple[UBloxCfg, Any]:
         if not '=' in s:
             raise ValueError('Key/value pairs must be in the form KEY=VALUE')
         K, V = s.split('=', 1)
-        return K, V
+        try:
+            cfg = UBloxCfg.get(K)
+        except KeyError:
+            raise ValueError()
+        return cfg, cfg.to_value(V)
+    key_value.__name__ = 'configuration KEY=VALUE pair'
 
-    valset = subp.add_parser(
-        'set', description='Set configuration values.',
-        help='Set configuration values.')
+    def int_key(s: str) -> int:
+        try:
+            return UBloxCfg.get_int_key(s)
+        except KeyError:
+            raise ValueError()
+    int_key.__name__ = 'configuration key'
+
+    valset = subp.add_parser('set', description='Set configuration values.',
+                             help='Set configuration values.')
     valset.add_argument('KV', type=key_value, nargs='+',
                         metavar='KEY=VALUE', help='KEY=VALUE pairs')
 
-    valget = subp.add_parser(
-        'get', description='Get configuration values.',
-        help='Get configuration values.')
-    valget.add_argument('KEY', nargs='+', help='KEYs')
+    valget = subp.add_parser('get', description='Get configuration values.',
+                             help='Get configuration values.')
+    valget.add_argument('KEY', nargs='+', type=int_key, help='KEYs')
     valget.add_argument('-l', '--layer', default=0, type=int,
                         help='Configuration layer to retrieve.')
 
@@ -57,9 +67,9 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     save = subp.add_parser(
         'save', help='Save GPS configuration to flash',
-        description='''Save currently running GPS configuration to flash.  Other
-        configuration saved in flash, such as the LMK05318b clock generator
-        configuration, will be preserved.''')
+        description='''Save currently running GPS configuration to flash.  This
+        will preserve other configuration saved in flash, such as that for the
+        LMK05318b clock generator.''')
     save.add_argument('-n', '--dry-run', action='store_true', default=False,
                       help="Don't actually write to flash.")
 
@@ -89,13 +99,12 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     scrape.add_argument('FILE', help='Text file to parse')
 
-def do_set(reader: UBloxReader, KV: list[Tuple[str, str]]) -> None:
+def do_set(reader: UBloxReader, KV: list[Tuple[UBloxCfg, Any]]) -> None:
     # TODO - this only copes with 64 values!
+    # Also, layers other than live might be useful?
     payload = bytes((0, 1, 0, 0))
-    for K, V in KV:
-        cfg = UBloxCfg.get(K)
-        val = cfg.to_value(V)
-        payload += cfg.encode_key_value(val)
+    for cfg, value in KV:
+        payload += cfg.encode_key_value(value)
     msg = UBloxMsg.get('CFG-VALSET')
 
     message = msg.frame_payload(payload)
@@ -110,12 +119,12 @@ def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
     else:
         return f'{value}'
 
-def do_get(reader: UBloxReader, layer: int, KEYS: list[str]) -> None:
-    for key, value in get_cfg_multi(reader, 0, KEYS):
+def do_get(reader: UBloxReader, layer: int, KEYS: list[int]) -> None:
+    for key, value in get_config(reader, 0, KEYS):
         print(key, '=', fmt_cfg_value(key, value))
 
 def do_dump(reader: UBloxReader, layer: int) -> None:
-    items = get_cfg_multi(reader, layer, [0xffffffff])
+    items = get_config(reader, layer, [0xffffffff])
     items.sort(key=lambda x: x[0].key & 0x0fffffff)
     for cfg, value in items:
         print(cfg, fmt_cfg_value(cfg, value))
@@ -135,7 +144,7 @@ def do_baud(device: Device, baud: int) -> None:
     device.get_ublox().command(msg)
 
 def do_changes(reader: UBloxReader) -> None:
-    for cfg, now, rom in get_cfg_changes(reader):
+    for cfg, now, rom in get_config_changes(reader):
         print(cfg, fmt_cfg_value(cfg, now), 'was', fmt_cfg_value(cfg, rom))
 
 def do_info(reader: UBloxReader) -> None:

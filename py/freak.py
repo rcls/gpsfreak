@@ -14,11 +14,6 @@ import argparse, struct, sys, uuid
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
 
-argp.add_argument('-s', '--serial',
-                  help='Serial port for GPS comms (default is direct USB)')
-argp.add_argument('-b', '--baud', type=int,
-                  help='Baud rate for serial (Default is no change)')
-
 subp = argp.add_subparsers(
     dest='command', metavar='COMMAND', required=True, help='Command')
 

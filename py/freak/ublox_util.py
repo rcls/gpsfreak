@@ -22,6 +22,12 @@ from typing import Any, Tuple
 
 def add_to_argparse(argp: argparse.ArgumentParser,
                     dest: str = 'command', metavar: str = 'COMMAND') -> None:
+    argp.add_argument(
+        '-s', '--serial',
+        help="Serial port for GPS comms (don't use with GPS Freak)")
+    argp.add_argument('-b', '--baud', type=int,
+                      help='Baud rate for serial (Default is no change)')
+
     subp = argp.add_subparsers(dest=dest, metavar=metavar,
                                required=True, help='Sub-command')
 

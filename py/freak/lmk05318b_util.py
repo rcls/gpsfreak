@@ -4,7 +4,7 @@ from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 from .lmk05318b import MaskedBytes, Register
 
 from .freak_util import Device
-from .lmk05318b_plan import PLLPlan, SCALE, str_to_freq, freq_to_str
+from .lmk05318b_plan import FrequencyTarget, PLLPlan, str_to_freq, freq_to_str
 
 import argparse
 import struct
@@ -82,22 +82,19 @@ def do_set(dev: Device, key_values: list[Tuple[Register, int]]) -> None:
         data.insert(r, v)
     masked_write(dev, data)
 
-def report_plan(plan: PLLPlan, raw: bool) -> None:
-    if plan.freq_target == 0:
-        print('PLL2 not used')
-    else:
-        print(f'PLL2: {freq_to_str(plan.freq)} = 2500 / {plan.fpd_divide} * {plan.multiplier}')
-        if plan.freq != plan.freq_target:
-            print(f'    target {freq_to_str(plan.freq_target)}, error {freq_to_str(plan.error())}')
-
+def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     for index, name, _ in channels:
-        f = plan.freqs[index]
-        if not f:
+        t = target.freqs[index]
+        if not t:
             continue
+        f = plan.freqs[index]
         pd, s1, s2 = plan.dividers[index]
         pll = 1 if pd == 0 else 2
-        print(f'{name} {freq_to_str(f)} PLL{pll} dividers', end='')
+        print(f'{name} {freq_to_str(f)}', end='')
+        if f != t:
+            print(f' error {freq_to_str(f - t, 4)}', end='')
+        print(f' PLL{pll} dividers', end='')
         if pll == 2:
             print(f' {pd}', end='')
         print(f' {s1}', end='')
@@ -105,13 +102,18 @@ def report_plan(plan: PLLPlan, raw: bool) -> None:
             print()
         else:
             print(f' {s2}')
+    if plan.freq_target != 0:
+        print()
+        print(f'PLL2: {freq_to_str(plan.freq)} = 2500 / {plan.fpd_divide} * {plan.multiplier}')
+        if plan.freq != plan.freq_target:
+            print(f'    target {freq_to_str(plan.freq_target)}, error {freq_to_str(plan.error(), 4)}')
 
-def make_freq_list(freqs: list[Fraction], raw: bool) -> list[Fraction]:
+def make_freq_list(freqs: list[Fraction], raw: bool) -> FrequencyTarget:
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     result = [Fraction(0)] * max(6, len(freqs))
     for (i, _, _), f in zip(channels, freqs):
         result[i] = f
-    return result
+    return FrequencyTarget(freqs=result)
 
 def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data = MaskedBytes()
@@ -195,8 +197,9 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     return data
 
 def do_freq(dev: Device, freq: list[Fraction], raw: bool) -> None:
-    plan = lmk05318b_plan.plan(make_freq_list(freq, raw))
-    report_plan(plan, raw)
+    target = make_freq_list(freq, raw)
+    plan = lmk05318b_plan.plan(target)
+    report_plan(target, plan, raw)
     data = freq_make_data(plan)
 
     # Software reset.
@@ -342,7 +345,7 @@ def report_freq(dev: Device, raw: bool) -> None:
     ranges = data.ranges(max_block = 30)
     get_ranges(dev, data, ranges)
     # FIXME - retrieve it!
-    reference = Fraction(8844582, SCALE)
+    reference = Fraction(8844582, lmk05318b_plan.SCALE)
     dpll_priref_rdiv    = data.DPLL_PRIREF_RDIV
     dpll_ref_fb_pre_div = data.DPLL_REF_FB_PRE_DIV + 2
     dpll_ref_fb_div     = data.DPLL_REF_FB_DIV
@@ -508,8 +511,9 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
             report_freq(device, True)
 
     elif command == 'plan':
+        target = make_freq_list(args.FREQ, True)
         plan = lmk05318b_plan.plan(make_freq_list(args.FREQ, True))
-        report_plan(plan, True)
+        report_plan(target, plan, True)
 
     elif command == 'drive':
         if args.DRIVE or args.defaults:

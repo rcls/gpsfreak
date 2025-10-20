@@ -117,9 +117,9 @@ if args.command == 'info':
     do_info(device)
 
 elif args.command == 'plan':
-    freqs = lmk05318b_util.make_freq_list(args.FREQ, False)
-    plan = lmk05318b_plan.plan(freqs)
-    lmk05318b_util.report_plan(plan, False)
+    target = lmk05318b_util.make_freq_list(args.FREQ, False)
+    plan = lmk05318b_plan.plan(target)
+    lmk05318b_util.report_plan(target, plan, False)
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:

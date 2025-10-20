@@ -14,6 +14,9 @@ MHz = 1000000 // SCALE
 assert SCALE * MHz == 1000000
 BAW_FREQ = 2_500 * MHz
 
+kHz = Fraction(MHz) / 1000
+Hz = kHz / 1000
+
 # I've only seen TICS Pro use this, which means it's the only possibility that
 # I have PLL2 filter settings for...
 FPD_DIVIDE = 18
@@ -130,6 +133,7 @@ def fract_lcm(a: Fraction|None, b: Fraction|None) -> Fraction|None:
         return b
     if b is None:
         return a
+
     g1 = gcd(a.denominator, b.denominator)
     g2 = gcd(a.numerator, b.numerator)
     u = (a.denominator // g1) * (b.numerator // g2)
@@ -496,6 +500,7 @@ def plan(target: FrequencyTarget) -> PLLPlan:
             pll2_lcm = fract_lcm(pll2_lcm, f)
 
     if pll2_lcm is None:
+        # Don't use PLL2...
         plan = PLLPlan()
         plan.freqs = [zero] * len(target.freqs)
         plan.dividers = [(0, 0, 0)] * len(target.freqs)
@@ -540,25 +545,26 @@ FRACTIONS = {
 
 def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
     if freq >= 1000000 * MHz:
-        scaled = freq / (MHz * 1000000)
+        scaled = freq / (Fraction(MHz) * 1000000)
         suffix = 'THz'
     elif freq >= 10_000 * MHz: # Report VCO frequencies in MHz.
-        scaled = freq / (MHz * 1000)
+        scaled = freq / (Fraction(MHz) * 1000)
         suffix = 'GHz'
     elif freq >= MHz:
-        scaled = freq / MHz
+        scaled = freq / Fraction(MHz)
         suffix = 'MHz'
-    elif freq * 1000 >= MHz:
-        scaled = freq * 1000 / MHz
+    elif freq >= kHz:
+        scaled = freq / kHz
         suffix = 'kHz'
     else:
-        scaled = freq * 1000000 / MHz
+        scaled = freq / Hz
         suffix = 'Hz'
 
     fract = scaled % 1
     fract_str = None
     if not isinstance(fract, float) and fract in FRACTIONS:
         fract_str = FRACTIONS[fract]
+
     elif isinstance(fract, Fraction) and (
             fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19):
         fract_str = f'+' + str(fract)

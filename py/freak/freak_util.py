@@ -38,7 +38,8 @@ class Device:
         if self.serial is not None:
             return self.serial
 
-        if self.args is not None and self.args.serial is not None:
+        if self.args is not None and \
+           getattr(self.args, 'serial', None) is not None:
             self.serial = Serial(self.args.serial)
         else:
             self.serial = USBEndpointIO(self.get_usb(), 0, 0x01, 0x81)

@@ -6,33 +6,31 @@ from math import gcd
 from typing import Tuple
 
 # All the frequencies are in MHz.
-SCALE = 1000000
-MHz = 1000000 // SCALE
-assert SCALE * MHz == 1000000
-BAW_FREQ = 2_500 * MHz
-
-kHz = Fraction(MHz) / 1000
+MHz = Fraction(1)
+kHz = MHz / 1000
 Hz = kHz / 1000
 
-REF_FREQ: Fraction = 8844582 * Hz
+BAW_FREQ = 2_500 * MHz
+
+REF_FREQ = 8844582 * Hz
 
 # I've only seen TICS Pro use this, which means it's the only possibility that
 # I have PLL2 filter settings for...
 FPD_DIVIDE = 18
-PLL2_PFD = Fraction(BAW_FREQ, FPD_DIVIDE)
+PLL2_PFD = BAW_FREQ / FPD_DIVIDE
+
+# PLL1 frequency range.  ±50ppm
+BAW_LOW  = BAW_FREQ + BAW_FREQ * 50 / 1000000
+BAW_HIGH = BAW_FREQ - BAW_FREQ * 50 / 1000000
 
 # This is the official range of the LMK05318b...
 OFFICIAL_PLL2_LOW = 5_500 * MHz
 OFFICIAL_PLL2_HIGH = 6_250 * MHz
 
-# PLL1 frequency range.
-BAW_LOW  = 2500 * MHz * Fraction(1000000 - 100, 1000000)
-BAW_HIGH = 2500 * MHz * Fraction(1000000 + 100, 1000000)
-
 # We push it by 110MHz in each direction, to cover all frequencies up to
 # 800MHz
-PLL2_LOW=5340 * MHz
-PLL2_HIGH=6410 * MHz
+PLL2_LOW = 5340 * MHz
+PLL2_HIGH = 6410 * MHz
 
 PLL2_MID = (PLL2_LOW + PLL2_HIGH) // 2
 # Our numbering of channels:
@@ -49,60 +47,11 @@ BIG_DIVIDE = 5
 class FrequencyTarget:
     '''Target output frequency list.  Use a frequence of zero for output off.
 
-    pll2_base allows you to constain the PLL2 frequency to be (a multiple of)
-    the specified value.'''
+    pll{1|2}_base allows you to constain the PLL{1|2} frequency to be (a
+    multiple of) the specified value.'''
     freqs: list[Fraction]
+    pll1_base: Fraction|None = None
     pll2_base: Fraction|None = None
-
-def fract_lcm(a: Fraction|None, b: Fraction|None) -> Fraction|None:
-    if a is None:
-        return b
-    if b is None:
-        return a
-
-    g1 = gcd(a.denominator, b.denominator)
-    g2 = gcd(a.numerator, b.numerator)
-    u = (a.denominator // g1) * (b.numerator // g2)
-    v = (a.numerator // g2) * (b.denominator // g1)
-    assert a * u == b * v, f'{a} {b} {u} {v}'
-    assert gcd(u, v) == 1
-    return a * u
-
-def test_fract_lcm():
-    def mf(u):
-        x, y = u
-        return Fraction(x, y)
-    L2 = list(map(mf, [(1,8), (1,4), (1,2), (1,1), (2,1), (4,1), (8,1)]))
-    L3 = list(map(mf, [(1,27), (1,9), (1,3), (1,1), (3,1), (9,1), (27,1)]))
-    L5 = list(map(mf, [(1,25), (1,5), (1,1), (5,1), (25,1)]))
-    L7 = list(map(mf, [(1,49), (1,7), (1,1), (7,1), (49,1)]))
-
-    fracts = []
-    for a2 in L2:
-        for a3 in L3:
-            for a5 in L5:
-                for a7 in L7:
-                    fracts.append(a2 * a3 * a5 * a7)
-    for a in fracts:
-        for b in fracts:
-            # We rely on the asserts in fract_lcm to actually test!
-            fract_lcm(a, b)
-
-def qd_factor(n: int) -> list[int]:
-    '''Quick and dirty prime factorisation'''
-    assert n > 0
-    factors = []
-    factor = 2
-    while factor * factor <= n:
-        if n % factor == 0:
-            factors.append(factor)
-            n //= factor
-            while n % factor == 0:
-                n //= factor
-        factor = (factor + 1) | 1
-    if n > 1:
-        factors.append(n)
-    return factors
 
 def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     if 2 <= ratio <= 256:

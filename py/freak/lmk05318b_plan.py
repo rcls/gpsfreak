@@ -3,7 +3,8 @@
 from fractions import Fraction
 
 from .plan_target import *
-from .plan_pll2 import *
+from .plan_tools import fail, fract_lcm
+from .plan_pll2 import PLLPlan, pll2_plan, pll2_plan_low
 
 def add_pll1(target: FrequencyTarget,
              plan: PLLPlan, freqs: list[Fraction]) -> None:
@@ -33,7 +34,7 @@ def plan(target: FrequencyTarget) -> PLLPlan:
         else:
             fail(f'Frequency {freq_to_str(f)} is not achievable on {i}')
 
-    SMALL = Fraction(MHz, 20)
+    SMALL = 100 * kHz
 
     # Find the LCM of all the pll2 frequencies...
     pll2_lcm = target.pll2_base

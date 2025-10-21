@@ -85,7 +85,7 @@ class UBloxReader:
             raise EOFError()
         #print(repr(data))
         self.current += data
-    def get_msg(self, expected: list[int]|None = None) -> Tuple[int, bytes]:
+    def get_msg(self, expect: int|None = None) -> Tuple[int, bytes]:
         more = False
         while True:
             if more:
@@ -123,36 +123,34 @@ class UBloxReader:
                 print('Checksum failure')
                 continue
             code = struct.unpack('<H', message[2:4])[0]
-            if expected is None or code in expected or \
+            if code == expect or \
                code in (0x0105, 0x0005):
                 return code, message[6:-2]
 
-    def command(self, b: bytes) -> None:
+    def command(self, msg: UBloxMsg|int|str, payload: bytes = b'') -> None:
+        msg = UBloxMsg.get(msg)
         serhelper.flushread(self.source)
-        serhelper.writeall(self.source, b)
+        serhelper.writeall(self.source, msg.frame_payload(payload))
         self.source.flush()
-        self.get_ack(b)
+        self.get_ack(msg.code)
 
-    def get_ack(self, b: bytes) -> None:
-        code, payload = self.get_msg(expected = [])
+    def get_ack(self, rq_code: int) -> None:
+        code, payload = self.get_msg(expect = 0x0105)
         # Check we have the correct ACK.
         assert code == 0x0105, f'{code:#x}'
         assert len(payload) == 2
-        assert payload[0] == b[2]
-        assert payload[1] == b[3]
+        assert struct.unpack('<H', payload)[0] == rq_code
 
     def transact(self, msg: UBloxMsg|int|str,
                  payload: bytes = b'', ack: bool = False) -> bytes:
         serhelper.flushread(self.source)
         msg = UBloxMsg.get(msg)
-        b = msg.frame_payload(payload)
-        serhelper.writeall(self.source,
-                           UBloxMsg.get(msg).frame_payload(payload))
+        serhelper.writeall(self.source, msg.frame_payload(payload))
         self.source.flush()
-        code, payload = self.get_msg(expected = [msg.code])
+        code, payload = self.get_msg(expect = msg.code)
         assert code == msg.code, f'{code:#x}'
         if ack:
-            self.get_ack(b)
+            self.get_ack(msg.code)
 
         return payload
 

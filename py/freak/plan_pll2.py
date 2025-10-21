@@ -1,13 +1,15 @@
 
 from .plan_target import *
+from .plan_tools import factor_splitting, fail, fract_lcm, qd_factor
 
 import dataclasses
-import sys
 
 from dataclasses import dataclass
 from fractions import Fraction
-from math import ceil, floor, gcd
-from typing import Any, Generator, NoReturn, Tuple
+from math import ceil, floor
+from typing import Tuple
+
+__all__ = 'PLLPlan', 'fail', 'pll2_plan', 'pll2_plan_low'
 
 @dataclass
 class PLLPlan:
@@ -44,7 +46,7 @@ class PLLPlan:
         if a_error != b_error:
             return a_error < b_error
         # Prefer an even stage2 divider (or one): this gives exactly 50/50
-        # duty cycle.
+        # duty cycle.  FIXME - do evens on all dividers...
         a_even = self.stage2_even()
         b_even = b.stage2_even()
         if a_even != b_even:
@@ -85,41 +87,15 @@ class PLLPlan:
         _, _, stage2 = self.dividers[BIG_DIVIDE]
         return stage2 == 1 or stage2 % 2 == 0
 
-def fail(*args: Any, **kwargs: Any) -> NoReturn:
-    print(*args, **kwargs)
-    sys.exit(1)
-
 def postdiv_mask(div: int) -> int:
     assert 2 <= div <= 7
     return 0x0101010101010101 << div | 0xfe << 8 * div
 
-def do_factor_splitting(left: int, right: int, primes: list[int], index: int) \
-        -> Generator[Tuple[int, int]]:
-    '''Worker function for factor_splitting below'''
-    if index >= len(primes):
-        if left <= 1<<24 and right <= 1<<24:
-            yield left, right
-        return
-    prime = primes[index]
-    while True:
-        yield from do_factor_splitting(left, right, primes, index + 1)
-        if right % prime != 0:
-            return
-        left *= prime
-        if left > 1<<24:
-            return
-        right //= prime
-
-def factor_splitting(number: int, primes: list[int]) \
-        -> Generator[Tuple[int, int]]:
-    '''Return all possible factorisations of number into two factors, with
-    the constraint that both are less than pow(2,24).  The list primes should
-    contain at least all prime factors of number.'''
-    return do_factor_splitting(1, number, primes, 0)
-
 def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
                    post_div: int, stage1_div: int,
                    mult_den: int, stage2_div: int) -> PLLPlan | None:
+    '''Try and create a PLL2 plan for a single output using the given data.
+    We multiply stage2_div to get the VCO frequency in the supported range.'''
     ratio = freq / PLL2_PFD
     total_divide = mult_den * post_div * stage1_div * stage2_div
     assert total_divide % ratio.denominator == 0
@@ -128,8 +104,7 @@ def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
 
     # Now attempt to multiply stage2_div by something to get us
     # into the VCO range.
-    max_extra = min((1<<24) // stage2_div,
-                    floor(Fraction(PLL2_HIGH) / freq / output_divide))
+    max_extra = min((1<<24) // stage2_div, PLL2_HIGH // freq // output_divide)
     min_extra = ceil(Fraction(PLL2_LOW) / freq / output_divide)
     if min_extra > max_extra:
         return None                     # Impossible.
@@ -165,24 +140,18 @@ def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
         dividers = dividers,
         freqs = freqs)
 
-def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
-    '''Plan for the special case where we only have the BIG_DIVIDE output, and
-    the stage2 divider is definitely needed.  Avoid a brute force search.'''
-    assert freq < Fraction(PLL2_LOW, 7 * 256)
-    assert freq == target.freqs[BIG_DIVIDE]
+def pll2_plan_low_exact(target: FrequencyTarget, freq: Fraction, fast: bool,
+                        ratio: Fraction, factors: list[int]) -> PLLPlan | None:
+    '''Search for a PLL2 plan generating the given frequency.
 
-    # Just like TICS Pro, assume a FPD divider of 18.  So this gives the overall
-    # multiple of the PLL2 PFD frequency.
-    ratio = freq / PLL2_PFD
+    ratio is the overall PDF-to-output multiplier.  factors should contain all
+    the prime factors of ratio.denominator.  fast enables a heuristic that
+    almost always succeeds and that slashes the run-time.'''
 
-    # Factorize the denominator.
-    factors = qd_factor(ratio.denominator)
-
-    # We only get called for frequencies well below BAW_FREQ/18!
-    assert len(factors) != 0
     # We definitely can't cope with any prime factors > 1<<24.
     if factors[-1] >= 1<<24:
-        fail("Can't acheive {freq}: denominator factor {den_fact[-1][0]} is too big")
+        print(f"Can't acheive {freq} exactly: denominator factor {factors[-1]} is too big")
+        return None
 
     #print(f'freq={freq}, ratio={ratio}, factors={factors}')
     # We need to partition the denominator of the ratio over:
@@ -199,39 +168,84 @@ def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
             # the denominator of that.
             bigden = ratio.denominator // gcd(ratio.denominator,
                                               post_div * stage1_div)
-            if bigden > 1 << 48:
+            s2_max = min(1 << 24, PLL2_HIGH // freq // post_div // stage1_div)
+            if bigden > s2_max << 24:
                 continue                # Not acheivable.
 
-            for mult_den, stage2_div in factor_splitting(bigden, factors):
+            s2_min = ceil(PLL2_LOW / freq / post_div / stage1_div)
+            # s2_min doesn't give a lower bound on the search, because we apply
+            # an extra multiplier to bring the stage2_div into range.  However,
+            # we can reject non-feasible values.
+            if s2_min > 1 << 24:
+                continue                # Not acheivable.
+
+            # As a heuristic, limiting the denominator usually works and makes
+            # the search much faster.  Or maybe we just shouldn't use python.
+            if fast:
+                den_max = min(1 << 24, bigden // s2_min)
+            else:
+                den_max = 1 << 24
+
+            for stage2_div, mult_den in \
+                    factor_splitting(bigden, factors, s2_max, den_max):
                 plan = pll2_plan_low1(target, freq,
                                       post_div, stage1_div,
                                       mult_den, stage2_div)
                 if best is None or plan is not None and plan < best:
                     best = plan
+    return best
 
-    if best is not None:
-        return best
+def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
+    '''Plan for the special case where we only have the BIG_DIVIDE output, and
+    the stage2 divider is definitely needed.
 
-    MIN = Fraction(MHz, 10)
+    Avoid a complete brute force search over the PLL frequency range.  If
+    possible, achieve the exact frequency based on factorising the frequency
+    ratio.  If that fails, then multiply the frequency by arbitrary factors to
+    get into a sensible range, and then use the normal PLL2 planning.'''
+    assert freq < Fraction(PLL2_LOW, 7 * 256)
+    assert freq == target.freqs[BIG_DIVIDE]
+
+    # Just like TICS Pro, assume a FPD divider of 18.  So this gives the overall
+    # multiple of the PLL2 PFD frequency.
+    ratio = freq / PLL2_PFD
+
+    # Factorize the denominator.
+    factors = qd_factor(ratio.denominator)
+
+    # We only get called for frequencies well below PLL2_PFD = BAW_FREQ/18!
+    assert len(factors) != 0
+
+    plan = pll2_plan_low_exact(target, freq, True, ratio, factors)
+    if plan is not None:
+        return plan
+
+    plan = pll2_plan_low_exact(target, freq, False, ratio, factors)
+    if plan is not None:
+        return plan
 
     # Now find a multiple of pll2_freq that puts us into a sensible range for a
     # search of the VCO range.  First try multiplying by factors of the
     # frequency denominator.
 
+    MIN = 100 * kHz
+
     pll2_lcm = freq
+    ratio_denominator = ratio.denominator
     for p in reversed(factors):
-        while pll2_lcm.denominator % p == 0:
+        while ratio_denominator % p == 0:
             next = pll2_lcm * p
-            if ceil(Fraction(OFFICIAL_PLL2_LOW) / 10 / next) > \
-               floor(Fraction(OFFICIAL_PLL2_HIGH) / 10 / next):
+            if ceil(Fraction(OFFICIAL_PLL2_LOW) / next) > \
+               floor(Fraction(OFFICIAL_PLL2_HIGH) / next):
                 break
             pll2_lcm = next
+            ratio_denominator //= p
             if pll2_lcm >= MIN:
                 break
         if pll2_lcm >= MIN:
             break
 
-    # Now just multiply by powers of 2 to get us over 100kHz.
+    # Now just multiply by a power of 2 to get us over 100kHz.
     while pll2_lcm < MIN:
         pll2_lcm *= 2
 
@@ -242,7 +256,11 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
     '''Try and create a plan using a particular PLL2 frequency.  Note that
     the frequency list might not include all the frequencies in the target.'''
     assert PLL2_LOW <= pll2_freq <= PLL2_HIGH
+    # Bit mask of what post-divider pairs are usable.
     postdivs = (1 << 64) - 1
+    # Bit mask of what post-divider pairs are usable.  Ditto, but with the
+    # constraint that they are even.  FIXME - do we care about even postdivs?
+    # the output dividers are what we care about.
     postdive = (1 << 64) - 1
     for i, f in enumerate(freqs):
         if not f:                       # Not needed.
@@ -313,11 +331,15 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
 
 def pll2_plan(target: FrequencyTarget,
               freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
-    '''Create a frequency plan using PLL2 for a list of frequencies.'''
+    '''Create a frequency plan using PLL2 for a list of frequencies.
+
+    This does a brute force search, and to get sane run times, we need there to
+    be a limited number of multiples of pll2_lcm in the VCO range.  Use
+    pll2_plan_low instead for the case where pll2_lcm is low.'''
     # Firstly, if frequency is too high, then we can't do it.  Good luck
     # actually getting 3125MHz through the output drivers!
     maxf = max(f for f in freqs if f)
-    if maxf > Fraction(PLL2_HIGH, 2):
+    if maxf > Fraction(PLL2_HIGH, 4):
         fail('Max frequency too high: {freq_to_str(maxf)}')
 
     # Check that some multiple of the LCM is in rangle.

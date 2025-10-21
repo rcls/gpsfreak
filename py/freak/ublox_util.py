@@ -111,10 +111,8 @@ def do_set(reader: UBloxReader, KV: list[Tuple[UBloxCfg, Any]]) -> None:
     payload = bytes((0, 1, 0, 0))
     for cfg, value in KV:
         payload += cfg.encode_key_value(value)
-    msg = UBloxMsg.get('CFG-VALSET')
 
-    message = msg.frame_payload(payload)
-    reader.command(message)
+    reader.command('CFG-VALSET', payload)
 
 def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
     hd = cfg.val_byte_len() * 2 + 2
@@ -142,12 +140,12 @@ def do_baud(device: Device, baud: int) -> None:
     valset = UBloxMsg.get('CFG-VALSET')
     msg = valset.frame_payload(payload)
     serhelper.writeall(device.get_serial(), msg)
-    serhelper.flushread(device.get_serial())
     time.sleep(0.1)
+    serhelper.flushread(device.get_serial())
     message.set_baud(device.get_usb(), baud)
     time.sleep(0.1)
     # Now try the UBX again, check the response.
-    device.get_ublox().command(msg)
+    device.get_ublox().command(valset, payload)
 
 def do_changes(reader: UBloxReader) -> None:
     for cfg, now, rom in get_config_changes(reader):
@@ -207,11 +205,10 @@ def do_info(reader: UBloxReader) -> None:
         print(f'Pin {pinId} {pio} bank {bank} {direction} {value} {virtual} IRQ {irq_enabled} Virt.Pin {VP}{pull}')
 
 def do_status(reader: UBloxReader) -> None:
-    result = reader.transact('NAV-STATUS')
-    assert len(result) == 16
+    status = reader.transact('NAV-STATUS')
 
     iTOW, gpsFix, flags, fixStat, flags2, ttff, msss \
-        = struct.unpack('<IBBBBII', result)
+        = struct.unpack('<IBBBBII', status)
 
     print(f'iTOW = {iTOW / 1000} seconds')
 
@@ -229,7 +226,7 @@ def do_status(reader: UBloxReader) -> None:
     print(f'Time of week valid: {flags_bits[3]}')
     fixStat_bits = [fixStat & 1 << i != 0 for i in range(8)]
     print(f'Differential Corr.: {fixStat_bits[0]}')
-    print(f'carrSoln valid: {fixStat_bits[1]}')
+    print(f'Carrier phase solution valid: {fixStat_bits[1]}')
     print(f'Map matching: {fixStat_bits[3] * 2 + fixStat_bits[2]}')
 
     print(f'Power save mode:', flags2 & 3)
@@ -237,6 +234,18 @@ def do_status(reader: UBloxReader) -> None:
     print(f'Carrier phase range status:', flags2 >> 4 & 3)
     print(f'Time to first fix: {ttff / 1000} seconds')
     print(f'Seconds since start: {msss / 1000} seconds')
+
+    clock = reader.transact('NAV-CLOCK')
+    _, clkB, clkD, tAcc, fAcc = struct.unpack('<IiiII', clock)
+    print(f'Clock bias  {clkB:6} ns')
+    print(f'Clock drift {clkD:6} ppb')
+    print(f'Time accuracy ±{tAcc:3} ns')
+    print(f'Freq accuracy ±{fAcc:3} ppt')
+
+    dop = reader.transact('NAV-DOP')
+    _, gDOP, pDOP, tDOP, vDOP, hDOP, nDOP, eDOP = struct.unpack('<IHHHHHHH', dop)
+
+    print(f'DOP: G{gDOP*0.01:5.2f} P{pDOP*0.01:5.2f} T{tDOP*0.01:5.2f} V{vDOP*0.01:5.2f} H{hDOP*0.01:5.2f} N{nDOP*0.01:5.2f} E{eDOP*0.01:5.2f}')
 
 def do_scrape(FILE):
     configs, messages = parse_key_list(FILE)

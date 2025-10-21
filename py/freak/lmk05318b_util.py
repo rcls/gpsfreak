@@ -4,7 +4,8 @@ from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 from .lmk05318b import MaskedBytes, Register
 
 from .freak_util import Device
-from .lmk05318b_plan import FrequencyTarget, PLLPlan, str_to_freq, freq_to_str
+from .lmk05318b_plan import FrequencyTarget, str_to_freq, freq_to_str
+from .plan_pll2 import PLLPlan
 
 import argparse
 import struct
@@ -344,8 +345,6 @@ def report_freq(dev: Device, raw: bool) -> None:
         data.mask[a.address] = 0xff
     ranges = data.ranges(max_block = 30)
     get_ranges(dev, data, ranges)
-    # FIXME - retrieve it!
-    reference = Fraction(8844582, lmk05318b_plan.SCALE)
     dpll_priref_rdiv    = data.DPLL_PRIREF_RDIV
     dpll_ref_fb_pre_div = data.DPLL_REF_FB_PRE_DIV + 2
     dpll_ref_fb_div     = data.DPLL_REF_FB_DIV
@@ -365,8 +364,9 @@ def report_freq(dev: Device, raw: bool) -> None:
     pll2_p2             = data.PLL2_P2 + 1
 
     assert dpll_priref_rdiv != 0
-    baw_freq = Fraction(reference) / dpll_priref_rdiv \
-        * 2 * dpll_ref_fb_pre_div * (
+    # FIXME - retrieve the reference!
+    from .plan_target import REF_FREQ
+    baw_freq = REF_FREQ / dpll_priref_rdiv * 2 * dpll_ref_fb_pre_div * (
             dpll_ref_fb_div + Fraction(dpll_ref_num, dpll_ref_den))
 
     pll2_freq = baw_freq / pll2_rdiv_pre / pll2_rdiv_sec * (

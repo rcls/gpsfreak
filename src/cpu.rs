@@ -187,6 +187,7 @@ fn bugger() {
     // bytes to form the frame.
     let pcp = fp.wrapping_add(0x20);
     let pc = unsafe {*(pcp as *const u32)};
+    // TODO - change this to keeping a log in the backup SRAM.
     crate::dbgln!("Crash @ {pc:#010x}");
     loop {
         crate::uart_debug::debug_isr();
@@ -196,13 +197,13 @@ fn bugger() {
 #[inline(always)]
 pub fn barrier() {
     // The rust library compile_fence isn't behaving as expected.  Use the ASM
-    // version.
-    unsafe {core::arch::asm!("")}
+    // version.  Oh well, that still didn't achieve what I wanted.
+    unsafe {core::arch::asm!("", options(nostack, preserves_flags))}
 }
 
 #[inline(always)]
 pub fn nothing() {
-    unsafe {core::arch::asm!("", options(nomem))}
+    unsafe {core::arch::asm!("", options(nomem, nostack, preserves_flags))}
 }
 
 pub mod interrupt {

@@ -8,7 +8,7 @@ use crate::cpu::interrupt;
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
-use stm32h503::Interrupt::EXTI6 as INTERRUPT;
+use stm32h503::Interrupt::EXTI0 as INTERRUPT;
 use interrupt::PRIO_STATUS as PRIORITY;
 
 /// I²C address of the LMK05318(B).
@@ -16,18 +16,18 @@ pub const LMK05318: u8 = 0xc8;
 
 pub fn init() {
     let exti  = unsafe {&*stm32h503::EXTI ::ptr()};
-    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
 
-    // PA6 is STATUS1 interrupt pin from LMK05318b.  Set it to an input.
-    gpioa.MODER.modify(|_,w| w.MODE6().B_0x0());
+    // PB0 is STATUS1 interrupt pin from LMK05318b.  Set it to an input.
+    gpiob.MODER.modify(|_,w| w.MODE0().B_0x0());
     // Trigger on rising edge.
-    exti.RTSR1.modify(|_,w| w.RT6().set_bit());
-    exti.EXTICR2.modify(|_,w| w.EXTI6().B_0x0()); // This is the default!
-    exti.IMR1.modify(|_,w| w.IM6().set_bit()); // This should be default too!
+    exti.RTSR1.modify(|_,w| w.RT0().set_bit());
+    exti.EXTICR1.modify(|_,w| w.EXTI0().B_0x1());
+    exti.IMR1.modify(|_,w| w.IM0().set_bit()); // This should be default!
     // This needs to run at the same priority as the command code, because both
     // access I²C.
     interrupt::enable_priority(INTERRUPT, PRIORITY);
-    // Software trigger the EXTI6 interrupt to kick things off.  TODO - could
+    // Software trigger the EXTI0 interrupt to kick things off.  TODO - could
     // just call it!
     let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
     unsafe {nvic.stir.write(INTERRUPT as u32)};
@@ -35,12 +35,12 @@ pub fn init() {
 
 pub fn update_status() {
     dbgln!("exti6_isr");
-    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let exti  = unsafe {&*stm32h503::EXTI ::ptr()};
-    dbgln!("PA6 is {}", gpioa.IDR().read().ID6().bit());
+    dbgln!("PB0 is {}", gpiob.IDR().read().ID0().bit());
     dbgln!("pending = {:#06x}", exti.RPR1.read().bits());
     // Clear the pending bit.
-    exti.RPR1.write(|w| w.RPIF6().set_bit());
+    exti.RPR1.write(|w| w.RPIF0().set_bit());
 
     let red_green = unsafe {crate::led::RED_GREEN.as_mut()};
 
@@ -57,9 +57,9 @@ pub fn update_status() {
 
     // Hopefully we have cleared the interrupt line, but if not, software
     // trigger the interrupt.  FIXME - this should be rate limited.
-    if flicker || gpioa.IDR().read().ID6().bit() {
+    if flicker || gpiob.IDR().read().ID0().bit() {
         dbgln!("Flicker {flicker} and/or PA6 is still high");
-        exti.SWIER1.write(|w| w.SWI6().set_bit());
+        exti.SWIER1.write(|w| w.SWI0().set_bit());
     }
 }
 

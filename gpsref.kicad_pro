@@ -274,7 +274,56 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      [
+        "pin_not_driven|850900|1041400|0dcc68a1-4141-41aa-8a79-74519f35d87e|00000000-0000-0000-0000-000000000000|/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb|/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb|",
+        "Intentional (open drain)"
+      ],
+      [
+        "pin_to_pin|1574800|558800|e82688f1-7b1e-44ac-b993-b019f8dad82b|354e2894-415c-49ba-825a-80eb07e0c3b3|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1574800|711200|33d4e4ec-76a2-4180-a751-34d861feae71|354e2894-415c-49ba-825a-80eb07e0c3b3|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        ""
+      ],
+      [
+        "pin_to_pin|1574800|787400|4409553e-093b-47b1-a577-ef492018587b|541f9fbd-4b52-4147-80ac-66c9618cd30a|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1574800|787400|4409553e-093b-47b1-a577-ef492018587b|5d879baf-8910-4b07-aa28-5ddb4e302326|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1905000|1295400|a265e9f4-8f19-4c3d-9b26-f99cd5f9ca66|de7347d9-d61f-474f-b9ad-3529fc71607d|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|1930400|1295400|f2800c74-5994-4e86-b797-5069e64a0193|a9b7cf4f-a7c2-42dd-862b-2b2b18feba2d|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|2057400|1295400|1db404b8-44cc-46aa-926f-ab03861e17bc|1ab291ac-ff34-4910-87ca-ffa851e8807a|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|2082800|1295400|486f5269-85aa-45a0-a3a1-1fdee4a2cfc1|9371be45-2934-44f5-8024-fa299c06afdb|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39",
+        "Intentional"
+      ],
+      [
+        "pin_to_pin|2159000|1295400|640c59c4-5a6b-48ca-aba4-b3b729cb6294|354e2894-415c-49ba-825a-80eb07e0c3b3|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39|/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f",
+        "Intentional"
+      ],
+      [
+        "single_global_label|2159000|1003300|8a50a918-7bdd-4035-9f72-51585d811e24|00000000-0000-0000-0000-000000000000|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9|",
+        ""
+      ],
+      [
+        "single_global_label|2159000|1346200|4893366e-bab5-4243-b8a0-026e219712d8|00000000-0000-0000-0000-000000000000|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9|/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9|",
+        "Intentional"
+      ]
+    ],
     "meta": {
       "version": 0
     },
@@ -523,16 +572,22 @@
         "wire_width": 6
       },
       {
+        "name": "100diff",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)"
+      },
+      {
         "clearance": 0.125,
         "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.6034,
+        "diff_pair_width": 0.5844,
         "microvia_diameter": 0.0,
         "microvia_drill": 0.0,
-        "name": "25ms",
+        "name": "125diff",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 1,
+        "priority": 2,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 1.0,
+        "track_width": 0.8087,
         "via_diameter": 0.5,
         "via_drill": 0.3
       },
@@ -553,26 +608,12 @@
       {
         "clearance": 0.125,
         "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.5844,
-        "microvia_diameter": 0.0,
-        "microvia_drill": 0.0,
-        "name": "50diff",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 2,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.8087,
-        "via_diameter": 0.5,
-        "via_drill": 0.3
-      },
-      {
-        "clearance": 0.125,
-        "diff_pair_gap": 0.15,
         "diff_pair_width": 0.2395,
         "microvia_diameter": 0.0,
         "microvia_drill": 0.0,
         "name": "50ms",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
+        "priority": 1,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.3493,
         "via_diameter": 0.5,
@@ -727,22 +768,34 @@
         "50diff"
       ],
       "OUT1_N": [
-        "50diff"
+        "125diff"
       ],
       "OUT1_P": [
-        "50diff"
+        "125diff"
       ],
       "OUT2_N": [
-        "50diff"
+        "125diff"
       ],
       "OUT2_P": [
-        "50diff"
+        "125diff"
       ],
       "OUT3": [
         "50ms"
       ],
+      "OUT3_N": [
+        "100diff"
+      ],
+      "OUT3_P": [
+        "100diff"
+      ],
       "OUT4": [
         "50ms"
+      ],
+      "OUT4_N": [
+        "100diff"
+      ],
+      "OUT4_P": [
+        "100diff"
       ],
       "OUT6": [
         "50ms"
@@ -785,7 +838,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 10,
+    "annotate_start_num": 90,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [
       {
@@ -888,12 +941,6 @@
             "label": "Sim.Device",
             "name": "Sim.Device",
             "show": false
-          },
-          {
-            "group_by": false,
-            "label": "JLCPCB",
-            "name": "JLCPCB",
-            "show": false
           }
         ],
         "filter_string": "",
@@ -929,19 +976,19 @@
           "group_by": false,
           "label": "Qty",
           "name": "${QUANTITY}",
-          "show": true
+          "show": false
         },
         {
           "group_by": true,
           "label": "DNP",
           "name": "${DNP}",
-          "show": true
+          "show": false
         },
         {
           "group_by": true,
           "label": "Exclude from BOM",
           "name": "${EXCLUDE_FROM_BOM}",
-          "show": true
+          "show": false
         },
         {
           "group_by": true,
@@ -959,7 +1006,7 @@
           "group_by": true,
           "label": "Datasheet",
           "name": "Datasheet",
-          "show": true
+          "show": false
         },
         {
           "group_by": false,
@@ -994,10 +1041,10 @@
       ],
       "filter_string": "",
       "group_symbols": true,
-      "include_excluded_from_bom": true,
+      "include_excluded_from_bom": false,
       "name": "",
       "sort_asc": true,
-      "sort_field": "${EXCLUDE_FROM_BOM}"
+      "sort_field": "Reference"
     },
     "connection_grid_size": 50.0,
     "drawing": {

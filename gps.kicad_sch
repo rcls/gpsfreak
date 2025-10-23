@@ -5212,24 +5212,6 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" "D"
-			(at 90.17 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" "1=K 2=A"
-			(at 90.17 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(property "LCSC" "C2128"
 			(at 90.17 67.31 0)
 			(effects

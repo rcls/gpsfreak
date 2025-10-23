@@ -3868,12 +3868,6 @@
 		(uuid "23cadcb6-03a1-4537-a92f-78962811d2fe")
 	)
 	(junction
-		(at 173.99 102.87)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "26f0ae71-5100-4d2d-bc4b-7448987adef7")
-	)
-	(junction
 		(at 38.1 96.52)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4023,7 +4017,7 @@
 	)
 	(wire
 		(pts
-			(xy 171.45 102.87) (xy 173.99 102.87)
+			(xy 171.45 102.87) (xy 176.53 102.87)
 		)
 		(stroke
 			(width 0)
@@ -4150,16 +4144,6 @@
 			(type default)
 		)
 		(uuid "34686280-8be2-47c6-b81f-0a352fb2cd79")
-	)
-	(wire
-		(pts
-			(xy 173.99 102.87) (xy 176.53 102.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "34c5e3ab-4c99-4589-ad46-69a805aa334e")
 	)
 	(wire
 		(pts
@@ -4771,6 +4755,16 @@
 		)
 		(uuid "0774ebf9-eede-48ed-8462-4420f8f35c18")
 	)
+	(label "VCPU"
+		(at 171.45 102.87 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0d46e817-a3a2-4261-874f-faadfc44ec12")
+	)
 	(label "CC1"
 		(at 58.42 63.5 0)
 		(effects
@@ -5040,27 +5034,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-			)
-		)
-	)
-	(global_label "LED_PWR"
-		(shape input)
-		(at 82.55 105.41 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "9b6a178e-6be6-472a-b036-bf119a9fc9dc")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 91.9457 105.41 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 			)
 		)
 	)
@@ -5363,15 +5336,6 @@
 		)
 		(property "LCSC" ""
 			(at 90.17 119.38 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
-			(at 90.17 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6040,6 +6004,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+3V3")
+		(at 82.55 105.41 0)
+		(mirror y)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "34f65196-a830-45f5-ac4e-4403fc1841ce")
+		(property "Reference" "#PWR046"
+			(at 82.55 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 82.55 101.854 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 82.55 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 82.55 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "500dbd05-254e-4ad5-b015-c10a83672d3f")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
+					(reference "#PWR046")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 90.17 123.19 0)
 		(unit 1)
@@ -6438,15 +6468,6 @@
 			)
 		)
 		(property "LCSC" "C22385521"
-			(at 134.62 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 134.62 78.74 0)
 			(effects
 				(font
@@ -7018,72 +7039,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+3V3")
-		(at 173.99 102.87 0)
-		(mirror y)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "75aec54f-3e63-4fd4-8988-500dbcd27343")
-		(property "Reference" "#PWR071"
-			(at 173.99 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3"
-			(at 173.99 99.314 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 173.99 102.87 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 173.99 102.87 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 173.99 102.87 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "dc2d2a65-934b-4514-b515-1b5e48a2d384")
-		)
-		(instances
-			(project "gpsref"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
-					(reference "#PWR071")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:C")
 		(at 139.7 39.37 0)
 		(unit 1)
@@ -7138,15 +7093,6 @@
 			)
 		)
 		(property "LCSC" "C15525"
-			(at 139.7 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 139.7 39.37 0)
 			(effects
 				(font

@@ -67,10 +67,6 @@
         [
           "courtyards_overlap|110425000|94375000|0d540748-081c-4f38-ac45-0ee4a3658217|35aa32e3-c34f-4ae6-8136-ffd3a8935f03",
           "Intentional for strapping."
-        ],
-        [
-          "silk_overlap|144850000|112440000|248a71e0-dd23-498b-abb1-6a764f4c9463|49373a84-3997-46ac-a08e-e80f07435e9d",
-          "We'll live with that."
         ]
       ],
       "meta": {
@@ -205,8 +201,8 @@
         0.125,
         0.15,
         0.2,
-        0.25,
         0.3,
+        0.3493,
         0.4,
         0.5,
         1.0,
@@ -572,22 +568,30 @@
         "wire_width": 6
       },
       {
+        "clearance": 0.125,
+        "diff_pair_gap": 0.15,
+        "diff_pair_width": 0.1773,
+        "microvia_diameter": 0.0,
+        "microvia_drill": 0.0,
         "name": "100diff",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 0,
-        "schematic_color": "rgba(0, 0, 0, 0.000)"
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.1773,
+        "via_diameter": 0.5,
+        "via_drill": 0.3
       },
       {
         "clearance": 0.125,
-        "diff_pair_gap": 0.15,
-        "diff_pair_width": 0.5844,
+        "diff_pair_gap": 0.2,
+        "diff_pair_width": 0.125,
         "microvia_diameter": 0.0,
         "microvia_drill": 0.0,
         "name": "125diff",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 2,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.8087,
+        "track_width": 0.125,
         "via_diameter": 0.5,
         "via_drill": 0.3
       },
@@ -653,6 +657,9 @@
     },
     "net_colors": null,
     "netclass_assignments": {
+      "+1V8": [
+        "Pwr"
+      ],
       "+3V3": [
         "Pwr"
       ],
@@ -744,10 +751,10 @@
         "50ms"
       ],
       "Net-(J1-In)": [
-        "50cop"
+        "50ms"
       ],
       "Net-(J2-In)": [
-        "50cop"
+        "50ms"
       ],
       "Net-(J5-In)": [
         "50cop"
@@ -768,16 +775,16 @@
         "50diff"
       ],
       "OUT1_N": [
-        "125diff"
+        "100diff"
       ],
       "OUT1_P": [
-        "125diff"
+        "100diff"
       ],
       "OUT2_N": [
-        "125diff"
+        "100diff"
       ],
       "OUT2_P": [
-        "125diff"
+        "100diff"
       ],
       "OUT3": [
         "50ms"
@@ -816,12 +823,7 @@
         "Pwr"
       ]
     },
-    "netclass_patterns": [
-      {
-        "netclass": "50ms",
-        "pattern": "SecRef"
-      }
-    ]
+    "netclass_patterns": []
   },
   "pcbnew": {
     "last_paths": {
@@ -838,7 +840,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 90,
+    "annotate_start_num": 30,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [
       {
@@ -929,18 +931,6 @@
             "label": "#",
             "name": "${ITEM_NUMBER}",
             "show": false
-          },
-          {
-            "group_by": false,
-            "label": "Sim.Pins",
-            "name": "Sim.Pins",
-            "show": false
-          },
-          {
-            "group_by": false,
-            "label": "Sim.Device",
-            "name": "Sim.Device",
-            "show": false
           }
         ],
         "filter_string": "",
@@ -1022,18 +1012,6 @@
         },
         {
           "group_by": false,
-          "label": "Sim.Pins",
-          "name": "Sim.Pins",
-          "show": false
-        },
-        {
-          "group_by": false,
-          "label": "Sim.Device",
-          "name": "Sim.Device",
-          "show": false
-        },
-        {
-          "group_by": false,
           "label": "JLCPCB",
           "name": "JLCPCB",
           "show": false
@@ -1043,7 +1021,7 @@
       "group_symbols": true,
       "include_excluded_from_bom": false,
       "name": "",
-      "sort_asc": true,
+      "sort_asc": false,
       "sort_field": "Reference"
     },
     "connection_grid_size": 50.0,

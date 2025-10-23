@@ -33,8 +33,18 @@ freq = subp.add_parser(
 freq.add_argument('FREQ', nargs='*', type=lmk05318b_plan.str_to_freq,
                   help='Frequencies for each output')
 
-subp.add_parser(
-    'drive', help='Report output drive', description='Report output drive.')
+# FIX - put in utils.
+def key_value(s: str) -> Tuple[str, str]:
+    if not '=' in s:
+        raise ValueError('Key/value pairs must be in the form KEY=VALUE')
+    k, v =  s.split('=', 1)
+    return k, v
+key_value.__name__ = 'key=value pair'
+
+drive = subp.add_parser(
+    'drive', help='Report output drive', description='Set/Report output drive.')
+drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='OUT=DRIVE',
+                   help='Output and drive type / strength')
 
 info = subp.add_parser(
     'info', help='Basic device info', description='Basic device info')
@@ -123,7 +133,10 @@ elif args.command == 'freq':
         lmk05318b_util.report_freq(device, False)
 
 elif args.command == 'drive':
-    lmk05318b_util.report_driveout(device)
+    if args.DRIVE:
+        lmk05318b_util.do_drive_out(device, args.DRIVE)
+    else:
+        lmk05318b_util.report_driveout(device)
 
 elif args.command == 'save':
     config.save_config(device, save_ubx=False, save_lmk = True,

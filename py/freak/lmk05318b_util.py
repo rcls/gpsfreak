@@ -251,8 +251,8 @@ def do_drive(dev: Device, drives: list[Tuple[str, str]],
 
     set_drives(dev, expanded)
 
-def do_driveout(dev: Device, drives: list[Tuple[str, str]],
-                defaults: bool) -> None:
+# FIXME - add defaults.
+def do_drive_out(dev: Device, drives: list[Tuple[str, str]]) -> None:
     indexes = {'1': 2, '2': 0, '3': 7, '4': 6, '5': 5, '4': 4}
     expanded: list[str | None] = [None] * 8
     for ch, drive in drives:
@@ -264,8 +264,8 @@ def do_driveout(dev: Device, drives: list[Tuple[str, str]],
         elif drive.startswith('lvds'):
             split = {'': '40', '4': '40', '6': '60', '8': '80',
                      '10': '64', '12': '66', '14': '86', '16': '88'}[drive[4:]]
-            expanded[index] = 'lvds{split[0]}' if split[0] != '0' else 'off'
-            expanded[index+1] = 'lvds{split[1]}' if split[1] != '0' else 'off'
+            expanded[index] = f'lvds{split[0]}' if split[0] != '0' else 'off'
+            expanded[index+1] = f'lvds{split[1]}' if split[1] != '0' else 'off'
         else:
             expanded[index] = drive
             expanded[index+1] = 'off'
@@ -470,8 +470,8 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     plan.add_argument('FREQ', nargs='+', type=lmk05318b_plan.str_to_freq,
                       help='Frequencies for each channel')
 
-    drive = subp.add_parser('drive', help='Set/get output drive',
-                            description='Set/get output drive')
+    drive = subp.add_parser('drive', help='Set/report output drive',
+                            description='Set/port output drive')
     drive.add_argument('-d', '--defaults', action='store_true',
                        help='Set default values')
     drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='CH=DRIVE',

@@ -5588,7 +5588,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
+		(property "Footprint" "Parts:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
 			(at 172.72 38.1 0)
 			(effects
 				(font
@@ -6395,7 +6395,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
+		(property "Footprint" "Parts:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
 			(at 172.72 106.68 0)
 			(effects
 				(font
@@ -6995,7 +6995,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
+		(property "Footprint" "Parts:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
 			(at 172.72 140.97 0)
 			(effects
 				(font
@@ -7414,7 +7414,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
+		(property "Footprint" "Parts:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
 			(at 172.72 72.39 0)
 			(effects
 				(font

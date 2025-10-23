@@ -7906,7 +7906,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-48-1EP_7x7mm_P0.5mm_EP5.1x5.1mm"
+		(property "Footprint" "Parts:QFN-48-1EP_7x7mm_P0.5mm_EP5.1x5.1mm"
 			(at 201.93 104.14 0)
 			(effects
 				(font
@@ -7936,6 +7936,15 @@
 			)
 		)
 		(property "LCSC" "C3611586"
+			(at 201.93 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
 			(at 201.93 104.14 0)
 			(effects
 				(font

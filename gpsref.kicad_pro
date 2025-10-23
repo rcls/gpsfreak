@@ -65,8 +65,32 @@
       ],
       "drc_exclusions": [
         [
-          "courtyards_overlap|110425000|94375000|0d540748-081c-4f38-ac45-0ee4a3658217|35aa32e3-c34f-4ae6-8136-ffd3a8935f03",
-          "Intentional for strapping."
+          "courtyards_overlap|105425000|90925000|0d540748-081c-4f38-ac45-0ee4a3658217|35aa32e3-c34f-4ae6-8136-ffd3a8935f03",
+          "Intentional"
+        ],
+        [
+          "courtyards_overlap|166200000|106045000|049c098e-835b-4635-84d3-f3cd923070ce|4cf85229-42fa-480d-babc-fcaa880dc768",
+          "Intentional"
+        ],
+        [
+          "courtyards_overlap|167025000|103505000|4cf85229-42fa-480d-babc-fcaa880dc768|bdeef41e-5b83-443d-b985-dd897b34f658",
+          "Intentional"
+        ],
+        [
+          "silk_over_copper|167437554|106293562|01db7478-3aef-427a-a6bf-72474a692b7f|00000000-0000-0000-0000-000000000000",
+          "Don't care"
+        ],
+        [
+          "silk_over_copper|167495044|107251999|b1c24659-83eb-4c02-96af-8745b5216302|00000000-0000-0000-0000-000000000000",
+          "Don't care"
+        ],
+        [
+          "silk_overlap|106560000|115570000|911674ba-31eb-40a3-8a21-2db03ba29761|bdb81465-42dd-4917-b163-5fbe206e8b88",
+          "Who cares"
+        ],
+        [
+          "silk_overlap|170740000|116130000|600c5c9c-7fdd-46b4-bf3a-3d38b4311256|9d7da51e-328b-4bd1-aefc-1c79f6bd8ee5",
+          "Who cares"
         ]
       ],
       "meta": {
@@ -847,7 +871,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 1,
+    "annotate_start_num": 2,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [
       {

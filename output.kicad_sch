@@ -5553,7 +5553,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c0dc8fa5-b2e6-4948-ac95-3dbe0b97886b")
-		(property "Reference" "C37"
+		(property "Reference" "C3"
 			(at 70.866 103.886 90)
 			(effects
 				(font
@@ -5616,7 +5616,7 @@
 		(instances
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
-					(reference "C37")
+					(reference "C3")
 					(unit 1)
 				)
 			)

@@ -53,8 +53,8 @@
 	)
 	(attr through_hole)
 	(fp_line
-		(start -3.084569 -2.865)
-		(end -1.784569 -2.865)
+		(start -0.65 -2.4)
+		(end 0.65 -2.4)
 		(stroke
 			(width 0.12)
 			(type solid)
@@ -63,8 +63,8 @@
 		(uuid "74bce64d-3b7d-4630-9a23-966a2e7f8680")
 	)
 	(fp_line
-		(start -2.434569 -3.515)
-		(end -2.434569 -2.215)
+		(start 0 -3.05)
+		(end 0 -1.75)
 		(stroke
 			(width 0.12)
 			(type solid)
@@ -73,15 +73,37 @@
 		(uuid "6f593a32-2b89-4db0-af6e-99152dc37be9")
 	)
 	(fp_arc
-		(start -4.1 1.9)
-		(mid -4.368042 0)
-		(end -4.1 -1.9)
+		(start -3.264518 -3.602824)
+		(mid -2.056662 -5.044486)
+		(end -0.5 -6.1)
 		(stroke
 			(width 0.1)
 			(type default)
 		)
 		(layer "F.SilkS")
-		(uuid "c9b0220d-fd72-4673-b7a4-08efee63bb29")
+		(uuid "cdcb084e-45c7-448a-a508-ee6829d218da")
+	)
+	(fp_arc
+		(start -1.300105 5.546099)
+		(mid -2.418531 4.583456)
+		(end -3.3 3.4)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "ecf4a519-9f7f-4485-93af-8835dc35a4d3")
+	)
+	(fp_arc
+		(start 2.5 -6.8)
+		(mid 9.3 0)
+		(end 2.5 6.8)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "df4aa2fe-1fb6-4558-a08b-1355663a6599")
 	)
 	(fp_arc
 		(start 4.4 -6.5)
@@ -93,17 +115,6 @@
 		)
 		(layer "F.SilkS")
 		(uuid "cd9e1ea1-215e-43a0-baf0-8cc5fff84e1d")
-	)
-	(fp_arc
-		(start 7.395448 4.679165)
-		(mid 6.023264 5.783304)
-		(end 4.412763 6.496255)
-		(stroke
-			(width 0.1)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "75d73d90-cc1f-4934-8029-2c6862b2a214")
 	)
 	(fp_circle
 		(center 2.5 0)
@@ -117,8 +128,8 @@
 		(uuid "5105e280-5cd8-43a7-a90d-75af3828b486")
 	)
 	(fp_line
-		(start -3.082015 -2.8475)
-		(end -1.782015 -2.8475)
+		(start -0.647446 -2.3825)
+		(end 0.652554 -2.3825)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -127,8 +138,8 @@
 		(uuid "b7114bc7-ef15-4cc0-8876-7ef5281a23a0")
 	)
 	(fp_line
-		(start -2.432015 -3.4975)
-		(end -2.432015 -2.1975)
+		(start 0.002554 -3.0325)
+		(end 0.002554 -1.7325)
 		(stroke
 			(width 0.1)
 			(type solid)

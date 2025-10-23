@@ -3952,12 +3952,6 @@
 		(uuid "cdbfba3f-c19b-4350-9d62-a22befcd8498")
 	)
 	(junction
-		(at 161.29 71.12)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "d33f9c34-45a9-4e34-83e8-539f89779945")
-	)
-	(junction
 		(at 57.15 73.66)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3988,24 +3982,28 @@
 		(uuid "13b8cd1c-d9c6-414e-8a52-8f6e49db7f2c")
 	)
 	(no_connect
-		(at 157.48 91.44)
-		(uuid "1d4b06ac-afdf-4f2c-9dc5-4539b56689fb")
+		(at 157.48 60.96)
+		(uuid "2893db3c-bf04-48ee-b1a5-cacf9e648251")
 	)
 	(no_connect
-		(at 111.76 83.82)
-		(uuid "379a7570-41d9-4901-8ce4-0aa47070af60")
+		(at 157.48 55.88)
+		(uuid "3fb25b2f-dcf8-4e27-9234-a80c5a6629cf")
 	)
 	(no_connect
 		(at 57.15 86.36)
 		(uuid "8222376c-7270-4968-8195-fb41ebb29130")
 	)
 	(no_connect
-		(at 111.76 81.28)
-		(uuid "9f453f0d-7768-4398-a533-300e7ab5980b")
+		(at 157.48 63.5)
+		(uuid "8e5392d5-e1d7-4cb3-be4e-b06b372ddc6b")
 	)
 	(no_connect
 		(at 111.76 91.44)
 		(uuid "9f6e98e0-cfe1-4716-b22b-595d4b04c1eb")
+	)
+	(no_connect
+		(at 157.48 58.42)
+		(uuid "b84a0ca9-f2d7-4397-b520-1ee5b8ee5ba9")
 	)
 	(no_connect
 		(at 111.76 66.04)
@@ -4077,7 +4075,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 63.5) (xy 168.91 63.5)
+			(xy 111.76 83.82) (xy 101.6 83.82)
 		)
 		(stroke
 			(width 0)
@@ -4237,7 +4235,7 @@
 	)
 	(wire
 		(pts
-			(xy 111.76 78.74) (xy 100.33 78.74)
+			(xy 111.76 78.74) (xy 101.6 78.74)
 		)
 		(stroke
 			(width 0)
@@ -4307,7 +4305,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 60.96) (xy 168.91 60.96)
+			(xy 111.76 81.28) (xy 101.6 81.28)
 		)
 		(stroke
 			(width 0)
@@ -4364,16 +4362,6 @@
 			(type default)
 		)
 		(uuid "715c0d47-80ea-41f9-9114-d9fb5c15d4a1")
-	)
-	(wire
-		(pts
-			(xy 161.29 71.12) (xy 161.29 55.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "73d9b67f-2f43-43ba-9760-1bc141ea4bbb")
 	)
 	(wire
 		(pts
@@ -4617,16 +4605,6 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 55.88) (xy 157.48 55.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d3ffba2c-c26c-4a2f-987b-727a505c9e5e")
-	)
-	(wire
-		(pts
 			(xy 132.08 48.26) (xy 134.62 48.26)
 		)
 		(stroke
@@ -4707,7 +4685,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 58.42) (xy 168.91 58.42)
+			(xy 157.48 91.44) (xy 168.91 91.44)
 		)
 		(stroke
 			(width 0)
@@ -4916,7 +4894,7 @@
 		(uuid "9b1ee816-b98f-49f6-95fb-eb3bd4c85fe6")
 	)
 	(label "Blue"
-		(at 168.91 58.42 180)
+		(at 168.91 91.44 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4926,7 +4904,7 @@
 		(uuid "c1522056-2e7b-4ddc-9e66-2bbd72b7a15a")
 	)
 	(label "DBG_TX"
-		(at 100.33 78.74 0)
+		(at 101.6 78.74 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4936,12 +4914,12 @@
 		(uuid "d148cbd2-e678-49c5-b630-98c0f1f1e2a6")
 	)
 	(label "Green"
-		(at 168.91 60.96 180)
+		(at 101.6 81.28 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify left bottom)
 		)
 		(uuid "d8bedc09-c377-4e72-85a7-021a55e36eaa")
 	)
@@ -4966,12 +4944,12 @@
 		(uuid "e3618804-e4e4-407e-aac3-756f52d6e628")
 	)
 	(label "Red"
-		(at 168.91 63.5 180)
+		(at 101.6 83.82 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify left bottom)
 		)
 		(uuid "fae38ff6-128e-4133-ba3b-da8e4cc730e1")
 	)
@@ -5353,6 +5331,71 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
 					(reference "R50")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint_Probe")
+		(at 149.86 116.84 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "00c69965-6a2c-47d0-9e96-4dacc3d46c35")
+		(property "Reference" "TP8"
+			(at 152.146 112.776 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TestPoint_Probe"
+			(at 151.511 112.776 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "Parts:TestPoint"
+			(at 154.94 116.84 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 154.94 116.84 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point (alternative probe-style design)"
+			(at 149.86 116.84 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "68bf85c2-f632-4593-bdcb-cb6413d07ab5")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
+					(reference "TP8")
 					(unit 1)
 				)
 			)

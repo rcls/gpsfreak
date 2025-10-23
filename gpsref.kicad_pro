@@ -200,13 +200,14 @@
         0.0,
         0.125,
         0.15,
+        0.1773,
         0.2,
+        0.2319,
+        0.25,
         0.3,
         0.3493,
         0.4,
-        0.5,
-        1.0,
-        2.0
+        0.5
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -751,13 +752,19 @@
         "50ms"
       ],
       "Net-(J1-In)": [
-        "50ms"
+        "50cop"
       ],
       "Net-(J2-In)": [
         "50ms"
       ],
       "Net-(J5-In)": [
         "50cop"
+      ],
+      "Net-(JN1-In)": [
+        "50ms"
+      ],
+      "Net-(JP1-In)": [
+        "50ms"
       ],
       "Net-(R125-Pad1)": [
         "50ms"
@@ -840,7 +847,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 30,
+    "annotate_start_num": 1,
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [
       {

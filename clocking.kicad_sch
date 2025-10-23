@@ -3369,17 +3369,7 @@
 	)
 	(wire
 		(pts
-			(xy 162.56 113.03) (xy 176.53 113.03)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "69466064-ddd8-4031-b362-bf290a8ce6d8")
-	)
-	(wire
-		(pts
-			(xy 152.4 113.03) (xy 154.94 113.03)
+			(xy 152.4 113.03) (xy 176.53 113.03)
 		)
 		(stroke
 			(width 0)
@@ -4307,8 +4297,8 @@
 		)
 		(uuid "333472fd-dd41-4f1b-9658-4a5a498c73c5")
 	)
-	(label "SecRefLo"
-		(at 166.37 113.03 0)
+	(label "SecRef"
+		(at 165.1 113.03 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7532,82 +7522,6 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "#PWR011")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 158.75 113.03 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "94f0d0d3-95e0-4084-af80-46b64fe667e4")
-		(property "Reference" "R22"
-			(at 158.75 110.998 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 158.75 113.03 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 158.75 114.808 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 158.75 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 158.75 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 158.75 113.03 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "97a451b5-4df8-473a-9432-fbf6a9ce98c5")
-		)
-		(pin "1"
-			(uuid "1e157015-916e-409c-af6b-558657d581a1")
-		)
-		(instances
-			(project "gpsref"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "R22")
 					(unit 1)
 				)
 			)

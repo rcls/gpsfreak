@@ -3259,14 +3259,6 @@
 		(uuid "fc93b294-a381-4953-8989-d98c3e8c70b1")
 	)
 	(no_connect
-		(at 85.09 99.06)
-		(uuid "0b622bf6-a4c6-4628-b379-514d4a3b3c92")
-	)
-	(no_connect
-		(at 85.09 96.52)
-		(uuid "1fd514fa-8553-41eb-ab9a-556d21bb4e85")
-	)
-	(no_connect
 		(at 85.09 106.68)
 		(uuid "4e7b7280-4aad-42da-b830-2cd17e07b3b1")
 	)
@@ -3307,6 +3299,16 @@
 			(type default)
 		)
 		(uuid "05bf4996-fc06-463b-8624-25344e8cf787")
+	)
+	(wire
+		(pts
+			(xy 76.2 96.52) (xy 85.09 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "066a028d-5463-43c2-9415-84ba96ee7f99")
 	)
 	(wire
 		(pts
@@ -3670,6 +3672,16 @@
 	)
 	(wire
 		(pts
+			(xy 76.2 99.06) (xy 85.09 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fbbb7dd2-b627-4b30-a4a2-6fc28d13b2f3")
+	)
+	(wire
+		(pts
 			(xy 160.02 72.39) (xy 168.91 72.39)
 		)
 		(stroke
@@ -3787,6 +3799,48 @@
 			(justify right bottom)
 		)
 		(uuid "fc8dc212-88c7-49cb-96d9-1d63d4c47de1")
+	)
+	(global_label "I2C_SCL"
+		(shape input)
+		(at 76.2 99.06 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1af3faee-6f86-4d01-b304-a25543ca56fe")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 65.6553 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "I2C_SDA"
+		(shape bidirectional)
+		(at 76.2 96.52 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3566a2d9-0c32-401e-a7f2-720cf0f1bf26")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 64.4835 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
 	)
 	(global_label "GPS2CPU"
 		(shape output)

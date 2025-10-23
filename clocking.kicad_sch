@@ -2976,10 +2976,6 @@
 		(uuid "4fa8ff58-226f-4307-9fad-b03a825731b9")
 	)
 	(no_connect
-		(at 118.11 130.81)
-		(uuid "60de8694-ea16-4470-a927-b67634751421")
-	)
-	(no_connect
 		(at 205.74 78.74)
 		(uuid "747f6390-dfbc-4e2a-8106-fb43ac756cfb")
 	)
@@ -3096,6 +3092,16 @@
 			(type default)
 		)
 		(uuid "1a32e486-1fbb-4802-ab8b-5ceb36de65da")
+	)
+	(wire
+		(pts
+			(xy 121.92 130.81) (xy 118.11 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1d69c56d-234e-41a4-aee1-d31f52468c7d")
 	)
 	(wire
 		(pts
@@ -4536,6 +4542,27 @@
 			(justify right bottom)
 		)
 		(uuid "f7bea331-e386-4033-ac5e-7cfe3bb0c9ed")
+	)
+	(global_label "ALERT"
+		(shape output)
+		(at 121.92 130.81 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "01f46301-4a1c-4fcb-882b-c737bab251e6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.4647 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 	)
 	(global_label "OUT1_P"
 		(shape output)

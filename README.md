@@ -1,12 +1,13 @@
 Yet another GPS Disciplined Oscillator
 ======================================
 
-GPS Feak uses a U-Blox MAX-10 GPS receiver and a Texas Instruments LMK05318(B)
+GPS Freak uses a U-Blox MAX-10 GPS receiver and a Texas Instruments LMK05318b
 clock generator to drive multiple clock outputs.  The outputs are a total of 5
 SMA connectors.
 
-Power and data is supplied via a USB-C connector (USB FS data rate).  The
-GPS unit is available over USB as a CDC ACM serial port.
+Power and data are supplied via a USB-C connector (USB FS data rate).  The GPS
+unit is available over USB as a CDC ACM serial port.  In addition, there are USB
+end-points for device control via the CPU.
 
 License
 =======
@@ -62,7 +63,8 @@ The device software is a mix of on-board firmware, and Python scripts (freak.py)
 to communicate with the device.  These should work on any OS that pyusb
 supports.
 
-Firmware updates are done via USB DFU.
+Firmware updates are done via USB DFU.  There is also a Skedd connector breaking
+out SWD with a standard six pin connection.
 
 Hardware Options
 ================
@@ -85,14 +87,15 @@ This is revision 0, so the pin is grounded.
 Cost Reduction Opportunities
 ============================
 
-These will simplify the board layout also...
-
 Really understand the difference between MAX-F10 and MAX-M10.  Does L5
 band help, or does SBAS make this redundant?
 
 The TCXO can be replaced by a cheaper one.  The phase noise to worry about is
 capped above at around 18kHz by the BAW oscillator, and at low frequencies by
 the GPS output.  We possibly don't even need a TCXO?
+
+The CPU is overkill.  With the current arrangement of dumb firmware and all the
+smarts in the Python scripts, a low end CPU would be just fine.
 
 The temperature sensor is only for development.  Once we know how much heat the
 board generates, we can drop it.  Or just use a 1¢ thermistor.

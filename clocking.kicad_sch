@@ -2678,7 +2678,7 @@
 		)
 		(uuid "2af77e76-c5fb-4751-800f-3cebf588c8ab")
 	)
-	(text "Ganged outputs\nprovide 50Ω\ndrive.\n"
+	(text "Ganged outputs\nprovide high\ncurrent drive.\n"
 		(exclude_from_sim no)
 		(at 201.93 147.574 0)
 		(effects
@@ -4566,7 +4566,7 @@
 	)
 	(global_label "OUT1_P"
 		(shape output)
-		(at 210.82 139.7 270)
+		(at 213.36 139.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4576,7 +4576,7 @@
 		)
 		(uuid "1d6c6776-3fda-4427-a0e8-347d92f8ccd2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 210.82 149.7609 90)
+			(at 213.36 149.8214 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4732,7 +4732,7 @@
 	)
 	(global_label "OUT1_N"
 		(shape output)
-		(at 213.36 139.7 270)
+		(at 210.82 139.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4742,7 +4742,7 @@
 		)
 		(uuid "92450fd2-748e-47d0-85db-548469ca2820")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 213.36 149.8214 90)
+			(at 210.82 149.7609 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8051,6 +8051,7 @@
 		)
 		(pin "2"
 			(uuid "2939cd0e-36a3-4908-8c52-23c1919be15f")
+			(alternate "_FDEC")
 		)
 		(pin "3"
 			(uuid "a4e6fb84-2b52-413e-8274-19325b4ddbe6")
@@ -8069,6 +8070,7 @@
 		)
 		(pin "30"
 			(uuid "be5e1437-de6e-409d-b137-3a7bf73e33c7")
+			(alternate "_FINC")
 		)
 		(pin "37"
 			(uuid "c8d0cbde-77db-4704-ac0a-507c6a2ef79d")

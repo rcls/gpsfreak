@@ -4255,7 +4255,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 71.12) (xy 161.29 71.12)
+			(xy 157.48 71.12) (xy 168.91 71.12)
 		)
 		(stroke
 			(width 0)
@@ -5353,6 +5353,27 @@
 			)
 		)
 	)
+	(global_label "EXTINT"
+		(shape output)
+		(at 168.91 71.12 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "088430af-bb5b-48ff-9da8-bfdeb6b88487")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 176.1891 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
 	(global_label "I2C_SDA"
 		(shape bidirectional)
 		(at 100.33 88.9 180)
@@ -6113,72 +6134,6 @@
 			(project "gpsref"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
 					(reference "#PWR0102")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 161.29 71.12 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1a990217-7ba7-4a71-a7e3-e52c68e8d62e")
-		(property "Reference" "#PWR069"
-			(at 161.29 77.47 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 163.576 70.612 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify top)
-			)
-		)
-		(property "Footprint" ""
-			(at 161.29 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 161.29 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 161.29 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e70b6e5a-d4dc-4ab0-a3ec-05417c96cef1")
-		)
-		(instances
-			(project "gpsref"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
-					(reference "#PWR069")
 					(unit 1)
 				)
 			)

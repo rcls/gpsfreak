@@ -1608,7 +1608,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text_box "Eyeballing the datasheet, the TLV3601 output resistance is in the ballpark of 50ohm."
+	(text_box "Eyeballing the datasheet, the TLV3601 output resistance is in the ballpark of 50Ω."
 		(exclude_from_sim no)
 		(at 90.5881 98.8639 0)
 		(size 24.9819 9.0861)

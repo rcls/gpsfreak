@@ -3332,7 +3332,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 114.3) (xy 116.84 114.3)
+			(xy 127 114.3) (xy 125.73 114.3)
 		)
 		(stroke
 			(width 0)
@@ -3462,6 +3462,16 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 114.3) (xy 116.84 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5598fa4f-23f8-4ab9-9ad8-b7d69ca5d925")
+	)
+	(wire
+		(pts
 			(xy 130.81 90.17) (xy 130.81 91.44)
 		)
 		(stroke
@@ -3522,6 +3532,16 @@
 	)
 	(wire
 		(pts
+			(xy 76.2 104.14) (xy 85.09 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a4a5533c-c09e-4241-ba78-addc5d9afe3b")
+	)
+	(wire
+		(pts
 			(xy 95.25 81.28) (xy 97.79 81.28)
 		)
 		(stroke
@@ -3529,16 +3549,6 @@
 			(type default)
 		)
 		(uuid "b2d1ada0-cc47-4bd2-a9ef-adbe264043f5")
-	)
-	(wire
-		(pts
-			(xy 76.2 104.14) (xy 85.09 104.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b39655a0-0550-49eb-bc1e-41f9f46a22f5")
 	)
 	(wire
 		(pts
@@ -3559,16 +3569,6 @@
 			(type default)
 		)
 		(uuid "c6b88111-303b-46a4-aa63-d5aa664c0bc4")
-	)
-	(wire
-		(pts
-			(xy 177.8 90.17) (xy 181.61 90.17)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c7204e8d-4754-4a50-966f-2fee2a3a5690")
 	)
 	(wire
 		(pts
@@ -3710,16 +3710,6 @@
 		)
 		(uuid "2ea7af5d-7305-44a2-93fa-0f02784670c0")
 	)
-	(label "EXTINT"
-		(at 76.2 104.14 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "3557b158-c2b6-4a6f-b34c-3f2e7b506528")
-	)
 	(label "VBCKP"
 		(at 95.25 72.39 0)
 		(effects
@@ -3789,16 +3779,6 @@
 			(justify left bottom)
 		)
 		(uuid "f9e288a4-9269-43ce-aed9-f426f7d13040")
-	)
-	(label "EXTINT"
-		(at 181.61 90.17 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "fc8dc212-88c7-49cb-96d9-1d63d4c47de1")
 	)
 	(global_label "I2C_SCL"
 		(shape input)
@@ -3918,6 +3898,46 @@
 		(uuid "a95c5944-3fcb-4dae-acd8-0584bb2b9bc8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 64.3853 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "EXTINT"
+		(shape output)
+		(at 177.8 90.17 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d59386cb-a3a0-4840-a23a-8d21196fdb6f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 186.3491 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "EXTINT"
+		(shape input)
+		(at 76.2 104.14 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d7b23895-c1e0-4be5-bf85-a18b9361cfb6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 67.6509 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4894,6 +4914,82 @@
 	)
 	(symbol
 		(lib_id "Device:R")
+		(at 121.92 114.3 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp yes)
+		(uuid "5577b263-b557-4a4d-97c4-78ae91daeb03")
+		(property "Reference" "R15"
+			(at 121.92 112.268 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0"
+			(at 121.92 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 121.92 116.078 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 121.92 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 121.92 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" ""
+			(at 121.92 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "7e75a639-6d0b-4940-82e8-8fa47d2d4f20")
+		)
+		(pin "1"
+			(uuid "d0cfd5e1-07ab-42b3-bfcf-2e7541e5b4ad")
+		)
+		(instances
+			(project "gpsref"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
+					(reference "R15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
 		(at 85.09 72.39 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -5677,7 +5773,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 123.19 119.38 0)
+		(at 132.08 119.38 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5685,7 +5781,7 @@
 		(dnp no)
 		(uuid "98ab1a24-0982-43cc-8563-3d0da98e69e0")
 		(property "Reference" "#PWR06"
-			(at 123.19 125.73 0)
+			(at 132.08 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5694,7 +5790,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 123.19 122.174 0)
+			(at 132.08 122.174 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5703,7 +5799,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 123.19 119.38 0)
+			(at 132.08 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5712,7 +5808,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 123.19 119.38 0)
+			(at 132.08 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5721,7 +5817,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 123.19 119.38 0)
+			(at 132.08 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6312,7 +6408,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_Coaxial")
-		(at 123.19 114.3 0)
+		(at 132.08 114.3 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6320,7 +6416,7 @@
 		(dnp no)
 		(uuid "b97ed23b-5788-491c-987d-17fab66604a9")
 		(property "Reference" "J8"
-			(at 123.19 111.506 0)
+			(at 132.08 111.506 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6328,7 +6424,7 @@
 			)
 		)
 		(property "Value" "U.Fl"
-			(at 126.111 114.3 90)
+			(at 135.001 114.3 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6336,7 +6432,7 @@
 			)
 		)
 		(property "Footprint" "Parts:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
-			(at 123.19 114.3 0)
+			(at 132.08 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6345,7 +6441,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 123.19 114.3 0)
+			(at 132.08 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6354,7 +6450,7 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 123.19 114.3 0)
+			(at 132.08 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)

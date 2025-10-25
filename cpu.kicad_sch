@@ -7304,15 +7304,6 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
-			(at 134.62 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "21"
 			(uuid "4ae40346-87f6-4c0e-bb56-5f251244f8c9")
 			(alternate "USB_DM")
@@ -8375,15 +8366,6 @@
 				(hide yes)
 			)
 		)
-		(property "JLCPCB" ""
-			(at 63.5 105.41 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "2"
 			(uuid "95c4a0ce-7c19-4b53-9b81-ed4cb14607ed")
 		)
@@ -8730,15 +8712,6 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x02, script generated"
-			(at 69.85 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "JLCPCB" ""
 			(at 69.85 36.83 0)
 			(effects
 				(font

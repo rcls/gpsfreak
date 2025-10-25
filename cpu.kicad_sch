@@ -7367,7 +7367,7 @@
 		)
 		(pin "11"
 			(uuid "088ec86a-bd3c-44cd-9eb9-54b9fa66f65e")
-			(alternate "SPI3_MOSI")
+			(alternate "TIM2_CH1")
 		)
 		(pin "28"
 			(uuid "fbf802cf-921c-4d13-948f-7d9ce76abb11")
@@ -7404,7 +7404,7 @@
 		)
 		(pin "13"
 			(uuid "27d5b456-349f-47c5-849d-c820709ad085")
-			(alternate "SPI1_MOSI")
+			(alternate "TIM2_CH3")
 		)
 		(pin "29"
 			(uuid "52241c40-86c6-4aef-b225-165c3787e1a7")
@@ -8331,7 +8331,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "2k7"
 			(at 63.5 105.41 90)
 			(effects
 				(font
@@ -8366,8 +8366,17 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C11702"
+		(property "LCSC" ""
 			(at 63.5 105.41 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
+			(at 63.5 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)

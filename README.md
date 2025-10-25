@@ -66,6 +66,17 @@ supports.
 Firmware updates are done via USB DFU.  There is also a Skedd connector breaking
 out SWD with a standard six pin connection.
 
+Control Lines
+=============
+
+The CPU has various control lines to the GPS and clock chip.  All are on an I2C
+bus.  In addition there are connections to:
+
+* EXTINT and RESET lines on GPS.
+* PDN, STATUS0, STATUS1/FDEC and GPIO2/FINC on the clock chip.  The latter two
+  allow some degree of frequency modulation to be acheived e.g., a basic low
+  bit-rate FSK.
+
 Hardware Options
 ================
 

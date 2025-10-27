@@ -5,8 +5,6 @@ import csv
 import re
 import sys
 
-#_, IN, BOM, OUT = sys.argv
-
 BOM_FIRST_LINE = None
 
 PREFIX_ROTATE = [
@@ -14,9 +12,8 @@ PREFIX_ROTATE = [
     ('QFN-', -90),
     ('QFN10_TG5032CGN', -90),
     ('SOIC-', -90),
-    ('SOT-23', 180),
+    ('SOT-', 180),
     ('SIL0008C', 180),
-    ('WSON', -90),
     ('Texas_S-PWSON', -90)]
 
 def read_bom(BOM):

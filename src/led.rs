@@ -14,7 +14,7 @@ use stm32h503::Interrupt::TIM3 as INTERRUPT;
 use crate::cpu::interrupt::PRIO_LED as PRIORITY;
 type Priority = crate::cpu::Priority<PRIORITY>;
 
-type FiveHz<T> = UCell<LedTimer<1000, 1000, T>>;
+type FiveHz<T> = UCell<Led<1000, 1000, T>>;
 
 pub static BLUE : FiveHz<Blue> = Default::default();
 pub static RED_GREEN: FiveHz<RedGreen> = Default::default();
@@ -51,12 +51,8 @@ pub struct Blue;
 impl LedTrait for Blue {
     fn set(&mut self, state: bool) {
         let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        // We drive low for on.
+        // Negative polarity: we drive low for on.
         gpioa.BSRR.write(|w| w.BR1().set_bit().BS1().bit(!state));
-    }
-    fn get(&self) -> bool {
-        let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        !gpioa.ODR.read().OD1().bit()
     }
 }
 
@@ -73,22 +69,45 @@ impl LedTrait for RedGreen {
             |w|w.BR2().set_bit().BR3().set_bit()
                 .BS2().bit(!state).BS3().bit(state));
     }
-    fn get(&self) -> bool {
-        let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        gpioa.ODR.read().OD3().bit()
-    }
 }
 
 pub trait LedTrait {
     fn set(&mut self, state: bool);
-    fn get(&self) -> bool;
+}
+
+#[derive_const(Default)]
+pub struct Led<const ON: i16, const OFF: i16, T> {
+    timer: LedTimer<ON, OFF>,
+    led: T,
+}
+
+impl<const ON: i16, const OFF: i16, T: LedTrait> Led<ON, OFF, T> {
+    fn isr(&mut self, now: i16) {
+        self.timer.isr(now);
+        self.led.set(self.timer.led);
+    }
+    pub fn set(&mut self, state: bool) {
+        let tim = unsafe {&*TIM::PTR};
+
+        let _guard = Priority::new();
+        schedule(self.timer.set(state, tim.CNT.read().bits() as i16));
+        self.led.set(self.timer.led);
+    }
+    pub fn pulse(&mut self, state: bool) {
+        let tim = unsafe {&*TIM::PTR};
+
+        let _guard = Priority::new();
+        schedule(self.timer.pulse(state, tim.CNT.read().bits() as i16));
+        self.led.set(self.timer.led);
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[derive_const(Default)]
-pub struct LedTimer<const ON: i16, const OFF: i16, Led> {
-    /// Current state of the LED.
-    led: Led,
+struct LedTimer<const ON: i16, const OFF: i16> {
+    /// Current desired state of the LED.  Various methods update this field,
+    /// the wrapping methods in `Led` update the physical LED to match.
+    led: bool,
     /// Next state to move to.
     next: bool,
     /// State we want to end up on.
@@ -120,40 +139,22 @@ fn trigger(deadline: W<i16>) {
     }
 }
 
-impl<const ON: i16, const OFF: i16, Led: LedTrait> LedTimer<ON, OFF, Led> {
-    pub fn set(&mut self, state: bool) {
-        let _guard = Priority::new();
-        let tim = unsafe {&*TIM::PTR};
-        let now = tim.CNT.read().bits() as i16;
-        schedule(self.request(state, now));
-    }
-
-    pub fn pulse(&mut self, state: bool) {
-        let _guard = Priority::new();
-        let tim = unsafe {&*TIM::PTR};
-        let now = tim.CNT.read().bits() as i16;
-        schedule(self.request_pulse(state, now));
-    }
-
+impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
     fn isr(&mut self, now: i16) {
         let Some(expiry) = self.expiry else {return};
         if W(now) - expiry < W(0) {
             return;
         }
-        let led = self.led.get();
-        let next = self.next;
-        self.next = self.target;
-        if next != led {
-            self.led.set(next);
-            self.expiry_time(now, self.duration(next));
-        }
-        else if next == self.target {
-            self.expiry = None;
+        if self.next != self.led {
+            self.update(self.next, self.target, now);
         }
         else {
-            // This should never happen, but fake it by leaving the current
-            // expiry in place.
-            debug_assert!(next != self.target);
+            debug_assert!(self.next == self.target);
+            // We should have led==next==target, but just in case something
+            // funning is going on, defensively process it.
+            self.led = self.target;
+            self.next = self.target;
+            self.expiry = None;
         }
     }
 
@@ -161,40 +162,39 @@ impl<const ON: i16, const OFF: i16, Led: LedTrait> LedTimer<ON, OFF, Led> {
         if state {ON} else {OFF}
     }
 
-    fn request(&mut self, state: bool, now: i16) -> Option<W<i16>> {
+    fn set(&mut self, state: bool, now: i16) -> Option<W<i16>> {
         self.target = state;
-        let led = self.led.get();
         if self.expiry != None {
-            if led == self.next || self.duration(self.next) == 0 {
+            if self.led == self.next || self.duration(self.next) == 0 {
                 self.next = state;
             }
             return None;
         }
-        if led == state {
+        if self.led == state {
             return None;               // Nothing to do.
         }
 
         // No timer is running; just apply everything now.
-        self.led.set(state);
-        self.next = state;
-        self.expiry_time(now, self.duration(state))
+        self.update(state, state, now)
     }
 
-    fn request_pulse(&mut self, state: bool, now: i16) -> Option<W<i16>> {
+    fn pulse(&mut self, state: bool, now: i16) -> Option<W<i16>> {
         // Equivalent to: request(state) ; request(!state)
         self.target = !state;
         let next = state ^ (
-            self.duration(state) == 0 || self.led.get() == state);
+            self.duration(state) == 0 || self.led == state);
         if self.expiry != None {
             self.next = next;
             return None;
         }
-        self.led.set(next);
-        self.next = !state;
-        self.expiry_time(now, self.duration(next))
+        self.update(next, !state, now)
     }
 
-    fn expiry_time(&mut self, now: i16, duration: i16) -> Option<W<i16>> {
+    /// Set self.led and return the timer expiry time.
+    fn update(&mut self, state: bool, next: bool, now: i16) -> Option<W<i16>> {
+        self.led = state;
+        self.next = next;
+        let duration = self.duration(state);
         if duration != 0 {
             self.expiry = Some(W(now) + W(duration));
         }
@@ -227,16 +227,11 @@ fn isr() {
     // there is nothing to do.  Otherwise we need to deal with the ambiguity
     // between timers in the past being processed or late.
     let deadline = W(now) + W(30000);
-    let deadline = min(deadline, blue.expiry);
-    let deadline = min(deadline, red_green.expiry);
+    let deadline = min(deadline, blue.timer.expiry);
+    let deadline = min(deadline, red_green.timer.expiry);
     dbgln!("LED {now} {deadline}");
 
     trigger(deadline);
-}
-
-impl LedTrait for bool {
-    fn set(&mut self, state: bool) {*self = state}
-    fn get(&self) -> bool {*self}
 }
 
 impl crate::cpu::VectorTable {
@@ -252,39 +247,39 @@ fn check_isr() {
 
 #[test]
 fn test_fast() {
-    let mut lt = LedTimer::<10, 10, bool>::default();
+    let mut lt = LedTimer::<10, 10>::default();
 
     let mut exp = lt;
 
-    assert_eq!(lt.request(false, 0), None);
+    assert_eq!(lt.set(false, 0), None);
     assert_eq!(lt, exp);
     lt.isr(1);
     assert_eq!(lt, exp);
 
-    assert_ne!(lt.request(true, 10), None);
+    assert_ne!(lt.set(true, 10), None);
     exp.led = true;
     exp.next = true;
     exp.target = true;
     exp.expiry = Some(W(20));
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(true, 11), None);
+    assert_eq!(lt.set(true, 11), None);
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(false, 12), None);
+    assert_eq!(lt.set(false, 12), None);
     exp.next = false;
     exp.target = false;
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(true, 13), None);
+    assert_eq!(lt.set(true, 13), None);
     exp.target = true;
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(false, 14), None);
+    assert_eq!(lt.set(false, 14), None);
     exp.target = false;
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(true, 15), None);
+    assert_eq!(lt.set(true, 15), None);
     exp.target = true;
     assert_eq!(lt, exp);
 
@@ -294,11 +289,11 @@ fn test_fast() {
     exp.expiry = Some(W(30));
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(false, 21), None);
+    assert_eq!(lt.set(false, 21), None);
     exp.target = false;
     assert_eq!(lt, exp);
 
-    assert_eq!(lt.request(true, 22), None);
+    assert_eq!(lt.set(true, 22), None);
     exp.target = true;
     assert_eq!(lt, exp);
 
@@ -325,32 +320,32 @@ fn test_fast() {
 
 #[test]
 fn test_zero() {
-    let mut lt = LedTimer::<10, 0, bool>::default();
+    let mut lt = LedTimer::<10, 0>::default();
     let mut exp = lt;
-    lt.request(false, 0);
+    lt.set(false, 0);
     assert_eq!(lt, exp);
 
-    lt.request(true, 10);
+    lt.set(true, 10);
     exp.led = true;
     exp.next = true;
     exp.target = true;
     exp.expiry = Some(W(20));
     assert_eq!(lt, exp);
 
-    lt.request(true, 11);
+    lt.set(true, 11);
     assert_eq!(lt, exp);
 
-    lt.request(false, 12);
+    lt.set(false, 12);
     exp.next = false;
     exp.target = false;
     assert_eq!(lt, exp);
 
-    lt.request(true, 13);
+    lt.set(true, 13);
     exp.next = true;
     exp.target = true;
     assert_eq!(lt, exp);
 
-    lt.request(false, 14);
+    lt.set(false, 14);
     exp.next = false;
     exp.target = false;
     assert_eq!(lt, exp);
@@ -367,7 +362,7 @@ fn test_zero() {
 }
 
 #[cfg(test)]
-impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF, bool> {
+impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
     fn test_pulse1() {
         for led in [false, true] {
             for next in [false, true] {
@@ -379,9 +374,9 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF, bool> {
                         let l = Self{led, next, target, expiry};
                         for request in [false, true] {
                             let (mut r, mut p) = (l, l);
-                            r.request(request, 5);
-                            r.request(!request, 5);
-                            p.request_pulse(request, 5);
+                            r.set(request, 5);
+                            r.set(!request, 5);
+                            p.pulse(request, 5);
                             assert_eq!(r, p, "{l:?} {request}");
                         }
                     }
@@ -393,8 +388,8 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF, bool> {
 
 #[test]
 fn test_pulse() {
-    LedTimer::< 0,  0, bool>::test_pulse1();
-    LedTimer::< 0, 10, bool>::test_pulse1();
-    LedTimer::<10,  0, bool>::test_pulse1();
-    LedTimer::<10, 10, bool>::test_pulse1();
+    LedTimer::< 0,  0>::test_pulse1();
+    LedTimer::< 0, 10>::test_pulse1();
+    LedTimer::<10,  0>::test_pulse1();
+    LedTimer::<10, 10>::test_pulse1();
 }

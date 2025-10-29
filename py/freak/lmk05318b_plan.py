@@ -28,7 +28,7 @@ def plan(target: FrequencyTarget) -> PLLPlan:
         elif pll1_divider(i, f):
             pll1.append(f)
             pll2.append(zero)
-        elif i == BIG_DIVIDE or f >= Fraction(PLL2_LOW, 7 * 256):
+        elif i == BIG_DIVIDE or f >= PLL2_LOW / (7 * 256):
             pll1.append(zero)
             pll2.append(f)
         else:
@@ -51,7 +51,7 @@ def plan(target: FrequencyTarget) -> PLLPlan:
         plan.dividers = [(0, 0, 0)] * len(target.freqs)
     # Above about 50 kHz we can brute force the ≈1GHz VCO range within a
     # reasonable time.
-    elif pll2_lcm > Fraction(MHz, 20):
+    elif pll2_lcm > 50 * kHz:
         plan = pll2_plan(target, pll2, pll2_lcm)
     elif target.freqs[BIG_DIVIDE]:
         assert all(not f for i, f in enumerate(pll2) if i != BIG_DIVIDE)

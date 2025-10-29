@@ -32,7 +32,7 @@ OFFICIAL_PLL2_HIGH = 6_250 * MHz
 PLL2_LOW = 5340 * MHz
 PLL2_HIGH = 6410 * MHz
 
-PLL2_MID = (PLL2_LOW + PLL2_HIGH) // 2
+PLL2_MID = (PLL2_LOW + PLL2_HIGH) / 2
 # Our numbering of channels:
 # 0 = LMK 0,1, GPS Freak 2
 # 1 = LMK 2,3, GPS Freak 1
@@ -115,13 +115,13 @@ FRACTIONS = {
 
 def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
     if freq >= 1000000 * MHz:
-        scaled = freq / (Fraction(MHz) * 1000000)
+        scaled = freq / (MHz * 1000000)
         suffix = 'THz'
     elif freq >= 10_000 * MHz: # Report VCO frequencies in MHz.
-        scaled = freq / (Fraction(MHz) * 1000)
+        scaled = freq / (MHz * 1000)
         suffix = 'GHz'
     elif freq >= MHz:
-        scaled = freq / Fraction(MHz)
+        scaled = freq / MHz
         suffix = 'MHz'
     elif freq >= kHz:
         scaled = freq / kHz
@@ -130,6 +130,7 @@ def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
         scaled = freq / Hz
         suffix = 'Hz'
 
+    rounded = round(scaled)
     fract = scaled % 1
     fract_str = None
     if not isinstance(fract, float) and fract in FRACTIONS:
@@ -138,6 +139,13 @@ def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
     elif isinstance(fract, Fraction) and (
             fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19):
         fract_str = f'+' + str(fract)
+    elif isinstance(scaled, Fraction) and rounded != scaled and rounded != 0 \
+         and abs(rounded - scaled) < 1e-5:
+        if rounded < scaled:
+            fract_str = f' + {float(scaled - rounded):.6g}'
+        else:
+            fract_str = f' - {float(rounded - scaled):.6g}'
+        scaled = rounded
 
     if fract_str is not None:
         return f'{int(scaled)}{fract_str} {suffix}'

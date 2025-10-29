@@ -31,8 +31,10 @@ class PLLPlan:
     freqs: list[Fraction] \
         = dataclasses.field(default_factory = lambda: [])
 
-    def __lt__(self, b: PLLPlan) -> bool:
+    def __lt__(self, b: PLLPlan | None) -> bool:
         '''Less is better.  I.e., return True if self is better than b.'''
+        if b is None:
+            return True
         # Prefer no error!
         a_error = abs(self.error_ratio())
         b_error = abs(b.error_ratio())
@@ -105,11 +107,11 @@ def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
     # Now attempt to multiply stage2_div by something to get us
     # into the VCO range.
     max_extra = min((1<<24) // stage2_div, PLL2_HIGH // freq // output_divide)
-    min_extra = ceil(Fraction(PLL2_LOW) / freq / output_divide)
+    min_extra = ceil(PLL2_LOW / freq / output_divide)
     if min_extra > max_extra:
         return None                     # Impossible.
 
-    extra = floor(Fraction(PLL2_MID) / freq / output_divide)
+    extra = floor(PLL2_MID / freq / output_divide)
     extra = max(extra, min_extra)
 
     # Attempt to make the stage2 divide even...
@@ -191,7 +193,7 @@ def pll2_plan_low_exact(target: FrequencyTarget, freq: Fraction, fast: bool,
                 plan = pll2_plan_low1(target, freq,
                                       post_div, stage1_div,
                                       mult_den, stage2_div)
-                if best is None or plan is not None and plan < best:
+                if plan is not None and plan < best:
                     best = plan
     return best
 
@@ -203,7 +205,7 @@ def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
     possible, achieve the exact frequency based on factorising the frequency
     ratio.  If that fails, then multiply the frequency by arbitrary factors to
     get into a sensible range, and then use the normal PLL2 planning.'''
-    assert freq < Fraction(PLL2_LOW, 7 * 256)
+    assert freq < PLL2_LOW / (7 * 256)
     assert freq == target.freqs[BIG_DIVIDE]
 
     # Just like TICS Pro, assume a FPD divider of 18.  So this gives the overall
@@ -220,35 +222,18 @@ def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
     if plan is not None:
         return plan
 
-    plan = pll2_plan_low_exact(target, freq, False, ratio, factors)
-    if plan is not None:
-        return plan
-
     # Now find a multiple of pll2_freq that puts us into a sensible range for a
     # search of the VCO range.  First try multiplying by factors of the
     # frequency denominator.
 
     MIN = 100 * kHz
 
-    pll2_lcm = freq
-    ratio_denominator = ratio.denominator
-    for p in reversed(factors):
-        while ratio_denominator % p == 0:
-            next = pll2_lcm * p
-            if ceil(Fraction(OFFICIAL_PLL2_LOW) / next) > \
-               floor(Fraction(OFFICIAL_PLL2_HIGH) / next):
-                break
-            pll2_lcm = next
-            ratio_denominator //= p
-            if pll2_lcm >= MIN:
-                break
-        if pll2_lcm >= MIN:
-            break
-
-    # Now just multiply by a power of 2 to get us over 100kHz.
-    while pll2_lcm < MIN:
-        pll2_lcm *= 2
-
+    # Multiple freq by an arbitrary number to get us over 100kHz.  Don't
+    # reduce the denominator though!
+    m = ceil(100 * kHz / freq)
+    while gcd(m, ratio.denominator) != 1:
+       m += 1
+    pll2_lcm = m * freq
     return pll2_plan(target, [Fraction(0)] * BIG_DIVIDE + [freq], pll2_lcm)
 
 def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
@@ -259,8 +244,7 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
     # Bit mask of what post-divider pairs are usable.
     postdivs = (1 << 64) - 1
     # Bit mask of what post-divider pairs are usable.  Ditto, but with the
-    # constraint that they are even.  FIXME - do we care about even postdivs?
-    # the output dividers are what we care about.
+    # constraint that the final output is even.
     postdive = (1 << 64) - 1
     for i, f in enumerate(freqs):
         if not f:                       # Not needed.
@@ -284,8 +268,8 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
                 continue
             s1, s2 = od
             postdivs1 |= postdiv_mask(postdiv)
-            if s2 == 1 or s2 % 2 == 0:
-                postdive |= postdiv_mask(postdiv)
+            if s1 % 2 == 0 and s2 == 1 or s2 % 2 == 0:
+                postdive1 |= postdiv_mask(postdiv)
         postdivs &= postdivs1
         postdive &= postdive1
         if postdivs == 0:
@@ -339,11 +323,11 @@ def pll2_plan(target: FrequencyTarget,
     # Firstly, if frequency is too high, then we can't do it.  Good luck
     # actually getting 3125MHz through the output drivers!
     maxf = max(f for f in freqs if f)
-    if maxf > Fraction(PLL2_HIGH, 4):
+    if maxf > PLL2_HIGH / 4:
         fail('Max frequency too high: {freq_to_str(maxf)}')
 
-    # Check that some multiple of the LCM is in rangle.
-    if ceil(PLL2_LOW / pll2_lcm) > floor(PLL2_HIGH / pll2_lcm):
+    # Check that some multiple of the LCM is in range.
+    if ceil(PLL2_LOW / pll2_lcm) > PLL2_HIGH // pll2_lcm:
         fail(f'PLL2 needs to be a multiple of {freq_to_str(pll2_lcm)} which is not in range')
 
     # Range to try for multipliers.
@@ -355,7 +339,7 @@ def pll2_plan(target: FrequencyTarget,
         pll2_freq = mult * pll2_lcm
         assert PLL2_LOW <= pll2_freq <= PLL2_HIGH
         plan = pll2_plan1(target, freqs, pll2_freq)
-        if best is None or plan is not None and plan < best:
+        if plan is not None and plan < best:
             best = plan
 
     if best is None:

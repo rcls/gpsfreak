@@ -3,10 +3,14 @@ from fractions import Fraction
 from math import gcd
 from typing import Any, Generator, NoReturn, Tuple
 
+class PlanningFailed(RuntimeError):
+    pass
+
 def fail(*args: Any, **kwargs: Any) -> NoReturn:
     import sys
     print(*args, **kwargs)
-    sys.exit(1)
+    raise PlanningFailed(' '.join(str(s) for s in args))
+    #sys.exit(1)
 
 def is_multiple_of(a: Fraction, b: Fraction) -> bool:
     return a.numerator % b.numerator == 0 and \
@@ -48,29 +52,29 @@ def fract_lcm(a: Fraction|None, b: Fraction|None) -> Fraction|None:
     if b is None:
         return a
 
-    g1 = gcd(a.denominator, b.denominator)
-    g2 = gcd(a.numerator, b.numerator)
-    u = (a.denominator // g1) * (b.numerator // g2)
-    v = (a.numerator // g2) * (b.denominator // g1)
-    assert a * u == b * v, f'{a} {b} {u} {v}'
-    assert gcd(u, v) == 1
-    return a * u
+    u = a.denominator * b.numerator
+    v = a.numerator * b.denominator
+    g = gcd(u, v)
+    u = u // g
+    v = v // g
+    au = a * u
+    assert au == b * v, f'{a} {b} {u} {v}'
+    return au
 
 def test_fract_lcm():
-    def mf(u):
-        x, y = u
-        return Fraction(x, y)
-    L2 = list(map(mf, [(1,8), (1,4), (1,2), (1,1), (2,1), (4,1), (8,1)]))
-    L3 = list(map(mf, [(1,27), (1,9), (1,3), (1,1), (3,1), (9,1), (27,1)]))
-    L5 = list(map(mf, [(1,25), (1,5), (1,1), (5,1), (25,1)]))
-    L7 = list(map(mf, [(1,49), (1,7), (1,1), (7,1), (49,1)]))
+    L2 = list(map(Fraction, '1/8 1/4 1/2 1 2 4 8'.split()))
+    L3 = list(map(Fraction, '1/27 1/9 1/3 1 3 9 27'.split()))
+    L5 = list(map(Fraction, '1/25 1/5 1 5 25'.split()))
+    L7 = list(map(Fraction, '1/49 1/7 1 7 49'.split()))
 
+    # 7 * 7 * 5 * 5 = 1225
     fracts = []
     for a2 in L2:
         for a3 in L3:
             for a5 in L5:
                 for a7 in L7:
                     fracts.append(a2 * a3 * a5 * a7)
+    # ≈1.4 million checks.
     for a in fracts:
         for b in fracts:
             # We rely on the asserts in fract_lcm to actually test!

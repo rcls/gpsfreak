@@ -25,5 +25,5 @@ def test_crc():
     assert second == VERIFY_MAGIC
 
     data = b'This is a test string 123456789'
-    data += struct.pack('>I', crc(data))
+    data += struct.pack('>I', crc32(data))
     assert crc32(data) == VERIFY_MAGIC

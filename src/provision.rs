@@ -46,7 +46,7 @@ const CONFIG_MAX_LENGTH: usize = 2048;
 const MIN_SUPPORTED_VERSION: u32 = 1;
 const MAX_SUPPORTED_VERSION: u32 = 1;
 
-macro_rules!dbgln {($($tt:tt)*) => {if true {crate::dbgln!($($tt)*)}};}
+macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 #[repr(C)]
 struct ConfigBlock {
@@ -173,7 +173,7 @@ fn best_config() -> Option<&'static ConfigBlock> {
     None
 }
 
-/// Return true if config block number i is better than that at j.
+/// Key for sorting configs.  Configs with "greater" keys are better.
 fn config_sort_key(i: &u8) -> (bool, u32, u8) {
     let c = config_by_index(*i);
     let version_ok = MIN_SUPPORTED_VERSION <= c.version

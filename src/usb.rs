@@ -42,16 +42,16 @@ macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 pub(crate) use {ctrl_dbgln, usb_dbgln};
 
 #[allow(non_camel_case_types)]
+#[derive_const(Default)]
 struct USB_State {
     /// Base of the ACM CDC TX buffer we are accumulating.
-    tx_base: *mut u32,
+    tx_base: *mut u32 = BULK_TX_BUF as _,
     /// Current number of bytes in TX buffer we are accumulating.
     tx_len: usize,
     /// Accumulating bytes into 32 bit words.
     tx_part: u32,
-
     /// Is software still processing a received buffer?
-    rx_processing: RxProcessing,
+    rx_processing: RxProcessing = RxProcessing::Idle,
 }
 
 /// Status of processing received CDC ACM serial data.
@@ -67,17 +67,6 @@ enum RxProcessing {
 }
 
 unsafe impl Sync for USB_State {}
-
-impl const Default for USB_State {
-    fn default() -> USB_State {
-        USB_State {
-            tx_base: BULK_TX_BUF as _,
-            tx_len : 0,
-            tx_part: 0,
-            rx_processing: RxProcessing::Idle,
-        }
-    }
-}
 
 static USB_STATE: UCell<USB_State> = Default::default();
 

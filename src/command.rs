@@ -69,7 +69,6 @@
 //!
 //!    68 : Update LMK05318b status.
 //!
-//!    ?70 : Unsafe operation unlock.  Needs correct magic data payload.
 //!    71 : peek.  Payload is u32 address followed by u32 length.  Response is
 //!         F1 with address + data payload.
 //!    72 : poke.  Payload is u32 address followed by data bytes.
@@ -77,7 +76,6 @@
 //!         is supported.
 //!    73 : crc.  Payload is u32 address followed by u32 length.  Response is
 //!         F3 with a 32 bit CRC payload.
-//!    * Sometime we'll overload this to write to flash?
 //!
 //!            Both peek and poke will do 32-bit or 16-bit transfers if address
 //!            and length are both sufficiently aligned.  Neither guard against
@@ -110,7 +108,7 @@ enum Error {
     BadFormat      = 4,
     /// Payload parameter value bogus.
     BadParameter   = 5,
-    /// Special number used to indicate that an ACK (not a NACK) should be sent.
+    /// Special value used to indicate that an ACK (not a NACK) should be sent.
     Succeeded      = 6,
 }
 

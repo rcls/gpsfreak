@@ -10,18 +10,16 @@ MHz = Fraction(1)
 kHz = MHz / 1000
 Hz = kHz / 1000
 
-BAW_FREQ = 2_500 * MHz
-
 REF_FREQ = 8844582 * Hz
 
 # I've only seen TICS Pro use this, which means it's the only possibility that
 # I have PLL2 filter settings for...
 FPD_DIVIDE = 18
-PLL2_PFD = BAW_FREQ / FPD_DIVIDE
 
 # PLL1 frequency range.  ±50ppm
-BAW_LOW  = BAW_FREQ + BAW_FREQ * 50 / 1000000
-BAW_HIGH = BAW_FREQ - BAW_FREQ * 50 / 1000000
+BAW_FREQ = 2_500 * MHz
+BAW_LOW  = BAW_FREQ - BAW_FREQ * 50 / 1000000
+BAW_HIGH = BAW_FREQ + BAW_FREQ * 50 / 1000000
 
 # This is the official range of the LMK05318b...
 OFFICIAL_PLL2_LOW = 5_500 * MHz
@@ -32,7 +30,14 @@ OFFICIAL_PLL2_HIGH = 6_250 * MHz
 PLL2_LOW = 5340 * MHz
 PLL2_HIGH = 6410 * MHz
 
+# Small frequencies...
+SMALL = 50 * kHz
+
 PLL2_MID = (PLL2_LOW + PLL2_HIGH) / 2
+# Clamp the length of a PLL2 brute force search to ±MAX_HALF_RANGE attempts
+# around the mid-point.  This is ±10700 (i.e., 21401 total).
+MAX_HALF_RANGE = (PLL2_HIGH - PLL2_LOW) // 2 // SMALL
+
 # Our numbering of channels:
 # 0 = LMK 0,1, GPS Freak 2
 # 1 = LMK 2,3, GPS Freak 1
@@ -78,12 +83,6 @@ def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
             return first, ratio // first
 
     return None
-
-def pll1_divider(index: int, f: Fraction) -> Tuple[int, int] | None:
-    if BAW_FREQ % f.numerator == 0:
-        return output_divider(index, BAW_FREQ // f)
-    else:
-        return None
 
 def str_to_freq(s: str) -> Fraction:
     s = s.lower()
@@ -153,3 +152,14 @@ def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
         return f'{float(scaled)} {suffix}'
     else:
         return f'{float(scaled):.{precision}g} {suffix}'
+
+def fraction_to_str(f: Fraction, paren: bool = True) -> str:
+    if f.is_integer() or f < 1:
+        return str(f)
+    d = f.denominator
+    i = f.numerator // d
+    n = f.numerator % d
+    if paren:
+        return f'({i} + {n}/{d})'
+    else:
+        return f'{i} + {n}/{d}'

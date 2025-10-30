@@ -4,7 +4,8 @@ from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 from .lmk05318b import MaskedBytes, Register
 
 from .freak_util import Device
-from .lmk05318b_plan import FrequencyTarget, str_to_freq, freq_to_str
+from .lmk05318b_plan import FrequencyTarget, str_to_freq, freq_to_str, \
+    fraction_to_str
 from .plan_pll2 import PLLPlan
 
 import argparse
@@ -103,9 +104,14 @@ def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
             print()
         else:
             print(f' {s2}')
+    print()
+    dpll = plan.dpll
+    print(f'BAW: {freq_to_str(dpll.baw)} = 8844582 * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
+    if dpll.baw != dpll.baw_target:
+        error = freq_to_str(dpll.baw - dpll.baw_target, 4)
+        print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
     if plan.freq_target != 0:
-        print()
-        print(f'PLL2: {freq_to_str(plan.freq)} = 2500 / {plan.fpd_divide} * {plan.multiplier}')
+        print(f'PLL2: {freq_to_str(plan.freq)} = BAW / {plan.fpd_divide} * {fraction_to_str(plan.multiplier)}')
         if plan.freq != plan.freq_target:
             print(f'    target {freq_to_str(plan.freq_target)}, error {freq_to_str(plan.error(), 4)}')
 
@@ -159,6 +165,15 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
             data.OUT7_STG2_DIV = s2 - 1
         else:
             assert s2 == 1
+
+    data.DPLL_REF_FB_PRE_DIV = plan.dpll.fb_prediv - 2
+    div = plan.dpll.fb_div.numerator // plan.dpll.fb_div.denominator
+    num = plan.dpll.fb_div.numerator % plan.dpll.fb_div.denominator
+    den = plan.dpll.fb_div.denominator
+    mult = ((1 << 40) - 1) // den
+    data.DPLL_REF_FB_DIV = div
+    data.DPLL_REF_NUM = num * mult
+    data.DPLL_REF_DEN = den * mult
 
     if plan.freq_target == 0:
         data.LOL_PLL2_MASK = 1

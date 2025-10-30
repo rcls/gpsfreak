@@ -1,4 +1,5 @@
 
+from .plan_dpll import DPLLPlan
 from .plan_target import *
 from .plan_tools import factor_splitting, fail, fract_lcm, qd_factor
 
@@ -13,6 +14,8 @@ __all__ = 'PLLPlan', 'fail', 'pll2_plan', 'pll2_plan_low'
 
 @dataclass
 class PLLPlan:
+    # DPLL plan we assume.
+    dpll: DPLLPlan
     # The actual frequency of PLL2, in MHz
     freq: Fraction = Fraction(0)
     # The target frequency of PLL2, in MHz.
@@ -70,7 +73,7 @@ class PLLPlan:
         return False
 
     def validate(self):
-        assert self.freq == self.multiplier * BAW_FREQ / fpd_divide
+        assert self.freq == self.multiplier * self.dpll.freq / fpd_divide
 
     def error_ratio(self) -> float:
         return float(self.freq / self.freq_target - 1)
@@ -93,12 +96,13 @@ def postdiv_mask(div: int) -> int:
     assert 2 <= div <= 7
     return 0x0101010101010101 << div | 0xfe << 8 * div
 
-def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
-                   post_div: int, stage1_div: int,
+def pll2_plan_low1(target: FrequencyTarget, dpll: DPLLPlan,
+                   freq: Fraction, post_div: int, stage1_div: int,
                    mult_den: int, stage2_div: int) -> PLLPlan | None:
     '''Try and create a PLL2 plan for a single output using the given data.
     We multiply stage2_div to get the VCO frequency in the supported range.'''
-    ratio = freq / PLL2_PFD
+    pll2_pfd = dpll.pll2_pfd()
+    ratio = freq / pll2_pfd
     total_divide = mult_den * post_div * stage1_div * stage2_div
     assert total_divide % ratio.denominator == 0
 
@@ -123,17 +127,18 @@ def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
 
     stage2_div *= extra
     vco_freq = freq * post_div * stage1_div * stage2_div
-    multiplier = vco_freq / PLL2_PFD
+    multiplier = vco_freq / pll2_pfd
     dividers = [(0, 0, 0)] * BIG_DIVIDE
     dividers.append((post_div, stage1_div, stage2_div))
     freqs = [Fraction(0)] * BIG_DIVIDE
-    freqs.append(PLL2_PFD * multiplier / post_div / stage1_div / stage2_div)
+    freqs.append(pll2_pfd * multiplier / post_div / stage1_div / stage2_div)
 
     assert PLL2_LOW <= vco_freq <= PLL2_HIGH
     assert multiplier.denominator <= 1<<24
     assert freqs[-1] == freq
 
     return PLLPlan(
+        dpll = dpll,
         freq = vco_freq,
         freq_target = vco_freq,
         fpd_divide = FPD_DIVIDE,
@@ -142,8 +147,8 @@ def pll2_plan_low1(target: FrequencyTarget, freq: Fraction,
         dividers = dividers,
         freqs = freqs)
 
-def pll2_plan_low_exact(target: FrequencyTarget, freq: Fraction, fast: bool,
-                        ratio: Fraction, factors: list[int]) -> PLLPlan | None:
+def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
+                        fast: bool, factors: list[int]) -> PLLPlan | None:
     '''Search for a PLL2 plan generating the given frequency.
 
     ratio is the overall PDF-to-output multiplier.  factors should contain all
@@ -163,6 +168,7 @@ def pll2_plan_low_exact(target: FrequencyTarget, freq: Fraction, fast: bool,
     # * stage2 divider (1 ..= 1<<24)
     # Scan over post dividers and the stage1 output divider.
     best = None
+    ratio = freq / dpll.pll2_pfd()
     for post_div in range(2, 7+1):
         for stage1_div in range(6, 256+1):
             # What we are left with needs to be factored into the PLL2
@@ -190,14 +196,15 @@ def pll2_plan_low_exact(target: FrequencyTarget, freq: Fraction, fast: bool,
 
             for stage2_div, mult_den in \
                     factor_splitting(bigden, factors, s2_max, den_max):
-                plan = pll2_plan_low1(target, freq,
+                plan = pll2_plan_low1(target, dpll, freq,
                                       post_div, stage1_div,
                                       mult_den, stage2_div)
                 if plan is not None and plan < best:
                     best = plan
     return best
 
-def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
+def pll2_plan_low(target: FrequencyTarget, dpll: DPLLPlan,
+                  freq: Fraction) -> PLLPlan:
     '''Plan for the special case where we only have the BIG_DIVIDE output, and
     the stage2 divider is definitely needed.
 
@@ -208,9 +215,7 @@ def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
     assert freq < PLL2_LOW / (7 * 256)
     assert freq == target.freqs[BIG_DIVIDE]
 
-    # Just like TICS Pro, assume a FPD divider of 18.  So this gives the overall
-    # multiple of the PLL2 PFD frequency.
-    ratio = freq / PLL2_PFD
+    ratio = freq / dpll.pll2_pfd()
 
     # Factorize the denominator.
     factors = qd_factor(ratio.denominator)
@@ -218,25 +223,20 @@ def pll2_plan_low(target: FrequencyTarget, freq: Fraction) -> PLLPlan:
     # We only get called for frequencies well below PLL2_PFD = BAW_FREQ/18!
     assert len(factors) != 0
 
-    plan = pll2_plan_low_exact(target, freq, True, ratio, factors)
+    plan = pll2_plan_low_exact(target, dpll, freq, True, factors)
     if plan is not None:
         return plan
 
-    # Now find a multiple of pll2_freq that puts us into a sensible range for a
-    # search of the VCO range.  First try multiplying by factors of the
-    # frequency denominator.
+    plan = pll2_plan_low_exact(target, dpll, freq, False, factors)
+    if plan is not None:
+        return plan
 
-    MIN = 100 * kHz
+    # Ok, just fall back to a brute force search.  It'll only try a limited part
+    # of the search space, but thats OK, we've given up on exact matches.
+    return pll2_plan(target, dpll,
+                     [Fraction(0)] * BIG_DIVIDE + [freq], freq)
 
-    # Multiple freq by an arbitrary number to get us over 100kHz.  Don't
-    # reduce the denominator though!
-    m = ceil(100 * kHz / freq)
-    while gcd(m, ratio.denominator) != 1:
-       m += 1
-    pll2_lcm = m * freq
-    return pll2_plan(target, [Fraction(0)] * BIG_DIVIDE + [freq], pll2_lcm)
-
-def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
+def pll2_plan1(target: FrequencyTarget, dpll: DPLLPlan, freqs: list[Fraction],
                pll2_freq: Fraction) -> PLLPlan | None:
     '''Try and create a plan using a particular PLL2 frequency.  Note that
     the frequency list might not include all the frequencies in the target.'''
@@ -276,7 +276,7 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
             break                       # Doesn't work
 
     # Compute the multipliers.
-    mult_exact = pll2_freq / PLL2_PFD
+    mult_exact = pll2_freq / dpll.pll2_pfd()
     mult_actual = mult_exact.limit_denominator(1 << 24)
     # Compute the post-dividers.  Use the highest possible pair.
     if postdivs == 0:
@@ -305,7 +305,8 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
             dividers[i] = p2, od[0], od[1]
 
     return PLLPlan(
-        freq = PLL2_PFD * mult_actual,
+        dpll = dpll,
+        freq = dpll.pll2_pfd() * mult_actual,
         freq_target = pll2_freq,
         fpd_divide = FPD_DIVIDE,
         multiplier = mult_actual,
@@ -313,7 +314,7 @@ def pll2_plan1(target: FrequencyTarget, freqs: list[Fraction],
         dividers = dividers,
         freqs = [f / mult_exact * mult_actual for f in freqs])
 
-def pll2_plan(target: FrequencyTarget,
+def pll2_plan(target: FrequencyTarget, dpll: DPLLPlan,
               freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
     '''Create a frequency plan using PLL2 for a list of frequencies.
 
@@ -330,15 +331,19 @@ def pll2_plan(target: FrequencyTarget,
     if ceil(PLL2_LOW / pll2_lcm) > PLL2_HIGH // pll2_lcm:
         fail(f'PLL2 needs to be a multiple of {freq_to_str(pll2_lcm)} which is not in range')
 
-    # Range to try for multipliers.
+    # Range to try for multipliers.  Clamp the range to be not-too-big, for the
+    # case where we've been given a small pll2_lcm.
     start = ceil(PLL2_LOW / pll2_lcm)
-    end = floor(PLL2_HIGH / pll2_lcm)
+    end = PLL2_HIGH // pll2_lcm
+    mid = PLL2_MID // pll2_lcm
+    start = max(start, mid - MAX_HALF_RANGE)
+    end = min(end, mid + MAX_HALF_RANGE)
+
     best = None
-    for mult in range(ceil(PLL2_LOW / pll2_lcm),
-                      floor(PLL2_HIGH / pll2_lcm) + 1):
+    for mult in range(start, end + 1):
         pll2_freq = mult * pll2_lcm
         assert PLL2_LOW <= pll2_freq <= PLL2_HIGH
-        plan = pll2_plan1(target, freqs, pll2_freq)
+        plan = pll2_plan1(target, dpll, freqs, pll2_freq)
         if plan is not None and plan < best:
             best = plan
 

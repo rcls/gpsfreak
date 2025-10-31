@@ -12,7 +12,7 @@ import argparse
 import struct
 
 from fractions import Fraction
-from typing import Tuple
+from typing import Any, Tuple
 
 CHANNELS_RAW = list(
     (i, f'Channel {s:3}', s) for i, s in enumerate('0_1 2_3 4 5 6 7'.split()))
@@ -90,7 +90,7 @@ def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
         t = target.freqs[index]
         if not t:
             continue
-        f = plan.freqs[index]
+        f = plan.freq(index)
         pd, s1, s2 = plan.dividers[index]
         pll = 1 if pd == 0 else 2
         print(f'{name} {freq_to_str(f)}', end='')
@@ -110,17 +110,19 @@ def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
     if dpll.baw != dpll.baw_target:
         error = freq_to_str(dpll.baw - dpll.baw_target, 4)
         print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
-    if plan.freq_target != 0:
-        print(f'PLL2: {freq_to_str(plan.freq)} = BAW / {plan.fpd_divide} * {fraction_to_str(plan.multiplier)}')
-        if plan.freq != plan.freq_target:
-            print(f'    target {freq_to_str(plan.freq_target)}, error {freq_to_str(plan.error(), 4)}')
+    if plan.pll2_target != 0:
+        print(f'PLL2: {freq_to_str(plan.pll2)} = BAW / {plan.fpd_divide} * {fraction_to_str(plan.multiplier)}')
+        if plan.pll2 != plan.pll2_target:
+            print(f'    target {freq_to_str(plan.pll2_target)}, error {freq_to_str(plan.error(), 4)}')
 
-def make_freq_list(freqs: list[Fraction], raw: bool) -> FrequencyTarget:
+def make_freq_target(args: argparse.Namespace, raw: bool) -> FrequencyTarget:
+    freqs = args.FREQ
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
-    result = [Fraction(0)] * max(6, len(freqs))
+    result = [Fraction(0)] * max(6, len(args.FREQ))
+    # FIXME - this just silently ignores extrats.
     for (i, _, _), f in zip(channels, freqs):
         result[i] = f
-    return FrequencyTarget(freqs=result)
+    return FrequencyTarget(freqs=result, pll2_base=args.pll2)
 
 def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data = MaskedBytes()
@@ -175,7 +177,7 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data.DPLL_REF_NUM = num * mult
     data.DPLL_REF_DEN = den * mult
 
-    if plan.freq_target == 0:
+    if plan.pll2_target == 0:
         data.LOL_PLL2_MASK = 1
         data.MUTE_APLL2_LOCK = 0
         data.PLL2_PDN = 1
@@ -212,8 +214,8 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data.PLL2_LF_C3 = 7
     return data
 
-def do_freq(dev: Device, freq: list[Fraction], raw: bool) -> None:
-    target = make_freq_list(freq, raw)
+def do_freq(dev: Device, args: argparse.Namespace, raw: bool) -> None:
+    target = make_freq_target(args, raw)
     plan = lmk05318b_plan.plan(target)
     report_plan(target, plan, raw)
     data = freq_make_data(plan)
@@ -437,6 +439,28 @@ def do_upload(dev: Device, path: str) -> None:
     tcs = tics.read_tcs_file(path)
     masked_write(dev, tcs)
 
+def add_freq_commands(subp: Any, short: str, long: str) -> None:
+    epilog = f'''Each frequency on the command line corresponds to a {long}.
+    Use 0 to turn an output off.  The frequency can be specified as either
+    fraction (315/88) or a decimal number (3.579545), with an optional unit that
+    defaults to MHz.'''
+    freq = subp.add_parser(
+        'freq', aliases=['frequency'], help='Program/report frequencies',
+        description='''Program or report frequencies.  If a list of frequencies
+        is given, these are programmed to the device.  With no arguments, report
+        the current device frequencies.''',
+        epilog=epilog)
+    plan = subp.add_parser(
+        'plan', help='Frequency planning', epilog = epilog,
+        description='''Compute and print a frequency plan without programming it
+        to the device.''')
+
+    for p, n in (freq, '*'), (plan, '+'):
+        p.add_argument('FREQ', nargs=n, type=lmk05318b_plan.str_to_freq,
+                       help=f'Frequencies for each {short}')
+        p.add_argument('-2', '--pll2', type=lmk05318b_plan.str_to_freq,
+                       help=f'Forced divisor of PLL2 frequency')
+
 def add_to_argparse(argp: argparse.ArgumentParser,
                     dest: str = 'command', metavar: str = 'COMMAND') -> None:
 
@@ -464,26 +488,11 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp = argp.add_subparsers(
         dest=dest, metavar=metavar, required=True, help='Sub-command')
 
+    add_freq_commands(subp, 'channel', 'LMK0531b channel')
     FREQ_EPILOG='''Each frequency on the command line corresponds to a LMK05318b
     channel.  Use 0 to turn an output off.  The frequency can be specified as
     either fraction (315/88) or a decimal number (3.579545), with an optional
     unit that defaults to MHz.'''
-
-    freq = subp.add_parser(
-        'freq', aliases=['frequency'], help='Program/report frequencies',
-        description='''Program or report frequencies.  If a list of frequencies
-        is given, these are programmed to the device.  With no arguments, report
-        the current device frequencies.''',
-        epilog=FREQ_EPILOG)
-    freq.add_argument('FREQ', nargs='*', type=lmk05318b_plan.str_to_freq,
-                      help='Frequencies for each channel')
-
-    plan = subp.add_parser(
-        'plan', help='Frequency planning', epilog=FREQ_EPILOG,
-        description='''Compute and print a frequency plan without programming it
-        to the device.''')
-    plan.add_argument('FREQ', nargs='+', type=lmk05318b_plan.str_to_freq,
-                      help='Frequencies for each channel')
 
     drive = subp.add_parser('drive', help='Set/report output drive',
                             description='Set/port output drive')
@@ -526,8 +535,8 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
             report_freq(device, True)
 
     elif command == 'plan':
-        target = make_freq_list(args.FREQ, True)
-        plan = lmk05318b_plan.plan(make_freq_list(args.FREQ, True))
+        target = make_freq_target(args, True)
+        plan = lmk05318b_plan.plan(target)
         report_plan(target, plan, True)
 
     elif command == 'drive':

@@ -17,22 +17,26 @@ class PLLPlan:
     # DPLL plan we assume.
     dpll: DPLLPlan
     # The actual frequency of PLL2, in MHz
-    freq: Fraction = Fraction(0)
+    pll2: Fraction = Fraction(0)
     # The target frequency of PLL2, in MHz.
-    freq_target: Fraction = Fraction(0)
+    pll2_target: Fraction = Fraction(0)
     # Fpd divider between BAW and PLL2.  Currently only 18 is supported.
     fpd_divide: int = FPD_DIVIDE
     # Feedback divider value for PLL2.
     multiplier: Fraction = Fraction(0)
-    # Postdivider mask.
-    postdiv_mask: int = 0
     # Post & output dividers by channel.  A post-divider of zero means that
     # the source is PLL1, otherwise PLL2 is used.
     dividers: list[Tuple[int, int, int]] \
         = dataclasses.field(default_factory = lambda: [])
-    # Target output frequency list.  Use zero for output off.
-    freqs: list[Fraction] \
-        = dataclasses.field(default_factory = lambda: [])
+
+    def freq(self, i: int) -> Fraction:
+        if i >= len(self.dividers):
+            return Fraction(0)
+        pre, s1, s2 = self.dividers[i]
+        if pre <= 1:
+            return self.dpll.baw / (s1 * s2)
+        else:
+            return self.pll2 / (pre * s1 * s2)
 
     def __lt__(self, b: PLLPlan | None) -> bool:
         '''Less is better.  I.e., return True if self is better than b.'''
@@ -62,26 +66,26 @@ class PLLPlan:
         if a_fixed != b_fixed:
             return a_fixed
         # Prefer VCO2 near the middle of its range.
-        a_df = abs(self.freq - PLL2_MID)
-        b_df = abs(b   .freq - PLL2_MID)
+        a_df = abs(self.pll2 - PLL2_MID)
+        b_df = abs(b   .pll2 - PLL2_MID)
         if a_df != b_df:
             return a_df < b_df
 
-        if self.freq != b.freq:
-            return self.freq < b.freq
+        if self.pll2 != b.pll2:
+            return self.pll2 < b.pll2
 
         return False
 
     def validate(self):
-        assert self.freq == self.multiplier * self.dpll.freq / fpd_divide
+        assert self.pll2 == self.multiplier * self.dpll.pll2 / fpd_divide
 
     def error_ratio(self) -> float:
-        return float(self.freq / self.freq_target - 1)
+        return float(self.pll2 / self.pll2_target - 1)
     def error(self) -> Fraction:
-        return self.freq - self.freq_target
+        return self.pll2 - self.pll2_target
 
     def is_official(self) -> bool:
-        return OFFICIAL_PLL2_LOW <= self.freq <= OFFICIAL_PLL2_HIGH
+        return OFFICIAL_PLL2_LOW <= self.pll2 <= OFFICIAL_PLL2_HIGH
 
     def fixed_denom(self) -> bool:
         return (1 << 24) % self.multiplier.denominator == 0
@@ -130,22 +134,17 @@ def pll2_plan_low1(target: FrequencyTarget, dpll: DPLLPlan,
     multiplier = vco_freq / pll2_pfd
     dividers = [(0, 0, 0)] * BIG_DIVIDE
     dividers.append((post_div, stage1_div, stage2_div))
-    freqs = [Fraction(0)] * BIG_DIVIDE
-    freqs.append(pll2_pfd * multiplier / post_div / stage1_div / stage2_div)
 
     assert PLL2_LOW <= vco_freq <= PLL2_HIGH
     assert multiplier.denominator <= 1<<24
-    assert freqs[-1] == freq
 
     return PLLPlan(
         dpll = dpll,
-        freq = vco_freq,
-        freq_target = vco_freq,
+        pll2 = vco_freq,
+        pll2_target = vco_freq,
         fpd_divide = FPD_DIVIDE,
         multiplier = multiplier,
-        postdiv_mask = postdiv_mask(post_div),
-        dividers = dividers,
-        freqs = freqs)
+        dividers = dividers)
 
 def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
                         fast: bool, factors: list[int]) -> PLLPlan | None:
@@ -157,7 +156,7 @@ def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
 
     # We definitely can't cope with any prime factors > 1<<24.
     if factors[-1] >= 1<<24:
-        print(f"Can't acheive {freq} exactly: denominator factor {factors[-1]} is too big")
+        print(f"Can't acheive {freq_to_str(freq)} exactly: denominator factor {factors[-1]} is too big")
         return None
 
     #print(f'freq={freq}, ratio={ratio}, factors={factors}')
@@ -231,8 +230,9 @@ def pll2_plan_low(target: FrequencyTarget, dpll: DPLLPlan,
     if plan is not None:
         return plan
 
-    # Ok, just fall back to a brute force search.  It'll only try a limited part
-    # of the search space, but thats OK, we've given up on exact matches.
+    # Ok, just fall back to a brute force search for something.  It'll only try
+    # a limited part of the search space, but thats OK, we've given up on exact
+    # matches.
     return pll2_plan(target, dpll,
                      [Fraction(0)] * BIG_DIVIDE + [freq], freq)
 
@@ -306,13 +306,11 @@ def pll2_plan1(target: FrequencyTarget, dpll: DPLLPlan, freqs: list[Fraction],
 
     return PLLPlan(
         dpll = dpll,
-        freq = dpll.pll2_pfd() * mult_actual,
-        freq_target = pll2_freq,
+        pll2 = dpll.pll2_pfd() * mult_actual,
+        pll2_target = pll2_freq,
         fpd_divide = FPD_DIVIDE,
         multiplier = mult_actual,
-        postdiv_mask = postdivs,
-        dividers = dividers,
-        freqs = [f / mult_exact * mult_actual for f in freqs])
+        dividers = dividers)
 
 def pll2_plan(target: FrequencyTarget, dpll: DPLLPlan,
               freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
@@ -323,7 +321,7 @@ def pll2_plan(target: FrequencyTarget, dpll: DPLLPlan,
     pll2_plan_low instead for the case where pll2_lcm is low.'''
     # Firstly, if frequency is too high, then we can't do it.  Good luck
     # actually getting 3125MHz through the output drivers!
-    maxf = max(f for f in freqs if f)
+    maxf = max(freqs)
     if maxf > PLL2_HIGH / 4:
         fail('Max frequency too high: {freq_to_str(maxf)}')
 

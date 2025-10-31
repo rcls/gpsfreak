@@ -62,85 +62,17 @@ def baw_plan_for_freq(freq: Fraction) -> DPLLPlan:
     best = None
     ratio = freq / REF_FREQ
     for pre_div in range(2, 17+1):
-        fb_div = ratio / 2 / pre_div
-        fb_div = fb_div.limit_denominator((1 << 40) - 1)
+        fb_div_target = ratio / 2 / pre_div
+        fb_div = fb_div_target.limit_denominator((1 << 40) - 1)
         plan = DPLLPlan(
             baw = REF_FREQ * 2 * pre_div * fb_div,
-            baw_target = freq,
+            baw_target = REF_FREQ * ratio,
             fb_prediv = pre_div,
             fb_div = fb_div)
         if plan < best:
             best = plan
     assert best is not None
     return best
-
-def baw_plan_low_exact1(freq: Fraction,
-                        fb_prediv: int, stage1_div: int,
-                        stage2_div: int, den: int) -> DPLLPlan | None:
-    '''Attempt to create a plan with the given dividers.  stage2_div may
-    be multiplied to get the BAW frequency in range.'''
-    min_extra = ceil(BAW_LOW / stage1_div / stage2_div)
-    max_extra = BAW_HIGH // stage1_div // stage2_div
-    max_extra = min(max_extra, (1 << 24) // stage2_div)
-    if min_extra > max_extra:
-        return None                     # Impossible
-    extra = floor(BAW_FREQ / stage1_div / stage2_div)
-    extra = max(extra, min_extra)
-    # Attempt to make stage2_div even...
-    if stage2_div % 2 != 0 and extra % 2 != 0:
-        if extra < max_extra:
-            extra = extra + 1
-        elif extra > min_extra:
-            extra = extra - 1
-    baw = freq * extra * stage2_div * stage1_div
-    assert BAW_LOW <= baw <= BAW_HIGH
-    # FIXME - is fb_div.denominator in range guarenteed?
-    plan = DPLLPlan(
-        baw = baw,
-        baw_target = baw,
-        fb_prediv = fb_prediv,
-        fb_div = baw / fb_prediv / REF_FREQ)
-    assert den % plan.fb_div.denominator == 0
-    assert plan.fb_div.denominator < 1 << 40
-    return plan
-
-def baw_plan_low_exact(freq: Fraction, fast: bool) -> DPLLPlan | None:
-    '''Exact planning for a low frequency output.  We assume that the
-    stage2 divider is actually required.'''
-    ratio = freq / REF_FREQ
-    factors = qd_factor(ratio.denominator, hint = qd_factor(REF_FREQ.numerator))
-    best = None
-    # FIXME - this pretty much duplicates work depending on the GCD...
-    # Also it is going to take a long time....
-    for fb_prediv in range(2, 17+1):
-        for stage1_div in range(6, 256+1):
-            bigden = ratio.denominator // gcd(
-                ratio.denominator, fb_prediv * stage1_div)
-
-            s2_max = min(BAW_HIGH // freq // stage1_div, 1 << 24)
-            if bigden >= s2_max << 40:
-                continue                # Not achievable.
-
-            s2_min = ceil(BAW_LOW / freq / fb_prediv / stage1_div)
-            if s2_min > 1 << 24:
-                continue
-
-            # The fast heuristic is to limit stage2_div below.  The slow case
-            # is to allow an extra multiplier to be applied to get stage2_div
-            # into range.
-            den_max = (1 << 40) - 1
-            if fast:
-                den_max = min(den_max, ceil(bigden / s2_min))
-
-            for stage2_div, den in factor_splitting(
-                    bigden, factors, s2_max, den_max):
-                plan = baw_plan_low_exact1(freq, fb_prediv, stage1_div,
-                                           stage2_div, den)
-                # FIXME - this doesn't take into account whether or not we got
-                # an even stage2_div.
-                if plan is not None and plan < best:
-                    best = plan
-    return plan
 
 def baw_plan_low_search(freq: Fraction) -> DPLLPlan | None:
     '''Brute force search.  We've given up on finding an exact solution,
@@ -165,13 +97,36 @@ def baw_plan_low_search(freq: Fraction) -> DPLLPlan | None:
                 fb_div = fb_div)
             if plan < best:
                 best = plan
-    #print(f'BAW low search done')
     return best
 
+def baw_plan_low_exact(freq: Fraction) -> DPLLPlan | None:
+    '''Brute force for an exact solution of getting a low frequency out of
+    the BAW.  We assume that the stage2 divider is needed.
+
+    We gain speed by not doing the song and dance needed for approximation.'''
+    for stage1 in range(6, 256 + 1):
+        base = freq * stage1
+        start = ceil(BAW_LOW / base)
+        end = min(BAW_HIGH // base, 1 << 24)
+        for prediv in range(2, 17 + 1):
+            post_fb_div = REF_FREQ * 2 * prediv
+            fb_base = base / post_fb_div
+            for stage2 in range(start, end + 1):
+                fb_div = fb_base * stage2
+                if fb_div.denominator < 1<<40:
+                    assert post_fb_div * fb_div == freq * stage1 * stage2
+                    return DPLLPlan(
+                        baw = post_fb_div * fb_div,
+                        baw_target = post_fb_div * fb_div,
+                        fb_prediv = prediv,
+                        fb_div = fb_div)
+    return None
+
 def baw_plan_low(freq: Fraction) -> DPLLPlan | None:
-    if (BAW_HIGH - BAW_LOW) // freq > 2 * MAX_HALF_RANGE:
-        # Attempt a divisor based search....
-        pass
+    exact = baw_plan_low_exact(freq)
+    if exact:
+        return exact
+    print('Try approx...')
     return baw_plan_low_search(freq)
 
 def single_baw_mult(freq: Fraction) -> int | None:
@@ -197,6 +152,10 @@ def dpll_plan(target: FrequencyTarget) -> DPLLPlan:
         if not f:
             continue
 
+        if target.pll2_base and is_multiple_of(target.pll2_base, f):
+            # Skip frequencies that are requested on PLL2.
+            continue
+
         if (BAW_FREQ / f).is_integer() \
            and output_divider(i, BAW_FREQ // f) is not None:
             # If we can use the default BAW_FREQ for anything, then we do so.
@@ -211,7 +170,7 @@ def dpll_plan(target: FrequencyTarget) -> DPLLPlan:
 
     # Re-assess the B_D frequency...
     bd = target.freqs[BIG_DIVIDE] if BIG_DIVIDE < len(target.freqs) else Fraction()
-    if bd:
+    if bd and not target.force_pll2(bd):
         m1 = ceil(BAW_LOW / bd)
         m2 = BAW_HIGH // bd
         if m1 < m2:
@@ -223,12 +182,14 @@ def dpll_plan(target: FrequencyTarget) -> DPLLPlan:
     if len(counts) == 0:
         # Nothing could be uniquely divided from the BAW range.  Recheck the
         # bd frequency to see if it's worth searching...
-        if bd <= BAW_HIGH - BAW_LOW and \
-           not any(f for i, f in enumerate(target.freqs) if i != BIG_DIVIDE):
+        if bd and not target.force_pll2(bd) and bd <= BAW_HIGH - BAW_LOW:
+            #not any(f for i, f in enumerate(target.freqs) if i != BIG_DIVIDE):
+            print('Try baw plan low')
             plan = baw_plan_low(bd)
             if plan is not None:
                 return plan
-        print('Nothing doing on PLL1')
+            print('Failed')
+        #print('Nothing doing on PLL1')
         return DPLLPlan()
 
     # The feedback divider has three stages:

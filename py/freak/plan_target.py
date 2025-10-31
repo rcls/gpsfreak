@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from fractions import Fraction
 from math import gcd
 
+from .plan_tools import is_multiple_of
+
 from typing import Tuple
 
 # All the frequencies are in MHz.
@@ -57,6 +59,11 @@ class FrequencyTarget:
     freqs: list[Fraction]
     pll1_base: Fraction|None = None
     pll2_base: Fraction|None = None
+
+    def force_pll2(self, freq: Fraction) -> bool:
+        if not self.pll2_base:
+            return False
+        return is_multiple_of(self.pll2_base, freq)
 
 def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     if 2 <= ratio <= 256:

@@ -12,7 +12,9 @@ def fail(*args: Any, **kwargs: Any) -> NoReturn:
     raise PlanningFailed(' '.join(str(s) for s in args))
     #sys.exit(1)
 
-def is_multiple_of(a: Fraction, b: Fraction) -> bool:
+def is_multiple_of(a: Fraction, b: Fraction | None) -> bool:
+    if not b:
+        return False
     return a.numerator % b.numerator == 0 and \
         b.denominator % a.denominator == 0
 

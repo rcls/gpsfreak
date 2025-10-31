@@ -9,6 +9,7 @@ import freak.message as message
 import freak.ublox_util as ublox_util
 
 from freak.freak_util import Device
+from typing import Tuple
 
 import argparse, struct, sys, uuid
 
@@ -17,21 +18,7 @@ argp = argparse.ArgumentParser(description='GPS Freak utility')
 subp = argp.add_subparsers(
     dest='command', metavar='COMMAND', required=True, help='Command')
 
-FREQ_EPILOG='''Each frequency on the command line corresponds to a device output
-    connector.  Use 0 to turn an output off.  The frequency can be specified as
-    either a fraction (315/88) or a floating-point number (3.579545), with an
-    optional unit that defaults to MHz.  Note that fractions avoid rounding
-    errors.'''
-
-freq = subp.add_parser(
-    'freq', aliases=['frequency'], help='Program/report frequencies',
-    description='''Program or report frequencies.  If a list of frequencies is
-    given, these are programmed to the device.
-    With no arguments, report the current device frequencies.''',
-    epilog=FREQ_EPILOG)
-
-freq.add_argument('FREQ', nargs='*', type=lmk05318b_plan.str_to_freq,
-                  help='Frequencies for each output')
+lmk05318b_util.add_freq_commands(subp, 'output', 'device output connector')
 
 # FIX - put in utils.
 def key_value(s: str) -> Tuple[str, str]:
@@ -55,13 +42,6 @@ save = subp.add_parser(
     Other configuration saved in flash, such as GPS, will be preserved.''')
 save.add_argument('-n', '--dry-run', action='store_true', default=False,
                   help="Don't actually write to flash.")
-
-planp = subp.add_parser(
-    'plan', help='Frequency planning', epilog=FREQ_EPILOG,
-    description='''Compute and print a frequency plan without programming it
-    to the device.''')
-planp.add_argument('FREQ', type=lmk05318b_plan.str_to_freq,
-                   nargs='+', help='Frequencies for each output')
 
 configp = subp.add_parser(
     'config', help='Saved configuration maintenance',
@@ -122,13 +102,13 @@ if args.command == 'info':
     do_info(device)
 
 elif args.command == 'plan':
-    target = lmk05318b_util.make_freq_list(args.FREQ, False)
+    target = lmk05318b_util.make_freq_target(args, False)
     plan = lmk05318b_plan.plan(target)
     lmk05318b_util.report_plan(target, plan, False)
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:
-        lmk05318b_util.do_freq(device, args.FREQ, False)
+        lmk05318b_util.do_freq(device, args, False)
     else:
         lmk05318b_util.report_freq(device, False)
 

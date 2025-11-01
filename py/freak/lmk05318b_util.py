@@ -107,7 +107,7 @@ def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
             print(f' {s2}')
     print()
     dpll = plan.dpll
-    print(f'BAW: {freq_to_str(dpll.baw)} = {REF_FREQ/Hz} * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
+    print(f'BAW: {freq_to_str(dpll.baw)} = {freq_to_str(REF_FREQ)} * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
     if dpll.baw != dpll.baw_target:
         error = freq_to_str(dpll.baw - dpll.baw_target, 4)
         print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
@@ -554,7 +554,8 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
                            dry_run = args.dry_run)
 
     elif command == 'reset':
-        message_util.do_reset_line(device, message.LMK05318B_PDN, args)
+        message_util.do_reset_line(device.get_usb(),
+                                   message.LMK05318B_PDN, args)
 
     elif command == 'upload':
         do_upload(device, args.FILE)

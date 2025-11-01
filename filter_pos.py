@@ -77,6 +77,7 @@ def filter_cpl(IN, BOM, OUT):
 def filter_bom(IN, OUT):
     lines = read_bom(IN)
     w = csv.writer(open(OUT, 'w'))
+    assert BOM_FIRST_LINE is not None
     w.writerow(BOM_FIRST_LINE)
     for l in lines:
         l[2] = map_package(l[2])

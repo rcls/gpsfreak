@@ -5,7 +5,7 @@ from .usb_endpoint import USBEndpointIO
 
 import argparse
 import io
-import usb
+import usb.core
 
 from usb.core import Device as USBDevice
 
@@ -23,7 +23,9 @@ class Device:
             return self.usb
 
         # FIXME - arguments for specifying USB device.
-        self.usb = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+        u = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+        assert isinstance(u, USBDevice)
+        self.usb = u
         # Flush any stale data.
         try:
             self.usb.read(0x83, 64, 10)

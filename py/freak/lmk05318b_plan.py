@@ -114,10 +114,14 @@ def plan(target: FrequencyTarget) -> PLLPlan:
     elif pll2_lcm >= SMALL:
         print('Normal pll2 plan')
         plan = pll2_plan(target, dpll, pll2, pll2_lcm)
+
     elif target.freqs[BIG_DIVIDE]:
         assert all(not f for i, f in enumerate(pll2) if i != BIG_DIVIDE)
         print('Low pll2 plan')
         plan = pll2_plan_low(target, dpll, target.freqs[BIG_DIVIDE])
+
+    else:
+        plan = PLLPlan(dpll = dpll)
 
     if any(pll1):
         add_pll1(target, plan, pll1)

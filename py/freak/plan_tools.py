@@ -179,7 +179,7 @@ FRACTIONS = {
     Fraction(1, 9): '⅑',
 }
 
-def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
+def freq_to_str(freq: Fraction, precision: int = 0) -> str:
     if freq >= 1000_000 * MHz:
         scaled = freq / (MHz * 1000000)
         suffix = 'THz'
@@ -197,16 +197,15 @@ def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
         suffix = 'Hz'
 
     rounded = round(scaled)
-    fract = scaled % 1
+    fract = Fraction(scaled % 1)
     fract_str = None
-    if not isinstance(fract, float) and fract in FRACTIONS:
+    if fract in FRACTIONS:
         fract_str = FRACTIONS[fract]
 
-    elif isinstance(fract, Fraction) and (
-            fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19):
-        fract_str = f'+' + str(fract)
-    elif isinstance(scaled, Fraction) and rounded != scaled and rounded != 0 \
-         and abs(rounded - scaled) < 1e-5:
+    elif fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19:
+        fract_str = f'+{fract}'
+
+    elif rounded != scaled and rounded != 0 and abs(rounded - scaled) < 1e-5:
         if rounded < scaled:
             fract_str = f' + {float(scaled - rounded):.6g}'
         else:

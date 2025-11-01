@@ -209,7 +209,7 @@ class MaskedBytes:
 
     def __setattr__(self, key: str, value: Any) -> None:
         if key in ('data', 'mask'):
-            super.__setattr__(self, key, value)
+            super().__setattr__(key, value)
             return
         try:
             reg = REGISTERS[key]

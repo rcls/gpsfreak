@@ -2,11 +2,10 @@
 
 import array
 import struct
-import usb
 
 from dataclasses import dataclass
 from typing import TypeAlias
-from usb import Device
+from usb.core import Device
 
 Target: TypeAlias = Device|bytearray
 
@@ -95,8 +94,8 @@ def test_simple() -> None:
     payload = b'This is a test'
     assert deframe(frame(code, payload)) == Message(code, payload)
 
-def transact(dev: Target, code: int, payload: bytes,
-             expect: int|None = None) -> Message:
+def command(dev: Target, code: int, payload: bytes,
+            expect: int = ACK) -> Message:
     data = frame(code, payload)
     if isinstance(dev, bytearray):
         dev += data
@@ -109,35 +108,32 @@ def transact(dev: Target, code: int, payload: bytes,
         raise RequestFailed(f'Result code is {result.code:#04x}')
     return result
 
-def command(dev: Target, code: int, payload: bytes = b'') -> Message:
-    return transact(dev, code, payload, expect=ACK)
-
 def retrieve(dev: Device, code: int, payload: bytes = b'') -> Message:
-    return transact(dev, code, payload, expect = code | 0x80)
+    return command(dev, code, payload, expect = code | 0x80)
 
-def ping(dev: Target, payload: bytes) -> bytes:
+def ping(dev: Device, payload: bytes) -> bytes:
     resp = retrieve(dev, PING, payload)
     assert resp.payload == payload
     return resp.payload
 
-def get_protocol_version(dev: Target) -> int:
+def get_protocol_version(dev: Device) -> int:
     data = retrieve(dev, GET_PROTOCOL_VERSION, b'')
     return struct.unpack('<I', data.payload)[0]
 
-def get_serial_number(dev: Target) -> bytes:
+def get_serial_number(dev: Device) -> bytes:
     return retrieve(dev, GET_SERIAL_NUMBER, b'').payload
 
 def serial_sync(dev: Target, microseconds: int) -> None:
     command(dev, SERIAL_SYNC, struct.pack('<I', microseconds))
 
 def set_baud(dev: Target, baud: int) -> None:
-    retrieve(dev, GET_SET_BAUD, struct.pack('<I', baud))
+    command(dev, GET_SET_BAUD, struct.pack('<I', baud), GET_SET_BAUD | 0x80)
 
-def get_baud(dev: Target) -> int:
+def get_baud(dev: Device) -> int:
     resp = retrieve(dev, GET_SET_BAUD, b'')
     return struct.unpack('<I', resp.payload)[0]
 
-def peek(dev: Target, address: int, length: int) -> bytes:
+def peek(dev: Device, address: int, length: int) -> bytes:
     result = b''
     while len(result) < length:
         todo = min(length - len(result), 48)
@@ -158,7 +154,7 @@ def poke(dev: Target, address: int, data: bytes, chunk_size: int = 32) -> None:
                 struct.pack('<I', address + base) + data[base:base + todo])
         base += todo
 
-def crc(dev: Target, address: int, length: int) -> int:
+def crc(dev: Device, address: int, length: int) -> int:
     data = retrieve(dev, GET_CRC, struct.pack('<II', address, length))
     a, l, crc = struct.unpack('<III', data.payload)
     assert a == address
@@ -180,9 +176,9 @@ def lmk05318b_write(dev: Target, address: int, *data: bytes|int) -> None:
     command(dev, LMK05318B_WRITE, struct.pack('>H', address) + total)
 
 def lmk05318b_status(dev: Target) -> None:
-    command(dev, LMK05318B_STATUS)
+    command(dev, LMK05318B_STATUS, b'')
 
-def tmp117_read(dev: Target, address: int, length: int = 1) -> bytes:
+def tmp117_read(dev: Device, address: int, length: int = 1) -> bytes:
     r = retrieve(dev, TMP117_READ, bytes((length, address)))
     assert len(r.payload) == length
     return r.payload

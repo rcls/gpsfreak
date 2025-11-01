@@ -31,6 +31,8 @@ SKIP += 123, 124, 125, 126, 127 # PLL1 volatile.
 SKIP += 155, 156, 157, 158, 159, 161, 162, 164 # NVM.
 SKIP += 168, # DPLL status.
 
+SKIP_ABOVE = 353
+
 # Addresses of the configs in flash.
 ADDRESSES = list(range(0x0800c000, 0x08010000, 2048)) + \
     list(range(0x0801c000, 0x08020000, 2048))
@@ -60,7 +62,7 @@ def load_lmk05318b(dev: USBDevice) -> MaskedBytes:
     data = MaskedBytes()
 
     for a in lmk05318b.ADDRESSES:
-        if not a.address in SKIP:
+        if a.address < SKIP_ABOVE and not a.address in SKIP:
             data.mask[a.address] = 0xff
     # Now grab the data...
     for address, length in data.ranges(max_block = 32):

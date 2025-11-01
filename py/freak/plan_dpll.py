@@ -6,6 +6,7 @@ from .plan_tools import is_multiple_of, factor_splitting, qd_factor
 from dataclasses import dataclass
 from fractions import Fraction
 from math import ceil, floor
+from typing import Generator
 
 __all__ = 'DPLLPlan', 'dpll_plan'
 
@@ -43,7 +44,9 @@ class DPLLPlan:
         '''Try and get an output frequency by dividing the BAW frequency.
 
         For this, we use the target frequency not the actual.'''
+        #print(index, self.baw_target / f)
         if is_multiple_of(self.baw_target, f):
+            #print(output_divider(index, self.baw_target // f))
             return output_divider(index, self.baw_target // f)
         else:
             return None
@@ -52,6 +55,8 @@ class DPLLPlan:
         # the only use of that is to get the PFD frequency into the supported
         # sub-150MHz range.
         return self.baw / FPD_DIVIDE
+    def validate(self) -> None:
+        assert self.baw == REF_FREQ * 2 * self.fb_prediv * self.fb_div
 
 # Check that our defaults match the TI calculated values...
 assert DPLLPlan().fb_div == 70 + Fraction(730877267270, 1099509789039)
@@ -74,30 +79,56 @@ def baw_plan_for_freq(freq: Fraction) -> DPLLPlan:
     assert best is not None
     return best
 
-def baw_plan_low_search(freq: Fraction) -> DPLLPlan | None:
+def baw_plan_low_approx(freq: Fraction) -> DPLLPlan | None:
     '''Brute force search.  We've given up on finding an exact solution,
     so just try the best of a limited range.'''
+    half_range = 1000
     best  = None
+    error = BAW_HIGH
     start = ceil(BAW_LOW / freq)
     end   = BAW_HIGH // freq
     mid   = BAW_FREQ // freq
-    start = max(start, mid - MAX_HALF_RANGE)
-    end   = min(end  , mid + MAX_HALF_RANGE)
-    #print(f'BAW low search {start} {end} {end - start}')
-    # FIXME - this doesn't take into account output divider feasibility.
-    for m in range(start, end + 1):
-        baw = freq * m
-        for prediv in range(2, 17 + 1):
-            fb_div = baw / REF_FREQ / 2 / prediv
+    end   = min(end  , mid + half_range, 1 << 32)
+    start = max(start, end - 2 * half_range)
+    # FIXME - as we get close to the bottom of the possible range, fewer
+    # of the stage1*stage2 possibilities are feasible, so we are wasting
+    # time trying infeasible values of m.
+    for prediv in range(2, 17 + 1):
+        ref_mult = REF_FREQ * 2 * prediv
+        ratio_target = freq / ref_mult
+        for m in range(start, end + 1):
+            fb_div = ratio_target * m
             fb_div = fb_div.limit_denominator(1 << 40)
-            plan = DPLLPlan(
-                baw = REF_FREQ * 2 * prediv * fb_div,
-                baw_target = baw,
-                fb_prediv = prediv,
-                fb_div = fb_div)
-            if plan < best:
-                best = plan
+            baw = fb_div * ref_mult
+            e = abs(baw / m - freq)
+            if e < error and output_divider(5, m):
+                error = e
+                best = DPLLPlan(
+                    baw = baw, baw_target = freq * m,
+                    fb_prediv = prediv, fb_div = fb_div)
     return best
+
+def sym_range(f: Fraction, low: Fraction, high: Fraction,
+              limit: int) -> Generator[int]:
+    '''Iterate over all multipliers of `f` that give a product in the range
+    between `low` and `high` inclusive.  But limit the multiplier to `limit`.
+    Return even multipliers before odd multipliers, and then return multipliers
+    closer to mid-range first.'''
+    mid = (low + high) / 2
+    offset = mid // f
+    start = ceil(low / f)
+    end = min(limit, high // f)
+    if start > end:
+        return
+    initial = max(0, offset - end, start - offset)
+    parity = (offset + initial) & 1
+    final = max(end - offset, offset - start)
+    for p in parity, 1 - parity:
+        for i in range(initial + p, 1 + final, 2):
+            if start <= offset - i <= end:
+                yield offset - i
+                if i != 0 and start <= offset + i <= end:
+                    yield offset + i
 
 def baw_plan_low_exact(freq: Fraction) -> DPLLPlan | None:
     '''Brute force for an exact solution of getting a low frequency out of
@@ -106,12 +137,10 @@ def baw_plan_low_exact(freq: Fraction) -> DPLLPlan | None:
     We gain speed by not doing the song and dance needed for approximation.'''
     for stage1 in range(6, 256 + 1):
         base = freq * stage1
-        start = ceil(BAW_LOW / base)
-        end = min(BAW_HIGH // base, 1 << 24)
         for prediv in range(2, 17 + 1):
             post_fb_div = REF_FREQ * 2 * prediv
             fb_base = base / post_fb_div
-            for stage2 in range(start, end + 1):
+            for stage2 in sym_range(base, BAW_LOW, BAW_HIGH, 1<<24):
                 fb_div = fb_base * stage2
                 if fb_div.denominator < 1<<40:
                     assert post_fb_div * fb_div == freq * stage1 * stage2
@@ -123,11 +152,12 @@ def baw_plan_low_exact(freq: Fraction) -> DPLLPlan | None:
     return None
 
 def baw_plan_low(freq: Fraction) -> DPLLPlan | None:
+    print('Try BAW LF exact brute force')
     exact = baw_plan_low_exact(freq)
     if exact:
         return exact
-    print('Try approx...')
-    return baw_plan_low_search(freq)
+    print('Try BAW LF inexact brute force.')
+    return baw_plan_low_approx(freq)
 
 def single_baw_mult(freq: Fraction) -> int | None:
     '''If there is exactly one multiple of freq in the BAW range, then return
@@ -159,13 +189,13 @@ def dpll_plan(target: FrequencyTarget) -> DPLLPlan:
         if (BAW_FREQ / f).is_integer() \
            and output_divider(i, BAW_FREQ // f) is not None:
             # If we can use the default BAW_FREQ for anything, then we do so.
-            print(f'Use default for {f}')
+            #print(f'Use default for {f}')
             return DPLLPlan()
 
         m = single_baw_mult(f)
         if m is not None and output_divider(i, m) is not None:
             baw = m * f
-            print(f'For {f}, multiple {m} is {baw}')
+            #print(f'For {f}, multiple {m} is {baw}')
             counts[baw] = 1 + counts.get(baw, 0)
 
     # Re-assess the B_D frequency...
@@ -184,11 +214,9 @@ def dpll_plan(target: FrequencyTarget) -> DPLLPlan:
         # bd frequency to see if it's worth searching...
         if bd and not target.force_pll2(bd) and bd <= BAW_HIGH - BAW_LOW:
             #not any(f for i, f in enumerate(target.freqs) if i != BIG_DIVIDE):
-            print('Try baw plan low')
             plan = baw_plan_low(bd)
             if plan is not None:
                 return plan
-            print('Failed')
         #print('Nothing doing on PLL1')
         return DPLLPlan()
 

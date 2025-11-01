@@ -410,6 +410,7 @@ def report_freq(dev: Device, raw: bool) -> None:
     print(f'PLL2        {freq_to_str(pll2_freq)}')
 
 def do_status(dev: Device) -> None:
+    message.lmk05318b_status(dev.get_usb())
     data = MaskedBytes()
     get_ranges(dev, data, [(13, 17)])
     #print(data.data[13:20])
@@ -530,7 +531,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'freq':
         if len(args.FREQ) != 0:
-            do_freq(device, args.FREQ, True)
+            do_freq(device, args, True)
         else:
             report_freq(device, True)
 

@@ -76,8 +76,9 @@ class PLLPlan:
 
         return False
 
-    def validate(self):
-        assert self.pll2 == self.multiplier * self.dpll.pll2 / fpd_divide
+    def validate(self) -> None:
+        self.dpll.validate()
+        assert self.pll2 == self.multiplier * self.dpll.baw / self.fpd_divide
 
     def error_ratio(self) -> float:
         return float(self.pll2 / self.pll2_target - 1)
@@ -114,7 +115,7 @@ def pll2_plan_low1(target: FrequencyTarget, dpll: DPLLPlan,
 
     # Now attempt to multiply stage2_div by something to get us
     # into the VCO range.
-    max_extra = min((1<<24) // stage2_div, PLL2_HIGH // freq // output_divide)
+    max_extra = min((1<<24) // stage2_div, PLL2_HIGH / freq // output_divide)
     min_extra = ceil(PLL2_LOW / freq / output_divide)
     if min_extra > max_extra:
         return None                     # Impossible.
@@ -156,7 +157,6 @@ def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
 
     # We definitely can't cope with any prime factors > 1<<24.
     if factors[-1] >= 1<<24:
-        print(f"Can't acheive {freq_to_str(freq)} exactly: denominator factor {factors[-1]} is too big")
         return None
 
     #print(f'freq={freq}, ratio={ratio}, factors={factors}')
@@ -175,7 +175,7 @@ def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
             # the denominator of that.
             bigden = ratio.denominator // gcd(ratio.denominator,
                                               post_div * stage1_div)
-            s2_max = min(1 << 24, PLL2_HIGH // freq // post_div // stage1_div)
+            s2_max = min(1 << 24, PLL2_HIGH / freq / post_div // stage1_div)
             if bigden > s2_max << 24:
                 continue                # Not acheivable.
 
@@ -216,19 +216,24 @@ def pll2_plan_low(target: FrequencyTarget, dpll: DPLLPlan,
 
     ratio = freq / dpll.pll2_pfd()
 
-    # Factorize the denominator.
-    factors = qd_factor(ratio.denominator)
+    # The biggest divider we can achieve is 7 * 256 * (1 << 24), and then the
+    # biggest denominator on the PLL is (1<<24).  Don't waste time with
+    # denominators that are bigger than all that.
+    if ratio.denominator <= 7 << 56:
+        # Factorize the denominator.
+        factors = qd_factor(ratio.denominator)
 
-    # We only get called for frequencies well below PLL2_PFD = BAW_FREQ/18!
-    assert len(factors) != 0
+        # We only get called for frequencies well below PLL2_PFD = BAW_FREQ/18!
+        # So the denominator should not be 1.
+        assert len(factors) != 0
 
-    plan = pll2_plan_low_exact(target, dpll, freq, True, factors)
-    if plan is not None:
-        return plan
+        plan = pll2_plan_low_exact(target, dpll, freq, True, factors)
+        if plan is not None:
+            return plan
 
-    plan = pll2_plan_low_exact(target, dpll, freq, False, factors)
-    if plan is not None:
-        return plan
+        plan = pll2_plan_low_exact(target, dpll, freq, False, factors)
+        if plan is not None:
+            return plan
 
     # Ok, just fall back to a brute force search for something.  It'll only try
     # a limited part of the search space, but thats OK, we've given up on exact

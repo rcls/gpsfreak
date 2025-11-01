@@ -113,6 +113,7 @@ class Register:
 
     @staticmethod
     def get(key: str) -> Register:
+        key = key.upper().replace('-', '_')
         try:
             return REGISTERS[key]
         except KeyError:
@@ -201,7 +202,7 @@ class MaskedBytes:
 
     def __getattr__(self, key: str) -> int:
         try:
-            reg = Register.get(key)
+            reg = REGISTERS[key]
         except KeyError:
             raise AttributeError()
         return self.extract(reg)
@@ -211,7 +212,7 @@ class MaskedBytes:
             super.__setattr__(self, key, value)
             return
         try:
-            reg = Register.get(key)
+            reg = REGISTERS[key]
         except KeyError:
             raise AttributeError()
         self.insert(reg, int(value))

@@ -165,6 +165,10 @@ extra_field(Field('PLL2_ORDER', 2, 0, 'R/W', 0, 139))
 extra_field(Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139))
 extra_field(Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105))
 
+# From the datasheet, MEMADDR sounds like a 13 bit register, but that doesn't
+# make sense because only 8 bits are needed?
+# extra_field(Field('MEMADR_12:8', 4, 0, 'R/W', 0, 159))
+
 # Various undocumented fields are set in the TICS file.  Some are observed to
 # change with the configuration, and influence outputs.
 if args.tics:

@@ -67,7 +67,8 @@
 //!
 //!    64, 65 : Reserved for GPS I²C.
 //!
-//!    68 : Update LMK05318b status.
+//!    68 : Update LMK05318b status LED.  Use this to make the firmware catch
+//!         up after sending I²C commands that alter the status flag handling.
 //!
 //!    71 : peek.  Payload is u32 address followed by u32 length.  Response is
 //!         F1 with address + data payload.

@@ -38,7 +38,9 @@ SMALL = 50 * kHz
 PLL2_MID = (PLL2_LOW + PLL2_HIGH) / 2
 # Clamp the length of a PLL2 brute force search to ±MAX_HALF_RANGE attempts
 # around the mid-point.  This is ±10700 (i.e., 21401 total).
-MAX_HALF_RANGE = (PLL2_HIGH - PLL2_LOW) // 2 // SMALL
+MAX_HALF_RANGE = (PLL2_HIGH - PLL2_LOW) / 2 // SMALL
+
+ZERO = Fraction(0)
 
 # Our numbering of channels:
 # 0 = LMK 0,1, GPS Freak 2
@@ -120,7 +122,7 @@ FRACTIONS = {
 }
 
 def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
-    if freq >= 1000000 * MHz:
+    if freq >= 1000_000 * MHz:
         scaled = freq / (MHz * 1000000)
         suffix = 'THz'
     elif freq >= 10_000 * MHz: # Report VCO frequencies in MHz.

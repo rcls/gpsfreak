@@ -1,5 +1,5 @@
-Yet another GPS Disciplined Oscillator
-======================================
+GPS Freak - A GPS Disciplined Frequency Generator
+=================================================
 
 GPS Freak uses a U-Blox MAX-10 GPS receiver and a Texas Instruments LMK05318b
 clock generator to drive multiple clock outputs.  The outputs are a total of 5
@@ -17,12 +17,11 @@ Licence, strongly reciprocal, CERN-OHL-S.  ([cern\_oh\l_s\_v2.txt]).
 
 All software in this project is licensed under the GNU GPL v3.  ([COPYING.txt])
 
-
 Connectors
 ==========
 
-GPS input, SMA, provides 3.3V (or 5V) antennae power.  The voltage selection
-is a strap resistor on board.
+The GPS input is a SMA connector that also provides 3.3V (or 5V) antennae power.
+The voltage selection is a strap resistor on board.
 
 Outputs 1+ and 1-
 : Complementary high frequency, 3MHz to 1.6MHz.  These can be used together as a
@@ -40,6 +39,11 @@ Output 4
 
 USB C.  Power (approx 2W) and data (USB FS).
 
+The high frequency outputs provide complete coverage of 3MHz to 800MHz with
+≈nano-Hertz resolution, and then select frequencies to 1.6GHz.  (There is a
+region around 520MHz where the LMK05318b is operated outside its documented
+range, but I have seen no issue with this.)
+
 The outputs are all nominally 50Ω.  In fact, the LMK05318b appears to have
 current-source outputs, so the drive impedance of the high-frequency outputs is
 high.  The two CMOS level outputs are each driven by a TLV3601 comparator, from
@@ -47,14 +51,21 @@ the datasheet this appears to be a reasonable match for 50Ω.
 
 There are also pads for 3 internal U.Fl connectors.  One provides an additional
 output, one a secondary reference clock input to the LMK05318, and the last
-an output of the GPS timepluse signal.
+an output of the GPS timepulse signal.
 
 GPS
 ===
 
 This is a U-Blox MAX-F10S.  (Building the board with other U-Blox MAX or
 compatible devices is possible.  The firmware should work with any U-Blox MAX-10
-or later device.
+or later device.)
+
+Status LED
+==========
+
+There is a status LED next to the USB connector.  This is a three colour RGB
+LED.  The LED lights green or red to indicate that the device has PLL lock.
+Additionally, the blue component indicates USB activity.
 
 Software
 ========
@@ -62,6 +73,11 @@ Software
 The device software is a mix of on-board firmware, and Python scripts (freak.py)
 to communicate with the device.  These should work on any OS that pyusb
 supports.
+
+The firmware is pretty dumb.  All the frequency planning logic is in the python
+scripts, with the firmware essentially just passing through commands to the GPS
+and clock generator.  Frequency plans may be saved to flash for autonomous
+operation with no USB.
 
 Firmware updates are done via USB DFU.  There is also a Skedd connector breaking
 out SWD with a standard six pin connection.

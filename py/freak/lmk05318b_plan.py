@@ -22,14 +22,27 @@ def cont_frac_approx(f: Fraction) -> Generator[Fraction]:
     '''Generate the sequence of continued fraction approximations to f.'''
     intf = int(f)
     if intf:
-        yield Fraction(intf, 1)
+        yield Fraction(intf)
     if f != intf:
         for inner in cont_frac_approx(1 / (f - intf)):
             yield intf + 1 / inner
 
-assert list(cont_frac_approx(Fraction(5,3))) == [1, 2, Fraction(5,3)]
+def test_cont_frac() -> None:
+    assert list(cont_frac_approx(Fraction(5,3))) == [1, 2, Fraction(5,3)]
+    import math
+    expect = []
+    n, d = 1, 1
+    for _ in range(21):
+        expect.append(Fraction(n, d))
+        n, d = n + d * 2, n + d
+    approx = list(cont_frac_approx(Fraction(math.sqrt(2))))
+    assert expect == approx[:len(expect)], f'{expect}\n\n{approx}'
 
 def rejig_pll1(base: PLLPlan) -> PLLPlan:
+    '''Attempt to make PLL2 more accurate, by tweaking the DPLL frequency.
+
+    Simplifying the PLL2 multiplier ratio may well be helpful, so scan through
+    the continued fraction expansion and pick the best possibility.'''
     if base.pll2 == base.pll2_target:
         return base                     # Nothing to improve.
 
@@ -38,7 +51,9 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
     # Back calculate the BAW frequency from the target.  Ratios with smaller
     # numerator & denomoninator may be easier to achieve, so work through the
     # continued fraction expansion of the multiplier.
-    for multiplier in cont_frac_approx(base.multiplier):
+    assert base.multiplier ==  base.pll2 / base.dpll.baw * base.fpd_divide
+    target_multiplier = base.pll2_target / base.dpll.baw * base.fpd_divide
+    for multiplier in cont_frac_approx(target_multiplier):
         target = base.pll2_target / multiplier * base.fpd_divide
         if not BAW_LOW <= target <= BAW_HIGH:
             continue
@@ -66,16 +81,15 @@ def plan(target: FrequencyTarget) -> PLLPlan:
     # First pull out the divisors of 2.5G...
     pll1: list[Fraction] = []
     pll2: list[Fraction] = []
-    zero = Fraction(0)
     for i, f in enumerate(target.freqs):
         if not f:
-            pll1.append(zero)
-            pll2.append(zero)
+            pll1.append(ZERO)
+            pll2.append(ZERO)
         elif not target.force_pll2(f) and dpll.pll1_divider(i, f):
             pll1.append(f)
-            pll2.append(zero)
+            pll2.append(ZERO)
         elif i == BIG_DIVIDE or f >= PLL2_LOW / (7 * 256):
-            pll1.append(zero)
+            pll1.append(ZERO)
             pll2.append(f)
         else:
             fail(f'Frequency {freq_to_str(f)} is not achievable on {i}')
@@ -110,3 +124,35 @@ def plan(target: FrequencyTarget) -> PLLPlan:
         plan = rejig_pll1(plan)
 
     return plan
+
+def test_32k() -> None:
+    target = FrequencyTarget(
+        freqs = [ZERO] * 5 + [str_to_freq('32768.298Hz')])
+    assert float(target.freqs[5] / Hz) == 32768.298
+    p = plan(target)
+    # We should get an exact result using PLL1.
+    assert p.freq(5) == target.freqs[5]
+    assert p.pll2 == 0
+    assert p.dpll.baw == p.dpll.baw_target
+    assert BAW_LOW <= p.dpll.baw <= BAW_HIGH
+    # Work without assuming our units...
+    assert REF_FREQ == 8844582 * Hz
+    assert 8844582 * 2 * p.dpll.fb_prediv * p.dpll.fb_div / (
+        p.dividers[5][1] * p.dividers[5][2]) == Fraction('32768.298')
+
+def test_32k_11M() -> None:
+    target = FrequencyTarget(
+        [11 * MHz] + [ZERO] * 4 + [3276829 * Hz / 100])
+    p = plan(target)
+    # One should be exact....
+    assert p.freq(0) == target.freqs[0] or p.freq(5) == target.freqs[5]
+    # Errors should be less than a nano hertz.
+    nHz = Hz / 1000_000_000
+    assert abs(p.freq(0) - target.freqs[0]) < nHz
+    assert abs(p.freq(5) - target.freqs[5]) < nHz
+
+def test_11M_33M() -> None:
+    target = FrequencyTarget([11 * MHz, 33333 * kHz])
+    p = plan(target)
+    assert p.freq(0) == target.freqs[0]
+    assert p.freq(1) == target.freqs[1]

@@ -13,6 +13,8 @@ from typing import Generator
 def add_pll1(target: FrequencyTarget,
              plan: PLLPlan, freqs: list[Fraction]) -> None:
     for i, f in enumerate(freqs):
+        if len(plan.dividers) <= i:
+            plan.dividers.append((0, 0, 0))
         if not f:
             continue
         od = plan.dpll.pll1_divider(i, f)

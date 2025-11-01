@@ -85,42 +85,11 @@ def do_set(dev: Device, key_values: list[Tuple[Register, int]]) -> None:
         data.insert(r, v)
     masked_write(dev, data)
 
-def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
-    channels = CHANNELS_RAW if raw else CHANNELS_COOKED
-    for index, name, _ in channels:
-        t = target.freqs[index]
-        if not t:
-            continue
-        f = plan.freq(index)
-        pd, s1, s2 = plan.dividers[index]
-        pll = 1 if pd == 0 else 2
-        print(f'{name} {freq_to_str(f)}', end='')
-        if f != t:
-            print(f' error {freq_to_str(f - t, 4)}', end='')
-        print(f' PLL{pll} dividers', end='')
-        if pll == 2:
-            print(f' {pd}', end='')
-        print(f' {s1}', end='')
-        if s2 == 1:
-            print()
-        else:
-            print(f' {s2}')
-    print()
-    dpll = plan.dpll
-    print(f'BAW: {freq_to_str(dpll.baw)} = {freq_to_str(REF_FREQ)} * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
-    if dpll.baw != dpll.baw_target:
-        error = freq_to_str(dpll.baw - dpll.baw_target, 4)
-        print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
-    if plan.pll2_target != 0:
-        print(f'PLL2: {freq_to_str(plan.pll2)} = BAW / {FPD_DIVIDE} * {fraction_to_str(plan.multiplier)}')
-        if plan.pll2 != plan.pll2_target:
-            print(f'    target {freq_to_str(plan.pll2_target)}, error {freq_to_str(plan.error(), 4)}')
-
 def make_freq_target(args: argparse.Namespace, raw: bool) -> FrequencyTarget:
     freqs = args.FREQ
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     result = [Fraction(0)] * max(6, len(args.FREQ))
-    # FIXME - this just silently ignores extrats.
+    # FIXME - this just silently ignores extras.
     for (i, _, _), f in zip(channels, freqs):
         result[i] = f
     return FrequencyTarget(freqs=result, pll2_base=args.pll2)
@@ -169,6 +138,7 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
         else:
             assert s2 == 1
 
+    data.DPLL_PRIREF_RDIV = 1
     data.DPLL_REF_FB_PRE_DIV = plan.dpll.fb_prediv - 2
     div = plan.dpll.fb_div.numerator // plan.dpll.fb_div.denominator
     num = plan.dpll.fb_div.numerator % plan.dpll.fb_div.denominator
@@ -218,8 +188,8 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
 def do_freq(dev: Device, args: argparse.Namespace, raw: bool) -> None:
     target = make_freq_target(args, raw)
     plan = lmk05318b_plan.plan(target)
-    report_plan(target, plan, raw)
     data = freq_make_data(plan)
+    report_freq(data, raw, False)
 
     # Software reset.
     data.RESET_SW = 1
@@ -356,58 +326,81 @@ def report_driveout(dev: Device) -> None:
         print(f'{name}:{pdown}', drive_description(sel, mode1, mode2),
               '+', drive_description(selb, mode1b, mode2b))
 
-def report_freq(dev: Device, raw: bool) -> None:
-    data = MaskedBytes()
+def report_live_freq(dev: Device, raw: bool) -> None:
+    # FIXME - retrieve the reference frequency!
+    d = MaskedBytes()
     # For now, pull everything...
     for a in lmk05318b.ADDRESSES:
-        data.mask[a.address] = 0xff
-    ranges = data.ranges(max_block = 30)
-    get_ranges(dev, data, ranges)
-    dpll_priref_rdiv    = data.DPLL_PRIREF_RDIV
-    dpll_ref_fb_pre_div = data.DPLL_REF_FB_PRE_DIV + 2
-    dpll_ref_fb_div     = data.DPLL_REF_FB_DIV
-    dpll_ref_num        = data.DPLL_REF_NUM
-    dpll_ref_den        = data.DPLL_REF_DEN
+        d.mask[a.address] = 0xff
+    ranges = d.ranges(max_block = 30)
+    get_ranges(dev, d, ranges)
 
-    pll2_rdiv_pre       = data.PLL2_RDIV_PRE + 3
-    pll2_rdiv_sec       = data.PLL2_RDIV_SEC + 1
-    pll2_ndiv           = data.PLL2_NDIV
-    pll2_num            = data.PLL2_NUM
-    apll2_den_mode      = data.APLL2_DEN_MODE
-    if apll2_den_mode == 0:
-        pll2_den = 1 << 24
+    report_freq(d, raw, True)
+
+def report_freq(d: MaskedBytes, raw: bool, report_pd: bool) -> None:
+    pll2_rdiv = (d.PLL2_RDIV_PRE + 3) * (d.PLL2_RDIV_SEC + 1)
+    dpll_fb_pre_div = d.DPLL_REF_FB_PRE_DIV + 2
+
+    if d.DPLL_REF_DEN:
+        dpll_fb_div = d.DPLL_REF_FB_DIV + Fraction(d.DPLL_REF_NUM, d.DPLL_REF_DEN)
     else:
-        pll2_den        = data.PLL2_DEN
-    pll2_p1             = data.PLL2_P1 + 1
-    pll2_p2             = data.PLL2_P2 + 1
+        print('dpll fb div 0')
+        dpll_fb_div = Fraction(0)
 
-    assert dpll_priref_rdiv != 0
-    # FIXME - retrieve the reference!
-    baw_freq = REF_FREQ / dpll_priref_rdiv * 2 * dpll_ref_fb_pre_div * (
-            dpll_ref_fb_div + Fraction(dpll_ref_num, dpll_ref_den))
+    if d.DPLL_PRIREF_RDIV:
+        baw_freq = REF_FREQ / d.DPLL_PRIREF_RDIV * 2 * dpll_fb_pre_div \
+            * dpll_fb_div
+    else:
+        print('dpll priref rdiv 0')
+        baw_freq = Fraction(0)
 
-    pll2_freq = baw_freq / pll2_rdiv_pre / pll2_rdiv_sec * (
-        pll2_ndiv + Fraction(pll2_num, pll2_den))
+    if d.PLL2_DEN == 0:
+        print('pll2 den 0')
+        pll2_freq = Fraction(0)
+        pll2_fb_div = Fraction(0)
+    else:
+        pll2_fb_div = d.PLL2_NDIV + Fraction(d.PLL2_NUM, d.PLL2_DEN)
+        pll2_freq = baw_freq / pll2_rdiv * pll2_fb_div
 
     for _, name, ch in CHANNELS_RAW if raw else CHANNELS_COOKED:
-        mux = data.extract(f'CH{ch}_MUX')
-        div = data.extract(f'OUT{ch}_DIV') + 1
-        s2div = 1
-        if ch == '7':
-            s2div = data.OUT7_STG2_DIV + 1
-        muxed = baw_freq
-        if mux == 2:
-            muxed = pll2_freq / pll2_p1
-        elif mux == 3:
-            muxed = pll2_freq / pll2_p2
-        ch_freq = muxed / div / s2div
-        if data.extract(f'CH{ch}_PD'):
+        if not d.extract(f'CH{ch}_PD'):
+            pd = ''
+        elif report_pd:
             pd = ' (power down)'
         else:
-            pd = ''
-        print(f'{name} {freq_to_str(ch_freq)}{pd}')
-    print(f'BAW         {freq_to_str(baw_freq)}')
-    print(f'PLL2        {freq_to_str(pll2_freq)}')
+            continue
+
+        dividers = []
+        mux = d.extract(f'CH{ch}_MUX')
+        if mux == 2:
+            dividers = [d.PLL2_P1 + 1]
+        elif mux == 3:
+            dividers = [d.PLL2_P2 + 1]
+
+        dividers.append(d.extract(f'OUT{ch}_DIV') + 1)
+        if ch == '7':
+            dividers.append(d.OUT7_STG2_DIV + 1)
+
+        source = 'BAW'
+        muxed = baw_freq
+        if mux >= 2:
+            source = 'PLL2'
+            muxed = pll2_freq
+
+        ch_freq = muxed
+        for div in dividers:
+            ch_freq /= div
+
+        print(f'{name} {freq_to_str(ch_freq)}{pd} {source} dividers',
+              *dividers)
+
+    print()
+    print(f'BAW         {freq_to_str(baw_freq)} = {freq_to_str(REF_FREQ)}',
+          f'/ {d.DPLL_PRIREF_RDIV} * 2 * {dpll_fb_pre_div} *',
+          fraction_to_str(dpll_fb_div))
+    if report_pd or not d.PLL2_PDN:
+        print(f'PLL2        {freq_to_str(pll2_freq)}',
+              f'= BAW / {pll2_rdiv} * {fraction_to_str(pll2_fb_div)}')
 
 def do_status(dev: Device) -> None:
     message.lmk05318b_status(dev.get_usb())
@@ -533,12 +526,13 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         if len(args.FREQ) != 0:
             do_freq(device, args, True)
         else:
-            report_freq(device, True)
+            report_live_freq(device, True)
 
     elif command == 'plan':
         target = make_freq_target(args, True)
         plan = lmk05318b_plan.plan(target)
-        report_plan(target, plan, True)
+        data = freq_make_data(plan)
+        report_freq(data, True, False)
 
     elif command == 'drive':
         if args.DRIVE or args.defaults:

@@ -1,12 +1,13 @@
 '''Planning for the LMK05318b DPLL.'''
 
-from .plan_target import *
-from .plan_tools import is_multiple_of, factor_splitting, qd_factor
+from .plan_constants import *
+from .plan_tools import FrequencyTarget, \
+    is_multiple_of, factor_splitting, output_divider, qd_factor
 
 from dataclasses import dataclass
 from fractions import Fraction
 from math import ceil, floor
-from typing import Generator
+from typing import Generator, Tuple
 
 __all__ = 'DPLLPlan', 'dpll_plan'
 

@@ -1,13 +1,14 @@
 
 from .plan_dpll import DPLLPlan
-from .plan_target import *
-from .plan_tools import factor_splitting, fail, fract_lcm, qd_factor
+from .plan_constants import *
+from .plan_tools import FrequencyTarget, factor_splitting, fail, fract_lcm, \
+    freq_to_str, output_divider, qd_factor
 
 import dataclasses
 
 from dataclasses import dataclass
 from fractions import Fraction
-from math import ceil, floor
+from math import ceil, floor, gcd
 from typing import Tuple
 
 __all__ = 'PLLPlan', 'fail', 'pll2_plan', 'pll2_plan_low'
@@ -20,8 +21,6 @@ class PLLPlan:
     pll2: Fraction = Fraction(0)
     # The target frequency of PLL2, in MHz.
     pll2_target: Fraction = Fraction(0)
-    # Fpd divider between BAW and PLL2.  Currently only 18 is supported.
-    fpd_divide: int = FPD_DIVIDE
     # Feedback divider value for PLL2.
     multiplier: Fraction = Fraction(0)
     # Post & output dividers by channel.  A post-divider of zero means that
@@ -78,7 +77,7 @@ class PLLPlan:
 
     def validate(self) -> None:
         self.dpll.validate()
-        assert self.pll2 == self.multiplier * self.dpll.baw / self.fpd_divide
+        assert self.pll2 == self.multiplier * self.dpll.baw / FPD_DIVIDE
 
     def error_ratio(self) -> float:
         return float(self.pll2 / self.pll2_target - 1)
@@ -143,7 +142,6 @@ def pll2_plan_low1(target: FrequencyTarget, dpll: DPLLPlan,
         dpll = dpll,
         pll2 = vco_freq,
         pll2_target = vco_freq,
-        fpd_divide = FPD_DIVIDE,
         multiplier = multiplier,
         dividers = dividers)
 
@@ -313,7 +311,6 @@ def pll2_plan1(target: FrequencyTarget, dpll: DPLLPlan, freqs: list[Fraction],
         dpll = dpll,
         pll2 = dpll.pll2_pfd() * mult_actual,
         pll2_target = pll2_freq,
-        fpd_divide = FPD_DIVIDE,
         multiplier = mult_actual,
         dividers = dividers)
 

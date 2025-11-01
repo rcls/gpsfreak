@@ -1,10 +1,28 @@
-from fractions import Fraction
 
+from .plan_constants import BIG_DIVIDE, Hz, MHz, kHz
+
+from dataclasses import dataclass
+from fractions import Fraction
 from math import gcd
 from typing import Any, Generator, NoReturn, Tuple
 
 class PlanningFailed(RuntimeError):
     pass
+
+@dataclass
+class FrequencyTarget:
+    '''Target output frequency list.  Use a frequence of zero for output off.
+
+    pll{1|2}_base allows you to constrain the PLL{1|2} frequency to be (a
+    multiple of) the specified value.'''
+    freqs: list[Fraction]
+    pll1_base: Fraction|None = None
+    pll2_base: Fraction|None = None
+
+    def force_pll2(self, freq: Fraction) -> bool:
+        if not self.pll2_base:
+            return False
+        return is_multiple_of(self.pll2_base, freq)
 
 def fail(*args: Any, **kwargs: Any) -> NoReturn:
     import sys
@@ -106,3 +124,109 @@ def qd_factor(n: int, hint: list[int] | None = None) -> list[int]:
         factors.append(n)
     factors.sort()
     return factors
+
+def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
+    if 2 <= ratio <= 256:
+        return ratio, 1
+
+    if index != BIG_DIVIDE:
+        return None
+
+    # For index 4, the two stage divider must have the fist stage in [6..=256]
+    # and the second stage in [1..=(1<<24)].  Prefer an even second stage
+    # divider, as this gives 50% duty cycle.  If the second stage is even,
+    # keep the first stage as high as possible.  If the second stage is odd,
+    # keep the second stage as high as possible to keep the duty cycle near
+    # 50%.
+
+    # Try even second stage.
+    for first in range(512, 11, -2):
+        if ratio % first == 0 and ratio // first <= 1<<23:
+            return first // 2, ratio * 2 // first
+
+    # Try any second stage.
+    for first in range(6, 257):
+        if ratio % first == 0 and ratio // first <= 1<<24:
+            return first, ratio // first
+
+    return None
+
+def str_to_freq(s: str) -> Fraction:
+    s = s.lower()
+    for suffix, scale in ('khz', 1000), ('mhz', 1000_000), \
+            ('ghz', 1000_000_000), ('hz', 1):
+        if s.endswith(suffix):
+            break
+        if suffix != 'hz' and s.endswith(suffix[0]):
+            suffix = suffix[0]
+            break
+    else:
+        suffix = ''
+        scale = 1000000
+
+    return Fraction(s.removesuffix(suffix)) * scale / (1000000 * MHz)
+
+# Set the name of str_to_freq to give sensible argparse help test.
+str_to_freq.__name__ = 'frequency'
+
+FRACTIONS = {
+    Fraction(0): '',
+    Fraction(1, 3): '⅓',
+    Fraction(2, 3): '⅔',
+    Fraction(1, 6): '⅙',
+    Fraction(5, 6): '⅚',
+    Fraction(1, 7): '⅐',
+    Fraction(1, 9): '⅑',
+}
+
+def freq_to_str(freq: Fraction|int|float, precision: int = 0) -> str:
+    if freq >= 1000_000 * MHz:
+        scaled = freq / (MHz * 1000000)
+        suffix = 'THz'
+    elif freq >= 10_000 * MHz: # Report VCO frequencies in MHz.
+        scaled = freq / (MHz * 1000)
+        suffix = 'GHz'
+    elif freq >= MHz:
+        scaled = freq / MHz
+        suffix = 'MHz'
+    elif freq >= kHz:
+        scaled = freq / kHz
+        suffix = 'kHz'
+    else:
+        scaled = freq / Hz
+        suffix = 'Hz'
+
+    rounded = round(scaled)
+    fract = scaled % 1
+    fract_str = None
+    if not isinstance(fract, float) and fract in FRACTIONS:
+        fract_str = FRACTIONS[fract]
+
+    elif isinstance(fract, Fraction) and (
+            fract.denominator in (6, 7, 9) or 11 <= fract.denominator <= 19):
+        fract_str = f'+' + str(fract)
+    elif isinstance(scaled, Fraction) and rounded != scaled and rounded != 0 \
+         and abs(rounded - scaled) < 1e-5:
+        if rounded < scaled:
+            fract_str = f' + {float(scaled - rounded):.6g}'
+        else:
+            fract_str = f' - {float(rounded - scaled):.6g}'
+        scaled = rounded
+
+    if fract_str is not None:
+        return f'{int(scaled)}{fract_str} {suffix}'
+    elif precision == 0:
+        return f'{float(scaled)} {suffix}'
+    else:
+        return f'{float(scaled):.{precision}g} {suffix}'
+
+def fraction_to_str(f: Fraction, paren: bool = True) -> str:
+    if f.is_integer() or f < 1:
+        return str(f)
+    d = f.denominator
+    i = f.numerator // d
+    n = f.numerator % d
+    if paren:
+        return f'({i} + {n}/{d})'
+    else:
+        return f'{i} + {n}/{d}'

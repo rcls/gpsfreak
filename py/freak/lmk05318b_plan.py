@@ -4,8 +4,9 @@ from fractions import Fraction
 
 from .plan_dpll import DPLLPlan, dpll_plan
 from .plan_pll2 import PLLPlan, pll2_plan, pll2_plan_low
-from .plan_target import *
-from .plan_tools import fail, fract_lcm
+from .plan_constants import *
+from .plan_tools import FrequencyTarget, \
+    fail, fract_lcm, freq_to_str, str_to_freq
 
 from typing import Generator
 
@@ -51,10 +52,10 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
     # Back calculate the BAW frequency from the target.  Ratios with smaller
     # numerator & denomoninator may be easier to achieve, so work through the
     # continued fraction expansion of the multiplier.
-    assert base.multiplier ==  base.pll2 / base.dpll.baw * base.fpd_divide
-    target_multiplier = base.pll2_target / base.dpll.baw * base.fpd_divide
+    assert base.multiplier ==  base.pll2 / base.dpll.baw * FPD_DIVIDE
+    target_multiplier = base.pll2_target / base.dpll.baw * FPD_DIVIDE
     for multiplier in cont_frac_approx(target_multiplier):
-        target = base.pll2_target / multiplier * base.fpd_divide
+        target = base.pll2_target / multiplier * FPD_DIVIDE
         if not BAW_LOW <= target <= BAW_HIGH:
             continue
         for pre_div in range(2, 17 + 1):
@@ -63,7 +64,7 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
             baw = REF_FREQ * 2 * pre_div * fb_div
             dpll = DPLLPlan(baw=baw, baw_target=baw,
                             fb_prediv = pre_div, fb_div=fb_div)
-            pll2 = baw / base.fpd_divide * multiplier
+            pll2 = baw / FPD_DIVIDE * multiplier
             if not PLL2_LOW <= pll2 <= PLL2_HIGH:
                 continue
             #print(freq_to_str(pll2))

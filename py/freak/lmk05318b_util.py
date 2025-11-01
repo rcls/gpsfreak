@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
-from .lmk05318b import MaskedBytes, Register
 
 from .freak_util import Device
-from .lmk05318b_plan import FrequencyTarget, str_to_freq, freq_to_str, \
-    fraction_to_str
+from .lmk05318b import MaskedBytes, Register
+from .plan_constants import FPD_DIVIDE, REF_FREQ, Hz
 from .plan_pll2 import PLLPlan
+from .plan_tools import FrequencyTarget, \
+    str_to_freq, freq_to_str, fraction_to_str
 
 import argparse
 import struct
@@ -106,12 +107,12 @@ def report_plan(target: FrequencyTarget, plan: PLLPlan, raw: bool) -> None:
             print(f' {s2}')
     print()
     dpll = plan.dpll
-    print(f'BAW: {freq_to_str(dpll.baw)} = 8844582 * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
+    print(f'BAW: {freq_to_str(dpll.baw)} = {REF_FREQ/Hz} * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
     if dpll.baw != dpll.baw_target:
         error = freq_to_str(dpll.baw - dpll.baw_target, 4)
         print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
     if plan.pll2_target != 0:
-        print(f'PLL2: {freq_to_str(plan.pll2)} = BAW / {plan.fpd_divide} * {fraction_to_str(plan.multiplier)}')
+        print(f'PLL2: {freq_to_str(plan.pll2)} = BAW / {FPD_DIVIDE} * {fraction_to_str(plan.multiplier)}')
         if plan.pll2 != plan.pll2_target:
             print(f'    target {freq_to_str(plan.pll2_target)}, error {freq_to_str(plan.error(), 4)}')
 
@@ -382,7 +383,6 @@ def report_freq(dev: Device, raw: bool) -> None:
 
     assert dpll_priref_rdiv != 0
     # FIXME - retrieve the reference!
-    from .plan_target import REF_FREQ
     baw_freq = REF_FREQ / dpll_priref_rdiv * 2 * dpll_ref_fb_pre_div * (
             dpll_ref_fb_div + Fraction(dpll_ref_num, dpll_ref_den))
 
@@ -457,9 +457,9 @@ def add_freq_commands(subp: Any, short: str, long: str) -> None:
         to the device.''')
 
     for p, n in (freq, '*'), (plan, '+'):
-        p.add_argument('FREQ', nargs=n, type=lmk05318b_plan.str_to_freq,
+        p.add_argument('FREQ', nargs=n, type=str_to_freq,
                        help=f'Frequencies for each {short}')
-        p.add_argument('-2', '--pll2', type=lmk05318b_plan.str_to_freq,
+        p.add_argument('-2', '--pll2', type=str_to_freq,
                        help=f'Forced divisor of PLL2 frequency')
 
 def add_to_argparse(argp: argparse.ArgumentParser,

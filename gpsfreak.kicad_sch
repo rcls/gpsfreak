@@ -40,7 +40,7 @@
 			)
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
 					(page "2")
 				)
@@ -82,7 +82,7 @@
 			)
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
 					(page "3")
 				)
@@ -124,7 +124,7 @@
 			)
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
 					(page "1")
 				)
@@ -166,7 +166,7 @@
 			)
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
 					(page "5")
 				)
@@ -208,7 +208,7 @@
 			)
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
 					(page "4")
 				)

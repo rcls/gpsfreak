@@ -4054,7 +4054,7 @@
 			(uuid "665660ab-2fc7-4c34-97ac-a31a873db606")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR02")
 					(unit 1)
@@ -4119,7 +4119,7 @@
 			(uuid "fd95c4ed-84d7-40d9-a606-63d82f707928")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "TP1")
 					(unit 1)
@@ -4185,7 +4185,7 @@
 			(uuid "1be919dd-f832-4332-acad-b7ef4c1830ca")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR05")
 					(unit 1)
@@ -4252,7 +4252,7 @@
 			(uuid "746c9968-cd1f-4934-92ae-8e97fab4b14e")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "J6")
 					(unit 1)
@@ -4328,7 +4328,7 @@
 			(uuid "072f6261-b976-45aa-aa9a-14a23eb7bb54")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "L11")
 					(unit 1)
@@ -4394,7 +4394,7 @@
 			(uuid "234b105c-9a8b-4c91-be66-d9d684b6a713")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR012")
 					(unit 1)
@@ -4472,7 +4472,7 @@
 			(uuid "18e646e5-e08d-4cf0-90f8-0506696d4a3a")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "C11")
 					(unit 1)
@@ -4542,7 +4542,7 @@
 			(uuid "f41463b8-1019-4006-ac05-b4d0887aa2a7")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "TH1")
 					(unit 1)
@@ -4609,7 +4609,7 @@
 			(uuid "6a4d53a6-9c3c-45f4-90d2-a8e72f76f528")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "L1")
 					(unit 1)
@@ -4675,7 +4675,7 @@
 			(uuid "cd296cc7-0000-4414-b4ee-e39e8cb25e54")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR08")
 					(unit 1)
@@ -4828,7 +4828,7 @@
 			(uuid "b1c4a46d-eed8-4585-8f9c-f85e78a45f74")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "Q1")
 					(unit 1)
@@ -4904,7 +4904,7 @@
 			(uuid "72aee98a-29f9-4dbc-ab27-5a619ce3a516")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "R13")
 					(unit 1)
@@ -4980,7 +4980,7 @@
 			(uuid "d0cfd5e1-07ab-42b3-bfcf-2e7541e5b4ad")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "R15")
 					(unit 1)
@@ -5056,7 +5056,7 @@
 			(uuid "6bbabd64-fdc7-471c-975e-b01ea2ae328f")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "R11")
 					(unit 1)
@@ -5122,7 +5122,7 @@
 			(uuid "eea181a0-4c5e-450c-9854-1aaac23f376b")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR04")
 					(unit 1)
@@ -5237,7 +5237,7 @@
 			(uuid "41bd7492-87cf-4b08-a720-2ecb249cb715")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "U1")
 					(unit 1)
@@ -5302,7 +5302,7 @@
 			(uuid "b20897a0-e6a4-408a-800b-faff6f8500ac")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR01")
 					(unit 1)
@@ -5454,7 +5454,7 @@
 			(uuid "881d8968-cb76-46e5-9125-cfaee8d01b20")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "U11")
 					(unit 1)
@@ -5530,7 +5530,7 @@
 			(uuid "60080db0-a0d3-4c64-a813-d89d8acd61fa")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "L3")
 					(unit 1)
@@ -5607,7 +5607,7 @@
 			(uuid "0444c67f-375d-4870-a6ce-21ab7cc49b58")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "R12")
 					(unit 1)
@@ -5685,7 +5685,7 @@
 			(uuid "c29c76d7-4eca-4abc-932d-efd076938a0b")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "C15")
 					(unit 1)
@@ -5763,7 +5763,7 @@
 			(uuid "844c0062-4fb1-4fd2-a1cf-423000f40aa5")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "C14")
 					(unit 1)
@@ -5829,7 +5829,7 @@
 			(uuid "f0dac04e-b1f5-47ef-9d26-a775cd635e3b")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR06")
 					(unit 1)
@@ -5895,7 +5895,7 @@
 			(uuid "bf1a6761-cbfa-4c5d-bd53-4245960fb8b2")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "TP2")
 					(unit 1)
@@ -5961,7 +5961,7 @@
 			(uuid "793698c2-d760-4ec1-a2ec-904773b7bdb8")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR010")
 					(unit 1)
@@ -6039,7 +6039,7 @@
 			(uuid "24406695-7e77-481f-9ff7-13687245cbed")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "C13")
 					(unit 1)
@@ -6105,7 +6105,7 @@
 			(uuid "61f1ace3-ddb4-4f5e-a462-bb27fe342693")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR028")
 					(unit 1)
@@ -6171,7 +6171,7 @@
 			(uuid "8b681939-d4f2-4557-8985-fb5166783954")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR07")
 					(unit 1)
@@ -6256,7 +6256,7 @@
 			(uuid "08c17ab3-ebd1-4369-8f03-415d7d9fb79b")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "Q2")
 					(unit 1)
@@ -6332,7 +6332,7 @@
 			(uuid "75fe0411-69d0-4961-8d3d-0d486b6a400f")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "R14")
 					(unit 1)
@@ -6465,7 +6465,7 @@
 			(uuid "0970dde8-cbff-484a-8937-4bc6a771f39b")
 		)
 		(instances
-			(project "gpsref"
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "J8")
 					(unit 1)

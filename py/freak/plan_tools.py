@@ -24,11 +24,8 @@ class FrequencyTarget:
             return False
         return is_multiple_of(self.pll2_base, freq)
 
-def fail(*args: Any, **kwargs: Any) -> NoReturn:
-    import sys
-    print(*args, **kwargs)
+def fail(*args: Any) -> NoReturn:
     raise PlanningFailed(' '.join(str(s) for s in args))
-    #sys.exit(1)
 
 def is_multiple_of(a: Fraction, b: Fraction | None) -> bool:
     if not b:

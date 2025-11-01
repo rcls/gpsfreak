@@ -344,18 +344,15 @@ def report_freq(d: MaskedBytes, raw: bool, report_pd: bool) -> None:
     if d.DPLL_REF_DEN:
         dpll_fb_div = d.DPLL_REF_FB_DIV + Fraction(d.DPLL_REF_NUM, d.DPLL_REF_DEN)
     else:
-        print('dpll fb div 0')
         dpll_fb_div = Fraction(0)
 
     if d.DPLL_PRIREF_RDIV:
         baw_freq = REF_FREQ / d.DPLL_PRIREF_RDIV * 2 * dpll_fb_pre_div \
             * dpll_fb_div
     else:
-        print('dpll priref rdiv 0')
         baw_freq = Fraction(0)
 
     if d.PLL2_DEN == 0:
-        print('pll2 den 0')
         pll2_freq = Fraction(0)
         pll2_fb_div = Fraction(0)
     else:

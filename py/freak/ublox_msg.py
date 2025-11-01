@@ -79,12 +79,13 @@ class UBloxReader:
     def __init__(self, source: io.IOBase):
         self.source = source
         self.current = bytearray()
+
     def read_more(self) -> None:
         data = self.source.read(1024)
         if data == '':
             raise EOFError()
-        #print(repr(data))
         self.current += data
+
     def get_msg(self, expect: int|None = None) -> Tuple[int, bytes]:
         more = False
         while True:
@@ -95,33 +96,29 @@ class UBloxReader:
             if mu < 0:
                 self.current = bytearray()
                 continue
-            #print('Reader got µ')
+
             del self.current[:mu]
             if len(self.current) < 8:   # Minimum packet length.
                 continue
             if self.current[1] != 0x62:
-                #print('No b', self.current)
-                del self.current[:2]
+                del self.current[:1]
                 continue
-            #print('Reader got b')
+
             length, = struct.unpack('<H', self.current[4:6])
             if length > MAX_LENGTH:
-                #print(f'Too long {length}')
                 del self.current[:2]
                 continue
             msg_len = length + 8
             if len(self.current) < msg_len:
-                #print(f'Need more {msg_len}')
                 continue
             # Ok, it looks like we have a message.
             message = bytes(self.current[:msg_len])
-            #print('Try', message)
             del self.current[:msg_len]
             more = False
             ckA, ckB = checksum(message[2:-2])
             if message[-2] != ckA or message[-1] != ckB:
-                print('Checksum failure')
                 continue
+
             code = struct.unpack('<H', message[2:4])[0]
             if code == expect or \
                code in (0x0105, 0x0005):

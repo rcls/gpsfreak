@@ -31,7 +31,7 @@ SKIP += 123, 124, 125, 126, 127 # PLL1 volatile.
 SKIP += 155, 156, 157, 158, 159, 161, 162, 164 # NVM.
 SKIP += 168, # DPLL status.
 
-SKIP_ABOVE = 353
+SKIP_ABOVE = 352
 
 # Addresses of the configs in flash.
 ADDRESSES = list(range(0x0800c000, 0x08010000, 2048)) + \

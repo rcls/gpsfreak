@@ -169,6 +169,9 @@ extra_field(Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105))
 # make sense because only 8 bits are needed?
 # extra_field(Field('MEMADR_12:8', 4, 0, 'R/W', 0, 159))
 
+# From the datasheet...
+extra_field(Field('DPLL_FDEV_REG_UPDATE', 0, 0, 'R/W', 0, 0x160))
+
 # Various undocumented fields are set in the TICS file.  Some are observed to
 # change with the configuration, and influence outputs.
 if args.tics:

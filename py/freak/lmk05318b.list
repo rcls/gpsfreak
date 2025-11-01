@@ -359,7 +359,7 @@ UNKNOWN344          : R/W 344:8
 UNKNOWN345          : R/W 345:8
 DPLL_FDEV_EN        : R/W 346.0:1
 DPLL_FDEV           : R/W 347:38 (5)
-UNKNOWN352          : R/W 352:8
+DPLL_FDEV_REG_UPDATE: R/W 352.0:1
 UNKNOWN357          : R/W 357:8 = 0x08
 UNKNOWN367          : R/W 367:8
 UNKNOWN411          : R/W 411:8 = 0x0c

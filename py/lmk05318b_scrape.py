@@ -98,9 +98,7 @@ def extra_field(field: Field) -> None:
     else:
         address = Address(field.address, [field])
         addresses[field.address] = address
-    #print()
-    #for f in address.fields:
-    #    print(repr(f))
+
     # Now redo the reserved fields...
     unseen = [True] * 8
     reset = 0
@@ -111,8 +109,8 @@ def extra_field(field: Field) -> None:
             new_fields.append(f)
             for i in range(f.byte_lo, f.byte_hi + 1):
                 unseen[i] = False
-    base = None
-    #print(unseen)
+
+    base: int|None = None
     for i, u in enumerate(unseen):
         if not u:
             continue
@@ -125,9 +123,6 @@ def extra_field(field: Field) -> None:
             base = None
     new_fields.sort(key = lambda f: -f.byte_lo)
     address.fields = new_fields
-    #print()
-    #for f in address.fields:
-    #    print(repr(f))
     address.validate()
 
 # Not all are documented..

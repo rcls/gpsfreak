@@ -134,8 +134,8 @@ def get_baud(dev: Device) -> int:
     resp = retrieve(dev, GET_SET_BAUD, b'')
     return struct.unpack('<I', resp.payload)[0]
 
-def peek(dev: Device, address: int, length: int) -> bytes:
-    result = b''
+def peek(dev: Device, address: int, length: int) -> bytearray:
+    result = bytearray()
     while len(result) < length:
         todo = min(length - len(result), 48)
         a = address + len(result)
@@ -143,7 +143,7 @@ def peek(dev: Device, address: int, length: int) -> bytes:
         aa = struct.unpack('<I', data.payload[:4])[0]
         assert a == aa
         assert len(data.payload) == todo + 4
-        result += data.payload[4:]
+        result += data.payload[4:] # pyrefly: ignore
     return result
 
 def poke(dev: Target, address: int, data: ByteString, chunk_size: int = 32) -> None:

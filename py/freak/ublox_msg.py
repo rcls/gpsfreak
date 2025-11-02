@@ -14,7 +14,7 @@ from typing import Tuple
 MESSAGES_BY_CODE: dict[int, UBloxMsg] = {}
 MESSAGES_BY_NAME: dict[str, UBloxMsg] = {}
 
-def checksum(data: bytes) -> Tuple[int, int]:
+def checksum(data: ByteString) -> Tuple[int, int]:
     ckA = 0;
     ckB = 0;
     for b in data:

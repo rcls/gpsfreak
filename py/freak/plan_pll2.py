@@ -351,4 +351,5 @@ def pll2_plan(target: FrequencyTarget, dpll: DPLLPlan,
 
     if best is None:
         fail(f'PLL2 planning failed, LCM = {freq_to_str(pll2_lcm)}')
+        assert False # @!#$@!#$ pyrefly.
     return best

@@ -63,7 +63,7 @@ def factor_splitting(number: int, primes: list[int], maxL: int, maxR: int) \
     for a, b in do_factor_splitting(1, number, maxR, maxL, primes, 0):
         yield b, a
 
-def fract_lcm(a: Fraction|None, b: Fraction|None) -> Fraction|None:
+def fract_lcm(a: Fraction | None, b: Fraction | None) -> Fraction | None:
     if a is None:
         return b
     if b is None:
@@ -72,17 +72,15 @@ def fract_lcm(a: Fraction|None, b: Fraction|None) -> Fraction|None:
     u = a.denominator * b.numerator
     v = a.numerator * b.denominator
     g = gcd(u, v)
-    u = u // g
-    v = v // g
-    au = a * u
-    assert au == b * v, f'{a} {b} {u} {v}'
+    au = u // g * a
+    assert au == v // g * b, f'{a} {b} {u} {v}'
     return au
 
 def test_fract_lcm():
-    L2 = list(map(Fraction, '1/8 1/4 1/2 1 2 4 8'.split()))
-    L3 = list(map(Fraction, '1/27 1/9 1/3 1 3 9 27'.split()))
-    L5 = list(map(Fraction, '1/25 1/5 1 5 25'.split()))
-    L7 = list(map(Fraction, '1/49 1/7 1 7 49'.split()))
+    L2 = list(map(Fraction, '1/8 1/4 1/2 1 2 4 8'.split()))   # pyrefly: ignore
+    L3 = list(map(Fraction, '1/27 1/9 1/3 1 3 9 27'.split())) # pyrefly: ignore
+    L5 = list(map(Fraction, '1/25 1/5 1 5 25'.split()))       # pyrefly: ignore
+    L7 = list(map(Fraction, '1/49 1/7 1 7 49'.split()))       # pyrefly: ignore
 
     # 7 * 7 * 5 * 5 = 1225
     fracts: list[Fraction] = []

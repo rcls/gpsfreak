@@ -70,9 +70,9 @@ Additionally, the blue component indicates USB activity.
 Software
 ========
 
-The device software is a mix of on-board firmware, and Python scripts (freak.py)
-to communicate with the device.  These should work on any OS that pyusb
-supports.
+The device software is a mix of on-board firmware, and Python scripts
+(py/freak.py) to communicate with the device.  These should work on any OS that
+pyusb supports.
 
 The firmware is pretty dumb.  All the frequency planning logic is in the python
 scripts, with the firmware essentially just passing through commands to the GPS
@@ -81,6 +81,8 @@ operation with no USB.
 
 Firmware updates are done via USB DFU.  There is also a Skedd connector breaking
 out SWD with a standard six pin connection.
+
+The python scripts should work with python 3.10 or later.
 
 Control Lines
 =============

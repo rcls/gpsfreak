@@ -46,12 +46,12 @@ class Config:
     version: int
     generation: int
     length: int
-    content: bytes|None = None
+    content: bytearray|None = None
 
     def is_valid(self) -> bool:
         return self.magic == MAGIC and 20 <= self.length <= 2048
 
-    def fetch(self, dev: USBDevice) -> bytes:
+    def fetch(self, dev: USBDevice) -> bytearray:
         if self.content is not None:
             return self.content
         self.content = message.peek(dev, self.address, self.length)
@@ -207,7 +207,7 @@ def add_live_ublox(ubx: UBloxReader, b: bytearray) -> None:
     set_ubx(b, changes)
 
 def parse_config(dev: USBDevice, h: Config | None) \
-        -> Generator[Tuple[str, bytes]]:
+        -> Generator[Tuple[str, ByteString]]:
     if h is None:
         return
     assert h.is_valid()
@@ -245,6 +245,8 @@ def parse_config(dev: USBDevice, h: Config | None) \
         if msg[2] == message.LMK05318B_WRITE:
             yield 'LMK', msg
         elif msg[2] in (message.GET_SET_BAUD, message.SERIAL_SYNC):
+            # We class these as UBX messages as they relate to the serial port
+            # talking to it.
             yield 'UBX', msg
         else:
             yield 'UNKNOWN', msg

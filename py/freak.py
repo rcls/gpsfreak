@@ -2,6 +2,11 @@
 
 assert __name__ == '__main__'
 
+import sys
+if sys.version_info < (3, 10):
+    print('Your python version {sys.version} is too old. ',
+          'Please get 3.10 or later')
+
 import freak.lmk05318b_plan as lmk05318b_plan
 import freak.lmk05318b_util as lmk05318b_util
 import freak.config as config
@@ -11,7 +16,7 @@ import freak.ublox_util as ublox_util
 from freak.freak_util import Device
 from typing import Tuple
 
-import argparse, struct, sys, uuid
+import argparse, struct, uuid
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
 

@@ -11,8 +11,6 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs: list[UBloxCfg] = []
     messages: list[UBloxMsg] = []
 
-    last_config = None
-
     msg_line_re = re.compile(r' *3\.\d+.\d+')
     msg_sect_re = re.compile(r'3\.\d+.\d+$')
     msg_name_re = re.compile(r'UBX-\w+-\w+$')
@@ -34,6 +32,7 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     assert not cfg_key_re.match('0x1234567')
     assert not cfg_key_re.match('0x123456789')
 
+    last_config: None|UBloxCfg = None
     for L in open(doc_path):
         w = L.strip().split()
         if cfg_cont_re.match(L) and last_config is not None:

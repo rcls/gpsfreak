@@ -141,7 +141,7 @@ class MaskedBytes:
                defaults:MaskedBytes|None = None) -> BundledBytes:
         result: BundledBytes = {}
         current_addr = 0
-        current_data = None
+        current_data: bytearray|None = None
         for i in range(DATA_SIZE):
             data = self.data[i]
             mask = self.mask[i]

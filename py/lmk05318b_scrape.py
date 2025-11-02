@@ -45,29 +45,17 @@ address = None
 # Field currently being processed.
 field = None
 
-def eject_field():
-    global field, address
-    if field is None:
-        return
-    assert address is not None
-    # Reconstitute the field
-    address.fields.append(
-        Field(field.name, field.byte_hi, field.byte_lo, field.access,
-              field.reset, field.address))
-    field = None
-
 for L in open(args.INPUT):
     if field is not None:
         # Check for a continuation line.
         c = CONT_RE.match(L)
         if c:
-            #print('C', name, c.group(1))
-            field.name += c.group(1)
+            field.name += c.group(1).upper()
+            # Recalculate the bit ranges.
+            field.__post_init__()
+        field = None
 
-    eject_field()
     if SECTION_RE.match(L):
-        #if address is not None:
-            #print(address)
         address = None
 
     if L.startswith('SNAU254C') or L.startswith('Submit Doc') \
@@ -86,9 +74,9 @@ for L in open(args.INPUT):
     f = FIELD_RE.match(L)
     if not f:
         continue
-    assert address
-    #print(f.groups())
-    #address.fields.append(
+
+    assert address is not None
+
     s_byte_hi, s_byte_lo, name, access, s_reset = f.groups()
     byte_hi = int(s_byte_hi)
     if s_byte_lo is None:
@@ -96,23 +84,15 @@ for L in open(args.INPUT):
     else:
         byte_lo = int(s_byte_lo.removeprefix(':'))
     assert byte_lo <= byte_hi
-    #if name in fixups:
-    #    name = fixups[name]
-    reset = int(s_reset, 0)
-    field = Field(name, byte_hi, byte_lo, access, reset, address.address)
 
-eject_field()
+    reset = int(s_reset, 0)
+    field = Field(name.upper(), byte_hi, byte_lo,
+                  access, reset, address.address)
+    address.fields.append(field)
 
 # Validate what we read from the .txt file.
 for address in addresses.values():
     address.validate()
-
-# Not all are documented..
-#
-# The DPLL_PL_{LOCK|UNLK}_THRESH: Not sure how many bits these actually are!
-# The mapping from value to time appears to depend on the loop B/W and appears
-# to be exponential.
-# (They appear to be six bits.)
 
 def extra_field(field):
     if field.address in addresses:
@@ -153,8 +133,14 @@ def extra_field(field):
     #    print(repr(f))
     address.validate()
 
-# From the TICS GUI:
+# Not all are documented..
+#
+# The DPLL_PL_{LOCK|UNLK}_THRESH: Not sure how many bits these actually are!
+# The mapping from value to time appears to depend on the loop B/W and appears
+# to be exponential.
+# (They appear to be six bits.)
 
+# From the TICS GUI:
 extra_field(Field('DPLL_PL_LOCK_THRESH', 5, 0, 'R/W', 0, 301))
 extra_field(Field('DPLL_PL_UNLK_THRESH', 5, 0, 'R/W', 0, 302))
 

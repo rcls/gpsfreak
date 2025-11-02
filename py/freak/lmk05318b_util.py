@@ -54,6 +54,17 @@ def do_get(dev: Device, registers: list[Register]) -> None:
     for r in registers:
         print(r, '=', data.extract(r), sep='')
 
+def do_dump(dev: Device) -> None:
+    # Build the list of registers, skipping reserved/unknown registers,
+    # and a couple that have read side-effects.
+    registers = []
+    for r in lmk05318b.REGISTERS.values():
+        if r.name.startswith('UNKNOWN') or r.name.startswith('RESERVED') \
+           or r.base_address in (161, 162):
+            continue
+        registers.append(r)
+    do_get(dev, registers)
+
 def complete_partials(dev: Device, data: MaskedBytes) -> None:
     '''Where the data has only part of a byte, fill in the rest.'''
     # TODO - suppress RESERVED 0 fields, or use a 'pristine' source
@@ -509,14 +520,17 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         description='Upload TICS Pro .tcs file')
     upload.add_argument('FILE', help='Name of .tics file')
 
+    valget = subp.add_parser(
+        'get', help='Get registers', description='Get registers')
+    valget.add_argument('KEY', type=register_lookup, nargs='+', help='KEYs')
+
+    dump = subp.add_parser(
+        'dump', help='Get all registers', description='Get all registers')
+
     valset = subp.add_parser(
         'set', help='Set registers', description='Set registers')
     valset.add_argument('KV', type=reg_key_value, nargs='+',
                         metavar='KEY=VALUE', help='KEY=VALUE pairs')
-
-    valget = subp.add_parser(
-        'get', help='Get registers', description='Get registers')
-    valget.add_argument('KEY', type=register_lookup, nargs='+', help='KEYs')
 
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'freq':
@@ -553,6 +567,9 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
 
     elif command == 'get':
         do_get(device, args.KEY)
+
+    elif command == 'dump':
+        do_dump(device)
 
     elif command == 'set':
         do_set(device, args.KV)

@@ -1,8 +1,10 @@
 
+from __future__ import annotations
+
 from .plan_dpll import DPLLPlan
 from .plan_constants import *
 from .plan_tools import FrequencyTarget, factor_splitting, fail, fract_lcm, \
-    freq_to_str, output_divider, qd_factor
+    freq_to_str, is_multiple_of, output_divider, qd_factor
 
 import dataclasses
 
@@ -252,7 +254,7 @@ def pll2_plan1(target: FrequencyTarget, dpll: DPLLPlan, freqs: list[Fraction],
     for i, f in enumerate(freqs):
         if not f:                       # Not needed.
             continue
-        assert (pll2_freq / f).is_integer()
+        assert is_multiple_of(pll2_freq, f)
         ratio = int(pll2_freq / f)
         if ratio <= 1:
             postdivs = 0

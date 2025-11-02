@@ -127,10 +127,11 @@ smarts in the Python scripts, a low end CPU would be just fine.
 The temperature sensor is only for development.  Once we know how much heat the
 board generates, we can drop it.  Or just use a 1¢ thermistor.
 
-Evaluate whether or the C0G caps on the loop filter are worthwhile.  I suspect
-not in realistic conditions.
+Evaluate whether or the C0G capacitors on the loop filter are worthwhile.  I
+suspect not in realistic conditions.  The 0.47µF C0G cap could also be replaced
+by a through-hole film cap.
 
-Do we need the super cap?  It's only for hot-start, but we are likely to be
-always on anyway.
+Do we need the super cap?  It's only to speed up GPS start-up, but we are likely
+to be always on anyway.
 
 I'm not sure the output balun on output 2 is worth the cost.

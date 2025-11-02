@@ -10,6 +10,7 @@ from .ublox_defs import get_config_changes
 
 import argparse, struct
 
+from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import Any, Generator, Tuple
 from usb.core import Device as USBDevice
@@ -133,7 +134,7 @@ def next_header(dev: USBDevice, headers: Configs,
     message.flash_erase(dev, erase_base.address)
     return erase_base
 
-def compare_config(dev: USBDevice, h: Config, new: bytes) -> bool:
+def compare_config(dev: USBDevice, h: Config, new: ByteString) -> bool:
     magic, version, generation, length = struct.unpack('<IIII', new[:16])
     if magic != h.magic or version != h.version or length != h.length:
         #print('Old header different', h)
@@ -306,7 +307,7 @@ def make_config(device: Device, headers: Configs, active: Config | None,
     return config
 
 def write_config(dev: USBDevice, headers: Configs, active: Config | None,
-                 config: bytes) -> None:
+                 config: ByteString) -> None:
     where = next_header(dev, headers, active)
     message.poke(dev, where.address, config)
 

@@ -1,4 +1,6 @@
 
+from __future__ import annotations
+
 import dataclasses
 import difflib
 import os
@@ -6,6 +8,7 @@ import pickle
 import struct
 import re
 
+from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import Any, Callable, Tuple
 
@@ -103,7 +106,7 @@ class Register:
             reset |= f.reset << f.reg_lo
         self.reset = reset
 
-    def extract(self, bb: bytes) -> int:
+    def extract(self, bb: ByteString) -> int:
         base = self.base_address
         b = bb[base : base + self.byte_span]
         value = struct.unpack('>Q', (b'\0\0\0\0\0\0\0' + b)[-8:])[0]

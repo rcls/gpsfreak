@@ -3,11 +3,12 @@
 import array
 import struct
 
+from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import TypeAlias
 from usb.core import Device
 
-Target: TypeAlias = Device|bytearray
+Target: TypeAlias = Device | bytearray
 
 MAGIC = b'\xce\x93'
 
@@ -145,7 +146,7 @@ def peek(dev: Device, address: int, length: int) -> bytes:
         result += data.payload[4:]
     return result
 
-def poke(dev: Target, address: int, data: bytes, chunk_size: int = 32) -> None:
+def poke(dev: Target, address: int, data: ByteString, chunk_size: int = 32) -> None:
     base = 0
     while base < len(data):
         todo = min(chunk_size, len(data) - base)
@@ -169,8 +170,8 @@ def lmk05318b_read(dev: Device, address: int, length: int) -> bytes:
     assert len(r.payload) == length
     return r.payload
 
-def lmk05318b_write(dev: Target, address: int, *data: bytes|int) -> None:
-    def bb(x: bytes|int) -> bytes:
+def lmk05318b_write(dev: Target, address: int, *data: ByteString|int) -> None:
+    def bb(x: ByteString|int) -> ByteString:
         return bytes((x,)) if isinstance(x, int) else x
     total = b''.join(map(bb, data))
     command(dev, LMK05318B_WRITE, struct.pack('>H', address) + total)

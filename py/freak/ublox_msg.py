@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 
+from __future__ import annotations
+
 import difflib
 import io
 import os
 from freak import serhelper
 import struct
 
+from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -38,11 +41,11 @@ def test_ublox_frame_simple() -> None:
     assert framed[-1] == 0x8e
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass
 class UBloxMsg:
     name: str
     code: int
-    def frame_payload(self, b: bytes) -> bytes:
+    def frame_payload(self, b: ByteString) -> bytes:
         return ublox_frame(struct.pack('<HH', self.code, len(b)) + b)
     @staticmethod
     def get(key: int|str|UBloxMsg) -> UBloxMsg:

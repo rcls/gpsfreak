@@ -217,7 +217,7 @@ def freq_to_str(freq: Fraction, precision: int = 0) -> str:
         return f'{float(scaled):.{precision}g} {suffix}'
 
 def fraction_to_str(f: Fraction, paren: bool = True) -> str:
-    if f.is_integer() or f < 1:
+    if f.denominator == 1 or f < 1:
         return str(f)
     d = f.denominator
     i = f.numerator // d

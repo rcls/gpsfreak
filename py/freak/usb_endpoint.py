@@ -8,17 +8,22 @@ get a handle on the underlying USB device.'''
 import io
 import usb.core
 
+from collections.abc import ByteString
+from typing import Any
+
 class USBEndpointIO(io.IOBase):
     in_buffer: bytearray = bytearray()
-    usb: usb.core.Device
+    usb_: usb.core.Device
     write_endpoint: int
     read_endpoint: int
     timeout: float
     chunk_size: int
 
-    def __init__(self, device, interface, write_endpoint, read_endpoint,
-                 timeout=1000, chunk_size = 64):
-        self.usb = device
+    def __init__(self, device: usb.core.Device,
+                 interface: Any, write_endpoint: int, read_endpoint: int,
+                 timeout: int = 1000, chunk_size: int = 64):
+        self.in_buffer = bytearray()
+        self.usb_ = device
         self.write_endpoint = write_endpoint
         self.read_endpoint = read_endpoint
         self.chunk_size = chunk_size
@@ -35,7 +40,7 @@ class USBEndpointIO(io.IOBase):
             size = 64
         if size >= 0:
             if len(self.in_buffer) == 0:
-                self.in_buffer += self.usb.read(
+                self.in_buffer += self.usb_.read(
                     self.read_endpoint, self.chunk_size, self.timeout)
 
             count = min(size, len(self.in_buffer))
@@ -46,7 +51,7 @@ class USBEndpointIO(io.IOBase):
         timeout = self.timeout
         try:
             while True:
-                r = self.usb.read(self.read_endpoint, self.chunk_size, timeout)
+                r = self.usb_.read(self.read_endpoint, self.chunk_size, timeout)
                 if r == b'':
                     break
                 self.in_buffer += r
@@ -58,7 +63,7 @@ class USBEndpointIO(io.IOBase):
         self.in_buffer.clear()
         return ret
 
-    def write(self, b: bytes) -> int:
+    def write(self, b: ByteString) -> int:
         if len(b) > self.chunk_size:
             b = b[:self.chunk_size]
-        return self.usb.write(self.write_endpoint, b, self.timeout)
+        return self.usb_.write(self.write_endpoint, b, self.timeout)

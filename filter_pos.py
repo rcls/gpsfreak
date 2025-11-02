@@ -16,7 +16,7 @@ PREFIX_ROTATE = [
     ('SIL0008C', 180),
     ('Texas_S-PWSON', -90)]
 
-def read_bom(BOM):
+def read_bom(BOM: str) -> list[list[str]]:
     global BOM_FIRST_LINE
     f = csv.reader(open(BOM, newline=''))
     BOM_FIRST_LINE = next(f)
@@ -24,13 +24,13 @@ def read_bom(BOM):
 
     return list(f)
 
-def refset(bom):
+def refset(bom: list[list[str]]) -> set[str]:
     refs = []
     for L in bom:
         refs.extend(L[1].split(','))
     return set(refs)
 
-def map_package(package):
+def map_package(package: str) -> str:
     if ':' in package:
         package = package.rsplit(':', 1)[-1]
     if package.startswith('Diode_SMD:D_SO'):
@@ -40,7 +40,7 @@ def map_package(package):
         package = m.group(2)
     return package
 
-def read_cpl(IN, refs):
+def read_cpl(IN: str, refs: set[str]) -> list[str]:
     lines = ['Designator,Mid X,Mid Y,Layer,Rotation']
     f = csv.reader(open(IN, newline=''))
     first = next(f)
@@ -64,17 +64,17 @@ def read_cpl(IN, refs):
         lines.append(f'{ref},{posx}mm,{posy}mm,{side},{rot}')
     return lines
 
-def write_cpl(OUT, lines):
+def write_cpl(OUT: str, lines: list[str]) -> None:
     outf = open(OUT, 'w')
     for L in lines:
         print(L, file=outf)
 
-def filter_cpl(IN, BOM, OUT):
+def filter_cpl(IN: str, BOM: str, OUT: str) -> None:
     refs = refset(read_bom(BOM))
     lines = read_cpl(IN, refs)
     write_cpl(OUT, lines)
 
-def filter_bom(IN, OUT):
+def filter_bom(IN: str, OUT: str) -> None:
     lines = read_bom(IN)
     w = csv.writer(open(OUT, 'w'))
     assert BOM_FIRST_LINE is not None

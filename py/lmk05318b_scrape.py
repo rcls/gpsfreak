@@ -7,13 +7,10 @@ from freak import lmk05318b, tics
 from freak.lmk05318b import Address, Field, Register
 
 import argparse
-import dataclasses
-import os
 import pickle
 import re
 import sys
 
-from dataclasses import dataclass
 from typing import Any
 
 argp = argparse.ArgumentParser(description='LMK05318b scraper')
@@ -94,7 +91,7 @@ for L in open(args.INPUT):
 for address in addresses.values():
     address.validate()
 
-def extra_field(field):
+def extra_field(field: Field) -> None:
     if field.address in addresses:
         address = addresses[field.address]
         address.fields.append(field)

@@ -1,5 +1,7 @@
 '''Planning for the LMK05318b DPLL.'''
 
+from __future__ import annotations
+
 from .plan_constants import *
 from .plan_tools import FrequencyTarget, \
     is_multiple_of, factor_splitting, output_divider, qd_factor
@@ -187,7 +189,7 @@ def dpll_plan(target: FrequencyTarget) -> DPLLPlan:
             # Skip frequencies that are requested on PLL2.
             continue
 
-        if (BAW_FREQ / f).is_integer() \
+        if is_multiple_of(BAW_FREQ, f) \
            and output_divider(i, BAW_FREQ // f) is not None:
             # If we can use the default BAW_FREQ for anything, then we do so.
             #print(f'Use default for {f}')

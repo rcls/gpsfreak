@@ -3,12 +3,10 @@ import os
 import re
 import struct
 
-from typing import Any, Sequence, Tuple, TypeAlias
+from typing import Any, Sequence, Tuple
 
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
-
-KeyValue: TypeAlias = Tuple[UBloxCfg, Any]
 
 def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
     configs = []
@@ -75,7 +73,7 @@ def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
 
 def get_config(reader: UBloxReader, layer: int,
                keys: Sequence[int|str|UBloxCfg]) \
-        -> list[KeyValue]:
+        -> list[Tuple[UBloxCfg, Any]]:
     assert len(keys) <= 64
     start = 0
     items = []

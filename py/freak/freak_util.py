@@ -5,9 +5,9 @@ from .usb_endpoint import USBEndpointIO
 
 import argparse
 import io
-import usb.core
+import usb.core # type: ignore
 
-from usb.core import Device as USBDevice
+from usb.core import Device as USBDevice # type: ignore
 
 class Device:
     args: argparse.Namespace | None

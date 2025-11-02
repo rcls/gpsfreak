@@ -13,7 +13,7 @@ import argparse, struct
 from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import Any, Generator, Tuple
-from usb.core import Device as USBDevice
+from usb.core import Device as USBDevice # type: ignore
 
 # U+03A6 GREEK CAPITAL LETTER PHI UTF-8: 0xCE 0xA6
 # r 0x72

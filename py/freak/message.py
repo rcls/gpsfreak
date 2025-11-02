@@ -6,7 +6,7 @@ import struct
 from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import TypeAlias
-from usb.core import Device
+from usb.core import Device # type: ignore
 
 Target: TypeAlias = Device | bytearray
 

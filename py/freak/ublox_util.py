@@ -6,7 +6,8 @@ from .ublox_defs import parse_key_list, get_config_changes, get_config
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
-import argparse, usb.core, struct, time
+import argparse, struct, time
+import usb.core # type: ignore
 
 # My current changes:
 # CFG-TP-PULSE_DEF 0x01 was 0x00
@@ -177,7 +178,7 @@ def do_info(reader: UBloxReader) -> None:
     print(f'Unique ID {uniq_id}')
 
     result = reader.transact('MON-HW3')
-    version, nPins, flags = result[:3]
+    _version, nPins, flags = result[:3]
     hwVersion = binstr(result[3:13])
     print(f'HW Version = {hwVersion}')
     print(f'RTC is {"" if flags & 1 else "NOT "}calibrated')

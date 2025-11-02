@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from .plan_dpll import DPLLPlan
 from .plan_constants import *
-from .plan_tools import FrequencyTarget, factor_splitting, fail, fract_lcm, \
-    freq_to_str, is_multiple_of, output_divider, qd_factor
+from .plan_tools import FrequencyTarget, factor_splitting, fail, freq_to_str, \
+    is_multiple_of, output_divider, qd_factor
 
 import dataclasses
 

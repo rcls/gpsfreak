@@ -131,11 +131,11 @@ elif args.command == 'reboot':
     # Leave these in reset until the reboot takes effect.
     message.command(dev, message.LMK05318B_PDN, b'\0')
     message.command(dev, message.GPS_RESET, b'\0')
-    dev.write(0x03, message.frame(message.CPU_REBOOT, b''))
+    dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # type: ignore
 
 elif args.command == 'cpu-reset':
     # Just send the command blindly, no response.
-    device.get_usb().write(
+    device.get_usb().write( # type: ignore
         0x03, message.frame(message.CPU_REBOOT, b''))
 
 elif args.command in ('clock', 'lmk05318b'):

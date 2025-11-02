@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import difflib
 import io
-import os
 from freak import serhelper
 import struct
 
@@ -154,4 +153,4 @@ class UBloxReader:
 
         return payload
 
-import freak.ublox_lists
+import freak.ublox_lists # pyright: ignore[reportUnusedImport]

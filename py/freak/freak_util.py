@@ -23,12 +23,12 @@ class Device:
             return self.usb
 
         # FIXME - arguments for specifying USB device.
-        u = usb.core.find(idVendor=0xf055, idProduct=0xd448)
+        u = usb.core.find(idVendor=0xf055, idProduct=0xd448) # type: ignore
         assert isinstance(u, USBDevice)
         self.usb = u
         # Flush any stale data.
         try:
-            self.usb.read(0x83, 64, 10)
+            self.usb.read(0x83, 64, 10) # type: ignore
         except usb.core.USBTimeoutError:
             pass
 

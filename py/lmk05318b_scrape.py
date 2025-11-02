@@ -37,10 +37,10 @@ FIELD_RE = re.compile(
 is split over multiple lines.'''
 CONT_RE = re.compile(r'\s{12,28}([\w:]+)\b')
 
-addresses = {}
-address = None
+addresses: dict[int, Address] = {}
+address: Address | None = None
 # Field currently being processed.
-field = None
+field: Field | None = None
 
 for L in open(args.INPUT):
     if field is not None:
@@ -104,7 +104,7 @@ def extra_field(field: Field) -> None:
     # Now redo the reserved fields...
     unseen = [True] * 8
     reset = 0
-    new_fields = []
+    new_fields: list[Field] = []
     for f in address.fields:
         reset |= f.reset << f.byte_lo
         if f.name != 'RESERVED':

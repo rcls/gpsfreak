@@ -127,7 +127,7 @@ class Register:
 
 DATA_SIZE = 500
 
-def skip(R):
+def skip(R: int) -> bool:
     return R < 8 or R >= 353 or R in (12, 157, 164)
 
 class MaskedBytes:
@@ -139,7 +139,7 @@ class MaskedBytes:
 
     def bundle(self, ro: bool = True, max_block: int = 1000,
                defaults:MaskedBytes|None = None) -> BundledBytes:
-        result = {}
+        result: BundledBytes = {}
         current_addr = 0
         current_data = None
         for i in range(DATA_SIZE):
@@ -164,7 +164,7 @@ class MaskedBytes:
     def ranges(self, select: Callable[[int], bool] = lambda m: m != 0,
                max_block: int = 1000) -> list[Tuple[int, int]]:
         '''Return a list of (start, count) of indexes with non-zero mask.'''
-        result = []
+        result: list[Tuple[int, int]] = []
         addr = None
         span = 0
         for i, m in enumerate(self.mask):
@@ -246,7 +246,7 @@ def build_registers(addresses: list[Address]) -> dict[str, Register]:
 ADDRESSES: list[Address] = pickle.load(
     open(os.path.dirname(__file__) + '/lmk05318b-registers.pickle', 'rb'))
 
-ADDRESS_BY_NUM = {}
+ADDRESS_BY_NUM: dict[int, Address] = {}
 
 for address in ADDRESSES:
     address.validate()

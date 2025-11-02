@@ -125,4 +125,4 @@ def add_cfg_list(l: list[UBloxCfg]) -> None:
         CONFIGS_BY_NAME[cfg.name] = cfg
         CONFIGS_BY_KEY [cfg.key ] = cfg
 
-import freak.ublox_lists
+import freak.ublox_lists # pyright: ignore[reportUnusedImport]

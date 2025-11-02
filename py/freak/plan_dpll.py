@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from .plan_constants import *
-from .plan_tools import FrequencyTarget, \
-    is_multiple_of, factor_splitting, output_divider, qd_factor
+from .plan_tools import FrequencyTarget, is_multiple_of, output_divider
 
 from dataclasses import dataclass
 from fractions import Fraction
-from math import ceil, floor
+from math import ceil
 from typing import Generator, Tuple
 
 __all__ = 'DPLLPlan', 'dpll_plan'

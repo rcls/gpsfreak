@@ -1,13 +1,9 @@
 #!/usr/bin/python3
 
 from freak import lmk05318b, freak_util, message, tics
-from freak.message import LMK05318B_READ, LMK05318B_WRITE, retrieve
 from freak.lmk05318b import Address, MaskedBytes
 
 import argparse
-import fractions
-import struct
-import sys
 
 from fractions import Fraction
 from typing import Tuple
@@ -29,7 +25,7 @@ args = argp.parse_args()
 assert args.usb or args.tics is not None
 
 def lmk05318b_bundles() -> list[Tuple[int, int]]:
-    bundles = []
+    bundles: list[Tuple[int, int]] = []
     address = -100;
     length = 0;
     for a in lmk05318b.ADDRESSES:
@@ -59,7 +55,7 @@ if args.tics is not None:
 else:
     data = usb_load()
 
-config = {}
+config: dict[str, int] = {}
 
 # Report the register values.
 for r in lmk05318b.REGISTERS.values():
@@ -103,14 +99,14 @@ for i, mask in enumerate(data.mask):
 DPLL_PRIREF_RDIV = config['DPLL_PRIREF_RDIV']
 DPLL_REF_FB_DIV  = config['DPLL_REF_FB_DIV']
 DPLL_REF_NUM     = config['DPLL_REF_NUM']
-DPLL_REF_DEN     = config['DPLL_REF_DEN']
+dpll_ref_den     = config['DPLL_REF_DEN']
 DPLL_REF_FB_PRE_DIV = config['DPLL_REF_FB_PRE_DIV']
 
 ref = 8844582
 
-if DPLL_REF_DEN == 0:
-    DPLL_REF_DEN = 1 << 40
+if dpll_ref_den == 0:
+    dpll_ref_den = 1 << 40
 
 print(Fraction(ref) / DPLL_PRIREF_RDIV
       * (DPLL_REF_FB_PRE_DIV + 2) * 2
-      * (DPLL_REF_FB_DIV + Fraction(DPLL_REF_NUM)/DPLL_REF_DEN))
+      * (DPLL_REF_FB_DIV + Fraction(DPLL_REF_NUM)/dpll_ref_den))

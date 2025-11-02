@@ -85,7 +85,7 @@ def test_fract_lcm():
     L7 = list(map(Fraction, '1/49 1/7 1 7 49'.split()))
 
     # 7 * 7 * 5 * 5 = 1225
-    fracts = []
+    fracts: list[Fraction] = []
     for a2 in L2:
         for a3 in L3:
             for a5 in L5:
@@ -101,7 +101,7 @@ def qd_factor(n: int, hint: list[int] | None = None) -> list[int]:
     '''Quick and dirty prime factorisation.  If you know a large likely
     factor of n, then supply it in the hint list.'''
     assert n > 0
-    factors = []
+    factors: list[int] = []
     if hint is not None:
         for f in hint:
             if n % f == 0:

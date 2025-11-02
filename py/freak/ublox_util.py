@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
-from freak import config, message, message_util, serhelper, ublox_cfg
+from freak import config, message, message_util, serhelper
 from .freak_util import Device
 from .ublox_defs import parse_key_list, get_config_changes, get_config
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
-import argparse, usb, struct, sys, time
+import argparse, usb.core, struct, time
 
 # My current changes:
 # CFG-TP-PULSE_DEF 0x01 was 0x00
@@ -31,8 +31,8 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp = argp.add_subparsers(dest=dest, metavar=metavar,
                                required=True, help='Sub-command')
 
-    info = subp.add_parser('info', description='Basic GPS unit info.',
-                           help='Basic GPS unit info')
+    subp.add_parser('info', description='Basic GPS unit info.',
+                    help='Basic GPS unit info')
 
     subp.add_parser('status', description='Basic GPS status info.',
                     help='Basic GPS status info')
@@ -81,13 +81,13 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     message_util.add_reset_command(subp, 'GPS unit')
 
-    changes = subp.add_parser(
+    subp.add_parser(
         'changes', help='Report changed config items',
         description='''Report changed config items.  Running configuration items
         that differ from the GPS unit factory default configuration are listed.
         Note that listed changes are not necessarily saved in flash.''')
 
-    release = subp.add_parser(
+    subp.add_parser(
         'release', help='Release serial port back to OS',
         description='''Release the GPS serial port back to the operating system,
         making it available to other applications.''')
@@ -207,6 +207,7 @@ def do_info(reader: UBloxReader) -> None:
 def do_status(reader: UBloxReader) -> None:
     status = reader.transact('NAV-STATUS')
 
+    gpsFix: int
     iTOW, gpsFix, flags, fixStat, flags2, ttff, msss \
         = struct.unpack('<IBBBBII', status)
 
@@ -247,7 +248,7 @@ def do_status(reader: UBloxReader) -> None:
 
     print(f'DOP: G{gDOP*0.01:5.2f} P{pDOP*0.01:5.2f} T{tDOP*0.01:5.2f} V{vDOP*0.01:5.2f} H{hDOP*0.01:5.2f} N{nDOP*0.01:5.2f} E{eDOP*0.01:5.2f}')
 
-def do_scrape(FILE):
+def do_scrape(FILE: str) -> None:
     configs, messages = parse_key_list(FILE)
     print('from freak import ublox_cfg, ublox_msg')
     print('from .ublox_cfg import UBloxCfg')
@@ -290,7 +291,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
 
     elif command == 'release':
         try:
-            device.get_usb().attach_kernel_driver(0)
+            device.get_usb().attach_kernel_driver(0) # type: ignore
         except usb.core.USBError:
             pass
 

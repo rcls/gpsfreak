@@ -1,5 +1,4 @@
 {
-//    "disableBytesTypePromotions": false,
-    "pythonVersion": "3.10"
-//    "strict": ["py/**"],
+    "pythonVersion": "3.10",
+    "strict": ["py/**"],
 }

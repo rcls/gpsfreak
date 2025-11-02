@@ -33,7 +33,7 @@ def cont_frac_approx(f: Fraction) -> Generator[Fraction]:
 def test_cont_frac() -> None:
     assert list(cont_frac_approx(Fraction(5,3))) == [1, 2, Fraction(5,3)]
     import math
-    expect = []
+    expect: list[Fraction] = []
     n, d = 1, 1
     for _ in range(21):
         expect.append(Fraction(n, d))

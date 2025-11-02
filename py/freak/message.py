@@ -48,9 +48,9 @@ class Message:
     # len is implicit in payload.
     payload: bytes
     # CRC is implied.
-    def frame(self):
+    def frame(self) -> bytes:
         return frame(self.code, self.payload)
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.code:#06x} ' + self.payload.hex(' ')
 
 POLY = 0x1021
@@ -63,7 +63,7 @@ for i in range(1, 128):
     CRCTAB.extend((dbl, dbl ^ POLY))
 assert len(CRCTAB) == 256
 
-def crc16(bb: bytes) -> int:
+def crc16(bb: ByteString) -> int:
     result = 0
     for b in bb:
         result = result << 8 & 0xff00 ^ CRCTAB[result >> 8 ^ b]
@@ -71,7 +71,7 @@ def crc16(bb: bytes) -> int:
 
 assert crc16(b'123456789') == 0x31c3
 
-def frame(code: int, payload: bytes, limit: int = 64) -> bytes:
+def frame(code: int, payload: ByteString, limit: int = 64) -> bytes:
     assert len(payload) + 6 <= limit
     message = MAGIC + bytes((code, len(payload))) + payload
     return message + struct.pack('>H', crc16(message))
@@ -95,17 +95,17 @@ def test_simple() -> None:
     payload = b'This is a test'
     assert deframe(frame(code, payload)) == Message(code, payload)
 
-def command(dev: Target, code: int, payload: bytes,
+def command(dev: Target, code: int, payload: ByteString,
             expect: int = ACK) -> Message:
     data = frame(code, payload)
     if isinstance(dev, bytearray):
         dev += data
         return Message(ACK, b'')
-    dev.write(0x03, frame(code, payload))
-    result = deframe(bytes(dev.read(0x83, 64, 10000)))
+    dev.write(0x03, frame(code, payload)) # type: ignore
+    result = deframe(bytes(dev.read(0x83, 64, 10000))) # type: ignore
     if expect != NACK and result.code == NACK:
         raise RequestFailed(f'Result code is NACK ' + result.payload.hex(' '))
-    if expect is not None and result.code != expect:
+    if result.code != expect:
         raise RequestFailed(f'Result code is {result.code:#04x}')
     return result
 

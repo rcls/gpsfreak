@@ -4,13 +4,12 @@ from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 
 from .freak_util import Device
 from .lmk05318b import MaskedBytes, Register
-from .plan_constants import FPD_DIVIDE, REF_FREQ, Hz
+from .plan_constants import REF_FREQ
 from .plan_pll2 import PLLPlan
 from .plan_tools import FrequencyTarget, \
     str_to_freq, freq_to_str, fraction_to_str
 
 import argparse
-import struct
 
 from fractions import Fraction
 from typing import Any, Tuple
@@ -57,7 +56,7 @@ def do_get(dev: Device, registers: list[Register]) -> None:
 def do_dump(dev: Device) -> None:
     # Build the list of registers, skipping reserved/unknown registers,
     # and a couple that have read side-effects.
-    registers = []
+    registers: list[Register] = []
     for r in lmk05318b.REGISTERS.values():
         if r.name.startswith('UNKNOWN') or r.name.startswith('RESERVED') \
            or r.base_address in (161, 162):
@@ -491,10 +490,6 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         dest=dest, metavar=metavar, required=True, help='Sub-command')
 
     add_freq_commands(subp, 'channel', 'LMK0531b channel')
-    FREQ_EPILOG='''Each frequency on the command line corresponds to a LMK05318b
-    channel.  Use 0 to turn an output off.  The frequency can be specified as
-    either fraction (315/88) or a decimal number (3.579545), with an optional
-    unit that defaults to MHz.'''
 
     drive = subp.add_parser('drive', help='Set/report output drive',
                             description='Set/port output drive')
@@ -503,8 +498,8 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='CH=DRIVE',
                        help='Channel and drive type / strength')
 
-    status = subp.add_parser('status', help='Report oscillator status',
-                             description='Report oscillator status.')
+    subp.add_parser('status', help='Report oscillator status',
+                    description='Report oscillator status.')
 
     save = subp.add_parser(
         'save', help='Save clock gen config to flash.',
@@ -524,7 +519,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         'get', help='Get registers', description='Get registers')
     valget.add_argument('KEY', type=register_lookup, nargs='+', help='KEYs')
 
-    dump = subp.add_parser(
+    subp.add_parser(
         'dump', help='Get all registers', description='Get all registers')
 
     valset = subp.add_parser(

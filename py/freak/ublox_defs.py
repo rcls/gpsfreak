@@ -1,5 +1,4 @@
 
-import os
 import re
 import struct
 
@@ -9,8 +8,8 @@ from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
 def parse_key_list(doc_path: str) -> Tuple[list[UBloxCfg], list[UBloxMsg]]:
-    configs = []
-    messages = []
+    configs: list[UBloxCfg] = []
+    messages: list[UBloxMsg] = []
 
     last_config = None
 
@@ -76,7 +75,7 @@ def get_config(reader: UBloxReader, layer: int,
         -> list[Tuple[UBloxCfg, Any]]:
     assert len(keys) <= 64
     start = 0
-    items = []
+    items: list[Tuple[UBloxCfg, Any]] = []
 
     key_bin = bytes()
     for key in keys:
@@ -111,8 +110,8 @@ def get_config_changes(dev: UBloxReader, key: int = 0xffffffff) \
     live.sort(key=lambda x: x[0].key & 0x0fffffff)
     rom .sort(key=lambda x: x[0].key & 0x0fffffff)
 
-    assert len(live) == len(rom )
-    result = []
+    assert len(live) == len(rom)
+    result: list[Tuple[UBloxCfg, Any, Any]] = []
     for (cfg_l, value_l), (cfg_r, value_r) in zip(live, rom):
         assert cfg_l == cfg_r
         if value_l != value_r:

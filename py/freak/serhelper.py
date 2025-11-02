@@ -16,7 +16,6 @@ We only support raw mode on Posix ttys.  The historical Posix baggage for
 teletype support is ignored.'''
 
 import io
-import os
 import termios
 
 class Serial(io.FileIO):
@@ -24,10 +23,10 @@ class Serial(io.FileIO):
         io.FileIO.__init__(self, path, 'r+b')
         makeraw(self, speed)
 
-    def writeall(self, b):
-        writeall(self, b)
+    def writeall(self, b: bytes) -> int:
+        return writeall(self, b)
 
-    def flushread(self):
+    def flushread(self) -> None:
         flushread(self)
 
 # IOBase appears not to have a write() method?

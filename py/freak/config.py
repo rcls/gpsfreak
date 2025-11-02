@@ -2,7 +2,7 @@
 from . import crc32, lmk05318b, message, ublox_defs, ublox_msg
 
 from .freak_util import Device
-from .lmk05318b import MaskedBytes, Register
+from .lmk05318b import MaskedBytes
 from .message import lmk05318b_read, lmk05318b_write
 from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxReader
@@ -26,11 +26,11 @@ MAGIC = 0x4b72a6ce
 VERSION = 1
 
 # For the LMK05318b, we skip some feedback and the NVM related addresses.
-SKIP = list(range(12))         # Not writeable.
-SKIP += 13, 14, 17, 18, 19, 20 # LOL flags and their interrupts.
-SKIP += 123, 124, 125, 126, 127 # PLL1 volatile.
-SKIP += 155, 156, 157, 158, 159, 161, 162, 164 # NVM.
-SKIP += 168, # DPLL status.
+SKIP = list(range(12)) + [                     # Not writeable.
+    13, 14, 17, 18, 19, 20, # LOL flags and their interrupts.
+    123, 124, 125, 126, 127, # PLL1 volatile.
+    155, 156, 157, 158, 159, 161, 162, 164, # NVM.
+    168] # DPLL status.
 
 SKIP_ABOVE = 352
 
@@ -77,7 +77,7 @@ def load_lmk05318b(dev: USBDevice) -> MaskedBytes:
 # Get all the provisioning headers.
 def get_headers(dev: USBDevice) -> Configs:
     '''Load all the config headers from the device'''
-    headers = []
+    headers: Configs = []
     for address in ADDRESSES:
         peek = message.peek(dev, address, 16)
         headers.append(Config(address, *struct.unpack('<IIII', peek)))
@@ -135,7 +135,7 @@ def next_header(dev: USBDevice, headers: Configs,
     return erase_base
 
 def compare_config(dev: USBDevice, h: Config, new: ByteString) -> bool:
-    magic, version, generation, length = struct.unpack('<IIII', new[:16])
+    magic, version, _generation, length = struct.unpack('<IIII', new[:16])
     if magic != h.magic or version != h.version or length != h.length:
         #print('Old header different', h)
         return False

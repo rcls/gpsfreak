@@ -9,7 +9,7 @@ import io
 import usb.core
 
 from collections.abc import ByteString
-from typing import Any
+from typing import Any, cast
 
 class USBEndpointIO(io.IOBase):
     in_buffer: bytearray = bytearray()
@@ -29,7 +29,7 @@ class USBEndpointIO(io.IOBase):
         self.chunk_size = chunk_size
         self.timeout = timeout
         try:
-            device.detach_kernel_driver(interface)
+            device.detach_kernel_driver(interface) # type: ignore
         except usb.core.USBError:
             pass
 
@@ -40,8 +40,8 @@ class USBEndpointIO(io.IOBase):
             size = 64
         if size >= 0:
             if len(self.in_buffer) == 0:
-                self.in_buffer += self.usb_.read(
-                    self.read_endpoint, self.chunk_size, self.timeout)
+                self.in_buffer += cast(bytes, self.usb_.read( # type: ignore
+                    self.read_endpoint, self.chunk_size, self.timeout))
 
             count = min(size, len(self.in_buffer))
             ret = bytes(self.in_buffer[:count])
@@ -51,7 +51,8 @@ class USBEndpointIO(io.IOBase):
         timeout = self.timeout
         try:
             while True:
-                r = self.usb_.read(self.read_endpoint, self.chunk_size, timeout)
+                r = cast(bytes, self.usb_.read( # type: ignore
+                    self.read_endpoint, self.chunk_size, timeout))
                 if r == b'':
                     break
                 self.in_buffer += r
@@ -66,4 +67,5 @@ class USBEndpointIO(io.IOBase):
     def write(self, b: ByteString) -> int:
         if len(b) > self.chunk_size:
             b = b[:self.chunk_size]
-        return self.usb_.write(self.write_endpoint, b, self.timeout)
+        return self.usb_.write(         # type: ignore
+            self.write_endpoint, b, self.timeout)

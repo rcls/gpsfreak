@@ -26,7 +26,4 @@ def read_tcs_file(path: str) -> MaskedBytes:
     return result
 
 def make_i2c_transactions(reg_block_list: BundledBytes) -> list[bytes]:
-    messages = []
-    for R, B in reg_block_list.items():
-        messages.append(struct.pack('>H', R) + bytes(B))
-    return messages
+    return [struct.pack('>H', R) + bytes(B) for R, B in reg_block_list.items()]

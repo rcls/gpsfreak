@@ -82,11 +82,17 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     message_util.add_reset_command(subp, 'GPS unit')
 
-    subp.add_parser(
+    changes = subp.add_parser(
         'changes', help='Report changed config items',
         description='''Report changed config items.  Running configuration items
         that differ from the GPS unit factory default configuration are listed.
         Note that listed changes are not necessarily saved in flash.''')
+    changes.add_argument(
+        '-u', '--upper', type=int, default=0, help
+        = 'Config layer containing changes to report, default is live config')
+    changes.add_argument(
+        '-b', '--base', type=int, default=7, help
+        = 'Base layer to compare against; default is factor default')
 
     subp.add_parser(
         'release', help='Release serial port back to OS',
@@ -148,9 +154,12 @@ def do_baud(device: Device, baud: int) -> None:
     # Now try the UBX again, check the response.
     device.get_ublox().command(valset, payload)
 
-def do_changes(reader: UBloxReader) -> None:
-    for cfg, now, rom in get_config_changes(reader):
-        print(cfg, fmt_cfg_value(cfg, now), 'was', fmt_cfg_value(cfg, rom))
+def do_changes(reader: UBloxReader, upper: int, base: int) -> None:
+    for cfg, now, rom in get_config_changes(reader, upper, base):
+        if rom is None:
+            print(cfg, fmt_cfg_value(cfg, now), 'is new')
+        else:
+            print(cfg, fmt_cfg_value(cfg, now), 'was', fmt_cfg_value(cfg, rom))
 
 def do_info(reader: UBloxReader) -> None:
     def binstr(b: bytes) -> str:
@@ -288,7 +297,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
             do_baud(device, args.BAUD)
 
     elif command == 'changes':
-        do_changes(device.get_ublox())
+        do_changes(device.get_ublox(), args.upper, args.base)
 
     elif command == 'release':
         try:

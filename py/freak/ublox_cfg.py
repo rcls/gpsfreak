@@ -62,6 +62,9 @@ class UBloxCfg:
     def __repr__(self) -> str:
         return f'UBloxCfg({self.name!r:}, {self.key:#010x}, {self.typ!r:})'
 
+    def compare_key(self) -> Tuple[int, int, str, str]:
+        return self.key & 0x0fffffff, self.key, self.name, self.typ
+
     @staticmethod
     def decode_from(b: bytes) -> Tuple[UBloxCfg, Any, int]:
         '''Returns (key, value, length)

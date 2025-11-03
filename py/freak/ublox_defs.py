@@ -102,17 +102,24 @@ def get_config(reader: UBloxReader, layer: int,
         if num_items < 64:
             return items
 
-def get_config_changes(dev: UBloxReader, key: int = 0xffffffff) \
+def get_config_changes(dev: UBloxReader, upper: int = 0, base: int = 7,
+                       key: int = 0xffffffff) \
         -> list[Tuple[UBloxCfg, Any, Any]]:
-    live = get_config(dev, 0, [key])
-    rom  = get_config(dev, 7, [key])
-    live.sort(key=lambda x: x[0].key & 0x0fffffff)
-    rom .sort(key=lambda x: x[0].key & 0x0fffffff)
+    live = get_config(dev, upper, [key])
+    rom  = get_config(dev, base, [key])
+    live.sort(key=lambda x: x[0].compare_key())
+    rom .sort(key=lambda x: x[0].compare_key())
 
-    assert len(live) == len(rom)
     result: list[Tuple[UBloxCfg, Any, Any]] = []
-    for (cfg_l, value_l), (cfg_r, value_r) in zip(live, rom):
-        assert cfg_l == cfg_r
-        if value_l != value_r:
-            result.append((cfg_l, value_l, value_r))
+    rom_idx = 0
+    for cfg, value in live:
+        ck = cfg.compare_key()
+        while rom_idx < len(rom) and rom[rom_idx][0].compare_key() < ck:
+            rom_idx += 1
+
+        if rom_idx >= len(rom) or rom[rom_idx][0].compare_key() != ck:
+            result.append((cfg, value, None))
+        elif value != rom[rom_idx][1]:
+            result.append((cfg, value, rom[rom_idx][1]))
+
     return result

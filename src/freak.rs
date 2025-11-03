@@ -70,11 +70,13 @@ pub fn main() -> ! {
     gpiob.BSRR.write(|w| w.BS1().set_bit());     // High
     gpiob.MODER.modify(|_,w| w.MODE1().B_0x1()); // Output
 
-    // EN_REF2 = PB5, deassert high
-    // EN_OUT4 = PB4, assert low
-    // nEN_OUT3 = PB8, assert low
-    gpiob.BSRR.write(|w| w.BS4().set_bit().BR5().set_bit().BR8().set_bit());
-    gpiob.MODER.modify(|_,w| w.MODE4().B_0x1().MODE5().B_0x1().MODE8().B_0x1());
+    if *cpu::IS_PROTOTYPE {
+        // EN_REF2 = PB5, deassert high
+        // EN_OUT4 = PB4, assert low
+        // nEN_OUT3 = PB8, assert low
+        gpiob.BSRR.write(|w| w.BS4().set_bit().BR5().set_bit().BR8().set_bit());
+        gpiob.MODER.modify(|_,w| w.MODE4().B_0x1().MODE5().B_0x1().MODE8().B_0x1());
+    }
 
     loop {
         cpu::WFE();

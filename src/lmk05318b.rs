@@ -42,17 +42,17 @@ pub fn update_status() {
     // Clear the pending bit.
     exti.RPR1.write(|w| w.RPIF0().set_bit());
 
-    let red_green = unsafe {crate::led::RED_GREEN.as_mut()};
+    use crate::led::RED_GREEN;
 
     let (good, changes, flicker)
         = lmk05318b_status().unwrap_or((false, true, false));
     if !good || changes || flicker {
         dbgln!("Set red");
-        red_green.set(false);
+        RED_GREEN.set(false);
     }
     if good {
         dbgln!("Set green");
-        red_green.set(true);
+        RED_GREEN.set(true);
     }
 
     // Hopefully we have cleared the interrupt line, but if not, software
@@ -85,7 +85,7 @@ fn lmk05318b_status() -> Result<(bool, bool, bool), ()> {
     let good = new_bits & !mask == 0; // Everything good.
     // Note that we get called pre-emptively in various situations.  So note
     // whether or not the LMK05318b thought it was giving us an interrupt.
-    let changes = intr != 0;          // This was a real interrupt.
+    let changes = intr & !mask != 0;          // This was a real interrupt.
     let flicker = new_bits & !mask != bits & !mask; // WTF.
     Ok((good, changes, flicker))
 }

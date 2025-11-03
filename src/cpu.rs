@@ -26,6 +26,12 @@ const USB_SERIAL_LEN: usize = SERIAL_LEN * 2 + 2;
 pub static SERIAL_NUMBER: UCell<[u8; SERIAL_LEN]> = UCell::new([0; _]);
 pub static USB_SERIAL_NUMBER: UCell<[u8; USB_SERIAL_LEN]> = UCell::new([0; _]);
 
+pub static IS_PROTOTYPE: UCell<bool> = UCell::new(false);
+
+static PROTO_SN0: u32 = 0x006b0028;
+static PROTO_SN1: u32 = 0x31335105;
+static PROTO_SN2: u32 = 0x30393436;
+
 /// Key for writes to AIRCR.  We include the PRIGROUP value we use:
 /// 3 priority bits, 5 sub-priority bits (but only the top one actually
 /// implemented in our CPU.)
@@ -58,23 +64,34 @@ pub fn init() {
         barrier();
     }
 
-    // Use PLL1 in integer mode with even divider.
+    // We use PLL1 in integer mode with even divider.  The CPU frequency should
+    // be a multiple of 8 MHz.
     const {assert!(CPU_FREQ % 8_000_000 == 0)};
     // Run PLL1 in wide range, 128MHz to 560MHz VCO.  Use the lowest VCO that
     // is an even multiple of CPU_FREQ.
     const PDIV_BY_2: u32 = 128_000_000u32.div_ceil(CPU_FREQ * 2);
+
+    // PLL output divider to main clock tree.
     const PDIV: u32 = PDIV_BY_2 * 2;
     const {assert!(PDIV <= 255)};
-    const IN_FREQ: u32 = 32_000_000;
-    const PFD_FREQ: f64 = 2_000_000.;
+
+    const IN_FREQ: u32 = 32_000_000;  // HSI oscillator frequency.
+    const PFD_FREQ: f64 = 2_000_000.; // Phase detector frequency.
+
+    // PLL input divider.
     const MDIV: u32 = (IN_FREQ as f64 / PFD_FREQ + 0.5) as u32;
     const {assert!(MDIV >= 1 && MDIV <= 63)};
+
     const VCO_FREQ: u32 = CPU_FREQ * PDIV;
     const {assert!(VCO_FREQ <= 560_000_000)};
     const {assert!(VCO_FREQ >= 120_000_000)};
+
+    // PLL feedback multiplier.
     const MULT: u32 = (VCO_FREQ as f64 / PFD_FREQ + 0.5) as u32;
     const {assert!(MULT >= 4)};
     const {assert!(MULT <= 512)};
+
+    // Check that it works out end-to-end.
     const {assert!(IN_FREQ as u64 * MULT as u64
         == CPU_FREQ as u64 * PDIV as u64 * MDIV as u64)};
 
@@ -132,8 +149,13 @@ pub fn init() {
     // Generate the USB serial number.  ST notes claim that we will hard fault
     // if we do this with ICACHE enabled.
     let sn = unsafe {&*(0x8fff800 as *const [u32; 3])};
+    if sn[0] == PROTO_SN0 && sn[1] == PROTO_SN1 && sn[2] == PROTO_SN2 {
+        unsafe {*IS_PROTOTYPE.as_mut() = true};
+    }
     format_serial_number(sn, unsafe {SERIAL_NUMBER.as_mut()},
                          unsafe {USB_SERIAL_NUMBER.as_mut()});
+
+    barrier();
 
     // Enable ICACHE.
     while icache.SR.read().BUSYF().bit() {
@@ -402,7 +424,7 @@ unsafe extern "C" {
 
 #[test]
 fn test_sn() {
-    let sn = [0x006b0028, 0x31335105, 0x30393436];
+    let sn = [PROTO_SN0, PROTO_SN1, PROTO_SN2];
     let mut text = [0; SERIAL_LEN];
     let mut usb = [0; USB_SERIAL_LEN];
     format_serial_number(&sn, &mut text, &mut usb);

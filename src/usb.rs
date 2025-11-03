@@ -196,7 +196,7 @@ impl USB_State {
         }
 
         if not_only_sof {
-            unsafe {crate::led::BLUE.as_mut()}.pulse(true);
+            crate::led::BLUE.pulse(true);
             fast_dbgln!("CHEP0 now {:#010x}\n***", chep_ctrl().read().bits());
         }
     }

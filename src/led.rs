@@ -14,21 +14,32 @@ use stm32h503::Interrupt::TIM3 as INTERRUPT;
 use crate::cpu::interrupt::PRIO_LED as PRIORITY;
 type Priority = crate::cpu::Priority<PRIORITY>;
 
-type FiveHz<T> = UCell<Led<1000, 1000, T>>;
+type FiveHz = UCell<LedTimer<1000, 1000>>;
 
-pub static BLUE : FiveHz<Blue> = Default::default();
-pub static RED_GREEN: FiveHz<RedGreen> = Default::default();
+pub static BLUE: FiveHz = Default::default();
+pub static RED_GREEN: FiveHz = Default::default();
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::PTR};
-    let rcc = unsafe {&*stm32h503::RCC::PTR};
+    let gpiob = unsafe {&*stm32h503::GPIOB::PTR};
+    let rcc   = unsafe {&*stm32h503::RCC  ::PTR};
     let tim = unsafe {&*TIM::PTR};
 
-    // Blue/green/red are PA1,2,3.
-    gpioa.BSRR.write(|w| w.bits(0xe));
-    gpioa.MODER.modify(|_,w| w.MODE1().B_0x1().MODE2().B_0x1().MODE3().B_0x1());
+    if *crate::cpu::IS_PROTOTYPE.as_ref() {
+        // The prototype has Blue/green/red are PA1,2,3.
+        gpioa.BSRR.write(|w| w.bits(0xe));
+        gpioa.MODER.modify(
+            |_,w| w.MODE1().B_0x1().MODE2().B_0x1().MODE3().B_0x1());
+    }
+    else {
+        // Current design has Blue=PA15, Green=PB4, Red=PB5.
+        gpioa.BSRR.write(|w| w.BS15().set_bit());
+        gpioa.MODER.modify(|_,w| w.MODE15().B_0x1());
+        gpiob.BSRR.write(|w| w.BS4().set_bit().BS5().set_bit());
+        gpiob.MODER.modify(|_,w| w.MODE4().B_0x1().MODE5().B_0x1());
+    }
 
     rcc.APB1LENR.modify(|_,w| w.TIM3EN().set_bit());
     // Set ARR to 0?
@@ -45,66 +56,63 @@ pub fn init() {
     interrupt::enable_priority(INTERRUPT, PRIORITY);
 }
 
-#[derive_const(Default)]
-pub struct Blue;
+/// Set the physical LEDs.
+/// red_green indicator: true = good = green, false = red.
+/// blue true = LED, false = LED off.
+/// Note that the LED is common anode, so that we drive the GPIO with negative
+/// logic.
+fn drive(red_green: bool, blue: bool) {
+    let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
+    let gpiob = unsafe{&*stm32h503::GPIOB::PTR};
 
-impl LedTrait for Blue {
-    fn set(&mut self, state: bool) {
-        let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        // Negative polarity: we drive low for on.
-        gpioa.BSRR.write(|w| w.BR1().set_bit().BS1().bit(!state));
-    }
-}
-
-/// Pair of red and green LEDs.  Positive logic indicator, true = good = green.
-/// Red is PA3, green is PA2.
-#[derive_const(Default)]
-pub struct RedGreen;
-
-impl LedTrait for RedGreen {
-    fn set(&mut self, state: bool) {
-        let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
-        // This gives negative polarity as wanted.
+    if *crate::cpu::IS_PROTOTYPE.as_ref() {
+        let green_off = !red_green;
+        let red_off = red_green && !blue;
+        let blue_off = !blue;
         gpioa.BSRR.write(
-            |w|w.BR2().set_bit().BR3().set_bit()
-                .BS2().bit(!state).BS3().bit(state));
+            |w|w.BR1().set_bit().BR2().set_bit().BR3().set_bit()
+                .BS1().bit(blue_off).BS2().bit(green_off).BS3().bit(red_off));
     }
-}
-
-pub trait LedTrait {
-    fn set(&mut self, state: bool);
-}
-
-#[derive_const(Default)]
-pub struct Led<const ON: i16, const OFF: i16, T> {
-    timer: LedTimer<ON, OFF>,
-    led: T,
-}
-
-impl<const ON: i16, const OFF: i16, T: LedTrait> Led<ON, OFF, T> {
-    fn isr(&mut self, now: i16) {
-        self.timer.isr(now);
-        self.led.set(self.timer.led);
+    else {
+        gpiob.BSRR.write(
+            |w|w.BR4().set_bit().BR5().set_bit()
+                .BS4().bit(!red_green).BS5().bit(red_green));
+        gpioa.BSRR.write(|w| w.BR15().set_bit().BS15().bit(!blue));
     }
-    pub fn set(&mut self, state: bool) {
+
+}
+
+impl<const ON: i16, const OFF: i16> UCell<LedTimer<ON, OFF>> {
+    fn isr(&self, now: i16) {
+        unsafe {self.as_mut().isr(now)};
+    }
+
+    pub fn set(&self, state: bool) {
         let tim = unsafe {&*TIM::PTR};
 
         let _guard = Priority::new();
-        schedule(self.timer.set(state, tim.CNT.read().bits() as i16));
-        self.led.set(self.timer.led);
+
+        let now = tim.CNT.read().bits() as i16;
+        schedule(unsafe {self.as_mut()}.set(state, now));
+
+        drive(RED_GREEN.led, BLUE.led);
     }
-    pub fn pulse(&mut self, state: bool) {
+
+    pub fn pulse(&self, state: bool) {
         let tim = unsafe {&*TIM::PTR};
 
         let _guard = Priority::new();
-        schedule(self.timer.pulse(state, tim.CNT.read().bits() as i16));
-        self.led.set(self.timer.led);
+
+        let now = tim.CNT.read().bits() as i16;
+        schedule(unsafe {self.as_mut()}.pulse(state, now));
+
+        drive(RED_GREEN.led, BLUE.led);
     }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[derive_const(Default)]
-struct LedTimer<const ON: i16, const OFF: i16> {
+pub struct LedTimer<const ON: i16, const OFF: i16> {
     /// Current desired state of the LED.  Various methods update this field,
     /// the wrapping methods in `Led` update the physical LED to match.
     led: bool,
@@ -219,16 +227,16 @@ fn isr() {
         }
     };
 
-    let (blue, red_green) = unsafe{(BLUE.as_mut(), RED_GREEN.as_mut())};
-    blue.isr(now);
-    red_green.isr(now);
+    BLUE.isr(now);
+    RED_GREEN.isr(now);
+    drive(RED_GREEN.led, BLUE.led);
 
     // We make sure that the time is always scheduled in the future, even if
     // there is nothing to do.  Otherwise we need to deal with the ambiguity
     // between timers in the past being processed or late.
     let deadline = W(now) + W(30000);
-    let deadline = min(deadline, blue.timer.expiry);
-    let deadline = min(deadline, red_green.timer.expiry);
+    let deadline = min(deadline, BLUE.expiry);
+    let deadline = min(deadline, RED_GREEN.expiry);
     dbgln!("LED {now} {deadline}");
 
     trigger(deadline);

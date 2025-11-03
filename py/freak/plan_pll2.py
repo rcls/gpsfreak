@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from .plan_dpll import DPLLPlan
 from .plan_constants import *
-from .plan_tools import FrequencyTarget, factor_splitting, fail, freq_to_str, \
+from .plan_tools import Target, factor_splitting, fail, freq_to_str, \
     is_multiple_of, output_divider, qd_factor
 
 import dataclasses
@@ -102,7 +102,7 @@ def postdiv_mask(div: int) -> int:
     assert 2 <= div <= 7
     return 0x0101010101010101 << div | 0xfe << 8 * div
 
-def pll2_plan_low1(target: FrequencyTarget, dpll: DPLLPlan,
+def pll2_plan_low1(target: Target, dpll: DPLLPlan,
                    freq: Fraction, post_div: int, stage1_div: int,
                    mult_den: int, stage2_div: int) -> PLLPlan | None:
     '''Try and create a PLL2 plan for a single output using the given data.
@@ -147,7 +147,7 @@ def pll2_plan_low1(target: FrequencyTarget, dpll: DPLLPlan,
         multiplier = multiplier,
         dividers = dividers)
 
-def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
+def pll2_plan_low_exact(target: Target, dpll: DPLLPlan, freq: Fraction,
                         fast: bool, factors: list[int]) -> PLLPlan | None:
     '''Search for a PLL2 plan generating the given frequency.
 
@@ -202,7 +202,7 @@ def pll2_plan_low_exact(target: FrequencyTarget, dpll: DPLLPlan, freq: Fraction,
                     best = plan
     return best
 
-def pll2_plan_low(target: FrequencyTarget, dpll: DPLLPlan,
+def pll2_plan_low(target: Target, dpll: DPLLPlan,
                   freq: Fraction) -> PLLPlan:
     '''Plan for the special case where we only have the BIG_DIVIDE output, and
     the stage2 divider is definitely needed.
@@ -241,7 +241,7 @@ def pll2_plan_low(target: FrequencyTarget, dpll: DPLLPlan,
     return pll2_plan(target, dpll,
                      [Fraction(0)] * BIG_DIVIDE + [freq], freq)
 
-def pll2_plan1(target: FrequencyTarget, dpll: DPLLPlan, freqs: list[Fraction],
+def pll2_plan1(target: Target, dpll: DPLLPlan, freqs: list[Fraction],
                pll2_freq: Fraction) -> PLLPlan | None:
     '''Try and create a plan using a particular PLL2 frequency.  Note that
     the frequency list might not include all the frequencies in the target.'''
@@ -316,7 +316,7 @@ def pll2_plan1(target: FrequencyTarget, dpll: DPLLPlan, freqs: list[Fraction],
         multiplier = mult_actual,
         dividers = dividers)
 
-def pll2_plan(target: FrequencyTarget, dpll: DPLLPlan,
+def pll2_plan(target: Target, dpll: DPLLPlan,
               freqs: list[Fraction], pll2_lcm: Fraction) -> PLLPlan:
     '''Create a frequency plan using PLL2 for a list of frequencies.
 

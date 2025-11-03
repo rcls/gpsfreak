@@ -1,5 +1,5 @@
 
-from freak.message import Target, command
+from freak.message import Recipient, command
 
 from argparse import Namespace
 from typing import Any
@@ -20,7 +20,7 @@ def add_reset_command(subp: Any, unit: str) -> None:
     reset.add_argument('-1', '--deassert', action='store_true',
                        help='De-assert reset line (high).')
 
-def do_reset_line(dev: Target, code: int, args: Namespace|None) -> None:
+def do_reset_line(dev: Recipient, code: int, args: Namespace|None) -> None:
     payload = b'\x02'
     if args is not None:
         assrt = getattr(args, 'assert')

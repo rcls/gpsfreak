@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import TypeAlias
 from usb.core import Device # type: ignore
 
-Target: TypeAlias = Device | bytearray
+Recipient: TypeAlias = Device | bytearray
 
 MAGIC = b'\xce\x93'
 
@@ -95,7 +95,7 @@ def test_simple() -> None:
     payload = b'This is a test'
     assert deframe(frame(code, payload)) == Message(code, payload)
 
-def command(dev: Target, code: int, payload: ByteString,
+def command(dev: Recipient, code: int, payload: ByteString,
             expect: int = ACK) -> Message:
     data = frame(code, payload)
     if isinstance(dev, bytearray):
@@ -124,10 +124,10 @@ def get_protocol_version(dev: Device) -> int:
 def get_serial_number(dev: Device) -> bytes:
     return retrieve(dev, GET_SERIAL_NUMBER, b'').payload
 
-def serial_sync(dev: Target, microseconds: int) -> None:
+def serial_sync(dev: Recipient, microseconds: int) -> None:
     command(dev, SERIAL_SYNC, struct.pack('<I', microseconds))
 
-def set_baud(dev: Target, baud: int) -> None:
+def set_baud(dev: Recipient, baud: int) -> None:
     command(dev, GET_SET_BAUD, struct.pack('<I', baud), GET_SET_BAUD | 0x80)
 
 def get_baud(dev: Device) -> int:
@@ -146,7 +146,7 @@ def peek(dev: Device, address: int, length: int) -> bytearray:
         result += data.payload[4:] # pyrefly: ignore
     return result
 
-def poke(dev: Target, address: int, data: ByteString, chunk_size: int = 32) -> None:
+def poke(dev: Recipient, address: int, data: ByteString, chunk_size: int = 32) -> None:
     base = 0
     while base < len(data):
         todo = min(chunk_size, len(data) - base)
@@ -162,7 +162,7 @@ def crc(dev: Device, address: int, length: int) -> int:
     assert l == length
     return crc
 
-def flash_erase(dev: Target, address: int) -> None:
+def flash_erase(dev: Recipient, address: int) -> None:
     command(dev, FLASH_ERASE, struct.pack('<I', address))
 
 def lmk05318b_read(dev: Device, address: int, length: int) -> bytes:
@@ -170,13 +170,13 @@ def lmk05318b_read(dev: Device, address: int, length: int) -> bytes:
     assert len(r.payload) == length
     return r.payload
 
-def lmk05318b_write(dev: Target, address: int, *data: ByteString|int) -> None:
+def lmk05318b_write(dev: Recipient, address: int, *data: ByteString|int) -> None:
     def bb(x: ByteString|int) -> ByteString:
         return bytes((x,)) if isinstance(x, int) else x
     total = b''.join(map(bb, data))
     command(dev, LMK05318B_WRITE, struct.pack('>H', address) + total)
 
-def lmk05318b_status(dev: Target) -> None:
+def lmk05318b_status(dev: Recipient) -> None:
     command(dev, LMK05318B_STATUS, b'')
 
 def tmp117_read(dev: Device, address: int, length: int = 1) -> bytes:
@@ -184,5 +184,5 @@ def tmp117_read(dev: Device, address: int, length: int = 1) -> bytes:
     assert len(r.payload) == length
     return r.payload
 
-def tmp117_write(dev: Target, address: int, data: bytes) -> None:
+def tmp117_write(dev: Recipient, address: int, data: bytes) -> None:
     command(dev, TMP117_WRITE, bytes((address,)) + data)

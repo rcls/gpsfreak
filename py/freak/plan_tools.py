@@ -1,21 +1,22 @@
 
-from .plan_constants import BIG_DIVIDE, Hz, MHz, kHz
+from .plan_constants import BIG_DIVIDE, Hz, MHz, REF_FREQ, kHz
 
 from dataclasses import dataclass
 from fractions import Fraction
-from math import gcd
+from math import ceil, gcd
 from typing import Any, Generator, NoReturn, Tuple
 
 class PlanningFailed(RuntimeError):
     pass
 
 @dataclass
-class FrequencyTarget:
+class Target:
     '''Target output frequency list.  Use a frequence of zero for output off.
 
     pll{1|2}_base allows you to constrain the PLL{1|2} frequency to be (a
     multiple of) the specified value.'''
     freqs: list[Fraction]
+    reference: Fraction = REF_FREQ
     pll1_base: Fraction|None = None
     pll2_base: Fraction|None = None
 
@@ -134,17 +135,16 @@ def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     # keep the second stage as high as possible to keep the duty cycle near
     # 50%.
 
-    # Try even second stage.
-    for first in range(512, 11, -2):
-        if ratio % first == 0 and ratio // first <= 1<<23:
-            return first // 2, ratio * 2 // first
+    base = max(6, ceil(Fraction(ratio, 1 << 24)))
+    result = None
+    for first in range(256, base - 1, -1):
+        if ratio % first == 0:
+            second = ratio // first
+            result = first, second
+            if second & 1 == 0:
+                return result           # If its even, prefer it.
 
-    # Try any second stage.
-    for first in range(6, 257):
-        if ratio % first == 0 and ratio // first <= 1<<24:
-            return first, ratio // first
-
-    return None
+    return result                       # We may have an odd stage2.
 
 def str_to_freq(s: str) -> Fraction:
     s = s.lower()

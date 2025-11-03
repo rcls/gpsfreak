@@ -5,13 +5,11 @@ from fractions import Fraction
 from .plan_dpll import DPLLPlan, dpll_plan
 from .plan_pll2 import PLLPlan, pll2_plan, pll2_plan_low
 from .plan_constants import *
-from .plan_tools import FrequencyTarget, \
-    fail, fract_lcm, freq_to_str, str_to_freq
+from .plan_tools import Target, fail, fract_lcm, freq_to_str, str_to_freq
 
 from typing import Generator
 
-def add_pll1(target: FrequencyTarget,
-             plan: PLLPlan, freqs: list[Fraction]) -> None:
+def add_pll1(target: Target, plan: PLLPlan, freqs: list[Fraction]) -> None:
     for i, f in enumerate(freqs):
         if len(plan.dividers) <= i:
             plan.dividers.append((0, 0, 0))
@@ -49,6 +47,7 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
     if base.pll2 == base.pll2_target:
         return base                     # Nothing to improve.
 
+    reference = base.dpll.reference
     best = base
 
     # Back calculate the BAW frequency from the target.  Ratios with smaller
@@ -57,14 +56,14 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
     assert base.multiplier ==  base.pll2 / base.dpll.baw * FPD_DIVIDE
     target_multiplier = base.pll2_target / base.dpll.baw * FPD_DIVIDE
     for multiplier in cont_frac_approx(target_multiplier):
-        target = base.pll2_target / multiplier * FPD_DIVIDE
-        if not BAW_LOW <= target <= BAW_HIGH:
+        baw_target = base.pll2_target / multiplier * FPD_DIVIDE
+        if not BAW_LOW <= baw_target <= BAW_HIGH:
             continue
         for pre_div in range(2, 17 + 1):
-            fb_div = target / REF_FREQ / 2 / pre_div
+            fb_div = baw_target / reference / 2 / pre_div
             fb_div = fb_div.limit_denominator((1 << 40) - 1)
-            baw = REF_FREQ * 2 * pre_div * fb_div
-            dpll = DPLLPlan(baw=baw, baw_target=baw,
+            baw = reference * 2 * pre_div * fb_div
+            dpll = DPLLPlan(baw=baw, baw_target=baw, reference=reference,
                             fb_prediv = pre_div, fb_div=fb_div)
             pll2 = baw / FPD_DIVIDE * multiplier
             if not PLL2_LOW <= pll2 <= PLL2_HIGH:
@@ -78,7 +77,7 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
 
     return best
 
-def plan(target: FrequencyTarget) -> PLLPlan:
+def plan(target: Target) -> PLLPlan:
     # Do the DPLL planning first.
     dpll = dpll_plan(target)
     # First pull out the divisors of 2.5G...
@@ -131,7 +130,7 @@ def plan(target: FrequencyTarget) -> PLLPlan:
     return plan
 
 def test_32k() -> None:
-    target = FrequencyTarget(
+    target = Target(
         freqs = [ZERO] * 5 + [str_to_freq('32768.298Hz')])
     assert float(target.freqs[5] / Hz) == 32768.298
     p = plan(target)
@@ -141,12 +140,12 @@ def test_32k() -> None:
     assert p.dpll.baw == p.dpll.baw_target
     assert BAW_LOW <= p.dpll.baw <= BAW_HIGH
     # Work without assuming our units...
-    assert REF_FREQ == 8844582 * Hz
+    assert p.dpll.reference == 8844582 * Hz
     assert 8844582 * 2 * p.dpll.fb_prediv * p.dpll.fb_div / (
         p.dividers[5][1] * p.dividers[5][2]) == Fraction('32768.298')
 
 def test_32k_11M() -> None:
-    target = FrequencyTarget(
+    target = Target(
         [11 * MHz] + [ZERO] * 4 + [3276829 * Hz / 100])
     p = plan(target)
     # One should be exact....
@@ -157,7 +156,7 @@ def test_32k_11M() -> None:
     assert abs(p.freq(5) - target.freqs[5]) < nHz
 
 def test_11M_33M() -> None:
-    target = FrequencyTarget([11 * MHz, 33333 * kHz])
+    target = Target([11 * MHz, 33333 * kHz])
     p = plan(target)
     assert p.freq(0) == target.freqs[0]
     assert p.freq(1) == target.freqs[1]

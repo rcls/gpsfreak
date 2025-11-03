@@ -4,10 +4,9 @@ from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 
 from .freak_util import Device
 from .lmk05318b import MaskedBytes, Register
-from .plan_constants import REF_FREQ
 from .plan_pll2 import PLLPlan
-from .plan_tools import FrequencyTarget, \
-    str_to_freq, freq_to_str, fraction_to_str
+from .plan_constants import REF_FREQ
+from .plan_tools import Target, str_to_freq, freq_to_str, fraction_to_str
 
 import argparse
 
@@ -95,14 +94,15 @@ def do_set(dev: Device, key_values: list[Tuple[Register, int]]) -> None:
         data.insert(r, v)
     masked_write(dev, data)
 
-def make_freq_target(args: argparse.Namespace, raw: bool) -> FrequencyTarget:
+def make_freq_target(args: argparse.Namespace, raw: bool) -> Target:
+    reference = args.reference if args.reference else REF_FREQ
     freqs = args.FREQ
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     result = [Fraction(0)] * max(6, len(args.FREQ))
     # FIXME - this just silently ignores extras.
     for (i, _, _), f in zip(channels, freqs):
         result[i] = f
-    return FrequencyTarget(freqs=result, pll2_base=args.pll2)
+    return Target(freqs=result, pll2_base=args.pll2, reference=reference)
 
 def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data = MaskedBytes()
@@ -199,7 +199,7 @@ def do_freq(dev: Device, args: argparse.Namespace, raw: bool) -> None:
     target = make_freq_target(args, raw)
     plan = lmk05318b_plan.plan(target)
     data = freq_make_data(plan)
-    report_freq(data, raw, False)
+    report_freq(data, plan.dpll.reference, raw, False)
 
     # Software reset.
     data.RESET_SW = 1
@@ -336,7 +336,7 @@ def report_driveout(dev: Device) -> None:
         print(f'{name}:{pdown}', drive_description(sel, mode1, mode2),
               '+', drive_description(selb, mode1b, mode2b))
 
-def report_live_freq(dev: Device, raw: bool) -> None:
+def report_live_freq(dev: Device, reference: Fraction, raw: bool) -> None:
     # FIXME - retrieve the reference frequency!
     d = MaskedBytes()
     # For now, pull everything...
@@ -345,9 +345,10 @@ def report_live_freq(dev: Device, raw: bool) -> None:
     ranges = d.ranges(max_block = 30)
     get_ranges(dev, d, ranges)
 
-    report_freq(d, raw, True)
+    report_freq(d, reference, raw, True)
 
-def report_freq(d: MaskedBytes, raw: bool, report_pd: bool) -> None:
+def report_freq(d: MaskedBytes, reference: Fraction, \
+                raw: bool, report_pd: bool) -> None:
     pll2_rdiv = (d.PLL2_RDIV_PRE + 3) * (d.PLL2_RDIV_SEC + 1)
     dpll_fb_pre_div = d.DPLL_REF_FB_PRE_DIV + 2
 
@@ -357,7 +358,7 @@ def report_freq(d: MaskedBytes, raw: bool, report_pd: bool) -> None:
         dpll_fb_div = Fraction(0)
 
     if d.DPLL_PRIREF_RDIV:
-        baw_freq = REF_FREQ / d.DPLL_PRIREF_RDIV * 2 * dpll_fb_pre_div \
+        baw_freq = reference / d.DPLL_PRIREF_RDIV * 2 * dpll_fb_pre_div \
             * dpll_fb_div
     else:
         baw_freq = Fraction(0)
@@ -402,7 +403,7 @@ def report_freq(d: MaskedBytes, raw: bool, report_pd: bool) -> None:
               *dividers)
 
     print()
-    print(f'BAW         {freq_to_str(baw_freq)} = {freq_to_str(REF_FREQ)}',
+    print(f'BAW         {freq_to_str(baw_freq)} = {freq_to_str(reference)}',
           f'/ {d.DPLL_PRIREF_RDIV} * 2 * {dpll_fb_pre_div} *',
           fraction_to_str(dpll_fb_div))
     if report_pd or not d.PLL2_PDN:
@@ -461,6 +462,9 @@ def add_freq_commands(subp: Any, short: str, long: str) -> None:
                        help=f'Frequencies for each {short}')
         p.add_argument('-2', '--pll2', type=str_to_freq,
                        help=f'Forced divisor of PLL2 frequency')
+        p.add_argument('--reference', '-r', type=str_to_freq,
+                       default=REF_FREQ,
+                       help=f'Reference input frequency to LMK05318b')
 
 def add_to_argparse(argp: argparse.ArgumentParser,
                     dest: str = 'command', metavar: str = 'COMMAND') -> None:
@@ -532,13 +536,13 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         if len(args.FREQ) != 0:
             do_freq(device, args, True)
         else:
-            report_live_freq(device, True)
+            report_live_freq(device, REF_FREQ, True)
 
     elif command == 'plan':
         target = make_freq_target(args, True)
         plan = lmk05318b_plan.plan(target)
         data = freq_make_data(plan)
-        report_freq(data, True, False)
+        report_freq(data, plan.dpll.reference, True, False)
 
     elif command == 'drive':
         if args.DRIVE or args.defaults:

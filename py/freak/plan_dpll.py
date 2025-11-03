@@ -21,13 +21,13 @@ class DPLLPlan:
     baw_target: Fraction = BAW_FREQ
     # Input reference frequency.
     reference: Fraction = REF_FREQ
+    # Reference divider.
+    ref_div: int = 1
     # Variable predivider 2 to 17.  This is actually post the main divider.
     fb_prediv: int = 2
     # The main ΣΔ divider.  As well as the predivider, there is a fixed divde
     # by two.
     fb_div: Fraction = BAW_FREQ / REF_FREQ / 2 / 2
-    def __post_init__(self) -> None:
-        assert self.fb_div.denominator < 1 << 40
 
     def __lt__(self, b: DPLLPlan | None) -> bool:
         '''Less is better.  I.e., return True if self is better than b.'''
@@ -64,7 +64,9 @@ class DPLLPlan:
         return self.baw / FPD_DIVIDE
 
     def validate(self) -> None:
-        assert self.baw == self.reference * 2 * self.fb_prediv * self.fb_div
+        assert self.fb_div.denominator < 1 << 40
+        assert self.baw == \
+            self.reference / self.ref_div * 2 * self.fb_prediv * self.fb_div
         assert abs(self.baw - self.baw_target) < 1 * Hz
 
 # Check that our defaults match the TI calculated values...

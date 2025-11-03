@@ -79,6 +79,7 @@ class PLLPlan:
 
     def validate(self) -> None:
         self.dpll.validate()
+        assert self.multiplier.denominator <= 1 << 24
         assert self.pll2 == self.multiplier * self.dpll.baw / FPD_DIVIDE
 
     def error_ratio(self) -> float:
@@ -353,3 +354,11 @@ def pll2_plan(target: Target, dpll: DPLLPlan,
         fail(f'PLL2 planning failed, LCM = {freq_to_str(pll2_lcm)}')
         assert False # @!#$@!#$ pyrefly.
     return best
+
+def test_round():
+    f = Fraction('46.60376888888889')
+    target = Target(freqs = [f])
+    plan = pll2_plan(target, DPLLPlan(), [f], f)
+    from .lmk05318b_util import report_plan
+    report_plan(target, plan, True)
+    assert plan.multiplier.denominator <= 1 << 24

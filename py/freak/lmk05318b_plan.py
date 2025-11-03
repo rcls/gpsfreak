@@ -55,7 +55,8 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
     # continued fraction expansion of the multiplier.
     assert base.multiplier ==  base.pll2 / base.dpll.baw * FPD_DIVIDE
     target_multiplier = base.pll2_target / base.dpll.baw * FPD_DIVIDE
-    for multiplier in cont_frac_approx(target_multiplier):
+    for m in cont_frac_approx(target_multiplier):
+        multiplier = m.limit_denominator(1 << 24)
         baw_target = base.pll2_target / multiplier * FPD_DIVIDE
         if not BAW_LOW <= baw_target <= BAW_HIGH:
             continue
@@ -125,8 +126,10 @@ def plan(target: Target) -> PLLPlan:
     if any(pll1):
         add_pll1(target, plan, pll1)
     else:
+        plan.validate()
         plan = rejig_pll1(plan)
 
+    plan.validate()
     return plan
 
 def test_32k() -> None:
@@ -160,3 +163,11 @@ def test_11M_33M() -> None:
     p = plan(target)
     assert p.freq(0) == target.freqs[0]
     assert p.freq(1) == target.freqs[1]
+
+def test_round():
+    f = Fraction('46.60376888888889')
+    target = Target(freqs = [f])
+    p = plan(target)
+    from .lmk05318b_util import report_plan
+    report_plan(target, p, True)
+    assert p.multiplier.denominator <= 1 << 24

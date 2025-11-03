@@ -14,7 +14,6 @@ import freak.message as message
 import freak.ublox_util as ublox_util
 
 from freak.freak_util import Device
-from freak.plan_constants import REF_FREQ
 from typing import Tuple
 
 import argparse, struct, uuid
@@ -110,8 +109,9 @@ if args.command == 'info':
 elif args.command == 'plan':
     target = lmk05318b_util.make_freq_target(args, False)
     plan = lmk05318b_plan.plan(target)
+    lmk05318b_util.report_plan(target, plan, False)
+
     data = lmk05318b_util.freq_make_data(plan)
-    lmk05318b_util.report_freq(data, plan.dpll.reference, False, False)
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:

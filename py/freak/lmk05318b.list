@@ -63,8 +63,14 @@ INT_AND_OR          : R/W  21.1:1
 INT_EN              : R/W  21.0:1 = 1
 STAT1_POL           : R/W  22.1:1
 STAT0_POL           : R/W  22.0:1
-UNKNOWN23           : R/W  23:8 = 0x55
-UNKNOWN24           : R/W  24:8 = 0x55
+OUT3_MUTE_LVL       : R/W  23.6:2 = 1
+OUT2_MUTE_LVL       : R/W  23.4:2 = 1
+OUT1_MUTE_LVL       : R/W  23.2:2 = 1
+OUT0_MUTE_LVL       : R/W  23.0:2 = 1
+OUT7_MUTE_LVL       : R/W  24.6:2 = 1
+OUT6_MUTE_LVL       : R/W  24.4:2 = 1
+OUT5_MUTE_LVL       : R/W  24.2:2 = 1
+OUT4_MUTE_LVL       : R/W  24.0:2 = 1
 CH7_MUTE            : R/W  25.7:1
 CH6_MUTE            : R/W  25.6:1
 CH5_MUTE            : R/W  25.5:1
@@ -83,7 +89,8 @@ MUTE_APLL1_LOCK     : R/W  29.0:1 = 1
 UNKNOWN30           : R/W  30:8 = 0x40
 UNKNOWN32           : R/W  32:8 = 0x44
 UNKNOWN35           : R/W  35:8
-UNKNOWN36           : R/W  36:8 = 0x03
+GPIO_STAT1_OUT      : R/W  36.1:1
+GPIO_STAT0_OUT      : R/W  36.0:1
 UNKNOWN37           : R/W  37:8
 UNKNOWN38           : R/W  38:8
 APLL1_DEN_MODE      : R/W  39.0:1
@@ -91,15 +98,17 @@ SECREF_DC_MODE      : R/W  40.3:1
 PRIREF_DC_MODE      : R/W  40.2:1
 APLL2_DEN_MODE      : R/W  40.0:1 = 1
 UNKNOWN41           : R/W  41:8
-UNKNOWN42           : R/W  42:8 = 0x11
+OSCIN_DBLR_EN       : R/W  42.4:1
+XO_TYPE             : R/W  43.3:4
 XO_DRV_APLL2_EN     : R/W  43.0:1
-UNKNOWN44           : R/W  44:8
+OSCIN_RDIV          : R/W  44.0:5
 SECREF_BUF_MODE     : R/W  45.1:1 = 1
 PRIREF_BUF_MODE     : R/W  45.0:1 = 1
 UNKNOWN46           : R/W  46:8 = 0x18
 PLL2_RCLK_SEL       : R/W  47.7:1
 STAT0_SEL           : R/W  48.0:7 = 0x50
 STAT1_SEL           : R/W  49.0:7 = 0x4a
+GPIO_FDEV_EN        : R/W  50.7:1
 CH7_PD              : R/W  50.5:1
 CH6_PD              : R/W  50.4:1
 CH5_PD              : R/W  50.3:1
@@ -143,7 +152,7 @@ OUT7_MODE1          : R/W  63.2:2 = 2
 OUT7_MODE2          : R/W  63.0:2
 OUT7_STG2_DIV       : R/W  64:24 (3)
 OUT7_DIV            : R/W  67:8 = 0x18
-UNKNOWN68           : R/W  68:8 = 0x08
+PLL1_CP_BAW         : R/W  68.0:4 = 8
 UNKNOWN69           : R/W  69:8
 PLL2_P2_SYNC_EN     : R/W  70.2:1
 PLL2_P1_SYNC_EN     : R/W  70.1:1
@@ -188,7 +197,8 @@ PLL2_CLSDWAIT       : R/W 105.3:0
 PLL1_NDLYDIV        : R/W 106:12 (2) = 0x064
 PLL1_NDIV           : R/W 108:12 (2) = 0x034
 PLL1_NUM            : R/W 110:40 (5) = 0x140008bcbd
-UNKNOWN115          : R/W 115:8 = 0x03
+PLL1_DTHRMODE       : R/W 115.3:2
+PLL1_ORDER          : R/W 115.0:3 = 3
 PLL1_FDEV_EN        : R/W 116.1:1
 PLL1_MODE           : R/W 116.0:1 = 1
 PLL1_FDEV           : R/W 117:38 (5)
@@ -233,7 +243,7 @@ NVMDAT              : R   161:8 = 0x32
 RAMDAT              : R/W 162:8
 NVMUNLK             : R/W 164:8
 UNKNOWN165          : R/W 165:8
-UNKNOWN167          : R/W 167:8 = 0x01
+DPLL_REFSEL_STAT    : R   167.0:2
 DPLL_PHASE_LOCK     : R   168.2:1
 DPLL_LOCK           : R   168.1:1
 UNKNOWN178          : R/W 178:8
@@ -284,7 +294,11 @@ SECREF_PH_VALID_THR : R/W 244.0:6
 DPLL_SECREF_AUTO_PRTY: R/W 249.4:2 = 2
 DPLL_PRIREF_AUTO_PRTY: R/W 249.0:2 = 1
 UNKNOWN250          : R/W 250:8
-UNKNOWN251          : R/W 251:8 = 0x03
+DPLL_REF_MAN_SEL    : R/W 251.5:1
+DPLL_REF_MAN_REG_SEL: R/W 251.4:1
+DPLL_SWITCH_MODE    : R/W 251.0:2
+DPLL_REF_SYNC_OUT7_EN: R/W 252.7:1
+DPLL_REF_SYNC_OUT7_NDIV_RST_DIV: R/W 252.6:1
 DPLL_FASTLOCK_ALWAYS: R/W 252.4:1
 DPLL_HLDOVR_MODE    : R/W 252.2:1 = 1
 DPLL_LOOP_EN        : R/W 252.0:1 = 1
@@ -351,15 +365,13 @@ DPLL_REF_UNLOCKDET_VCO_CNTSTRT_29_24: R/W 336.0:6
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_23_16: R/W 337:8 = 0x98
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_15_8: R/W 338:8 = 0x96
 PLL1_24B_NUM_MSB    : R/W 339:8
-UNKNOWN340          : R/W 340:8
-UNKNOWN341          : R/W 341:8
-UNKNOWN342          : R/W 342:8
-UNKNOWN343          : R/W 343:8
-UNKNOWN344          : R/W 344:8
+DPLL_REF_SYNC_PHASE_OFFSET: R/W 340:40 (5)
 UNKNOWN345          : R/W 345:8
+DPLL_FDEV_EXTRA     : R/W 346.1:1
 DPLL_FDEV_EN        : R/W 346.0:1
 DPLL_FDEV           : R/W 347:38 (5)
 DPLL_FDEV_REG_UPDATE: R/W 352.0:1
-UNKNOWN357          : R/W 357:8 = 0x08
-UNKNOWN367          : R/W 367:8
-UNKNOWN411          : R/W 411:8 = 0x0c
+PLL1_VM_INSIDE      : R   357.5:1
+PLL2_VM_INSIDE      : R   367.5:1
+SECREF_VALSTAT      : R   411.3:1
+PRIREF_VALSTAT      : R   411.2:1

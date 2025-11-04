@@ -34,10 +34,15 @@ class DPLLPlan:
         if b is None:
             return True
         # Prefer exact.
-        a_error = self.baw - self.baw_target
-        b_error = b.baw - self.baw_target
+        a_error = abs(self.baw - self.baw_target)
+        b_error = abs(b.baw - self.baw_target)
         if a_error != b_error:
             return a_error < b_error
+        # Prefer closer to nominal BAW frequency
+        a_delta = abs(self.baw - BAW_FREQ)
+        b_delta = abs(b.baw - BAW_FREQ)
+        if a_delta != b_delta:
+            return a_delta < b_delta
         # Prefer smaller predivs.
         if self.fb_prediv != b.fb_prediv:
             return self.fb_prediv < b.fb_prediv
@@ -272,11 +277,12 @@ def test_exact():
     assert plan.baw == f
 
 def test_inexact():
-    f = 2500 * MHz + 25000 * Hz + Hz/37217
+    f = 2500 * MHz + 25000 * Hz + Hz/372179
     plan = baw_plan_for_freq(Target(freqs = []), f)
+    print(plan)
+    print(float(plan.baw - plan.baw_target))
+    assert plan.baw_target == f
     assert 0 < plan.fb_prediv.denominator <= 1<<40
     assert plan.baw == REF_FREQ * 2 * plan.fb_div * plan.fb_prediv
     assert plan.baw != plan.baw_target
-    print(plan)
-    print(float(plan.baw - plan.baw_target))
     assert abs(plan.baw - plan.baw_target) < 1e-15 * Hz

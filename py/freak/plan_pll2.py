@@ -55,12 +55,10 @@ class PLLPlan:
         # Prefer smaller errors.
         if a_error != b_error:
             return a_error < b_error
-        # Prefer an even stage2 divider (or one): this gives exactly 50/50
-        # duty cycle.  FIXME - do evens on all dividers...
-        a_even = self.stage2_even()
-        b_even = b.stage2_even()
-        if a_even != b_even:
-            return a_even
+
+        # FIXME - Prefer even final output dividers. This gives exactly 50/50
+        # duty cycle.
+
         # Prefer power-of-two (fixed) denomoninator.
         a_fixed = self.fixed_denom()
         b_fixed = b.fixed_denom()
@@ -75,7 +73,7 @@ class PLLPlan:
         if self.pll2 != b.pll2:
             return self.pll2 < b.pll2
 
-        return False
+        return self.dpll < b.dpll
 
     def validate(self) -> None:
         self.dpll.validate()
@@ -92,12 +90,6 @@ class PLLPlan:
 
     def fixed_denom(self) -> bool:
         return (1 << 24) % self.multiplier.denominator == 0
-
-    def stage2_even(self) -> bool:
-        if BIG_DIVIDE > len(self.dividers):
-            return True
-        _, _, stage2 = self.dividers[BIG_DIVIDE]
-        return stage2 == 1 or stage2 % 2 == 0
 
 def postdiv_mask(div: int) -> int:
     assert 2 <= div <= 7

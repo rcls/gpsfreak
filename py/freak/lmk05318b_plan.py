@@ -28,17 +28,6 @@ def cont_frac_approx(f: Fraction) -> Generator[Fraction]:
         for inner in cont_frac_approx(1 / (f - intf)):
             yield intf + 1 / inner
 
-def test_cont_frac() -> None:
-    assert list(cont_frac_approx(Fraction(5,3))) == [1, 2, Fraction(5,3)]
-    import math
-    expect: list[Fraction] = []
-    n, d = 1, 1
-    for _ in range(21):
-        expect.append(Fraction(n, d))
-        n, d = n + d * 2, n + d
-    approx = list(cont_frac_approx(Fraction(math.sqrt(2))))
-    assert expect == approx[:len(expect)], f'{expect}\n\n{approx}'
-
 def rejig_pll1(base: PLLPlan) -> PLLPlan:
     '''Attempt to make PLL2 more accurate, by tweaking the DPLL frequency.
 
@@ -171,3 +160,14 @@ def test_round():
     from .lmk05318b_util import report_plan
     report_plan(target, p, True)
     assert p.multiplier.denominator <= 1 << 24
+
+def test_cont_frac() -> None:
+    assert list(cont_frac_approx(Fraction(5,3))) == [1, 2, Fraction(5,3)]
+    import math
+    expect: list[Fraction] = []
+    n, d = 1, 1
+    for _ in range(21):
+        expect.append(Fraction(n, d))
+        n, d = n + d * 2, n + d
+    approx = list(cont_frac_approx(Fraction(math.sqrt(2))))
+    assert expect == approx[:len(expect)], f'{expect}\n\n{approx}'

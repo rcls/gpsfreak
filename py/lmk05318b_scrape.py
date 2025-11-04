@@ -144,11 +144,66 @@ extra_field(Field('PLL2_DTHRMODE', 4, 3, 'R/W', 0, 139))
 extra_field(Field('PLL2_CLSDWAIT', 2, 3, 'R/W', 0, 105))
 
 # From the datasheet, MEMADDR sounds like a 13 bit register, but that doesn't
-# make sense because only 8 bits are needed?
+# make sense because only 8 bits are needed?  TICS/Pro does actually use it,
+# but I've only seen values of zero.
 # extra_field(Field('MEMADR_12:8', 4, 0, 'R/W', 0, 159))
 
 # From the datasheet...
 extra_field(Field('DPLL_FDEV_REG_UPDATE', 0, 0, 'R/W', 0, 0x160))
+
+# TICS/Pro XO tab.
+extra_field(Field('XO_TYPE', 6, 3, 'R/W', 0, 43))
+
+# TICS/Pro reference tab.
+extra_field(Field('DPLL_SWITCH_MODE', 1, 0, 'R/W', 0, 251))
+extra_field(Field('DPLL_REF_MAN_REG_SEL', 4, 4, 'R/W', 0, 251))
+extra_field(Field('DPLL_REF_MAN_SEL', 5, 5, 'R/W', 0, 251))
+
+# TICS/Pro APLL1 tab.
+extra_field(Field('PLL1_CP_BAW', 3, 0, 'R/W', 8, 68))
+extra_field(Field('PLL1_DTHRMODE', 4, 3, 'R/W', 0, 115))
+extra_field(Field('PLL1_ORDER', 2, 0, 'R/W', 3, 115))
+
+# TICS/Pro output tab.
+extra_field(Field('OUT0_MUTE_LVL', 1, 0, 'R/W', 1, 23))
+extra_field(Field('OUT1_MUTE_LVL', 3, 2, 'R/W', 1, 23))
+extra_field(Field('OUT2_MUTE_LVL', 5, 4, 'R/W', 1, 23))
+extra_field(Field('OUT3_MUTE_LVL', 7, 6, 'R/W', 1, 23))
+extra_field(Field('OUT4_MUTE_LVL', 1, 0, 'R/W', 1, 24))
+extra_field(Field('OUT5_MUTE_LVL', 3, 2, 'R/W', 1, 24))
+extra_field(Field('OUT6_MUTE_LVL', 5, 4, 'R/W', 1, 24))
+extra_field(Field('OUT7_MUTE_LVL', 7, 6, 'R/W', 1, 24))
+
+# FDEV_EN is 0x15a bit 0.  TICS/Pro also uses bit 1.
+# INC/DEC by pins: R346 = 1
+# INC/DEC by registers: R346 = 3
+# INC/DEC by DPLL numerator (absolute): R346 = 2
+# I'm not sure what the extra bit acheives?
+extra_field(Field('DPLL_FDEV_EXTRA', 1, 1, 'R/W', 0, 0x15a))
+
+# More from TICS/Pro DCO & SYNC tab.
+extra_field(Field('DPLL_REF_SYNC_OUT7_EN', 7, 7, 'R/W', 0, 252))
+extra_field(Field('DPLL_REF_SYNC_OUT7_NDIV_RST_DIV', 6, 6, 'R/W', 0, 252))
+extra_field(Field('DPLL_REF_SYNC_PHASE_OFFSET_39:32', 7, 0, 'R/W', 0, 340))
+extra_field(Field('DPLL_REF_SYNC_PHASE_OFFSET_31:24', 7, 0, 'R/W', 0, 341))
+extra_field(Field('DPLL_REF_SYNC_PHASE_OFFSET_23:16', 7, 0, 'R/W', 0, 342))
+extra_field(Field('DPLL_REF_SYNC_PHASE_OFFSET_15:8', 7, 0, 'R/W', 0, 343))
+extra_field(Field('DPLL_REF_SYNC_PHASE_OFFSET', 7, 0, 'R/W', 0, 344))
+
+extra_field(Field('GPIO_FDEV_EN', 7, 7, 'R/W', 0, 50))
+
+# TICS/Pro status tab.
+extra_field(Field('GPIO_STAT0_OUT', 0, 0, 'R/W', 0, 36))
+extra_field(Field('GPIO_STAT1_OUT', 1, 1, 'R/W', 0, 36))
+extra_field(Field('PLL1_VM_INSIDE', 5, 5, 'R', 0, 357))
+extra_field(Field('PLL2_VM_INSIDE', 5, 5, 'R', 0, 367))
+extra_field(Field('PRIREF_VALSTAT', 2, 2, 'R', 0, 411))
+extra_field(Field('SECREF_VALSTAT', 3, 3, 'R', 0, 411))
+extra_field(Field('DPLL_REFSEL_STAT', 1, 0, 'R', 0, 167))
+
+# TICS/Pro APLL1 tab.
+extra_field(Field('OSCIN_DBLR_EN', 4, 4, 'R/W', 0, 42))
+extra_field(Field('OSCIN_RDIV', 4, 0, 'R/W', 0, 44))
 
 # Various undocumented fields are set in the TICS file.  Some are observed to
 # change with the configuration, and influence outputs.

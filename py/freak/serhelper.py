@@ -16,7 +16,6 @@ We only support raw mode on Posix ttys.  The historical Posix baggage for
 teletype support is ignored.'''
 
 import io
-import termios
 
 class Serial(io.FileIO):
     def __init__(self, path: str, speed: int|None = None):
@@ -42,11 +41,13 @@ def writeall(f: io.IOBase, b: bytes) -> int:
 
 def flushread(f: io.IOBase) -> None:
     if f.isatty():
+        import termios
         termios.tcflush(f.fileno(), termios.TCIFLUSH)
 
 def makeraw(f: io.RawIOBase, speed: int|None) -> None:
     if not f.isatty():
         return
+    import termios
     from termios import (
         BRKINT, CS8, CSIZE, ECHO, ECHONL, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR,
         INLCR, ISIG, ISTRIP, IXON, OPOST, PARENB, PARMRK, VMIN, VTIME)

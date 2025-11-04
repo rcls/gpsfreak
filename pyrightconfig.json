@@ -1,4 +1,4 @@
 {
     "pythonVersion": "3.10",
-    "strict": ["py/**"],
+    "strict": ["**"],
 }

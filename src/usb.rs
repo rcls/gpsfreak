@@ -31,7 +31,7 @@ use crate::vcell::{UCell, VCell};
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
-macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false  {dbgln!($($tt)*)}};}
+macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!main_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}

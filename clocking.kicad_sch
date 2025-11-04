@@ -2719,10 +2719,10 @@
 		)
 		(uuid "c2cf0752-8f80-4ac6-84ca-a46b4bbdf659")
 	)
-	(text_box "The variant with filter cap appears to be vapour-ware."
+	(text_box "The variant with external filter cap appears to be vapour-ware."
 		(exclude_from_sim no)
-		(at 212.1153 31.8079 0)
-		(size 30.4547 5.0221)
+		(at 212.1153 43.2379 0)
+		(size 19.0247 10.1021)
 		(margins 0.9525 0.9525 0.9525 0.9525)
 		(stroke
 			(width 0)
@@ -4323,7 +4323,7 @@
 		)
 		(uuid "3e6281b0-aa76-4aee-b4b0-a2744dd9f215")
 	)
-	(label "VDDO_PLL2"
+	(label "VDD_PLL2"
 		(at 218.44 66.04 270)
 		(effects
 			(font
@@ -4353,7 +4353,7 @@
 		)
 		(uuid "49379cb2-ac8a-4e57-be11-a915d4ef0074")
 	)
-	(label "VDDO_XO"
+	(label "VDD_XO"
 		(at 91.44 110.49 180)
 		(effects
 			(font
@@ -4403,7 +4403,7 @@
 		)
 		(uuid "84d6099c-4ab6-4ef9-8ce7-c91697bde685")
 	)
-	(label "VDDO_XO"
+	(label "VDD_XO"
 		(at 238.76 97.79 180)
 		(effects
 			(font
@@ -4483,7 +4483,7 @@
 		)
 		(uuid "c5c564db-6fc8-4aa0-9e0f-0b7b6140fc4f")
 	)
-	(label "VDDO_PLL2"
+	(label "VDD_PLL2"
 		(at 120.65 93.98 180)
 		(effects
 			(font

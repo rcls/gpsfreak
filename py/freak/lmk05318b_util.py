@@ -51,7 +51,8 @@ def do_get(dev: Device, registers: list[Register]) -> None:
     ranges = data.ranges(max_block = 32)
     get_ranges(dev, data, ranges)
     for r in registers:
-        print(r, '=', data.extract(r), sep='')
+        value = data.extract(r)
+        print(f'{r}={value} ({value:#x})')
 
 def do_dump(dev: Device) -> None:
     # Build the list of registers, skipping reserved/unknown registers,

@@ -352,6 +352,9 @@ def report_live_freq(dev: Device, reference: Fraction, raw: bool) -> None:
 
     power_down = data.data[Register.get('CH0_1_PD').base_address]
     report_plan(target, plan, raw, power_down)
+    if data.PLL1_FDEV_EN or data.DPLL_FDEV_EN:
+        print()
+        print('NOTE: FDEV is enabled. Frequencies may differ from above by up to ±100ppm')
 
 def reverse_plan(d: MaskedBytes, reference: Fraction) -> Tuple[Target, PLLPlan]:
     pll2_rdiv = (d.PLL2_RDIV_PRE + 3) * (d.PLL2_RDIV_SEC + 1)

@@ -64,6 +64,8 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     valget = subp.add_parser('get', description='Get configuration values.',
                              help='Get configuration values.')
     valget.add_argument('KEY', nargs='+', type=int_key, help='KEYs')
+    valget.add_argument('--sort', action='store_true',
+                        help='Sort by key number')
     valget.add_argument('-l', '--layer', default=0, type=int,
                         help='Configuration layer to retrieve.')
 
@@ -130,13 +132,17 @@ def fmt_cfg_value(cfg: UBloxCfg, value: Any) -> str:
     else:
         return f'{value}'
 
-def do_get(reader: UBloxReader, layer: int, KEYS: list[int]) -> None:
-    for key, value in get_config(reader, 0, KEYS):
+def do_get(reader: UBloxReader, layer: int, KEYS: list[int],
+           sort: bool) -> None:
+    kv = get_config(reader, layer, KEYS)
+    if sort:
+        kv.sort(key=lambda x: x[0].compare_key())
+    for key, value in kv:
         print(key, '=', fmt_cfg_value(key, value))
 
 def do_dump(reader: UBloxReader, layer: int) -> None:
     items = get_config(reader, layer, [0xffffffff])
-    items.sort(key=lambda x: x[0].key & 0x0fffffff)
+    items.sort(key=lambda x: x[0].compare_key())
     for cfg, value in items:
         print(cfg, fmt_cfg_value(cfg, value))
 
@@ -281,7 +287,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         do_set(device.get_ublox(), args.KV)
 
     elif command == 'get':
-        do_get(device.get_ublox(), args.layer, args.KEY)
+        do_get(device.get_ublox(), args.layer, args.KEY, args.sort)
 
     elif command == 'dump':
         do_dump(device.get_ublox(), args.layer)

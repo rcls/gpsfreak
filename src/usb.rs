@@ -101,12 +101,13 @@ pub fn init() {
     crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit());
     crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit().CEN().set_bit());
 
-    usb.CNTR.modify(|_,w| w.PDWN().clear_bit());
+    usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().set_bit());
     // Wait t_startup (1µs).
     for _ in 0 .. crate::cpu::CPU_FREQ / 2000000 {
         nothing();
     }
     usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().clear_bit());
+    usb.BCDR.write(|w| w.DPPU_DPD().set_bit());
 
     // Clear any spurious interrupts.
     usb.ISTR.write(|w| w);
@@ -489,7 +490,6 @@ fn usb_initialize(cs: &mut ControlState) {
         |w|w.PDWN().clear_bit().USBRST().clear_bit()
             .RST_DCONM().set_bit().CTRM().set_bit().SOFM().set_bit());
 
-    usb.BCDR.write(|w| w.DPPU_DPD().set_bit().DCDEN().set_bit());
     usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(0));
 
     bd_control().rx.write(chep_block::<64>(CTRL_RX_OFFSET));

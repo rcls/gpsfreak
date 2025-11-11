@@ -9,14 +9,21 @@ use crate::cpu::interrupt;
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 use stm32h503::Interrupt::EXTI0 as INTERRUPT;
+use stm32h503::Interrupt::TIM6 as TIM_INTERRUPT;
 use interrupt::PRIO_STATUS as PRIORITY;
 
 /// I²C address of the LMK05318(B).
 pub const LMK05318: u8 = 0xc8;
 
+pub type TIM = stm32h503::TIM6;
+
 pub fn init() {
-    let exti  = unsafe {&*stm32h503::EXTI ::ptr()};
-    let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
+    let exti  = unsafe {&*stm32h503::EXTI ::PTR};
+    let gpiob = unsafe {&*stm32h503::GPIOB::PTR};
+    let rcc   = unsafe {&*stm32h503::RCC  ::PTR};
+    let tim = unsafe {&*TIM::PTR};
+
+    rcc.APB1LENR.modify(|_,w| w.TIM6EN().set_bit());
 
     // PB0 is STATUS1 interrupt pin from LMK05318b.  Set it to an input.
     gpiob.MODER.modify(|_,w| w.MODE0().B_0x0());
@@ -24,9 +31,19 @@ pub fn init() {
     exti.RTSR1.modify(|_,w| w.RT0().set_bit());
     exti.EXTICR1.modify(|_,w| w.EXTI0().B_0x1());
     exti.IMR1.modify(|_,w| w.IM0().set_bit()); // This should be default!
+
+    // Timer for rate limiting.
+    const PRESCALE: u32 = crate::cpu::CPU_FREQ / 10000 - 1; // 10kHz
+    const {assert!(PRESCALE >= 1 && PRESCALE < 65536)};
+    tim.PSC.write(|w| w.PSC().bits(PRESCALE as u16));
+    tim.ARR.write(|w| w.ARR().bits(100 - 1)); // 100Hz.
+    tim.CNT.write(|w| w.CNT().bits(100 - 1));
+    tim.DIER.write(|w| w.UIE().set_bit());
+
     // This needs to run at the same priority as the command code, because both
     // access I²C.
     interrupt::enable_priority(INTERRUPT, PRIORITY);
+    interrupt::enable_priority(TIM_INTERRUPT, PRIORITY);
     // Software trigger the EXTI0 interrupt to kick things off.  TODO - could
     // just call it!
     let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
@@ -37,10 +54,13 @@ pub fn update_status() {
     dbgln!("exti6_isr");
     let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let exti  = unsafe {&*stm32h503::EXTI ::ptr()};
+    let tim   = unsafe {&*TIM::PTR};
+
     dbgln!("PB0 is {}", gpiob.IDR().read().ID0().bit());
     dbgln!("pending = {:#06x}", exti.RPR1.read().bits());
     // Clear the pending bit.
     exti.RPR1.write(|w| w.RPIF0().set_bit());
+    tim.SR.write(|w| w.bits(0));
 
     use crate::led::RED_GREEN;
 
@@ -58,8 +78,8 @@ pub fn update_status() {
     // Hopefully we have cleared the interrupt line, but if not, software
     // trigger the interrupt.  FIXME - this should be rate limited.
     if flicker || gpiob.IDR().read().ID0().bit() {
-        dbgln!("Flicker {flicker} and/or PA6 is still high");
-        exti.SWIER1.write(|w| w.SWI0().set_bit());
+        dbgln!("Flicker {flicker} and/or PB0 is still high");
+        tim.CR1.write(|w| w.OPM().set_bit().CEN().set_bit());
     }
 }
 
@@ -92,7 +112,7 @@ fn lmk05318b_status() -> Result<(bool, bool, bool), ()> {
 
 impl crate::cpu::VectorTable {
     pub const fn lmk05318b(&mut self) -> &mut Self {
-        self.isr(INTERRUPT, update_status)
+        self.isr(INTERRUPT, update_status).isr(TIM_INTERRUPT, update_status)
     }
 }
 

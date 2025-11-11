@@ -49,6 +49,12 @@ pub fn main() -> ! {
     i2c::init();
 
     gps_uart::init();
+
+    // Spin for ≈100ms to wait for the clock generator and GPS to start.
+    for _ in 0 .. cpu::CPU_FREQ / 20 {
+        cpu::nothing();
+    }
+
     provision::provision();
 
     lmk05318b::init();

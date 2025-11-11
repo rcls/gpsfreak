@@ -86,7 +86,7 @@ class Register:
         # Everything appears to be big endian
         for a, b in zip(self.fields, self.fields[1:]):
             assert a.reg_hi + 1 == b.reg_lo
-            assert a.byte_hi == 7
+            assert a.byte_hi == 7, self
             assert b.byte_lo == 0
             assert a.address == b.address + 1
         first = self.fields[ 0]

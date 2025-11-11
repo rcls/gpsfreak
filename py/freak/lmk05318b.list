@@ -1,15 +1,15 @@
 VNDRID              : R     0:16 (2) = 0x100b
 PRODID              : R     2:8 = 0x35
-REVID               : R     3:8 = 0x32
-PRTID               : R     4:32 (4) = 0x040e178e
+REVID               : R     3:8 = 0x2a
+PRTID               : R     4:32 (4) = 0x040e1700
 HW_SW_CTRL_MODE     : R     8.6:1
 OP_MODE             : R     8.0:3 = 2
 I2C_ADDR_GPIO1_SW   : R    10.3:5 = 0x19
 EEREV               : R    11:8
 RESET_SW            : R/W  12.7:1
 SYNC_SW             : R/W  12.6:1
-SYNC_AUTO_APLL      : R/W  12.4:1
-SYNC_MUTE           : R/W  12.3:1
+SYNC_AUTO_APLL      : R/W  12.4:1 = 1
+SYNC_MUTE           : R/W  12.3:1 = 1
 PLLSTRTMODE         : R/W  12.1:1 = 1
 LOS_FDET_XO         : R    13.4:1
 LOL_PLL2            : R    13.3:1 = 1
@@ -63,14 +63,14 @@ INT_AND_OR          : R/W  21.1:1
 INT_EN              : R/W  21.0:1 = 1
 STAT1_POL           : R/W  22.1:1
 STAT0_POL           : R/W  22.0:1
-OUT3_MUTE_LVL       : R/W  23.6:2 = 1
-OUT2_MUTE_LVL       : R/W  23.4:2 = 1
-OUT1_MUTE_LVL       : R/W  23.2:2 = 1
-OUT0_MUTE_LVL       : R/W  23.0:2 = 1
-OUT7_MUTE_LVL       : R/W  24.6:2 = 1
-OUT6_MUTE_LVL       : R/W  24.4:2 = 1
-OUT5_MUTE_LVL       : R/W  24.2:2 = 1
-OUT4_MUTE_LVL       : R/W  24.0:2 = 1
+CH3_MUTE_LVL        : R/W  23.6:2 = 1
+CH2_MUTE_LVL        : R/W  23.4:2 = 1
+CH1_MUTE_LVL        : R/W  23.2:2 = 1
+CH0_MUTE_LVL        : R/W  23.0:2 = 1
+CH7_MUTE_LVL        : R/W  24.6:2 = 1
+CH6_MUTE_LVL        : R/W  24.4:2 = 1
+CH5_MUTE_LVL        : R/W  24.2:2 = 1
+CH4_MUTE_LVL        : R/W  24.0:2 = 1
 CH7_MUTE            : R/W  25.7:1
 CH6_MUTE            : R/W  25.6:1
 CH5_MUTE            : R/W  25.5:1
@@ -89,22 +89,27 @@ MUTE_APLL1_LOCK     : R/W  29.0:1 = 1
 UNKNOWN30           : R/W  30:8 = 0x40
 UNKNOWN32           : R/W  32:8 = 0x44
 UNKNOWN35           : R/W  35:8
-GPIO_STAT1_OUT      : R/W  36.1:1
-GPIO_STAT0_OUT      : R/W  36.0:1
+GPIO_STAT1_OUT      : R/W  36.1:1 = 1
+GPIO_STAT0_OUT      : R/W  36.0:1 = 1
 UNKNOWN37           : R/W  37:8
 UNKNOWN38           : R/W  38:8
+GPIO2_OUT           : R/W  39.1:1 = 1
 APLL1_DEN_MODE      : R/W  39.0:1
 SECREF_DC_MODE      : R/W  40.3:1
 PRIREF_DC_MODE      : R/W  40.2:1
 APLL2_DEN_MODE      : R/W  40.0:1 = 1
 UNKNOWN41           : R/W  41:8
 OSCIN_DBLR_EN       : R/W  42.4:1
-XO_TYPE             : R/W  43.3:4
+XO_FDET_BYP         : R/W  42.3:1
+XO_TYPE             : R/W  43.3:4 = 8
 XO_DRV_APLL2_EN     : R/W  43.0:1
 OSCIN_RDIV          : R/W  44.0:5
+SECREF_CMOS_SLEW    : R/W  45.3:1
+PRIREF_CMOS_SLEW    : R/W  45.2:1
 SECREF_BUF_MODE     : R/W  45.1:1 = 1
 PRIREF_BUF_MODE     : R/W  45.0:1 = 1
-UNKNOWN46           : R/W  46:8 = 0x18
+SECREF_TYPE         : R/W  46.4:4
+PRIREF_TYPE         : R/W  46.0:4
 PLL2_RCLK_SEL       : R/W  47.7:1
 STAT0_SEL           : R/W  48.0:7 = 0x50
 STAT1_SEL           : R/W  49.0:7 = 0x4a
@@ -177,7 +182,7 @@ PLL1_CP             : R/W  75.0:2
 PLL1_P1             : R/W  76.0:3
 PLL1_DISABLE_3RD4TH : R/W  77.0:4 = 15
 UNKNOWN78           : R/W  78:8
-UNKNOWN79           : R/W  79:8 = 0x11
+BAW_LOCKDET_EN      : R/W  79.4:1 = 1
 BAW_LOCK            : R    80.7:1 = 1
 BAW_LOCK_PPM_MAX    : R/W  80:15 (2) = 0x000a
 BAW_LOCK_CNTSTRT    : R/W  82:30 (4) = 0x000e105d
@@ -192,8 +197,8 @@ PLL2_CP             : R/W 101.0:2 = 1
 PLL2_P2             : R/W 102.4:3 = 2
 PLL2_P1             : R/W 102.0:3 = 2
 PLL2_DISABLE_3RD4TH : R/W 103.0:4 = 15
-UNKNOWN104          : R/W 104:8 = 0x1f
-PLL2_CLSDWAIT       : R/W 105.3:0
+PLL2_RBLEED_CP      : R/W 104.0:6 = 0x1f
+PLL2_CLSDWAIT       : R/W 105.2:2 = 1
 PLL1_NDLYDIV        : R/W 106:12 (2) = 0x064
 PLL1_NDIV           : R/W 108:12 (2) = 0x034
 PLL1_NUM            : R/W 110:40 (5) = 0x140008bcbd
@@ -214,7 +219,7 @@ PLL1_LF_C3          : R/W 133.0:3 = 7
 PLL2_NDIV           : R/W 134:9 (2) = 0x02b
 PLL2_NUM            : R/W 136:24 (3) = 0x0028e5
 PLL2_DTHRMODE       : R/W 139.3:2
-PLL2_ORDER          : R/W 139.0:3
+PLL2_ORDER          : R/W 139.0:3 = 3
 PLL2_LF_R2          : R/W 140.0:6 = 0x02
 PLL2_LF_C1          : R/W 141.0:3
 PLL2_LF_R3          : R/W 142.0:6 = 0x01
@@ -237,17 +242,17 @@ NVMCRCERR           : R   157.5:1
 NVMCOMMIT           : R/WSC 157.3:1
 NVMBUSY             : R   157.2:1
 NVMLCRC             : R   158:8
-UNKNOWN159          : R/W 159:8
-MEMADR              : R/W 160:8 = 0xfc
+MEMADR              : R/W 159:13 (2) = 0x00fc
 NVMDAT              : R   161:8 = 0x32
 RAMDAT              : R/W 162:8
 NVMUNLK             : R/W 164:8
 UNKNOWN165          : R/W 165:8
-DPLL_REFSEL_STAT    : R   167.0:2
+DPLL_REFSEL_STAT    : R   167.0:2 = 1
 DPLL_PHASE_LOCK     : R   168.2:1
 DPLL_LOCK           : R   168.1:1
 UNKNOWN178          : R/W 178:8
 DPLL_TUNING_FREE_RUN: R/W 180:38 (5)
+DPLL_REF_HIST_INTMD : R/W 185.4:4
 DPLL_REF_HIST_EN    : R/W 185.0:1 = 1
 DPLL_REF_HISTCNT    : R/W 186.0:5 = 0x08
 DPLL_REF_HISTDLY    : R/W 187:31 (4) = 0x0000002c
@@ -296,19 +301,18 @@ DPLL_PRIREF_AUTO_PRTY: R/W 249.0:2 = 1
 UNKNOWN250          : R/W 250:8
 DPLL_REF_MAN_SEL    : R/W 251.5:1
 DPLL_REF_MAN_REG_SEL: R/W 251.4:1
-DPLL_SWITCH_MODE    : R/W 251.0:2
+DPLL_SWITCH_MODE    : R/W 251.0:2 = 2
 DPLL_REF_SYNC_OUT7_EN: R/W 252.7:1
 DPLL_REF_SYNC_OUT7_NDIV_RST_DIV: R/W 252.6:1
 DPLL_FASTLOCK_ALWAYS: R/W 252.4:1
+DPLL_LOCKDET_PPM_EN : R/W 252.3:1 = 1
 DPLL_HLDOVR_MODE    : R/W 252.2:1 = 1
 DPLL_LOOP_EN        : R/W 252.0:1 = 1
 UNKNOWN253          : R/W 253:8
 UNKNOWN254          : R/W 254:8
 UNKNOWN255          : R/W 255:8
-UNKNOWN256          : R/W 256:8
-DPLL_PRIREF_RDIV    : R/W 257:8 = 0x01
-UNKNOWN258          : R/W 258:8
-DPLL_SECREF_RDIV    : R/W 259:8 = 0x01
+DPLL_PRIREF_RDIV    : R/W 256:16 (2) = 0x0001
+DPLL_SECREF_RDIV    : R/W 258:16 (2) = 0x0001
 UNKNOWN260          : R/W 260:8 = 0x02
 UNKNOWN261          : R/W 261:8 = 0x80
 UNKNOWN262          : R/W 262:8
@@ -347,8 +351,8 @@ UNKNOWN297          : R/W 297:8 = 0x0a
 UNKNOWN298          : R/W 298:8 = 0x0e
 UNKNOWN299          : R/W 299:8 = 0x01
 UNKNOWN300          : R/W 300:8
-DPLL_PL_LOCK_THRESH : R/W 301.0:6
-DPLL_PL_UNLK_THRESH : R/W 302.0:6
+DPLL_PL_LOCK_THRESH : R/W 301.0:6 = 0x1c
+DPLL_PL_UNLK_THRESH : R/W 302.0:6 = 0x20
 UNKNOWN303          : R/W 303:8 = 0x01
 DPLL_REF_FB_PRE_DIV : R/W 304.0:4 = 1
 DPLL_REF_FB_DIV     : R/W 305:30 (4) = 0x00000010
@@ -359,19 +363,18 @@ DPLL_REF_LOCKDET_PPM_MAX: R/W 320:15 (2) = 0x000a
 DPLL_REF_LOCKDET_CNTSTRT: R/W 322:30 (4) = 0x00249f00
 DPLL_REF_LOCKDET_VCO_CNTSTRT: R/W 326:30 (4) = 0x00989680
 DPLL_REF_UNLOCKDET_PPM_MAX: R/W 330:15 (2) = 0x0064
-UNKNOWN332          : R/W 332:8
+DPLL_REF_UNLOCKDET_CNTSTRT_29_24: R/W 332.0:6
 PLL2_DEN            : R/W 333:24 (3) = 0x003d09
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_29_24: R/W 336.0:6
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_23_16: R/W 337:8 = 0x98
 DPLL_REF_UNLOCKDET_VCO_CNTSTRT_15_8: R/W 338:8 = 0x96
 PLL1_24B_NUM_MSB    : R/W 339:8
-DPLL_REF_SYNC_PHASE_OFFSET: R/W 340:40 (5)
-UNKNOWN345          : R/W 345:8
+DPLL_REF_SYNC_PH_OFFSET: R/W 340:45 (6)
 DPLL_FDEV_EXTRA     : R/W 346.1:1
 DPLL_FDEV_EN        : R/W 346.0:1
 DPLL_FDEV           : R/W 347:38 (5)
 DPLL_FDEV_REG_UPDATE: R/W 352.0:1
-PLL1_VM_INSIDE      : R   357.5:1
+PLL1_VM_INSIDE      : R   357.5:1 = 1
 PLL2_VM_INSIDE      : R   367.5:1
-SECREF_VALSTAT      : R   411.3:1
-PRIREF_VALSTAT      : R   411.2:1
+SECREF_VALSTAT      : R   411.3:1 = 1
+PRIREF_VALSTAT      : R   411.2:1 = 1

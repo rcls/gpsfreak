@@ -1,12 +1,13 @@
-GPS Freak — A GPS Disciplined Frequency Generator
-=================================================
+GPS Freak — GPS Disciplined Frequency Generator
+===============================================
 
 GPS Freak is a flexible, programmable, high-quality, frequency generator, using
 GPS as a reference.
 
-It uses a U-Blox MAX-10 GPS receiver and a Texas Instruments LMK05318b clock
-generator to drive multiple clock outputs.  The outputs are a total of 5 SMA
-connectors, with 4 separately programmable frequencies derived from 2 PLLs.
+The outputs are a total of 5 SMA connectors, with 4 separately programmable
+frequencies derived from 2 PLLs.  The outputs are driven by a Texas Instruments
+LMK05318b clock generator, and a U-Blox MAX-10 GPS receiver providing the
+overall frequency reference.
 
 Power and data are supplied via a USB-C connector (USB FS data rate).  The GPS
 unit is available over USB as a CDC ACM serial port.  In addition, there are USB
@@ -23,8 +24,6 @@ All software in this project is licensed under the GNU GPL v3.  (`COPYING.txt`)
 Connectors
 ==========
 
-**GPS Input** for an active L1 and/or L5 GPS antenna.  It provides 3.3 V (or
-5 V) antennae power.  The voltage selection is a strap resistor on board.
 
 **Outputs 1+** and **1–**
 : Complementary high frequency, 3 MHz to 1.6 GHz, 11 dBm nominal output power.
@@ -41,11 +40,14 @@ Connectors
 **Output 4**
 : Mid frequency 3.3 V CMOS.  3 MHz to 325 MHz.  DC coupled.
 
+**GPS Input** for an active L1 and/or L5 GPS antenna.  It provides 3.3 V (or
+5 V) antennae power.  The voltage selection is a strap resistor on board.
+
 **USB-C**
 : Power (approx 2 W) and data (USB FS).
 
 The high frequency outputs provide complete coverage of 3 MHz to 800 MHz with ≈
-nano-Hertz resolution, and then select frequencies to 1.6 GHz.  (There is a
+pico-Hertz resolution, and then select frequencies to 1.6 GHz.  (There is a
 region around 520 MHz where the LMK05318b is operated outside its documented
 range, but I have seen no issue with this.)
 
@@ -93,8 +95,8 @@ Heat-sinking
 ------------
 
 The LMK05318b generates a bit of heat, and the board may reach temperatures
-approaching 30 °C above ambient.  This should not be a problem, but provision
-is made to heat-sink the rear of the PCB to the case.
+approaching 30 °C above ambient.  This should not be a problem, but provision is
+made to heat-sink the rear of the PCB to the case.
 
 There is a 7 mm × 7 mm exposed copper area backside to the LMK05318b.  Solder a
 2 mm thick copper slug to this, and then cover with a 1.5 mm thick thermal pad.
@@ -154,18 +156,18 @@ Components that I have hand-soldered in preference to using JLCPCB assembly:
   detection are hand-soldered, to save assembly costs.
 * The three C0G/NPO loop-filter caps (C78, C79, C92) I have hand-soldered as
   JLCPCB doesn't have the exact parts.
-* The LED I have hand soldered.  It protrudes past the board edge, I am not
-  sure if that poses an issue for PCB manufacturers.
-* The TVS protection diodes I have never populated.  The 0402 pads are design
+* The LED I have hand soldered.  It protrudes past the board edge, I am not sure
+  if that poses an issue for PCB manufacturers.
+* The TVS protection diodes I have never populated.  The 0402 pads are designed
   for hand-soldering just like the inductor above.
 
-If you want to keep assembly costs down, then hand soldering many of the ICs
-is an option.  This is especially true if you only want one board, as most
+If you want to keep assembly costs down, then hand soldering many of the ICs is
+an option.  This is especially true if you only want one board, as most
 manufacturers insist on making multiple!
 
 There is enough space between most of the ICs and surrounding passive components
-to get a soldering iron in, but if you are unsure of your soldering skills and
-equipment, then review the board layout before committing yourself to that.
+to get a soldering iron in, but if you are unsure of your soldering equipment
+and skills, then review the board layout before committing yourself to that.
 
 Initial Software Install and Configuration
 ==========================================

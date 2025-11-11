@@ -102,10 +102,10 @@ def pll2_plan_low1(target: Target, dpll: DPLLPlan,
     We multiply stage2_div to get the VCO frequency in the supported range.'''
     pll2_pfd = dpll.pll2_pfd()
     ratio = freq / pll2_pfd
-    total_divide = mult_den * post_div * stage1_div * stage2_div
-    assert total_divide % ratio.denominator == 0
 
     output_divide = post_div * stage1_div * stage2_div
+    total_divide = mult_den * output_divide
+    assert total_divide % ratio.denominator == 0
 
     # Now attempt to multiply stage2_div by something to get us
     # into the VCO range.
@@ -125,7 +125,7 @@ def pll2_plan_low1(target: Target, dpll: DPLLPlan,
             extra = extra - 1
 
     stage2_div *= extra
-    vco_freq = freq * post_div * stage1_div * stage2_div
+    vco_freq = freq * output_divide
     multiplier = vco_freq / pll2_pfd
     dividers = [(0, 0, 0)] * BIG_DIVIDE
     dividers.append((post_div, stage1_div, stage2_div))
@@ -139,6 +139,15 @@ def pll2_plan_low1(target: Target, dpll: DPLLPlan,
         pll2_target = vco_freq,
         multiplier = multiplier,
         dividers = dividers)
+
+def _make_pd_stage1() -> dict[int, Tuple[int, int]]:
+    result = dict()
+    for post_div in range(2, 7+1):
+        for stage1_div in range(6, 256+1):
+            result[post_div * stage1_div] = post_div, stage1_div
+    return result
+
+POST_DIV_STAGE1 = _make_pd_stage1()
 
 def pll2_plan_low_exact(target: Target, dpll: DPLLPlan, freq: Fraction,
                         fast: bool, factors: list[int]) -> PLLPlan | None:
@@ -161,38 +170,40 @@ def pll2_plan_low_exact(target: Target, dpll: DPLLPlan, freq: Fraction,
     # Scan over post dividers and the stage1 output divider.
     best = None
     ratio = freq / dpll.pll2_pfd()
-    for post_div in range(2, 7+1):
-        for stage1_div in range(6, 256+1):
-            # What we are left with needs to be factored into the PLL2
-            # multiplier, and the stage2 divider.  Do a brute force search of
-            # the denominator of that.
-            bigden = ratio.denominator // gcd(ratio.denominator,
-                                              post_div * stage1_div)
-            s2_max = min(1 << 24, PLL2_HIGH / freq / post_div // stage1_div)
-            if bigden > s2_max << 24:
-                continue                # Not acheivable.
+    for ps1_div, (post_div, stage1_div) in POST_DIV_STAGE1.items():
+        ps1_freq = freq * ps1_div
+        # What we are left with needs to be factored into the PLL2 multiplier,
+        # and the stage2 divider.  Do a brute force search of the denominator of
+        # that.
+        bigden = ratio.denominator // gcd(ratio.denominator, ps1_div)
+        s2_max = min(1 << 24, PLL2_HIGH // ps1_freq)
+        if bigden > s2_max << 24:
+            continue            # Not acheivable.
 
-            s2_min = ceil(PLL2_LOW / freq / post_div / stage1_div)
-            # s2_min doesn't give a lower bound on the search, because we apply
-            # an extra multiplier to bring the stage2_div into range.  However,
-            # we can reject non-feasible values.
-            if s2_min > 1 << 24:
-                continue                # Not acheivable.
+        s2_min = ceil(PLL2_LOW / ps1_freq)
+        # s2_min doesn't give a lower bound on the search, because we apply an
+        # extra multiplier to bring the stage2_div into range.  However, we can
+        # reject non-feasible values.
+        if s2_min > s2_max:
+            continue            # Not acheivable.
 
-            # As a heuristic, limiting the denominator usually works and makes
-            # the search much faster.  Or maybe we just shouldn't use python.
-            if fast:
-                den_max = min(1 << 24, bigden // s2_min)
-            else:
-                den_max = 1 << 24
+        # As a heuristic, limiting the denominator usually works and makes the
+        # search much faster.  Or maybe we just shouldn't use python.
+        fast_den_max = min(1 << 24, bigden // s2_min)
+        if fast:
+            den_max = fast_den_max
+        else:
+            den_max = 1 << 24
+            # Exclude the fast==True range.
+            s2_max = min(s2_max, bigden // fast_den_max)
 
-            for stage2_div, mult_den in \
-                    factor_splitting(bigden, factors, s2_max, den_max):
-                plan = pll2_plan_low1(target, dpll, freq,
-                                      post_div, stage1_div,
-                                      mult_den, stage2_div)
-                if plan is not None and plan < best:
-                    best = plan
+        for stage2_div, mult_den in \
+                factor_splitting(bigden, factors, s2_max, den_max):
+            plan = pll2_plan_low1(target, dpll, freq,
+                                  post_div, stage1_div,
+                                  mult_den, stage2_div)
+            if plan is not None and plan < best:
+                best = plan
     return best
 
 def pll2_plan_low(target: Target, dpll: DPLLPlan,
@@ -248,7 +259,7 @@ def pll2_plan1(target: Target, dpll: DPLLPlan, freqs: list[Fraction],
         if not f:                       # Not needed.
             continue
         assert is_multiple_of(pll2_freq, f)
-        ratio = int(pll2_freq / f)
+        ratio = pll2_freq // f
         if ratio <= 1:
             postdivs = 0
             break                       # Impossible.

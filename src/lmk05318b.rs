@@ -36,8 +36,8 @@ pub fn init() {
     const PRESCALE: u32 = crate::cpu::CPU_FREQ / 10000 - 1; // 10kHz
     const {assert!(PRESCALE >= 1 && PRESCALE < 65536)};
     tim.PSC.write(|w| w.PSC().bits(PRESCALE as u16));
-    tim.ARR.write(|w| w.ARR().bits(100 - 1)); // 100Hz.
-    tim.CNT.write(|w| w.CNT().bits(100 - 1));
+    tim.ARR.write(|w| w.ARR().bits(400 - 1)); // 25Hz.
+    tim.CNT.write(|w| w.CNT().bits(400 - 1));
     tim.DIER.write(|w| w.UIE().set_bit());
 
     // This needs to run at the same priority as the command code, because both

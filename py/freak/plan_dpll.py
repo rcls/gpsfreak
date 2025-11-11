@@ -173,6 +173,8 @@ def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
     return None
 
 def baw_plan_low(target: Target, freq: Fraction) -> DPLLPlan | None:
+    if freq < BAW_LOW / (1 << 32):
+        return                          # No point in trying.
     print('Try BAW LF exact brute force')
     exact = baw_plan_low_exact(target, freq)
     if exact:
@@ -275,6 +277,19 @@ def test_exact():
     assert plan.baw == REF_FREQ * 2 * plan.fb_div * plan.fb_prediv
     assert plan.baw_target == f
     assert plan.baw == f
+
+def test_110khz():
+    f = 110 * kHz
+    prediv = 12
+    base = f * prediv
+    exp_baw = base * 1894
+    assert BAW_LOW <= exp_baw <= BAW_HIGH
+    possible = list(sym_range(base, BAW_LOW, BAW_HIGH, 1<<24))
+    assert possible
+    target = Target([ZERO, ZERO, f])
+    plan = baw_plan_low_exact(target, f)
+    assert plan
+    assert plan.baw == exp_baw
 
 def test_inexact():
     f = 2500 * MHz + 25000 * Hz + Hz/372179

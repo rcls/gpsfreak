@@ -6,7 +6,7 @@ endpoint—every OS serial driver goes out of its way to make it difficult to
 get a handle on the underlying USB device.'''
 
 import io
-from usb.core import Device, USBError, USBTimeoutError # type: ignore
+from usb.core import Device, USBError, USBTimeoutError # pyright: ignore
 
 from collections.abc import ByteString
 from typing import Any, cast
@@ -21,7 +21,7 @@ class USBEndpointIO(io.IOBase):
 
     def __init__(self, device: Device,
                  interface: Any, write_endpoint: int, read_endpoint: int,
-                 timeout: int = 1000, chunk_size: int = 64):
+                 timeout: int = 1500, chunk_size: int = 64):
         self.in_buffer = bytearray()
         self.usb = device
         self.write_endpoint = write_endpoint
@@ -29,7 +29,7 @@ class USBEndpointIO(io.IOBase):
         self.chunk_size = chunk_size
         self.timeout = timeout
         try:
-            device.detach_kernel_driver(interface) # type: ignore
+            device.detach_kernel_driver(interface) # pyright: ignore
         except USBError:
             pass
 
@@ -40,7 +40,7 @@ class USBEndpointIO(io.IOBase):
             size = 64
         if size >= 0:
             if len(self.in_buffer) == 0:
-                self.in_buffer += cast(bytes, self.usb.read( # type: ignore
+                self.in_buffer += cast(bytes, self.usb.read( # pyright: ignore
                     self.read_endpoint, self.chunk_size, self.timeout))
 
             count = min(size, len(self.in_buffer))
@@ -51,7 +51,7 @@ class USBEndpointIO(io.IOBase):
         timeout = self.timeout
         try:
             while True:
-                r = cast(bytes, self.usb.read( # type: ignore
+                r = cast(bytes, self.usb.read( # pyright: ignore
                     self.read_endpoint, self.chunk_size, timeout))
                 if r == b'':
                     break
@@ -67,5 +67,5 @@ class USBEndpointIO(io.IOBase):
     def write(self, b: ByteString) -> int:
         if len(b) > self.chunk_size:
             b = b[:self.chunk_size]
-        return self.usb.write(         # type: ignore
+        return self.usb.write(         # pyright: ignore
             self.write_endpoint, b, self.timeout)

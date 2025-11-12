@@ -46,6 +46,7 @@
 //!
 //!    02 : Get protocol version.  Response is 82 with u32 payload.
 //!    03 : Get serial number.  Response is 83 with ASCII string payload.
+//!    04 : Get/set device name.  Response is 84 with string payload.
 //!
 //!    10 : CPU reboot.  No response.
 //!    11 : GPS reset. u8 payload.
@@ -82,6 +83,7 @@
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
 
+use crate::vcell::UCell;
 use crate::{gps_uart::GpsPriority, i2c};
 use crate::utils::vcopy_aligned;
 
@@ -157,6 +159,17 @@ pub struct Message<P> {
     payload: P,
     crc0   : u8,
     crc1   : u8,
+}
+
+static NAME: UCell<MessageBuf> = Default::default();
+
+pub fn init() {
+    let name = unsafe {NAME.as_mut()};
+    name.magic = MAGIC;
+    name.code = 0x84;
+    let len = crate::cpu::SERIAL_NUMBER.len();
+    name.len = len as u8;
+    name.payload[..len].copy_from_slice(crate::cpu::SERIAL_NUMBER.as_ref());
 }
 
 impl MessageBuf {
@@ -248,6 +261,7 @@ fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
         0x00 => ping(message, r),
         0x02 => get_protocol_version(message, r),
         0x03 => get_serial_number(message, r),
+        0x04 => set_get_name(message, r),
 
         0x10 => crate::cpu::reboot(),
         0x11 => gps_reset(message),
@@ -287,6 +301,20 @@ fn get_serial_number(message: &MessageBuf, r: Responder) -> Result {
     Message::<()>::from_buf(message)?;
     let sn = crate::cpu::SERIAL_NUMBER.as_ref();
     Message::new(0x83, *sn).send(r)
+}
+
+fn set_get_name(message: &MessageBuf, r: Responder) -> Result {
+    let name = unsafe {NAME.as_mut()};
+    let len = message.len as usize;
+    if len > MAX_PAYLOAD {
+        // Our callers have actually validated the length but lets be safe.
+        return Err(Error::FramingError);
+    }
+    if len > 0 {
+        name.len = len as u8;
+        name.payload[..len].copy_from_slice(&message.payload[..len]);
+    }
+    name.send(r)
 }
 
 fn gps_reset(message: &MessageBuf) -> Result {

@@ -39,6 +39,13 @@ class PLLPlan:
         else:
             return self.pll2 / (pre * s1 * s2)
 
+    def neven(self) -> int:
+        count = 0
+        for _, s1, s2 in self.dividers:
+            if s2 == 1 and s1 & 1 == 0 or s2 & 1 == 0:
+                count += 1
+        return count
+
     def __lt__(self, b: PLLPlan | None) -> bool:
         '''Less is better.  I.e., return True if self is better than b.'''
         if b is None:
@@ -56,8 +63,12 @@ class PLLPlan:
         if a_error != b_error:
             return a_error < b_error
 
-        # FIXME - Prefer even final output dividers. This gives exactly 50/50
-        # duty cycle.
+        # Prefer even final output dividers. This gives exactly 50/50 duty
+        # cycle.
+        a_even = self.neven()
+        b_even = b.neven()
+        if a_even != b_even:
+            return a_even > b_even
 
         # Prefer power-of-two (fixed) denomoninator.
         a_fixed = self.fixed_denom()
@@ -141,7 +152,7 @@ def pll2_plan_low1(target: Target, dpll: DPLLPlan,
         dividers = dividers)
 
 def _make_pd_stage1() -> dict[int, Tuple[int, int]]:
-    result = dict()
+    result: dict[int, Tuple[int, int]] = dict()
     for post_div in range(2, 7+1):
         for stage1_div in range(6, 256+1):
             result[post_div * stage1_div] = post_div, stage1_div
@@ -161,7 +172,6 @@ def pll2_plan_low_exact(target: Target, dpll: DPLLPlan, freq: Fraction,
     if factors[-1] >= 1<<24:
         return None
 
-    #print(f'freq={freq}, ratio={ratio}, factors={factors}')
     # We need to partition the denominator of the ratio over:
     # * The PLL2 multiplier denominator. (1 ..= 1<<24).
     # * The post divider (2 ..= 7)
@@ -264,9 +274,8 @@ def pll2_plan1(target: Target, dpll: DPLLPlan, freqs: list[Fraction],
             postdivs = 0
             break                       # Impossible.
 
-        # Now break the ratio into a post-divider and output divider.
-        # Attempt to track which gives an even final stage divider, for
-        # 50% duty cycle - fixme we don't get that quite right.
+        # Now break the ratio into a post-divider and output divider.  Attempt
+        # to track which gives an even final stage divider, for 50% duty cycle.
         postdivs1 = 0
         postdive1 = 0
         for postdiv in range(2, 8):

@@ -55,6 +55,8 @@ pub fn main() -> ! {
         cpu::nothing();
     }
 
+    command::init();
+
     provision::provision();
 
     lmk05318b::init();

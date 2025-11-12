@@ -3,11 +3,11 @@ from .serhelper import Serial
 from .ublox_msg import UBloxReader
 from .usb_endpoint import USBEndpointIO
 
-import argparse
-import io
-import usb.core # type: ignore
+import freak.message as message
+import argparse, io, sys
+import usb.core # pyright: ignore
 
-from usb.core import Device as USBDevice # type: ignore
+from usb.core import Device as USBDevice # pyright: ignore
 
 class Device:
     args: argparse.Namespace | None
@@ -22,13 +22,30 @@ class Device:
         if self.usb is not None:
             return self.usb
 
-        # FIXME - arguments for specifying USB device.
-        u = usb.core.find(idVendor=0xf055, idProduct=0xd448) # type: ignore
-        assert isinstance(u, USBDevice)
-        self.usb = u
+        opts = {}
+        if self.args and self.args.sn:
+            opts['serial_number'] = self.args.sn
+        gen = usb.core.find(True, manufacturer='Ralph', product='GPS Freak',
+                            **opts)
+        u = list(gen) # type: ignore
+        if self.args.name is not None:
+            u = [dev for dev in u if message.get_name(dev) == self.args.name]
+        if len(u) == 0:
+            print('No GPS Freak USB device found', file=sys.stderr)
+            sys.exit(1)
+        if len(u) > 1:
+            print('Multiple GPS Freak USB devices found. ',
+                  'You may select one with the --sn option.', file=sys.stderr)
+            print('Available serial numbers are:', file=sys.stderr)
+            for d in u:
+                print(f'    {d.serial_number}', file=sys.stderr)
+            sys.exit(1)
+        assert isinstance(u[0], USBDevice)
+        #print(u.serial_number)
+        self.usb = u[0]
         # Flush any stale data.
         try:
-            self.usb.read(0x83, 64, 10) # type: ignore
+            self.usb.read(0x83, 64, 10) # pyright: ignore
         except usb.core.USBTimeoutError:
             pass
 

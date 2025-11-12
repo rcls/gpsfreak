@@ -7,7 +7,7 @@ from .ublox_cfg import UBloxCfg
 from .ublox_msg import UBloxMsg, UBloxReader
 
 import argparse, struct, time
-import usb.core # type: ignore
+import usb.core # pyright: ignore
 
 # My current changes:
 # CFG-TP-PULSE_DEF 0x01 was 0x00
@@ -94,7 +94,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         = 'Config layer containing changes to report, default is live config')
     changes.add_argument(
         '-b', '--base', type=int, default=7, help
-        = 'Base layer to compare against; default is factor default')
+        = 'Base layer to compare against; default is factory default')
 
     subp.add_parser(
         'release', help='Release serial port back to OS',
@@ -307,7 +307,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
 
     elif command == 'release':
         try:
-            device.get_usb().attach_kernel_driver(0) # type: ignore
+            device.get_usb().attach_kernel_driver(0) # pyright: ignore
         except usb.core.USBError:
             pass
 

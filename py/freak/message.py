@@ -6,7 +6,7 @@ import struct
 from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import TypeAlias
-from usb.core import Device # type: ignore
+from usb.core import Device # pyright: ignore
 
 Recipient: TypeAlias = Device | bytearray
 
@@ -18,6 +18,7 @@ NACK=0x81
 PING=0x00
 GET_PROTOCOL_VERSION=0x02
 GET_SERIAL_NUMBER=0x03
+GET_SET_NAME=0x04
 
 CPU_REBOOT=0x10
 GPS_RESET=0x11
@@ -101,8 +102,8 @@ def command(dev: Recipient, code: int, payload: ByteString,
     if isinstance(dev, bytearray):
         dev += data
         return Message(ACK, b'')
-    dev.write(0x03, frame(code, payload)) # type: ignore
-    result = deframe(bytes(dev.read(0x83, 64, 10000))) # type: ignore
+    dev.write(0x03, frame(code, payload)) # pyright: ignore
+    result = deframe(bytes(dev.read(0x83, 64, 10000))) # pyright: ignore
     if expect != NACK and result.code == NACK:
         raise RequestFailed(f'Result code is NACK ' + result.payload.hex(' '))
     if result.code != expect:
@@ -121,8 +122,15 @@ def get_protocol_version(dev: Device) -> int:
     data = retrieve(dev, GET_PROTOCOL_VERSION, b'')
     return struct.unpack('<I', data.payload)[0]
 
-def get_serial_number(dev: Device) -> bytes:
-    return retrieve(dev, GET_SERIAL_NUMBER, b'').payload
+def get_serial_number(dev: Device) -> str:
+    b = retrieve(dev, GET_SERIAL_NUMBER, b'').payload
+    return b.decode(errors='replace')
+
+def get_name(dev: Device) -> str:
+    return retrieve(dev, GET_SET_NAME, b'').payload.decode(errors='replace')
+
+def set_name(dev: Recipient, name: str) -> None:
+    command(dev, GET_SET_NAME, bytes(name, 'UTF-8'), GET_SET_NAME | 0x80)
 
 def serial_sync(dev: Recipient, microseconds: int) -> None:
     command(dev, SERIAL_SYNC, struct.pack('<I', microseconds))
@@ -143,7 +151,7 @@ def peek(dev: Device, address: int, length: int) -> bytearray:
         aa = struct.unpack('<I', data.payload[:4])[0]
         assert a == aa
         assert len(data.payload) == todo + 4
-        result += data.payload[4:] # pyrefly: ignore
+        result += data.payload[4:]
     return result
 
 def poke(dev: Recipient, address: int, data: ByteString, chunk_size: int = 32) -> None:

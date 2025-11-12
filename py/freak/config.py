@@ -13,7 +13,7 @@ import argparse, struct
 from collections.abc import ByteString
 from dataclasses import dataclass
 from typing import Any, Generator, Tuple
-from usb.core import Device as USBDevice # type: ignore
+from usb.core import Device as USBDevice # pyright: ignore
 
 # U+03A6 GREEK CAPITAL LETTER PHI UTF-8: 0xCE 0xA6
 # r 0x72
@@ -248,6 +248,8 @@ def parse_config(dev: USBDevice, h: Config | None) \
             # We class these as UBX messages as they relate to the serial port
             # talking to it.
             yield 'UBX', msg
+        elif msg[2] == message.GET_SET_NAME:
+            yield 'NAME', msg
         else:
             yield 'UNKNOWN', msg
 
@@ -287,11 +289,17 @@ def make_config(device: Device, headers: Configs, active: Config | None,
     if active is not None:
         unknown = 0
         for typ, msg in parse_config(dev, active):
-            if not typ in ('LMK', 'UBX'):
+            if typ == 'UNKNOWN':
                 config += msg
                 unknown += 1
         if unknown != 0:
             print(f'Note : preserving {unknown} unexpected config messages.')
+
+    # Save the device name if it is set to something other than the serial
+    # number.
+    name = message.get_name(dev)
+    if name != '' and name != message.get_serial_number(dev):
+        message.set_name(config, name)
 
     config[12:16] = struct.pack('<I', len(config) + 4)
     config += struct.pack('>I', crc32.crc32(config))
@@ -331,6 +339,13 @@ def save_config(device: Device, save_ubx: bool, save_lmk: bool,
         write_config(dev, headers, active, cfg)
     return True
 
+def do_name(device: Device, name: str | None):
+    dev = device.get_usb()
+    if name:
+        message.set_name(dev, name)
+    else:
+        print(message.get_name(dev))
+
 def add_to_argparse(argp: argparse.ArgumentParser,
                     dest: str = 'command', metavar: str = 'COMMAND') -> None:
     subp = argp.add_subparsers(dest=dest, metavar=metavar,
@@ -342,9 +357,15 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     save.add_argument('-n', '--dry-run', action='store_true', default=False,
                       help="Don't actually write to flash.")
 
+    name = subp.add_parser('name', help='Assign the device name')
+    name.add_argument('NAME', nargs='?', help='Device name, or omit to print')
+
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'save':
         save_config(device, True, True, args.dry_run)
+
+    elif command == 'name':
+        do_name(device, args.NAME)
 
     else:
         assert False, f'This should never happen: {command}'

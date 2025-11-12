@@ -5,7 +5,7 @@ assert __name__ == '__main__'
 import sys
 if sys.version_info < (3, 10):
     print('Your python version {sys.version} is too old. ',
-          'Please get 3.10 or later')
+          'This program needs 3.10 or later')
 
 import freak.lmk05318b_plan as lmk05318b_plan
 import freak.lmk05318b_util as lmk05318b_util
@@ -20,8 +20,10 @@ import argparse, struct, uuid
 
 argp = argparse.ArgumentParser(description='GPS Freak utility')
 
+# The argparse help formatting is crap and potentially confusing, this appears
+# to be the least bad.
 subp = argp.add_subparsers(
-    dest='command', metavar='COMMAND', required=True, help='Command')
+    title='GPS Freak Commands', metavar='COMMAND', dest='command')
 
 lmk05318b_util.add_freq_commands(subp, 'output', 'device output connector')
 
@@ -33,8 +35,8 @@ def key_value(s: str) -> Tuple[str, str]:
     return k, v
 key_value.__name__ = 'key=value pair'
 
-drive = subp.add_parser(
-    'drive', help='Report output drive', description='Set/Report output drive.')
+drive = subp.add_parser('drive', help='Set/Report output drive',
+                        description='Set/Report output drive.')
 drive.add_argument('DRIVE', type=key_value, nargs='*', metavar='OUT=DRIVE',
                    help='Output and drive type / strength')
 
@@ -75,17 +77,21 @@ gps_p = subp.add_parser(
     description='''Sub-commands for operation on the UBlox GPS module.''')
 ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 
+argp.add_argument('-n', '--name', metavar='NAME',
+                  help='Name of device to connect to')
+
+argp.add_argument('-s', '--sn', metavar='SERIAL NUM.',
+                  help='Serial number of device to connect to')
+
 def do_info(device: Device) -> None:
     dev = device.get_usb()
     # Ping with a UUID and check that we get the same one back...
     message.ping(dev, bytes(str(uuid.uuid4()), 'ascii'))
 
     serial = message.get_serial_number(dev)
-    try:
-        sn = serial.decode()
-    except:
-        sn = serial.hex(' ')
-    print('Device serial No:', sn)
+    print('Device serial No:', serial)
+
+    print('Device name     :', message.get_name(dev))
 
     result = message.tmp117_read(dev, 0, 2)
     assert len(result) == 2

@@ -254,7 +254,7 @@ def do_drive(dev: Device, drives: list[Tuple[str, str]],
 
 # FIXME - add defaults.
 def do_drive_out(dev: Device, drives: list[Tuple[str, str]]) -> None:
-    indexes = {'1': 2, '2': 0, '3': 7, '4': 6, '5': 5, '4': 4}
+    indexes = {'1': 2, '2': 0, '3': 7, '4': 6, '5': 5, '6': 4}
     expanded: list[str | None] = [None] * 8
     for ch, drive in drives:
         index = indexes[ch]
@@ -357,8 +357,9 @@ def report_live_freq(dev: Device, reference: Fraction, raw: bool) -> None:
         print('NOTE: FDEV is enabled. Frequencies may differ from above by up to ±100ppm')
 
 def reverse_plan(d: MaskedBytes, reference: Fraction) -> Tuple[Target, PLLPlan]:
+    '''Scrape a plan out of a configuration read-back.'''
     pll2_rdiv = (d.PLL2_RDIV_PRE + 3) * (d.PLL2_RDIV_SEC + 1)
-    assert pll2_rdiv == 18 # Only supported value.
+    assert pll2_rdiv == 18              # Only supported value.
 
     dpll = DPLLPlan()
     dpll.ref_div = d.DPLL_PRIREF_RDIV
@@ -382,8 +383,9 @@ def reverse_plan(d: MaskedBytes, reference: Fraction) -> Tuple[Target, PLLPlan]:
     else:
         plan.multiplier = d.PLL2_NDIV + Fraction(d.PLL2_NUM, d.PLL2_DEN)
 
-    plan.pll2 = dpll.baw / pll2_rdiv * plan.multiplier
-    plan.pll2_target = plan.pll2
+    if not d.PLL2_PDN:
+        plan.pll2 = dpll.baw / pll2_rdiv * plan.multiplier
+        plan.pll2_target = plan.pll2
 
     for _, _, tag in CHANNELS_RAW:
         mux = d.extract(f'CH{tag}_MUX')

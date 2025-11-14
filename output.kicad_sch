@@ -1608,6 +1608,26 @@
 			(embedded_fonts no)
 		)
 	)
+	(text_box "The balun provides 3dB gain for $5.  Probably just not worth it."
+		(exclude_from_sim no)
+		(at 153.7439 81.0839 0)
+		(size 25.3261 6.5461)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "c1db38c9-a4ed-477e-a0ed-95e66cc45bf4")
+	)
 	(text_box "Eyeballing the datasheet, the TLV3601 output resistance is in the ballpark of 50Ω."
 		(exclude_from_sim no)
 		(at 90.5881 98.8639 0)
@@ -3147,7 +3167,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "0e8abda5-ad21-4404-a4eb-05d78dd24e4b")
 		(property "Reference" "R32"
 			(at 160.02 56.896 90)
@@ -3367,7 +3387,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "18152e64-8b89-490d-aafb-3072ca6299f7")
 		(property "Reference" "R31"
 			(at 149.606 75.438 0)
@@ -4430,7 +4450,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "6f669726-6b85-495b-81a8-8f7c48246182")
 		(property "Reference" "T2"
 			(at 159.2619 70.6041 0)

@@ -98,15 +98,14 @@ The LMK05318b generates a bit of heat, and the board may reach temperatures
 approaching 30 °C above ambient.  This should not be a problem, but provision is
 made to heat-sink the rear of the PCB to the case.
 
-There is a 7 mm × 7 mm exposed copper area backside to the LMK05318b.  Solder a
+There is a 11 mm × 7 mm exposed copper area backside to the LMK05318b.  Solder a
 2 mm thick copper slug to this, and then cover with a 1.5 mm thick thermal pad.
 The clearance between PCB and housing is 3 mm, so inserting the board into the
 housing will apply gentle pressure to the thermal pad.  Chamfer the appropriate
 edge of the housing with a file to make inserting the assembly easier.
 
-(I found 2 mm × 6 mm × 100 mm copper bars on AliExpress, from which a 6 mm
-square slug can be cut with a hacksaw.  TODO - 10 mm wide, rather than 6 mm, are
-easier to find, so increasing the size of the exposed copper would be useful.)
+(You can find e.g., 2 mm × 10 mm × 100 mm copper bars on AliExpress, from which
+an appropriate slug can be cut with a hacksaw.)
 
 Software
 ========
@@ -148,12 +147,14 @@ Components that I have hand-soldered in preference to using JLCPCB assembly:
   fee.
 * The SMA connectors.  Position them carefully as they need to align with the
   end-plate holes!  These are edge-launch connectors for a 1.6 mm PCB.  You
-  can get these cheaply in bulk from AliExpress.
+  can get these cheaply in bulk from AliExpress.  The ones I used have approx
+  12 mm thread length, 18_mm total length including leads.
 * The 0402 antennae bias inductor I have hand soldered.  The pads are designed
   for easy hand soldering (one is bigger than the other, solder the smaller pad
   first).
 * Likewise the antennae power PTC fuse and the 74HC1G07 for antennae-short
-  detection are hand-soldered, to save assembly costs.
+  detection are hand-soldered, to save assembly costs.  The 74HC1G07 is
+  optional.
 * The three C0G/NPO loop-filter caps (C78, C79, C92) I have hand-soldered as
   JLCPCB doesn't have the exact parts.
 * The LED I have hand soldered.  It protrudes past the board edge, I am not sure
@@ -303,6 +304,11 @@ The feedback divider resistors are chosen to avoid JLCPCB loading fees.
 Additionally, fine-grained margining of the LDO output voltages can be achieved
 by replacing the two 0603 resistors, R56 and R66.
 
+**SMA Connectors** Feel free to replace with through-hole rather than
+edge-mount.  In that case, also straighten the board edge, as you no longer need
+the cut-outs.  You will need to adjust the position of the mounting-holes in the
+end-plates appropriately.
+
 **Programming Header** This can be removed, or swapped for whatever you fancy.
 You need to keep one of either the SWD header, or else the boot-pin header, in
 order to load firmware.  (Once you have functioning firmware installed, you can
@@ -407,6 +413,12 @@ hangs.
 
 Change Log
 ==========
+
+Current
+-------
+
+Enlarge the exposed pad underneath the clock chip to be 11 mm × 7 mm instead of
+7_mm square.
 
 Hardware version 1.0
 --------------------

@@ -3140,7 +3140,7 @@
 		)
 		(uuid "1b1473ba-1004-4374-8781-56502e40c331")
 	)
-	(text_box "R13 and R14 share a pad.  Only populate one!"
+	(text_box "R12 and R13 share a pad.  Only populate one!"
 		(exclude_from_sim no)
 		(at 124.46 61.5259 0)
 		(size 26.67 4.5141)

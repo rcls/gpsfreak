@@ -28,17 +28,20 @@ class Device:
         gen = usb.core.find(True, manufacturer='Ralph', product='GPS Freak',
                             **opts)
         u = list(gen) # type: ignore
-        if self.args.name is not None:
+        if self.args and self.args.name is not None:
             u = [dev for dev in u if message.get_name(dev) == self.args.name]
         if len(u) == 0:
             print('No GPS Freak USB device found', file=sys.stderr)
             sys.exit(1)
         if len(u) > 1:
-            print('Multiple GPS Freak USB devices found. ',
-                  'You may select one with the --sn option.', file=sys.stderr)
-            print('Available serial numbers are:', file=sys.stderr)
+            print('Multiple GPS Freak USB devices found.',
+                  file=sys.stderr)
+            print('You may select one with the --sn or --name option.',
+                  file=sys.stderr)
+            print('Available serial numbers and names are:', file=sys.stderr)
             for d in u:
-                print(f'    {d.serial_number}', file=sys.stderr)
+                name = message.get_name(d)
+                print(f'    {d.serial_number} {name}', file=sys.stderr)
             sys.exit(1)
         assert isinstance(u[0], USBDevice)
         #print(u.serial_number)

@@ -22,8 +22,8 @@ argp = argparse.ArgumentParser(description='GPS Freak utility')
 
 # The argparse help formatting is crap and potentially confusing, this appears
 # to be the least bad.
-subp = argp.add_subparsers(
-    title='GPS Freak Commands', metavar='COMMAND', dest='command')
+subp = argp.add_subparsers(title='GPS Freak Commands', metavar='COMMAND',
+                           dest='command', required=True)
 
 lmk05318b_util.add_freq_commands(subp, 'output', 'device output connector')
 
@@ -53,10 +53,10 @@ save.add_argument('-n', '--dry-run', action='store_true', default=False,
 configp = subp.add_parser(
     'config', help='Saved configuration maintenance',
     description='Saved configuration maintenance')
-config.add_to_argparse(configp, dest='config', metavar='SUB-COMMAND')
+config.add_to_argparse(configp)
 
-reboot = subp.add_parser(
-    'reboot', help='Cold restart entire device',
+restart = subp.add_parser(
+    'restart', help='Cold restart entire device',
     description='''Cold restart entire device.  This is equivalent to
     power-cycling.''')
 
@@ -121,7 +121,8 @@ elif args.command == 'plan':
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:
-        lmk05318b_util.do_freq(device, args, False)
+        lmk05318b_util.do_freq(
+            device, lmk05318b_util.make_freq_target(args, False), False)
     else:
         lmk05318b_util.report_live_freq(device, args.reference, False)
 
@@ -138,12 +139,12 @@ elif args.command == 'save':
 elif args.command == 'config':
     config.run_command(args, device, args.config)
 
-elif args.command == 'reboot':
+elif args.command == 'restart':
     dev = device.get_usb()
     # Leave these in reset until the reboot takes effect.
     message.command(dev, message.LMK05318B_PDN, b'\0')
     message.command(dev, message.GPS_RESET, b'\0')
-    dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # type: ignore
+    dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # pyright: ignore
 
 elif args.command == 'cpu-reset':
     # Just send the command blindly, no response.

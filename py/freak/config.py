@@ -109,7 +109,7 @@ def config_is_empty(dev: USBDevice, h: Config) -> bool:
     return h.magic == E and h.version == E and \
         h.generation == E and h.length == E \
         and message.crc(dev, h.address, 2048) == CRC_EMPTY_CONFIG \
-        and message.peek(dev, h.address, 2048) == b'\xff' * 2048
+        and memoryview(message.peek(dev, h.address, 2048)) == memoryview(b'\xff' * 2048)
 
 def next_header(dev: USBDevice, headers: Configs,
                 current: Config|None) -> Config:
@@ -333,9 +333,9 @@ def save_config(device: Device, save_ubx: bool, save_lmk: bool,
         print('No config changes.  Not writing to device.')
         return False
     if dry_run:
-        print('Dry run, not writing config')
+        print('Dry run, not writing config.')
     else:
-        print('Writing config to flash')
+        print('Writing config to flash.')
         write_config(dev, headers, active, cfg)
     return True
 
@@ -346,9 +346,65 @@ def do_name(device: Device, name: str | None):
     else:
         print(message.get_name(dev))
 
-def add_to_argparse(argp: argparse.ArgumentParser,
-                    dest: str = 'command', metavar: str = 'COMMAND') -> None:
-    subp = argp.add_subparsers(dest=dest, metavar=metavar,
+def do_wipe(device: Device):
+    dev = device.get_usb()
+    print('Retrieving saved configuration state.')
+    headers = get_headers(dev)
+    active = active_header(dev, headers)
+
+    generation = 1 if active is None else active.generation + 1
+    #print(f'Active = {active}, next generation {generation}')
+
+    config = bytearray(struct.pack('<IIII', MAGIC, VERSION, generation, 0))
+    config[12:16] = struct.pack('<I', len(config) + 4)
+    config += struct.pack('>I', crc32.crc32(config))
+    assert crc32.crc32(config) == crc32.VERIFY_MAGIC
+    config += b'\xff' * (31 & -len(config))
+    print('Writing config to flash')
+    write_config(dev, headers, active, config)
+
+def do_manufacture(device: Device):
+    import freak.lmk05318b_util as lmk05318b_util
+    import freak.plan_constants as plan_constants
+    import freak.plan_tools as plan_tools
+    import freak.ublox_util as ublox_util
+    from freak.plan_constants import Hz, MHz
+
+    print('Set baud rate')
+    ublox_util.do_baud(device, 230400)
+
+    print('Set GPS defaults')
+    ublox_update = [ublox_util.key_value(s) for s in f'''
+        TP-PULSE_DEF=1
+        TP-FREQ_LOCK_TP1={plan_constants.REF_FREQ // Hz}
+        TP-DUTY_LOCK_TP1=50.0
+        TP-PULSE_LENGTH_DEF=0x00
+        RATE-MEAS=100
+        RATE-NAV=10
+        SBAS-USE_TESTMODE=True
+        SBAS-PRNSCANMASK=0
+        MSGOUT-NMEA_ID_GSV_UART1=1'''.split()]
+    ublox_util.do_set(device.get_ublox(), ublox_update)
+
+    print('Load TICS/Pro config')
+    import os
+    lmk05318b_util.do_upload(
+        device, os.path.dirname(__file__) + '/bw10hz_ref8844582.tcs')
+
+    print('Set some frequencies')
+    target = plan_tools.Target(
+        freqs = [10 * MHz, 10 * MHz, 10 * MHz, 10 * MHz, 10 * MHz, Hz])
+    lmk05318b_util.do_freq(device, target, False)
+
+    print('Set drive levels')
+    drives = [('1', 'lvds16'), ('2', 'lvds16'), ('3', 'lvds4'), ('4', 'lvds4'),
+              ('5', 'off'), ('6', 'off')]
+    lmk05318b_util.do_drive_out(device, drives)
+
+    print("If you are happy with this then save with 'freak config save'")
+
+def add_to_argparse(argp: argparse.ArgumentParser) -> None:
+    subp = argp.add_subparsers(dest='command',
                                required=True, help='Sub-command')
     save = subp.add_parser(
         'save', help='Save all device config to flash',
@@ -360,12 +416,28 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     name = subp.add_parser('name', help='Assign the device name')
     name.add_argument('NAME', nargs='?', help='Device name, or omit to print')
 
+    subp.add_parser('manufacture', help='Initial set-up of device',
+                    description='''This loads typical configurations for GPS
+                    and clock generation.  The configuration is not saved
+                    to flash, you must run 'freak config save' to do that.'''),
+
+    subp.add_parser('wipe', help='Save an empty device config',
+                    description='''Save an empty device configuration.  Note
+                    that old configs are hidden but not erased.  The running
+                    configuration is not changed.''')
+
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'save':
         save_config(device, True, True, args.dry_run)
 
     elif command == 'name':
         do_name(device, args.NAME)
+
+    elif command == 'wipe':
+        do_wipe(device)
+
+    elif command == 'manufacture':
+        do_manufacture(device)
 
     else:
         assert False, f'This should never happen: {command}'

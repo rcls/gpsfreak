@@ -21,6 +21,17 @@ import usb.core # pyright: ignore
 
 from typing import Any, Tuple
 
+def key_value(s: str) -> Tuple[UBloxCfg, Any]:
+    if not '=' in s:
+        raise ValueError('Key/value pairs must be in the form KEY=VALUE')
+    K, V = s.split('=', 1)
+    try:
+        cfg = UBloxCfg.get(K)
+    except KeyError:
+        raise ValueError()
+    return cfg, cfg.to_value(V)
+key_value.__name__ = 'configuration KEY=VALUE pair'
+
 def add_to_argparse(argp: argparse.ArgumentParser,
                     dest: str = 'command', metavar: str = 'COMMAND') -> None:
     argp.add_argument(
@@ -37,17 +48,6 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     subp.add_parser('status', description='Basic GPS status info.',
                     help='Basic GPS status info')
-
-    def key_value(s: str) -> Tuple[UBloxCfg, Any]:
-        if not '=' in s:
-            raise ValueError('Key/value pairs must be in the form KEY=VALUE')
-        K, V = s.split('=', 1)
-        try:
-            cfg = UBloxCfg.get(K)
-        except KeyError:
-            raise ValueError()
-        return cfg, cfg.to_value(V)
-    key_value.__name__ = 'configuration KEY=VALUE pair'
 
     def int_key(s: str) -> int:
         try:

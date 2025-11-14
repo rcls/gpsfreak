@@ -197,8 +197,7 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data.PLL2_LF_C3 = 7
     return data
 
-def do_freq(dev: Device, args: argparse.Namespace, raw: bool) -> None:
-    target = make_freq_target(args, raw)
+def do_freq(dev: Device, target: Target, raw: bool) -> None:
     plan = lmk05318b_plan.plan(target)
     report_plan(target, plan, raw, False)
 
@@ -426,7 +425,7 @@ def report_plan(target: Target, plan: PLLPlan, raw: bool,
 
     print()
     dpll = plan.dpll
-    print(f'BAW: {freq_to_str(dpll.baw)} = {freq_to_str(REF_FREQ)} * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
+    print(f'BAW: {freq_to_str(dpll.baw)} = {freq_to_str(target.reference)} * 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
     if dpll.baw != dpll.baw_target:
         error = freq_to_str(dpll.baw - dpll.baw_target, 4)
         print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
@@ -559,7 +558,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     if command == 'freq':
         if len(args.FREQ) != 0:
-            do_freq(device, args, True)
+            do_freq(device, make_freq_target(args, True), True)
         else:
             report_live_freq(device, REF_FREQ, True)
 

@@ -221,6 +221,12 @@
 		(uuid "00e9d64f-d5bf-47e6-b6de-d708a17d7c05")
 	)
 	(junction
+		(at 87.63 67.31)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "23433d09-18d8-4e60-bdff-707ce66bbd56")
+	)
+	(junction
 		(at 76.2 67.31)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -231,6 +237,16 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "61d0df13-3483-4c70-983c-2a315e265cc0")
+	)
+	(wire
+		(pts
+			(xy 87.63 67.31) (xy 91.44 67.31)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4db4720f-7cf3-4450-825f-0c4b810db913")
 	)
 	(wire
 		(pts
@@ -254,7 +270,7 @@
 	)
 	(wire
 		(pts
-			(xy 83.82 67.31) (xy 91.44 67.31)
+			(xy 83.82 67.31) (xy 87.63 67.31)
 		)
 		(stroke
 			(width 0)
@@ -395,6 +411,79 @@
 			(project ""
 				(path "/7c517696-5291-4036-b4fd-2220f5916b7c"
 					(reference "#PWR01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole_Pad")
+		(at 87.63 69.85 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "5f27fece-380b-44e4-9114-b4d8cf08ef56")
+		(property "Reference" "H5"
+			(at 87.63 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED Hole"
+			(at 87.63 73.025 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Parts:LED_Hole"
+			(at 87.63 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 87.63 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Mounting Hole with connection"
+			(at 87.63 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB" ""
+			(at 87.63 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "564e496b-ba30-4aa1-948e-77b4853587e4")
+		)
+		(instances
+			(project "end-in"
+				(path "/7c517696-5291-4036-b4fd-2220f5916b7c"
+					(reference "H5")
 					(unit 1)
 				)
 			)

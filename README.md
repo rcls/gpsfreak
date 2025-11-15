@@ -420,6 +420,9 @@ Current
 Enlarge the exposed pad underneath the clock chip to be 11 mm × 7 mm instead of
 7_mm square.
 
+Dont have the LED overhanging the board edge.  Change all the LED resistors to
+0603 for easier swapping.  Plate the panel cut-out opening for the LED.
+
 Hardware version 1.0
 --------------------
 

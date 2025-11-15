@@ -423,6 +423,8 @@ Enlarge the exposed pad underneath the clock chip to be 11 mm × 7 mm instea
 Dont have the LED overhanging the board edge.  Change all the LED resistors to
 0603 for easier swapping.  Plate the panel cut-out opening for the LED.
 
+Remove the unnecessary strap resistor on the GPS timepulse U.Fl connector.
+
 Hardware version 1.0
 --------------------
 

@@ -3332,16 +3332,6 @@
 	)
 	(wire
 		(pts
-			(xy 127 114.3) (xy 125.73 114.3)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "093c8e84-2219-42f6-942d-471a8cdb8497")
-	)
-	(wire
-		(pts
 			(xy 123.19 67.31) (xy 130.81 67.31)
 		)
 		(stroke
@@ -3462,7 +3452,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 114.3) (xy 116.84 114.3)
+			(xy 116.84 114.3) (xy 119.38 114.3)
 		)
 		(stroke
 			(width 0)
@@ -4914,82 +4904,6 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 121.92 114.3 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp yes)
-		(uuid "5577b263-b557-4a4d-97c4-78ae91daeb03")
-		(property "Reference" "R15"
-			(at 121.92 112.268 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0"
-			(at 121.92 114.3 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 121.92 116.078 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 121.92 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 121.92 114.3 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" ""
-			(at 121.92 114.3 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "7e75a639-6d0b-4940-82e8-8fa47d2d4f20")
-		)
-		(pin "1"
-			(uuid "d0cfd5e1-07ab-42b3-bfcf-2e7541e5b4ad")
-		)
-		(instances
-			(project "gpsfreak"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "R15")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
 		(at 85.09 72.39 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -5773,7 +5687,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 132.08 119.38 0)
+		(at 124.46 119.38 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5781,7 +5695,7 @@
 		(dnp no)
 		(uuid "98ab1a24-0982-43cc-8563-3d0da98e69e0")
 		(property "Reference" "#PWR06"
-			(at 132.08 125.73 0)
+			(at 124.46 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5790,7 +5704,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 132.08 122.174 0)
+			(at 124.46 122.174 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5799,7 +5713,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 132.08 119.38 0)
+			(at 124.46 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5808,7 +5722,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 132.08 119.38 0)
+			(at 124.46 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5817,7 +5731,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 132.08 119.38 0)
+			(at 124.46 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6408,7 +6322,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_Coaxial")
-		(at 132.08 114.3 0)
+		(at 124.46 114.3 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6416,7 +6330,7 @@
 		(dnp no)
 		(uuid "b97ed23b-5788-491c-987d-17fab66604a9")
 		(property "Reference" "J8"
-			(at 132.08 111.506 0)
+			(at 124.46 111.506 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6424,7 +6338,7 @@
 			)
 		)
 		(property "Value" "U.Fl"
-			(at 135.001 114.3 90)
+			(at 127.381 114.3 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6432,7 +6346,7 @@
 			)
 		)
 		(property "Footprint" "Parts:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
-			(at 132.08 114.3 0)
+			(at 124.46 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6441,7 +6355,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 132.08 114.3 0)
+			(at 124.46 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6450,7 +6364,7 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 132.08 114.3 0)
+			(at 124.46 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)

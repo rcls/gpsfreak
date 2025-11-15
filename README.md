@@ -1,13 +1,14 @@
 GPS Freak — GPS Disciplined Frequency Generator
 ===============================================
 
-GPS Freak is a flexible, programmable, high-quality, frequency generator, using
-GPS as a reference.
+GPS Freak is a flexible, programmable, high-accuracy, low-jitter, frequency
+generator, using GPS as a reference.
 
 The outputs are a total of 5 SMA connectors, with 4 separately programmable
-frequencies derived from 2 PLLs.  The outputs are driven by a Texas Instruments
-LMK05318b clock generator, and a U-Blox MAX-10 GPS receiver providing the
-overall frequency reference.
+frequencies derived from 2 PLLs.
+
+The outputs are driven by a Texas Instruments LMK05318b clock generator, and a
+U-Blox MAX-10 GPS receiver providing the overall frequency reference.
 
 Power and data are supplied via a USB-C connector (USB FS data rate).  The GPS
 unit is available over USB as a CDC ACM serial port.  In addition, there are USB
@@ -23,7 +24,6 @@ All software in this project is licensed under the GNU GPL v3.  (`COPYING.txt`)
 
 Connectors
 ==========
-
 
 **Outputs 1+** and **1–**
 : Complementary high frequency, 3 MHz to 1.6 GHz, 11 dBm nominal output power.
@@ -98,11 +98,12 @@ The LMK05318b generates a bit of heat, and the board may reach temperatures
 approaching 30 °C above ambient.  This should not be a problem, but provision is
 made to heat-sink the rear of the PCB to the case.
 
-There is a 11 mm × 7 mm exposed copper area backside to the LMK05318b.  Solder a
-2 mm thick copper slug to this, and then cover with a 1.5 mm thick thermal pad.
-The clearance between PCB and housing is 3 mm, so inserting the board into the
-housing will apply gentle pressure to the thermal pad.  Chamfer the appropriate
-edge of the housing with a file to make inserting the assembly easier.
+There is an 11 mm × 7 mm exposed copper area backside to the LMK05318b.  Solder
+a 2 mm thick copper slug to this, and then cover with a 1.5 mm thick thermal
+pad.  The clearance between PCB and housing is 3 mm, so inserting the board into
+the housing will apply gentle pressure to the thermal pad.  Chamfer the
+appropriate edge of the housing with a file to make inserting the assembly
+easier.
 
 (You can find e.g., 2 mm × 10 mm × 100 mm copper bars on AliExpress, from which
 an appropriate slug can be cut with a hacksaw.)
@@ -152,7 +153,7 @@ Components that I have hand-soldered in preference to using JLCPCB assembly:
 * The 0402 antennae bias inductor I have hand soldered.  The pads are designed
   for easy hand soldering (one is bigger than the other, solder the smaller pad
   first).
-* Likewise the antennae power PTC fuse and the 74HC1G07 for antennae-short
+* Likewise, the antennae power PTC fuse and the 74HC1G07 for antennae-short
   detection are hand-soldered, to save assembly costs.  The 74HC1G07 is
   optional.
 * The three C0G/NPO loop-filter caps (C78, C79, C92) I have hand-soldered as
@@ -420,7 +421,7 @@ Current
 Enlarge the exposed pad underneath the clock chip to be 11 mm × 7 mm instead of
 7_mm square.
 
-Dont have the LED overhanging the board edge.  Change all the LED resistors to
+Don't have the LED overhanging the board edge.  Change all the LED resistors to
 0603 for easier swapping.  Plate the panel cut-out opening for the LED.
 
 Remove the unnecessary strap resistor on the GPS timepulse U.Fl connector.
@@ -428,10 +429,9 @@ Remove the unnecessary strap resistor on the GPS timepulse U.Fl connector.
 Hardware version 1.0
 --------------------
 
-Two built.  Major revision from prototype.  git rev
-496bb8c98727dc07b0214c3883fdf14111215e46.
+Two built.  Major revision from prototype.  git rev 496bb8c98727dc07.
 
 Prototype
 ---------
 
-Hardware was git rev 24c0655742e6f0937d6e081d2a56385f9dd78af1.  Only one built.
+Hardware was git rev 24c0655742e6f093.  Only one built.

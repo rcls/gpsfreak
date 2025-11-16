@@ -36348,7 +36348,7 @@
 		(property "Reference" "R3"
 			(at -1.6 0.05 180)
 			(layer "F.SilkS")
-			(uuid "a17c1033-1ba7-438d-bef7-d1071c3615f0")
+			(uuid "b45134fe-4f50-42f7-993d-91fa50150919")
 			(effects
 				(font
 					(size 1 1)
@@ -36359,7 +36359,7 @@
 		(property "Value" "100"
 			(at 0 1.17 90)
 			(layer "F.Fab")
-			(uuid "b16be623-4b06-40e9-8aac-52d419c0b5a9")
+			(uuid "ec366646-3b88-42f4-9267-38bc0b6bbaf5")
 			(effects
 				(font
 					(size 1 1)
@@ -36371,7 +36371,7 @@
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "d4f1d5d1-b95a-4dcf-b990-e9e15e67376a")
+			(uuid "4ae4c736-99c3-453d-9545-e05f26952d7a")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -36383,7 +36383,7 @@
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "7897ce5c-52ae-4181-b216-5e111e31b485")
+			(uuid "ef03310b-2429-47d2-8ac0-a8a73452a4fa")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -37874,14 +37874,6 @@
 		(layer "F.Cu")
 		(net 1)
 		(uuid "158d6563-bded-4778-a42c-ea47afc5c066")
-	)
-	(segment
-		(start 155.8 95.8)
-		(end 156.8 95.8)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 1)
-		(uuid "15c62548-a8a9-4749-87b7-57326772f166")
 	)
 	(segment
 		(start 109.9 116.71)
@@ -40515,7 +40507,7 @@
 		(uuid "79fbbc16-4425-4357-8676-ecbd57a44104")
 	)
 	(via
-		(at 148.1 113.7)
+		(at 148.05 113.7)
 		(size 0.5)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
@@ -40576,7 +40568,7 @@
 		(uuid "820e19d9-5b6e-4a22-9877-4c5e2810f5ec")
 	)
 	(via
-		(at 141.9 94.6)
+		(at 141.3 95.35)
 		(size 0.5)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
@@ -40677,7 +40669,7 @@
 		(uuid "8d101d06-d97e-4c9a-86b3-0572057e19f7")
 	)
 	(via
-		(at 136.5 89.65)
+		(at 138 89.35)
 		(size 0.5)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")

@@ -22,9 +22,7 @@ unsafe extern "C" {
 static end_of_ram: u8 = 0;
 
 const SERIAL_LEN: usize = 18;
-const USB_SERIAL_LEN: usize = SERIAL_LEN * 2 + 2;
 pub static SERIAL_NUMBER: UCell<[u8; SERIAL_LEN]> = UCell::new([0; _]);
-pub static USB_SERIAL_NUMBER: UCell<[u8; USB_SERIAL_LEN]> = UCell::new([0; _]);
 
 pub static IS_PROTOTYPE: UCell<bool> = UCell::new(false);
 
@@ -152,8 +150,7 @@ pub fn init() {
     if sn[0] == PROTO_SN0 && sn[1] == PROTO_SN1 && sn[2] == PROTO_SN2 {
         unsafe {*IS_PROTOTYPE.as_mut() = true};
     }
-    format_serial_number(sn, unsafe {SERIAL_NUMBER.as_mut()},
-                         unsafe {USB_SERIAL_NUMBER.as_mut()});
+    format_serial_number(sn, unsafe {SERIAL_NUMBER.as_mut()});
 
     barrier();
 
@@ -346,8 +343,7 @@ unsafe fn magic_reboot_config() -> &'static VCell<u32> {
     unsafe {&*(BKPSRAM_BASE as *const VCell<u32>)}
 }
 
-fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN],
-                        usb: &mut [u8; USB_SERIAL_LEN]) {
+fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN]) {
     // Little endian, start from high address.
     // 0x08fff808 :
     //     ASCII lot number.
@@ -365,11 +361,6 @@ fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN],
     for i in 0..10 {
         let hex = binary >> 36 - i * 4 & 15;
         text[8 + i] = hex as u8 + b'0' + if hex > 9 {b'a' - b'9' - 1} else {0};
-    }
-    usb[0] = usb.len() as u8;
-    usb[1] = 3;
-    for i in 0..SERIAL_LEN {
-        usb[i * 2 + 2] = text[i];
     }
 }
 
@@ -426,15 +417,7 @@ unsafe extern "C" {
 fn test_sn() {
     let sn = [PROTO_SN0, PROTO_SN1, PROTO_SN2];
     let mut text = [0; SERIAL_LEN];
-    let mut usb = [0; USB_SERIAL_LEN];
-    format_serial_number(&sn, &mut text, &mut usb);
-    assert_eq!(usb[0] as usize, size_of_val(&usb));
-    assert_eq!(usb[1], 3);
-    let mut bytes = [0; USB_SERIAL_LEN / 2 - 1];
-    for (i, &c) in usb[2..].iter().step_by(2).enumerate() {
-        bytes[i] = c as u8;
-    }
-    let str = str::from_utf8(&bytes).unwrap();
-    assert_eq!(str, str::from_utf8(&text).unwrap());
-    assert_eq!(str, "Q316490-05006b0028");
+    format_serial_number(&sn, &mut text);
+    let text = str::from_utf8(&text).unwrap();
+    assert_eq!(text, "Q316490-05006b0028");
 }

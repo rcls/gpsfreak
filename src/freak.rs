@@ -55,7 +55,8 @@ pub fn main() -> ! {
         cpu::nothing();
     }
 
-    command::init();
+    command::init(
+        unsafe {str::from_utf8_unchecked(cpu::SERIAL_NUMBER.as_ref())});
 
     provision::provision();
 

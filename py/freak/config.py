@@ -404,8 +404,7 @@ def do_manufacture(device: Device):
     print("If you are happy with this then save with 'freak config save'")
 
 def add_to_argparse(argp: argparse.ArgumentParser) -> None:
-    subp = argp.add_subparsers(dest='command',
-                               required=True, help='Sub-command')
+    subp = argp.add_subparsers(dest='config', required=True)
     save = subp.add_parser(
         'save', help='Save all device config to flash',
         description='''Save full device configuration to flash.  This saves

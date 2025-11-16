@@ -319,14 +319,11 @@ upgrade purely via software command.)
 
 **LED** This is a common 1206 edge-mount footprint RGB LED.  If you use a
 different part, then double or triple check the footprint, and note the odd pad
-numbering.  The resistor on the green line is a higher value, as the green
-component seems to be much brighter than the red and blue.  That resistor is an
-0603 footprint to make it easier to swap if desired.
+numbering.
 
 **PTC Fuse**: U-Blox example schematics just use a current limiting resistor.
 Which would be cheaper. The 74HC1G07 logic gate for antennae short-circuit
-sensing is optional; I have populated it but not actually enabled it in the GPS
-configuration.
+sensing is optional.
 
 Hardware Versioning
 ===================
@@ -345,22 +342,26 @@ much, or does SBAS make this redundant?
 
 The TCXO can be replaced by a cheaper one.  The phase noise to worry about is
 capped above at around 18 kHz by the BAW oscillator, and at low frequencies by
-the GPS output.  We possibly don't even need a TCXO?
+the GPS output.  Using a TCXO rather than an XO is probably not essential, but
+does allow us to run the LMK05318b at low bandwidth and smooth out the
+once-per-second frequency adjustments from the GPS unit.
 
 The CPU is overkill.  With the current arrangement of dumb firmware and all the
 smarts in the Python scripts, a low-end CPU would be just fine.
 
 The temperature sensor is only for development.  Once we know how much heat the
-board generates, we can drop it.  Or just use a 1 ¢ thermistor.
+board generates, we can drop it.  Or just use a 1 ¢ thermistor.  There is also
+the CPU temperature sensor.
 
 Evaluate whether or the C0G capacitors on the loop filter are worthwhile.  I
 suspect not in realistic conditions.  The 0.47 µF C0G cap could also be replaced
 by a through-hole film cap.
 
-Do we need the super cap?  It's only to speed up GPS start-up, but we are likely
-to be always on anyway.
+The super cap is more or less redundant.  It's only to speed up GPS start-up
+after a short power outage, but we are likely to be always on anyway.
 
-I'm not sure the output balun on output 2 is worth the cost.
+The output balun on output 2 is not worth the cost.  I've marked it as DNP
+in the schematic.
 
 The `freak` tool
 ========================

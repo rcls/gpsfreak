@@ -11,7 +11,7 @@ class PlanningFailed(RuntimeError):
 
 @dataclass
 class Target:
-    '''Target output frequency list.  Use a frequence of zero for output off.
+    '''Target output frequency list.  Use a frequency of zero for output off.
 
     pll{1|2}_base allows you to constrain the PLL{1|2} frequency to be (a
     multiple of) the specified value.'''

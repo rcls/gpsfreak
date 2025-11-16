@@ -62,6 +62,8 @@ restart = subp.add_parser(
 
 cpu_reset = subp.add_parser(
     'cpu-reset', help='Reset device CPU', description='Reset device CPU')
+cpu_reset.add_argument('-u', '--dfu', action='store_true',
+                       help='Enter DFU for firmware upload')
 
 clock_p = subp.add_parser(
     'clock', aliases=['lmk05318b'], help='LMK05318b clock-gen maintenance',
@@ -78,10 +80,10 @@ gps_p = subp.add_parser(
 ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 
 argp.add_argument('-n', '--name', metavar='NAME',
-                  help='Name of device to connect to')
+                  help='Name of device to connect to (USB ser. no.)')
 
-argp.add_argument('-s', '--sn', metavar='SERIAL NUM.',
-                  help='Serial number of device to connect to')
+argp.add_argument('-c', '--cpu', metavar='SERIAL NUM.',
+                  help='CPU serial number of device to connect to')
 
 def do_info(device: Device) -> None:
     dev = device.get_usb()
@@ -96,7 +98,7 @@ def do_info(device: Device) -> None:
     result = message.tmp117_read(dev, 0, 2)
     assert len(result) == 2
     temp = struct.unpack('>H', result)[0] / 128
-    print('Int. temperature:', temp, '°C')
+    print(f'Int. temperature: {temp:.2f} °C')
 
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
     print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
@@ -148,8 +150,12 @@ elif args.command == 'restart':
 
 elif args.command == 'cpu-reset':
     # Just send the command blindly, no response.
-    device.get_usb().write( # type: ignore
-        0x03, message.frame(message.CPU_REBOOT, b''))
+    if not args.dfu:
+        device.get_usb().write( # type: ignore
+            0x03, message.frame(message.CPU_REBOOT, b''))
+    else:
+        device.get_usb().detach_kernel_driver(0)
+        device.get_usb().ctrl_transfer(0x21, 0, timeout=100)
 
 elif args.command in ('clock', 'lmk05318b'):
     lmk05318b_util.run_command(args, device, args.clock)

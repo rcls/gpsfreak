@@ -45,7 +45,7 @@ static DATA: [u16; TOTAL_LENGTH] = {
     while i < NUM_STRINGS {
         let start = OFFSETS[i] as usize;
         let end = start + LENGTHS[i] as usize;
-        // Byte count (length*2+2), Descriptor type (3),  as LE word.
+        // Byte count (length*2+2), Descriptor type (3), as LE word.
         d[start] = LENGTHS[i] as u16 * 2 + 2 + 0x300;
         str_to_utf16_inplace(&mut d[start + 1 ..= end], STRING_LIST[i]);
         i += 1;
@@ -56,7 +56,12 @@ static DATA: [u16; TOTAL_LENGTH] = {
 pub fn get_descriptor(idx: u8) -> SetupResult {
     if idx == IDX_SERIAL_NUMBER {
         // Special case.
-        return SetupResult::Tx(crate::cpu::USB_SERIAL_NUMBER.as_ref());
+        let data = crate::command::USB_NAME.as_ref();
+        let byte_len = data[0] & 0xff;
+        let data = unsafe {
+            core::slice::from_raw_parts(data as *const u16 as *const u8,
+                                        byte_len as usize)};
+        return SetupResult::Tx(data);
     }
     if idx as usize >= NUM_STRINGS {
         return SetupResult::error();
@@ -64,7 +69,7 @@ pub fn get_descriptor(idx: u8) -> SetupResult {
     let offset = OFFSETS[idx as usize] as usize;
     let len = DATA[offset] as usize & 255;
     let data: &[u8] = unsafe{core::slice::from_raw_parts(
-        &DATA[offset] as *const _ as *const _, len)};
+        &DATA[offset] as *const u16 as *const u8, len)};
     SetupResult::Tx(data)
 }
 
@@ -86,10 +91,23 @@ const fn str_to_utf16_inplace(u: &mut [u16], s: &str) {
             u[i] = c as u16;
         }
         else {
-            u[i] = ((c as u32) >> 10 & 0x3ff) as u16 + 0xd800;
+            let excess = c as u32 - 0x10000;
+            u[i] = (excess >> 10 & 0x3ff) as u16 + 0xd800;
             i += 1;
-            u[i] = (c as u16 & 0x3ff) + 0xdc00;
+            u[i] = (excess & 0x3ff) as u16 + 0xdc00;
         }
         i += 1;
+    }
+}
+
+#[test]
+fn test_utf16() {
+    for s in ["abcd123456", "12🔴3🟥4🛑56🚫7🚨8😷"] {
+        let len = str_utf16_count(s);
+        let mut place = Vec::new();
+        place.resize(len, 0);
+        str_to_utf16_inplace(&mut place, s);
+        let utf16: Vec<u16> = s.encode_utf16().collect();
+        assert_eq!(place, utf16);
     }
 }

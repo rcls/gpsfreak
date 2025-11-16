@@ -1,0 +1,11 @@
+ACTION!="add", SUBSYSTEM!="usb_device", GOTO="freak_usb_end"
+
+ATTR{product}=="GPS Freak", GROUP="dialout"
+
+LABEL="freak_usb_end"
+
+ACTION!="add", SUBSYSTEM!="tty", GOTO="freak_tty_end"
+
+ATTRS{product}=="GPS Freak", SYMLINK+="freak-$env{ID_SERIAL_SHORT}"
+
+LABEL="freak_tty_end"

@@ -45,8 +45,9 @@
 //!         A u16 payload field.  See below for the error enumeration.
 //!
 //!    02 : Get protocol version.  Response is 82 with u32 payload.
-//!    03 : Get serial number.  Response is 83 with ASCII string payload.
-//!    04 : Get/set device name.  Response is 84 with string payload.
+//!    03 : Get CPU serial number.  Response is 83 with ASCII string payload.
+//!    04 : Get/set device name.  Response is 84 with UTF-8 payload.
+//!         This string is also used as the USB serial number.
 //!
 //!    10 : CPU reboot.  No response.
 //!    11 : GPS reset. u8 payload.
@@ -161,28 +162,48 @@ pub struct Message<P> {
     crc1   : u8,
 }
 
+/// Assigned device name, as a message.
 static NAME: UCell<MessageBuf> = Default::default();
+/// Assigned device name, in USB format.
+pub static USB_NAME: UCell<[u16; 32]> = UCell::new([0; _]);
 
-pub fn init() {
+pub fn init(serial: &str) {
     let name = unsafe {NAME.as_mut()};
     name.magic = MAGIC;
     name.code = 0x84;
-    let len = crate::cpu::SERIAL_NUMBER.len();
+    let sbytes = serial.as_bytes();
+    let len = sbytes.len();
     name.len = len as u8;
-    name.payload[..len].copy_from_slice(crate::cpu::SERIAL_NUMBER.as_ref());
+    name.payload[..len].copy_from_slice(sbytes.as_ref());
+    str_to_usb(unsafe {USB_NAME.as_mut()}, serial);
+}
+
+fn str_to_usb(out: &mut [u16], s: &str) {
+    let mut w = out.iter_mut();
+    let Some(head) = w.next() else {return};
+    let mut bytes = 0x302;
+    for code in s.chars() {
+        let code = code as u32;
+        if code < 0x10000 {
+            let Some(c) = w.next() else {break};
+            *c = code as u16;
+            bytes += 2;
+        }
+        else {
+            let Some(c1) = w.next() else {break};
+            let Some(c2) = w.next() else {break};
+            let code = code - 0x10000;
+            *c1 = (code >> 10 & 0x3ff) as u16 + 0xd800;
+            *c2 = (code & 0x3ff) as u16 + 0xdc00;
+            bytes += 4;
+        }
+    }
+    *head = bytes;
 }
 
 impl MessageBuf {
     fn start(code: u8) -> MessageBuf {
         MessageBuf{magic: MAGIC, code, len: 0, payload: [0; _]}
-    }
-    fn new(code: u8, payload: &[u8]) -> MessageBuf{
-        let len = payload.len();
-        let mut result = MessageBuf{
-            magic: MAGIC, code, len: len as u8, payload: [0; _],
-        };
-        result.payload[..len].copy_from_slice(payload);
-        result
     }
     fn send(&mut self, r: Responder) -> Result {
         self.set_crc();
@@ -289,7 +310,11 @@ fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
 
 fn ping(message: &MessageBuf, r: Responder) -> Result {
     // Send a generic ACK with the same payload.
-    MessageBuf::new(0x80, message.get_payload()).send(r)
+    let mut resp = MessageBuf::start(0x80);
+    let len = message.len as usize;
+    resp.len = len as u8;
+    resp.payload[..len].copy_from_slice(&message.payload[..len]);
+    resp.send(r)
 }
 
 fn get_protocol_version(message: &MessageBuf, r: Responder) -> Result {
@@ -311,8 +336,12 @@ fn set_get_name(message: &MessageBuf, r: Responder) -> Result {
         return Err(Error::FramingError);
     }
     if len > 0 {
+        let payload = &message.payload[..len];
+        let Ok(utf8) = str::from_utf8(payload)
+            else {return Err(Error::BadParameter)};
+        str_to_usb(unsafe {USB_NAME.as_mut()}, utf8);
         name.len = len as u8;
-        name.payload[..len].copy_from_slice(&message.payload[..len]);
+        name.payload[..len].copy_from_slice(payload);
     }
     name.send(r)
 }
@@ -481,4 +510,19 @@ fn test_gps_write(message: &MessageBuf) -> Result {
         prio.wfe();
     }
     SEND_ACK
+}
+
+
+#[test]
+fn test_utf16() {
+    for s in ["abcd123456", "12🔴3🟥4🛑56🚫7🚨8😷"] {
+        let utf16: Vec<u16> = s.encode_utf16().collect();
+        let mut place = Vec::new();
+        place.resize(utf16.len() + 1, 0);
+        str_to_usb(&mut place, s);
+        let p0b = place[0].to_ne_bytes();
+        assert_eq!(p0b[0] as usize, utf16.len() * 2 + 2);
+        assert_eq!(p0b[1], 3);
+        assert_eq!(&place[1..], utf16);
+    }
 }

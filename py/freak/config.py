@@ -389,7 +389,7 @@ def do_manufacture(device: Device):
     print('Load TICS/Pro config')
     import os
     lmk05318b_util.do_upload(
-        device, os.path.dirname(__file__) + '/bw10hz_ref8844582.tcs')
+        device, os.path.dirname(__file__) + '/bw0p3hz_ref8844582.tcs')
 
     print('Set some frequencies')
     target = plan_tools.Target(

@@ -14,8 +14,8 @@ pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     device_sub_class  : 2, // Unknown
     device_protocol   : 1, // Interface association
     max_packet_size0  : 64,
-    vendor            : 0xf055, // FIXME
-    product           : 0xd448, // FIXME
+    vendor            : 0x1209,
+    product           : 0xce93,
     device            : 0x100,
     i_manufacturer    : string_index("Ralph"),
     i_product         : string_index("GPS Freak"),

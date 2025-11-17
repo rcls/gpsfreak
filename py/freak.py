@@ -90,18 +90,17 @@ def do_info(device: Device) -> None:
     # Ping with a UUID and check that we get the same one back...
     message.ping(dev, bytes(str(uuid.uuid4()), 'ascii'))
 
-    serial = message.get_serial_number(dev)
-    print('Device serial No:', serial)
+    print('Device name   :', message.get_name(dev))
 
-    print('Device name     :', message.get_name(dev))
+    print('CPU serial num:', message.get_serial_number(dev))
 
     result = message.tmp117_read(dev, 0, 2)
     assert len(result) == 2
     temp = struct.unpack('>H', result)[0] / 128
-    print(f'Int. temperature: {temp:.2f} °C')
+    print(f'Temperature   : {temp:.2f} °C')
 
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
-    print('Protocol Version:', struct.unpack('<I', pv.payload)[0])
+    print('Protocol Vers :', struct.unpack('<I', pv.payload)[0])
 
 if len(sys.argv) < 2:
     argp.print_help()
@@ -143,7 +142,8 @@ elif args.command == 'config':
 
 elif args.command == 'restart':
     dev = device.get_usb()
-    # Leave these in reset until the reboot takes effect.
+    # Leave these in reset until the reboot takes effect.  Then the GPIOs get
+    # released and pulled high.
     message.command(dev, message.LMK05318B_PDN, b'\0')
     message.command(dev, message.GPS_RESET, b'\0')
     dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # pyright: ignore
@@ -154,7 +154,6 @@ elif args.command == 'cpu-reset':
         device.get_usb().write( # type: ignore
             0x03, message.frame(message.CPU_REBOOT, b''))
     else:
-        device.get_usb().detach_kernel_driver(0)
         device.get_usb().ctrl_transfer(0x21, 0, timeout=100)
 
 elif args.command in ('clock', 'lmk05318b'):

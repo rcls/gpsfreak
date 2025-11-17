@@ -22,6 +22,8 @@ pub struct ControlState {
     pending_address: Option<u8>,
     /// Are we configured?
     configured: bool,
+    /// Do we have a pending DFU reboot?
+    pending_dfu: bool,
 }
 
 pub static CONTROL_STATE: UCell<ControlState> = Default::default();
@@ -45,6 +47,10 @@ impl ControlState {
             chep_ctrl().write(
                 |w| w.control().VTTX().clear_bit().tx_valid(&chep));
             return;
+        }
+
+        if self.pending_dfu {
+            unsafe {crate::cpu::trigger_dfu()};
         }
 
         chep_ctrl().write(
@@ -138,7 +144,7 @@ impl ControlState {
                setup.length);
         match (setup.request_type, setup.request) {
             (0x80, 0x00) => SetupResult::tx_data(&0u16), // Status.
-            (0x21, 0x00) => unsafe {crate::cpu::trigger_dfu()},
+            (0x21, 0x00) => {self.pending_dfu = true; SetupResult::no_data()}
             (0x00, 0x05) => self.set_address(setup.value_lo), // Set address.
             (0x80, 0x06) => match setup.value_hi { // Get descriptor.
                 1 => SetupResult::tx_data(&DEVICE_DESC),

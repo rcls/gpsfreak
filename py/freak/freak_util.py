@@ -25,8 +25,7 @@ class Device:
         opts = {}
         if self.args and self.args.name:
             opts['serial_number'] = self.args.name
-        gen = usb.core.find(True, manufacturer='Ralph', product='GPS Freak',
-                            **opts)
+        gen = usb.core.find(True, idVendor=0x1209, idProduct=0xce93, **opts)
         u = list(gen) # type: ignore
         if self.args and self.args.cpu is not None:
             u = [dev for dev in u if message.get_serial_number(dev)

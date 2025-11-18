@@ -114,14 +114,14 @@ if args.command == 'info':
     do_info(device)
 
 elif args.command == 'plan':
-    target = lmk05318b_util.make_freq_target(args, False)
+    target = lmk05318b_plan.make_freq_target(args, False)
     plan = lmk05318b_plan.plan(target)
-    lmk05318b_util.report_plan(target, plan, False, verbose=args.verbose)
+    lmk05318b_plan.report_plan(target, plan, False, verbose=args.verbose)
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:
         lmk05318b_util.do_freq(
-            device, lmk05318b_util.make_freq_target(args, False), False)
+            device, lmk05318b_plan.make_freq_target(args, False), False)
     else:
         lmk05318b_util.report_live_freq(device, args.reference, False)
 

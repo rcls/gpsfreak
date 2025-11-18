@@ -373,6 +373,6 @@ def test_round():
     f = Fraction('46.60376888888889')
     target = Target(freqs = [f])
     plan = pll2_plan(target, DPLLPlan(), [f], f)
-    from .lmk05318b_util import report_plan
+    from .lmk05318b_plan import report_plan
     report_plan(target, plan, True)
     assert plan.multiplier.denominator <= 1 << 24

@@ -215,8 +215,8 @@ def sym_range(f: Fraction, low: Fraction, high: Fraction,
         for i in range(initial + p, 1 + final, 2):
             if start <= offset - i <= end:
                 yield offset - i
-                if i != 0 and start <= offset + i <= end:
-                    yield offset + i
+            if i != 0 and start <= offset + i <= end:
+                yield offset + i
 
 def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
     '''Brute force for an exact solution of getting a low frequency out of

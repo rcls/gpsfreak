@@ -25,23 +25,23 @@ class Device:
         opts = {}
         if self.args and self.args.name:
             opts['serial_number'] = self.args.name
-        gen = usb.core.find(True, idVendor=0x1209, idProduct=0xce93, **opts)
+        gen = usb.core.find(True, idVendor=0x1209, idProduct=0xce93, **opts) # pyright: ignore
         u = list(gen) # type: ignore
         if self.args and self.args.cpu is not None:
-            u = [dev for dev in u if message.get_serial_number(dev)
-                 == self.args.cpu]
+            u = [dev for dev in u
+                 if message.get_serial_number(dev) == self.args.cpu] # pyright: ignore
         if len(u) == 0:
             print('No GPS Freak USB device found', file=sys.stderr)
             sys.exit(1)
         if len(u) > 1:
             print('Multiple GPS Freak USB devices found.',
                   file=sys.stderr)
-            print('You may select one with the --sn or --name option.',
+            print('You may select one with the --name or --cpu option.',
                   file=sys.stderr)
             print('Available names and CPU ser. no. are:', file=sys.stderr)
             for d in u:
-                cpu = message.get_serial_number(d)
-                print(f'    {d.serial_number} {cpu}', file=sys.stderr)
+                cpu = message.get_serial_number(d) # pyright: ignore
+                print(f'    {d.serial_number} {cpu}', file=sys.stderr) # pyright: ignore
             sys.exit(1)
         assert isinstance(u[0], USBDevice)
         #print(u.serial_number)

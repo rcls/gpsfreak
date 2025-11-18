@@ -418,7 +418,7 @@ def add_to_argparse(argp: argparse.ArgumentParser) -> None:
     subp.add_parser('manufacture', help='Initial set-up of device',
                     description='''This loads typical configurations for GPS
                     and clock generation.  The configuration is not saved
-                    to flash, you must run 'freak config save' to do that.'''),
+                    to flash, you must run 'freak config save' to do that.''')
 
     subp.add_parser('wipe', help='Save an empty device config',
                     description='''Save an empty device configuration.  Note

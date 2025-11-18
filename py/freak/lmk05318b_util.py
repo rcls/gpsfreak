@@ -65,6 +65,12 @@ def do_dump(dev: Device) -> None:
         registers.append(r)
     do_get(dev, registers)
 
+def do_dump_tics(path: str) -> None:
+    data = tics.read_tcs_file(path)
+    for r in lmk05318b.REGISTERS.values():
+        value = data.extract(r)
+        print(f'{r}={value} ({value:#x})')
+
 def complete_partials(dev: Device, data: MaskedBytes) -> None:
     '''Where the data has only part of a byte, fill in the rest.'''
     # TODO - suppress RESERVED 0 fields, or use a 'pristine' source
@@ -106,7 +112,7 @@ def make_freq_target(args: argparse.Namespace, raw: bool) -> Target:
         result[i] = f
     return Target(freqs=result, pll2_base=args.pll2, reference=reference)
 
-def freq_make_data(plan: PLLPlan) -> MaskedBytes:
+def make_freq_data(plan: PLLPlan) -> MaskedBytes:
     data = MaskedBytes()
     postdiv1 = 0
     postdiv2 = 0
@@ -160,6 +166,21 @@ def freq_make_data(plan: PLLPlan) -> MaskedBytes:
     data.DPLL_REF_NUM = num * mult
     data.DPLL_REF_DEN = den * mult
 
+    # PLL1 seeding.
+    data.PLL1_NDIV, data.PLL1_NUM = plan.dpll.pll1_ratio()
+
+    # Frequency lock detection.
+    baw_lock_xo, baw_lock_vco = plan.dpll.baw_lock_det()
+    data.BAW_LOCK_CNTSTRT = baw_lock_xo
+    data.BAW_LOCK_VCO_CNTSTRT = baw_lock_vco
+    data.BAW_UNLK_CNTSTRT = baw_lock_xo
+    data.BAW_UNLK_VCO_CNTSTRT = baw_lock_vco
+
+    dpll_lock_ref, dpll_lock_vco = plan.dpll.dpll_lock_det()
+    data.DPLL_REF_LOCKDET_CNTSTRT = dpll_lock_ref
+    data.DPLL_REF_LOCKDET_VCO_CNTSTRT = dpll_lock_vco
+    data.DPLL_REF_UNLOCKDET_VCO_CNTSTRT = dpll_lock_vco
+
     if plan.pll2_target == 0:
         data.LOL_PLL2_MASK = 1
         data.MUTE_APLL2_LOCK = 0
@@ -201,7 +222,7 @@ def do_freq(dev: Device, target: Target, raw: bool) -> None:
     plan = lmk05318b_plan.plan(target)
     report_plan(target, plan, raw, False)
 
-    data = freq_make_data(plan)
+    data = make_freq_data(plan)
 
     # Software reset.
     data.RESET_SW = 1
@@ -230,7 +251,6 @@ def set_drives(dev: Device, drives: list[str | None]) -> None:
         data.insert(f'OUT{ch}_MODE2', mode2)
 
     masked_write(dev, data)
-
 
 def do_drive(dev: Device, drives: list[Tuple[str, str]],
              defaults: bool) -> None:
@@ -547,8 +567,9 @@ def add_to_argparse(argp: argparse.ArgumentParser,
         'get', help='Get registers', description='Get registers')
     valget.add_argument('KEY', type=register_lookup, nargs='+', help='KEYs')
 
-    subp.add_parser(
+    dump = subp.add_parser(
         'dump', help='Get all registers', description='Get all registers')
+    dump.add_argument('-t', '--tics', help='Read TICS file instead of device')
 
     valset = subp.add_parser(
         'set', help='Set registers', description='Set registers')
@@ -591,7 +612,10 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         do_get(device, args.KEY)
 
     elif command == 'dump':
-        do_dump(device)
+        if args.tics is None:
+            do_dump(device)
+        else:
+            do_dump_tics(args.tics)
 
     elif command == 'set':
         do_set(device, args.KV)

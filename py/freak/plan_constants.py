@@ -19,6 +19,9 @@ BAW_FREQ = 2_500 * MHz
 BAW_LOW  = BAW_FREQ - BAW_FREQ * 50 / 1000000
 BAW_HIGH = BAW_FREQ + BAW_FREQ * 50 / 1000000
 
+# We have a 30.72MHz XO.  (This gets doubled at the PLL1 PFD).
+XO_FREQ = 30720 * kHz
+
 # This is the official range of the LMK05318b...
 OFFICIAL_PLL2_LOW = 5_500 * MHz
 OFFICIAL_PLL2_HIGH = 6_250 * MHz

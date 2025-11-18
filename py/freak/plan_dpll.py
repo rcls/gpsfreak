@@ -74,6 +74,74 @@ class DPLLPlan:
             self.reference / self.ref_div * 2 * self.fb_prediv * self.fb_div
         assert abs(self.baw - self.baw_target) < 1 * Hz
 
+    def baw_lock_det(self) -> Tuple[int, int]:
+        '''Return the (BAW_LOCK_CNTSTART, BAW_LOCK_CNT_START) pair.'''
+        # The BAW freq. lock detection compares the BAW VCO output against the
+        # XO frequency.  More precisely, it checks
+        #
+        # BAW_LOCK_VCO_CNTSTRT / (VCO/24) == BAW_LOCK_CNTSTART / (XO * 2)
+        #
+        # within ± BAW_LOCK_PPM_MAX cycles of VCO/24.  The /24 is possibly
+        # either register 296 or 298.  The *2 comes from the XO doubler.
+        #
+        # TICS/Pro appears to use approx 2e6 cycles of VCO/24 i.e., 19.2ms.
+        xo, vco = freq_lock_counts(XO_FREQ * 2, self.baw / 24,
+                                   Fraction(19_200, 1000_000), 10)
+        assert 1_980_00 < vco < 2_020_000
+        return xo, vco
+
+    def dpll_lock_det(self) -> Tuple[int, int]:
+        '''Return the (DPLL_REF_LOCK_CNTSTART, DPLL_REF_LOCK_VCO_CNTSTRT) pair.
+        '''
+        # The DPLL freq. lock detection compares the BAW VCO output against
+        # the reference frequency.  More precisely, it checks:
+        #
+        # DPLL_REF_LOCK_VCO_CNTSTRT / (VCO/24) == DPLL_REF_LOCK_CNTSTART / REF
+        #
+        # within DPLL_REF_LOCKDET_PPM_MAX cycles of VCO/24
+        #
+        # TICS/Pro uses a measurement time of 96ms.
+        #
+        # TICS/Pro seems to always use a VCO count value of just over
+        # 10_000_000.  After working out the murky way the unlock count is
+        # stored we can loosen that up a bit.
+        ref, vco = freq_lock_counts(self.reference, self.baw / 24,
+                                    Fraction(96, 1000), 10)
+        #from math import ceil
+        #ref = ceil(10_000_000 / (self.baw / 24) * self.reference)
+        #vco = round(ref / self.reference * (self.baw / 24))
+        assert 9_900_000 < vco < 10_100_000
+        assert 800_000 < ref < 900_000
+        #print(ref, vco)
+        return ref, vco
+
+    def pll1_ratio(self) -> Tuple[int, int]:
+        pll1_ratio = self.baw / (XO_FREQ * 2)
+        assert 40 < pll1_ratio < 41
+        pll1_total = round(pll1_ratio * (1 << 40))
+        return pll1_total >> 40, pll1_total & 0xffffffffff
+
+def freq_lock_counts(freq1: Fraction, freq2: Fraction,
+                     meas_time: Fraction, max_off: int) -> Tuple[int, int]:
+    '''Return frequency lock detection counts for a pair of frequencies,
+    near a given measurement time in seconds.'''
+    assert freq1 < freq2
+    base1 = round(meas_time * freq1 / Hz)
+    assert base1 > 1000
+    best1 = 0
+    best2 = 0
+    best_err: Tuple[Fraction, int] | None = None
+    for this1 in range(base1 - max_off, base1 + max_off + 1):
+        frac2 = this1 / freq1 * freq2
+        this2 = round(frac2)
+        this_err = abs(this2 / frac2 - 1), abs(this1 - base1)
+        #print(this1, this2, float(this_err))
+        if best_err is None or this_err < best_err:
+            best1, best2, best_err = this1, this2, this_err
+    assert best1 != 0
+    #print(best1, best2, float(best_err.0), best_err.1)
+    return best1, best2
+
 # Check that our defaults match the TI calculated values...
 assert DPLLPlan().fb_div == 70 + Fraction(730877267270, 1099509789039)
 

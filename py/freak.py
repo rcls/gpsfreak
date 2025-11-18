@@ -118,7 +118,7 @@ elif args.command == 'plan':
     plan = lmk05318b_plan.plan(target)
     lmk05318b_util.report_plan(target, plan, False)
 
-    data = lmk05318b_util.freq_make_data(plan)
+    data = lmk05318b_util.make_freq_data(plan)
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:
@@ -151,10 +151,10 @@ elif args.command == 'restart':
 elif args.command == 'cpu-reset':
     # Just send the command blindly, no response.
     if not args.dfu:
-        device.get_usb().write( # type: ignore
+        device.get_usb().write( # pyright: ignore
             0x03, message.frame(message.CPU_REBOOT, b''))
     else:
-        device.get_usb().ctrl_transfer(0x21, 0, timeout=100)
+        device.get_usb().ctrl_transfer(0x21, 0, timeout=100) # pyright: ignore
 
 elif args.command in ('clock', 'lmk05318b'):
     lmk05318b_util.run_command(args, device, args.clock)

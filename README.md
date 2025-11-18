@@ -1,7 +1,7 @@
-GPS Freak — GPS Disciplined Frequency Generator
-===============================================
+GPS _freak_ — GPS Disciplined Frequency Generator
+=================================================
 
-GPS Freak is a flexible, programmable, high-accuracy, low-jitter, frequency
+GPS _freak_ is a flexible, programmable, high-accuracy, low-jitter, frequency
 generator, using GPS as a reference.
 
 The outputs are a total of 5 SMA connectors, with 4 separately programmable
@@ -27,12 +27,11 @@ Connectors
 
 **Outputs 1+** and **1–**
 : Complementary high frequency, 3 MHz to 1.6 GHz, 11 dBm nominal output power.
-  These can be used together as a differential pair.  AC coupled.  If only one
-  of the two outputs is used in a noise-sensitive environment, consider
-  terminating the other.
+  These can be used together as a differential pair.  AC coupled.
 
 **Output 2**
-: High frequency.  3 MHz to 1.6 GHz, 14 dBm nominal output power.  AC coupled.
+: High frequency.  3 MHz to 1.6 GHz, 11 dBm nominal output power.  AC coupled.
+  There is provision for a balun on the PCB to raise the output power to 14 dBm.
 
 **Output 3**
 : Low frequency 3.3 V CMOS.  Sub-1 Hz to 325 MHz.  DC coupled.
@@ -346,14 +345,14 @@ the GPS output.  Using a TCXO rather than an XO is probably not essential, but
 does allow us to run the LMK05318b at low bandwidth and smooth out the
 once-per-second frequency adjustments from the GPS unit.
 
-The CPU is overkill.  With the current arrangement of dumb firmware and all the
+The CPU is overkill.  With the current arrangement of dumb firmware & all the
 smarts in the Python scripts, a low-end CPU would be just fine.
 
 The temperature sensor is only for development.  Once we know how much heat the
 board generates, we can drop it.  Or just use a 1 ¢ thermistor.  There is also
 the CPU temperature sensor.
 
-Evaluate whether or the C0G capacitors on the loop filter are worthwhile.  I
+Evaluate whether or not the C0G capacitors on the loop filter are worthwhile.  I
 suspect not in realistic conditions.  The 0.47 µF C0G cap could also be replaced
 by a through-hole film cap.
 
@@ -403,11 +402,6 @@ configuration, respectively.
 Known Issues
 ============
 
-Currently, for some frequency plans, the frequency-lock loss detection is not
-configured correctly.  If the LED status red, and `freak clock status` shows
-that LOPL\_DPLL is good but LOFL\_PLL is bad, then run `freak clock set
-LOFL_DPLL_MASK=1`; `freak clock status` to mask the problematic flag.
-
 If frequency planning fails, then `freak` tends to die with an unfriendly
 assertion failure rather than a useful error message.  Ditto various other error
 conditions.  Problems with the communication to the GPS unit likely result in
@@ -419,8 +413,8 @@ Change Log
 Current
 -------
 
-Enlarge the exposed pad underneath the clock chip to be 11 mm × 7 mm instead of
-7_mm square.
+Enlarge the exposed pad backside to the clock chip to be 11 mm × 7 mm instead of
+7 mm square.
 
 Don't have the LED overhanging the board edge.  Change all the LED resistors to
 0603 for easier swapping.  Plate the panel cut-out opening for the LED.

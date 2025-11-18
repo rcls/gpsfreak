@@ -73,7 +73,7 @@ class Register:
     byte_span: int = 0
     shift: int = 0
     width: int = 0
-    access: str = ''
+    access: str = 'RW'
     reset: int = 0
 
     def __str__(self) -> str:
@@ -240,6 +240,11 @@ def build_registers(addresses: list[Address]) -> dict[str, Register]:
 
     for register in registers.values():
         register.validate()
+
+    # TI did wierd shit here.
+    hack = Register('DPLL_REF_UNLOCKDET_VCO_CNTSTRT', fields = [],
+                    base_address = 336, byte_span = 4, width = 30)
+    registers[hack.name] = hack
 
     return registers
 

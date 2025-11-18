@@ -96,31 +96,6 @@ def test_fract_lcm():
             # We rely on the asserts in fract_lcm to actually test!
             fract_lcm(a, b)
 
-def qd_factor(n: int, hint: list[int] | None = None) -> list[int]:
-    '''Quick and dirty prime factorisation.  If you know a large likely
-    factor of n, then supply it in the hint list.'''
-    assert n > 0
-    factors: list[int] = []
-    if hint is not None:
-        for f in hint:
-            if n % f == 0:
-                factors.append(f)
-                n //= f
-                while n % f == 0:
-                    n //= f
-    factor = 2
-    while factor * factor <= n:
-        if n % factor == 0:
-            factors.append(factor)
-            n //= factor
-            while n % factor == 0:
-                n //= factor
-        factor = (factor + 1) | 1
-    if n > 1:
-        factors.append(n)
-    factors.sort()
-    return factors
-
 def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     if 2 <= ratio <= 256:
         return ratio, 1

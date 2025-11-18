@@ -4,7 +4,7 @@ from __future__ import annotations
 from .plan_dpll import DPLLPlan
 from .plan_constants import *
 from .plan_tools import Target, factor_splitting, fail, freq_to_str, \
-    is_multiple_of, output_divider, qd_factor
+    is_multiple_of, output_divider
 
 import dataclasses
 
@@ -235,7 +235,8 @@ def pll2_plan_low(target: Target, dpll: DPLLPlan,
     # denominators that are bigger than all that.
     if ratio.denominator <= 7 << 56:
         # Factorize the denominator.
-        factors = qd_factor(ratio.denominator)
+        from .numbers import factorize
+        factors = factorize(ratio.denominator)
 
         # We only get called for frequencies well below PLL2_PFD = BAW_FREQ/18!
         # So the denominator should not be 1.

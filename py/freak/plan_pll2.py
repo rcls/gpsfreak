@@ -345,7 +345,8 @@ def pll2_plan(target: Target, dpll: DPLLPlan,
 
     # Check that some multiple of the LCM is in range.
     if ceil(PLL2_LOW / pll2_lcm) > PLL2_HIGH // pll2_lcm:
-        fail(f'PLL2 needs to be a multiple of {freq_to_str(pll2_lcm)} which is not in range')
+        fail(f'PLL2 needs to be a multiple of {freq_to_str(pll2_lcm)} '
+             'which is not in range')
 
     # Range to try for multipliers.  Clamp the range to be not-too-big, for the
     # case where we've been given a small pll2_lcm.

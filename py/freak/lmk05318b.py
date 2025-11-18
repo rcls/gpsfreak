@@ -107,8 +107,7 @@ class Register:
         self.reset = reset
 
     def extract(self, bb: ByteString) -> int:
-        base = self.base_address
-        b = bb[base : base + self.byte_span]
+        b = bb[self.base_address : self.base_address + self.byte_span]
         value = struct.unpack('>Q', (b'\0\0\0\0\0\0\0' + b)[-8:])[0]
         value = value >> self.shift
         value &= (1 << self.width) - 1
@@ -241,7 +240,11 @@ def build_registers(addresses: list[Address]) -> dict[str, Register]:
     for register in registers.values():
         register.validate()
 
-    # TI did wierd shit here.
+    # TI did wierd shit here.  These overlap other registers, and some DWIM'ing
+    # determines what actually happens.
+    #hack = Register('DPLL_REF_UNLOCKDET_CNTSTRT', fields = [],
+    #                base_address = 332, byte_span = 4, width = 30)
+    #registers[hack.name] = hack
     hack = Register('DPLL_REF_UNLOCKDET_VCO_CNTSTRT', fields = [],
                     base_address = 336, byte_span = 4, width = 30)
     registers[hack.name] = hack

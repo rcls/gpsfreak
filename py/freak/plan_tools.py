@@ -4,7 +4,7 @@ from .plan_constants import BIG_DIVIDE, Hz, MHz, REF_FREQ, kHz
 from dataclasses import dataclass
 from fractions import Fraction
 from math import ceil, gcd
-from typing import Any, Generator, NoReturn, Tuple
+from typing import Generator, NoReturn, Tuple
 
 class PlanningFailed(RuntimeError):
     pass
@@ -25,10 +25,10 @@ class Target:
             return False
         return is_multiple_of(self.pll2_base, freq)
 
-def fail(*args: Any) -> NoReturn:
-    raise PlanningFailed(' '.join(str(s) for s in args))
+def fail(why: str) -> NoReturn:
+    raise PlanningFailed(why)
 
-def is_multiple_of(a: Fraction, b: Fraction | None) -> bool:
+def is_multiple_of(a: Fraction, b: Fraction) -> bool:
     if not b:
         return False
     return a.numerator % b.numerator == 0 and \
@@ -61,8 +61,9 @@ def factor_splitting(number: int, primes: list[int], maxL: int, maxR: int) \
     # It's more efficient to put the smaller maximum first.
     if maxL <= maxR:
         yield from do_factor_splitting(1, number, maxL, maxR, primes, 0)
-    for a, b in do_factor_splitting(1, number, maxR, maxL, primes, 0):
-        yield b, a
+    else:
+        for a, b in do_factor_splitting(1, number, maxR, maxL, primes, 0):
+            yield b, a
 
 def fract_lcm(a: Fraction | None, b: Fraction | None) -> Fraction | None:
     if a is None:
@@ -199,3 +200,8 @@ def fraction_to_str(f: Fraction, paren: bool = True) -> str:
         return f'({i} + {n}/{d})'
     else:
         return f'{i} + {n}/{d}'
+
+def test_factor_split():
+    f = list(factor_splitting(12, [2, 3], 20, 20))
+    f.sort()
+    assert f == [(1,12), (2,6), (3,4), (4,3), (6,2), (12,1)]

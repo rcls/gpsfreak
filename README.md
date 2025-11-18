@@ -4,7 +4,7 @@ GPS _freak_ — GPS Disciplined Frequency Generator
 GPS _freak_ is a flexible, programmable, high-accuracy, low-jitter, frequency
 generator, using GPS as a reference.
 
-The outputs are a total of 5 SMA connectors, with 4 separately programmable
+There are 5 outputs via 5 SMA connectors, with 4 separately programmable
 frequencies derived from 2 PLLs.
 
 The outputs are driven by a Texas Instruments LMK05318b clock generator, and a
@@ -143,22 +143,19 @@ Components that I have hand-soldered in preference to using JLCPCB assembly:
 
 * JLCPCB doesn't stock the MAX-F10S.  It is fairly easy to hand-solder.  They do
   stock the cheaper MAX-M10S.
-* The USB-C connector is not too hard to hand solder, which saves a handling
-  fee.
+* The USB-C connector, saving a handling fee.
 * The SMA connectors.  Position them carefully as they need to align with the
   end-plate holes!  These are edge-launch connectors for a 1.6 mm PCB.  You
   can get these cheaply in bulk from AliExpress.  The ones I used have approx
   12 mm thread length, 18_mm total length including leads.
-* The 0402 antennae bias inductor I have hand soldered.  The pads are designed
-  for easy hand soldering (one is bigger than the other, solder the smaller pad
-  first).
+* The 0402 antennae bias inductor.  The pads are designed for easy hand
+  soldering (one is bigger than the other, solder the smaller pad first).
 * Likewise, the antennae power PTC fuse and the 74HC1G07 for antennae-short
   detection are hand-soldered, to save assembly costs.  The 74HC1G07 is
   optional.
-* The three C0G/NPO loop-filter caps (C78, C79, C92) I have hand-soldered as
+* The three C0G/NPO loop-filter caps (C78, C79, C92).
   JLCPCB doesn't have the exact parts.
-* The LED I have hand soldered.  It protrudes past the board edge, I am not sure
-  if that poses an issue for PCB manufacturers.
+* The LED.
 * The TVS protection diodes I have never populated.  The 0402 pads are designed
   for hand-soldering just like the inductor above.
 

@@ -116,9 +116,7 @@ if args.command == 'info':
 elif args.command == 'plan':
     target = lmk05318b_util.make_freq_target(args, False)
     plan = lmk05318b_plan.plan(target)
-    lmk05318b_util.report_plan(target, plan, False)
-
-    data = lmk05318b_util.make_freq_data(plan)
+    lmk05318b_util.report_plan(target, plan, False, verbose=args.verbose)
 
 elif args.command == 'freq':
     if len(args.FREQ) != 0:

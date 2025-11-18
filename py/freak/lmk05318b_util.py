@@ -130,31 +130,34 @@ def make_freq_data(plan: PLLPlan) -> MaskedBytes:
         postdiv1 = 2
     if postdiv2 == 0:
         postdiv2 = 2
-    data.PLL2_P1 = postdiv1 - 1
-    data.PLL2_P2 = postdiv2 - 1
+
     chtag = '0_1', '2_3', '4', '5', '6', '7'
-    for i, (pd, s1, s2) in enumerate(plan.dividers):
+    for i, (postdiv, stage1, stage2) in enumerate(plan.dividers):
         t = chtag[i]
-        if s1 == 0:                     # Disabled.
+        if stage1 == 0:                     # Disabled.
             data.insert(f'CH{t}_PD', 1)
             continue
         data.insert(f'CH{t}_PD', 0)
         # Source.
-        if pd == 0:
-            data.insert(f'CH{t}_MUX', 0)
-        elif pd == postdiv1:
+        if postdiv != 0:
+            assert 2 <= postdiv <= 7
+            assert plan.pll2 != 0
+
+        if postdiv == 0:
+            data.insert(f'CH{t}_MUX', 1)
+        elif postdiv == postdiv1:
             data.insert(f'CH{t}_MUX', 2)
-        elif pd == postdiv2:
+        elif postdiv == postdiv2:
             data.insert(f'CH{t}_MUX', 3)
         else:
             assert 'This should never happen' == None
-        assert 1 <= s1 <= 256
-        data.insert(f'OUT{t}_DIV', s1 - 1)
+        assert 1 <= stage1 <= 256
+        data.insert(f'OUT{t}_DIV', stage1 - 1)
         if i == 5:
-            assert 1 <= s2 <= 1<<24
-            data.OUT7_STG2_DIV = s2 - 1
+            assert 1 <= stage2 <= 1<<24
+            data.OUT7_STG2_DIV = stage2 - 1
         else:
-            assert s2 == 1
+            assert stage2 == 1
 
     data.DPLL_PRIREF_RDIV = 1
     data.DPLL_REF_FB_PRE_DIV = plan.dpll.fb_prediv - 2
@@ -179,6 +182,10 @@ def make_freq_data(plan: PLLPlan) -> MaskedBytes:
     dpll_lock_ref, dpll_lock_vco = plan.dpll.dpll_lock_det()
     data.DPLL_REF_LOCKDET_CNTSTRT = dpll_lock_ref
     data.DPLL_REF_LOCKDET_VCO_CNTSTRT = dpll_lock_vco
+    # Note that these alias other registers, and get overwritten if the other
+    # registers are in use.  The ...VCO_CNTSTRT is definitely necessary, not
+    # sure about the other.
+    #data.DPLL_REF_UNLOCK_CNTSTRT = dpll_lock_ref
     data.DPLL_REF_UNLOCKDET_VCO_CNTSTRT = dpll_lock_vco
 
     if plan.pll2_target == 0:
@@ -186,6 +193,10 @@ def make_freq_data(plan: PLLPlan) -> MaskedBytes:
         data.MUTE_APLL2_LOCK = 0
         data.PLL2_PDN = 1
         return data
+
+    # PLL2 post dividers.
+    data.PLL2_P1 = postdiv1 - 1
+    data.PLL2_P2 = postdiv2 - 1
 
     # PLL2 setup...
     data.PLL2_PDN  = 0
@@ -198,12 +209,11 @@ def make_freq_data(plan: PLLPlan) -> MaskedBytes:
         data.APLL2_DEN_MODE = 0
         assert (1<<24) % pll2_den == 0
         pll2_num = pll2_num * (1<<24) // pll2_den
-        pll2_den = 0
     else:
         data.APLL2_DEN_MODE = 1
+        data.PLL2_DEN  = pll2_den
     data.PLL2_NDIV = pll2_int
     data.PLL2_NUM  = pll2_num
-    data.PLL2_DEN  = pll2_den
     # Canned values... (Should we rely on these being preprogrammed?)
     data.PLL2_RCLK_SEL = 0
     data.PLL2_RDIV_PRE = 0
@@ -364,7 +374,7 @@ def report_live_freq(dev: Device, reference: Fraction, raw: bool) -> None:
     # For now, pull everything...
     for a in lmk05318b.ADDRESSES:
         data.mask[a.address] = 0xff
-    ranges = data.ranges(max_block = 30)
+    ranges = data.ranges(max_block = 58)
     get_ranges(dev, data, ranges)
 
     target, plan = reverse_plan(data, reference)
@@ -425,7 +435,7 @@ def reverse_plan(d: MaskedBytes, reference: Fraction) -> Tuple[Target, PLLPlan]:
     return target, plan
 
 def report_plan(target: Target, plan: PLLPlan, raw: bool,
-                power_down: int = 0) -> None:
+                power_down: int = 0, verbose: bool = False) -> None:
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     for index, name, _ in channels:
         if index >= len(target.freqs):
@@ -453,6 +463,14 @@ def report_plan(target: Target, plan: PLLPlan, raw: bool,
         print(f'PLL2: {freq_to_str(plan.pll2)} = BAW / 18 * {fraction_to_str(plan.multiplier)}')
         if plan.pll2 != plan.pll2_target:
             print(f'    target {freq_to_str(plan.pll2_target)}, error {freq_to_str(plan.error(), 4)}')
+
+    if verbose:
+        print()
+        data = make_freq_data(plan)
+        for r in lmk05318b.REGISTERS.values():
+            if r.extract(data.mask) != 0:
+                value = data.extract(r)
+                print(f'{r} = {value} ({value:#x})')
 
 def do_status(dev: Device) -> None:
     message.lmk05318b_status(dev.get_usb())
@@ -506,9 +524,11 @@ def add_freq_commands(subp: Any, short: str, long: str) -> None:
                        help=f'Frequencies for each {short}')
         p.add_argument('-2', '--pll2', type=str_to_freq,
                        help=f'Forced divisor of PLL2 frequency')
-        p.add_argument('--reference', '-r', type=str_to_freq,
+        p.add_argument('-r', '--reference', metavar='REF', type=str_to_freq,
                        default=REF_FREQ,
-                       help=f'Reference input frequency to LMK05318b')
+                       help='Reference input frequency to LMK05318b')
+    plan.add_argument('-v', '--verbose', action='store_true',
+                      help='Report LMK05318b register settings')
 
 def add_to_argparse(argp: argparse.ArgumentParser,
                     dest: str = 'command', metavar: str = 'COMMAND') -> None:
@@ -586,7 +606,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     elif command == 'plan':
         target = make_freq_target(args, True)
         plan = lmk05318b_plan.plan(target)
-        report_plan(target, plan, False)
+        report_plan(target, plan, False, verbose=args.verbose)
 
     elif command == 'drive':
         if args.DRIVE or args.defaults:

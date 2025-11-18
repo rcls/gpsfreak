@@ -2181,7 +2181,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7322c3d4-057b-4f66-a1df-93afaf6d24c0")
+		(uuid "71fea257-2be0-4f89-b5e3-d6c92cc255be")
 	)
 	(wire
 		(pts
@@ -2345,16 +2345,6 @@
 	)
 	(wire
 		(pts
-			(xy 203.2 31.75) (xy 215.9 31.75)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b462a6a3-0231-4f38-b33f-1b004200d74d")
-	)
-	(wire
-		(pts
 			(xy 153.67 73.66) (xy 162.56 73.66)
 		)
 		(stroke
@@ -2483,7 +2473,7 @@
 		)
 		(uuid "42b01ed1-966d-4abe-a9c3-748c1f59b0b1")
 	)
-	(label "FbCG18"
+	(label "Fb1V8"
 		(at 182.88 39.37 0)
 		(effects
 			(font
@@ -2608,7 +2598,7 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 208.28 31.75 0)
+		(at 186.69 31.75 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2618,7 +2608,7 @@
 		)
 		(uuid "243cc8a5-f11f-4336-8cc3-5c0e9cbec509")
 		(property "Netclass" "Pwr"
-			(at 208.9785 29.21 0)
+			(at 187.3885 29.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2627,7 +2617,7 @@
 			)
 		)
 		(property "Component Class" ""
-			(at 147.32 -45.72 0)
+			(at 125.73 -45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2732,7 +2722,7 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 147.32 66.04 0)
+		(at 140.97 66.04 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2742,7 +2732,7 @@
 		)
 		(uuid "71c4ded2-f460-418c-b04d-a7a1085249a8")
 		(property "Netclass" "Pwr"
-			(at 148.0185 63.5 0)
+			(at 141.6685 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2751,7 +2741,7 @@
 			)
 		)
 		(property "Component Class" ""
-			(at 86.36 -11.43 0)
+			(at 80.01 -11.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4643,7 +4633,7 @@
 	)
 	(symbol
 		(lib_id "power:+1V8")
-		(at 215.9 31.75 0)
+		(at 203.2 31.75 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4651,7 +4641,7 @@
 		(dnp no)
 		(uuid "8c9bb008-2f42-4130-816e-30833fae43a2")
 		(property "Reference" "#PWR059"
-			(at 215.9 35.56 0)
+			(at 203.2 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4660,7 +4650,7 @@
 			)
 		)
 		(property "Value" "+1V8"
-			(at 215.9 28.194 0)
+			(at 203.2 28.194 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4668,7 +4658,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 215.9 31.75 0)
+			(at 203.2 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4677,7 +4667,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 215.9 31.75 0)
+			(at 203.2 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4686,7 +4676,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+1V8\""
-			(at 215.9 31.75 0)
+			(at 203.2 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)

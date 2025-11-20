@@ -378,9 +378,8 @@ def do_manufacture(device: Device):
         TP-PULSE_DEF=1
         TP-FREQ_LOCK_TP1={plan_constants.REF_FREQ // Hz}
         TP-DUTY_LOCK_TP1=50.0
-        TP-PULSE_LENGTH_DEF=0x00
-        RATE-MEAS=100
-        RATE-NAV=10
+        TP-PULSE_LENGTH_DEF=0
+        NAVSPG-DYNMODEL=2
         SBAS-USE_TESTMODE=True
         SBAS-PRNSCANMASK=0
         MSGOUT-NMEA_ID_GSV_UART1=1'''.split()]

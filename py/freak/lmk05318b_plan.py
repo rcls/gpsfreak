@@ -191,8 +191,10 @@ def reverse_plan(d: MaskedBytes, reference: Fraction) -> Tuple[Target, PLLPlan]:
             s2div = d.OUT7_STG2_DIV + 1
         plan.dividers.append((prediv, s1div, s2div))
 
+    pll1_pfd = dpll.baw / (d.PLL1_NDIV + Fraction(d.PLL1_NUM_STAT, 1 << 40))
+
     target = Target(freqs = [plan.freq(i) for i in range(len(plan.dividers))],
-                    reference = reference)
+                    pll1_pfd = pll1_pfd, reference = reference)
 
     return target, plan
 

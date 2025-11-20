@@ -4,8 +4,8 @@ from freak import config, lmk05318b, lmk05318b_plan, message, message_util, tics
 
 from .freak_util import Device
 from .lmk05318b import MaskedBytes, Register
-from .plan_constants import REF_FREQ
-from .plan_tools import Target, str_to_freq
+from .plan_constants import REF_FREQ, MHz
+from .plan_tools import Target, freq_to_str, str_to_freq
 
 import argparse
 
@@ -243,6 +243,7 @@ def report_live_freq(dev: Device, reference: Fraction, raw: bool) -> None:
 
     power_down = data.data[Register.get('CH0_1_PD').base_address]
     lmk05318b_plan.report_plan(target, plan, raw, power_down)
+    print('XO:', freq_to_str(target.pll1_pfd / 2 / MHz))
     if data.PLL1_FDEV_EN or data.DPLL_FDEV_EN:
         print()
         print('NOTE: FDEV is enabled. Frequencies may differ from above by up to ±100ppm')

@@ -19,6 +19,9 @@ class DPLLPlan:
     # The target BAW frequency.  This is what we use for down-stream
     # calculations?
     baw_target: Fraction = BAW_FREQ
+    # Crystal frequency.  Or rather, the crystal-derived frequency at the
+    # PDF of PLL1.
+    pll1_pfd: Fraction = 2 * XO_FREQ
     # Input reference frequency.
     reference: Fraction = REF_FREQ
     # Reference divider.
@@ -85,7 +88,7 @@ class DPLLPlan:
         # either register 296 or 298.  The *2 comes from the XO doubler.
         #
         # TICS/Pro appears to use approx 2e6 cycles of VCO/24 i.e., 19.2ms.
-        xo, vco = freq_lock_counts(XO_FREQ * 2, self.baw / 24,
+        xo, vco = freq_lock_counts(self.pll1_pfd, self.baw / 24,
                                    Fraction(19_200, 1000_000), 10)
         assert 1_980_00 < vco < 2_020_000
         return xo, vco
@@ -116,7 +119,7 @@ class DPLLPlan:
         return ref, vco
 
     def pll1_ratio(self) -> Tuple[int, int]:
-        pll1_ratio = self.baw / (XO_FREQ * 2)
+        pll1_ratio = self.baw / self.pll1_pfd
         assert 40 < pll1_ratio < 41
         pll1_total = round(pll1_ratio * (1 << 40))
         return pll1_total >> 40, pll1_total & 0xffffffffff
@@ -156,6 +159,7 @@ def baw_plan_for_freq(target: Target, freq: Fraction) -> DPLLPlan:
         plan = DPLLPlan(
             baw = target.reference * 2 * pre_div * fb_div,
             baw_target = freq,
+            pll1_pfd = target.pll1_pfd,
             reference = target.reference,
             fb_prediv = pre_div,
             fb_div = fb_div)

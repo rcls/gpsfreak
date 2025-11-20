@@ -1,5 +1,5 @@
 
-from .plan_constants import BIG_DIVIDE, Hz, MHz, REF_FREQ, kHz
+from .plan_constants import BIG_DIVIDE, Hz, MHz, REF_FREQ, kHz, XO_FREQ
 
 from dataclasses import dataclass
 from fractions import Fraction
@@ -16,6 +16,7 @@ class Target:
     pll{1|2}_base allows you to constrain the PLL{1|2} frequency to be (a
     multiple of) the specified value.'''
     freqs: list[Fraction]
+    pll1_pfd : Fraction = 2 * XO_FREQ   # Frequency at the PLL1 PFD.
     reference: Fraction = REF_FREQ
     pll1_base: Fraction|None = None
     pll2_base: Fraction|None = None

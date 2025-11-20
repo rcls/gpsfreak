@@ -346,7 +346,7 @@ def do_name(device: Device, name: str | None):
     else:
         print(message.get_name(dev))
 
-def do_wipe(device: Device):
+def do_clear(device: Device):
     dev = device.get_usb()
     print('Retrieving saved configuration state.')
     headers = get_headers(dev)
@@ -420,7 +420,7 @@ def add_to_argparse(argp: argparse.ArgumentParser) -> None:
                     and clock generation.  The configuration is not saved
                     to flash, you must run 'freak config save' to do that.''')
 
-    subp.add_parser('wipe', help='Save an empty device config',
+    subp.add_parser('clear', help='Save an empty device config',
                     description='''Save an empty device configuration.  Note
                     that old configs are hidden but not erased.  The running
                     configuration is not changed.''')
@@ -432,8 +432,8 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
     elif command == 'name':
         do_name(device, args.NAME)
 
-    elif command == 'wipe':
-        do_wipe(device)
+    elif command == 'clear':
+        do_clear(device)
 
     elif command == 'manufacture':
         do_manufacture(device)

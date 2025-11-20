@@ -20,7 +20,7 @@ import io
 class Serial(io.FileIO):
     def __init__(self, path: str, speed: int|None = None):
         io.FileIO.__init__(self, path, 'r+b')
-        makeraw(self, speed)
+        configure(self, speed)
 
     def writeall(self, b: bytes) -> int:
         return writeall(self, b)
@@ -44,7 +44,7 @@ def flushread(f: io.IOBase) -> None:
         import termios
         termios.tcflush(f.fileno(), termios.TCIFLUSH)
 
-def makeraw(f: io.RawIOBase, speed: int|None) -> None:
+def configure(f: io.RawIOBase, speed: int|None) -> None:
     if not f.isatty():
         return
     import termios

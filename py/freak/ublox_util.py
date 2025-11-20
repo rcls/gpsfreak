@@ -46,8 +46,10 @@ def add_to_argparse(argp: argparse.ArgumentParser,
     subp.add_parser('info', description='Basic GPS unit info.',
                     help='Basic GPS unit info')
 
-    subp.add_parser('status', description='Basic GPS status info.',
-                    help='Basic GPS status info')
+    status = subp.add_parser('status', description='Basic GPS status info.',
+                             help='Basic GPS status info')
+    status.add_argument('-v', '--verbose', action='store_true',
+                        help='Give more information')
 
     def int_key(s: str) -> int:
         try:
@@ -60,6 +62,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
                              help='Set configuration values.')
     valset.add_argument('KV', type=key_value, nargs='+',
                         metavar='KEY=VALUE', help='KEY=VALUE pairs')
+    valset.add_argument('-l', '--layers', help='Layer mask')
 
     valget = subp.add_parser('get', description='Get configuration values.',
                              help='Get configuration values.')
@@ -114,10 +117,11 @@ def add_to_argparse(argp: argparse.ArgumentParser,
 
     scrape.add_argument('FILE', help='Text file to parse')
 
-def do_set(reader: UBloxReader, KV: list[Tuple[UBloxCfg, Any]]) -> None:
+def do_set(reader: UBloxReader, KV: list[Tuple[UBloxCfg, Any]],
+           layer_mask: int|None = 3) -> None:
     # TODO - this only copes with 64 values!
     # Also, layers other than live might be useful?
-    payload = bytes((0, 1, 0, 0))
+    payload = bytes((0, layer_mask or 3, 0, 0))
     for cfg, value in KV:
         payload += cfg.encode_key_value(value)
 
@@ -220,49 +224,55 @@ def do_info(reader: UBloxReader) -> None:
 
         print(f'Pin {pinId} {pio} bank {bank} {direction} {value} {virtual} IRQ {irq_enabled} Virt.Pin {VP}{pull}')
 
-def do_status(reader: UBloxReader) -> None:
-    status = reader.transact('NAV-STATUS')
+def do_status(reader: UBloxReader, verbose: bool) -> None:
+    if verbose:
+        status = reader.transact('NAV-STATUS')
 
-    gpsFix: int
-    iTOW, gpsFix, flags, fixStat, flags2, ttff, msss \
-        = struct.unpack('<IBBBBII', status)
+        gpsFix: int
+        iTOW, gpsFix, flags, fixStat, flags2, ttff, msss \
+            = struct.unpack('<IBBBBII', status)
 
-    print(f'iTOW = {iTOW / 1000} seconds')
+        print(f'iTOW = {iTOW / 1000} seconds')
 
-    FIXES = 'no fix,dead reckoning,2D-fix,3D-fix,GPS + dr,Time only'.split(',')
-    if gpsFix < len(FIXES):
-        fix = FIXES[gpsFix]
-    else:
-        fix = f'{gpsFix:#04x}'
-    print(f'GPS Fix: {fix}')
+        FIXES = 'no fix,dead reckoning,2D-fix,3D-fix,GPS + dr,Time only'.split(',')
+        if gpsFix < len(FIXES):
+            fix = FIXES[gpsFix]
+        else:
+            fix = f'{gpsFix:#04x}'
+        print(f'GPS Fix: {fix}')
 
-    flags_bits = [flags & 1 << i != 0 for i in range(8)]
-    print(f'GPS Fix OK: {flags_bits[0]}')
-    print(f'Diff soln applied: {flags_bits[1]}')
-    print(f'Week number valid: {flags_bits[2]}')
-    print(f'Time of week valid: {flags_bits[3]}')
-    fixStat_bits = [fixStat & 1 << i != 0 for i in range(8)]
-    print(f'Differential Corr.: {fixStat_bits[0]}')
-    print(f'Carrier phase solution valid: {fixStat_bits[1]}')
-    print(f'Map matching: {fixStat_bits[3] * 2 + fixStat_bits[2]}')
+        flags_bits = [flags & 1 << i != 0 for i in range(8)]
+        print(f'GPS Fix OK: {flags_bits[0]}')
+        print(f'Diff soln applied: {flags_bits[1]}')
+        print(f'Week number valid: {flags_bits[2]}')
+        print(f'Time of week valid: {flags_bits[3]}')
+        fixStat_bits = [fixStat & 1 << i != 0 for i in range(8)]
+        print(f'Differential Corr.: {fixStat_bits[0]}')
+        print(f'Carrier phase solution valid: {fixStat_bits[1]}')
+        print(f'Map matching: {fixStat_bits[3] * 2 + fixStat_bits[2]}')
 
-    print(f'Power save mode:', flags2 & 3)
-    print(f'Spoof detection mode:', flags2 >> 2 & 3)
-    print(f'Carrier phase range status:', flags2 >> 4 & 3)
-    print(f'Time to first fix: {ttff / 1000} seconds')
-    print(f'Seconds since start: {msss / 1000} seconds')
+        print(f'Power save mode:', flags2 & 3)
+        print(f'Spoof detection mode:', flags2 >> 2 & 3)
+        print(f'Carrier phase range status:', flags2 >> 4 & 3)
+        print(f'Time to first fix: {ttff / 1000} seconds')
+        print(f'Seconds since start: {msss / 1000} seconds')
 
     clock = reader.transact('NAV-CLOCK')
     _, clkB, clkD, tAcc, fAcc = struct.unpack('<IiiII', clock)
-    print(f'Clock bias  {clkB:6} ns')
-    print(f'Clock drift {clkD:6} ppb')
+    if verbose:
+        print(f'Clock bias  {clkB:6} ns')
+        print(f'Clock drift {clkD:6} ppb')
     print(f'Time accuracy ±{tAcc:3} ns')
     print(f'Freq accuracy ±{fAcc:3} ppt')
 
-    dop = reader.transact('NAV-DOP')
-    _, gDOP, pDOP, tDOP, vDOP, hDOP, nDOP, eDOP = struct.unpack('<IHHHHHHH', dop)
+    if verbose:
+        dop = reader.transact('NAV-DOP')
+        _, gDOP, pDOP, tDOP, vDOP, hDOP, nDOP, eDOP = struct.unpack(
+            '<IHHHHHHH', dop)
 
-    print(f'DOP: G{gDOP*0.01:5.2f} P{pDOP*0.01:5.2f} T{tDOP*0.01:5.2f} V{vDOP*0.01:5.2f} H{hDOP*0.01:5.2f} N{nDOP*0.01:5.2f} E{eDOP*0.01:5.2f}')
+        print(f'DOP: G{gDOP*0.01:5.2f} P{pDOP*0.01:5.2f} T{tDOP*0.01:5.2f} '
+              f'V{vDOP*0.01:5.2f} H{hDOP*0.01:5.2f} N{nDOP*0.01:5.2f} '
+              f'E{eDOP*0.01:5.2f}')
 
 def do_scrape(FILE: str) -> None:
     configs, messages = parse_key_list(FILE)
@@ -281,10 +291,10 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         do_info(device.get_ublox())
 
     elif command == 'status':
-        do_status(device.get_ublox())
+        do_status(device.get_ublox(), args.verbose)
 
     elif command == 'set':
-        do_set(device.get_ublox(), args.KV)
+        do_set(device.get_ublox(), args.KV, args.layer)
 
     elif command == 'get':
         do_get(device.get_ublox(), args.layer, args.KEY, args.sort)

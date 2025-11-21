@@ -363,7 +363,7 @@ def do_clear(device: Device):
     print('Writing config to flash')
     write_config(dev, headers, active, config)
 
-def do_manufacture(device: Device):
+def do_manufacture(device: Device, tics: str | None):
     import freak.lmk05318b_util as lmk05318b_util
     import freak.plan_constants as plan_constants
     import freak.plan_tools as plan_tools
@@ -375,6 +375,7 @@ def do_manufacture(device: Device):
 
     print('Set GPS defaults')
     ublox_update = [ublox_util.key_value(s) for s in f'''
+        TP-ALIGN_TO_TOW_TP1=0
         TP-PULSE_DEF=1
         TP-FREQ_LOCK_TP1={plan_constants.REF_FREQ // Hz}
         TP-DUTY_LOCK_TP1=50.0
@@ -386,9 +387,11 @@ def do_manufacture(device: Device):
     ublox_util.do_set(device.get_ublox(), ublox_update)
 
     print('Load TICS/Pro config')
-    import os
-    lmk05318b_util.do_upload(
-        device, os.path.dirname(__file__) + '/bw0p3hz_ref8844582.tcs')
+    if tics is None:
+        import os
+        tics = os.path.dirname(__file__) + '/bw0p3hz_ref8844582.tcs'
+
+    lmk05318b_util.do_upload(device, tics)
 
     print('Set some frequencies')
     target = plan_tools.Target(
@@ -414,10 +417,12 @@ def add_to_argparse(argp: argparse.ArgumentParser) -> None:
     name = subp.add_parser('name', help='Assign the device name')
     name.add_argument('NAME', nargs='?', help='Device name, or omit to print')
 
-    subp.add_parser('manufacture', help='Initial set-up of device',
-                    description='''This loads typical configurations for GPS
-                    and clock generation.  The configuration is not saved
-                    to flash, you must run 'freak config save' to do that.''')
+    man = subp.add_parser(
+        'manufacture', help='Initial set-up of device',
+        description='''This loads typical configurations for GPS and clock
+        generation.  The configuration is not saved to flash, you must run
+        'freak config save' to do that.''')
+    man.add_argument('-t', '--tics', help='TICS .tcs file to base config on')
 
     subp.add_parser('clear', help='Save an empty device config',
                     description='''Save an empty device configuration.  Note
@@ -435,7 +440,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         do_clear(device)
 
     elif command == 'manufacture':
-        do_manufacture(device)
+        do_manufacture(device, args.tics)
 
     else:
         assert False, f'This should never happen: {command}'

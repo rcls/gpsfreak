@@ -82,7 +82,7 @@ ublox_util.add_to_argparse(gps_p, dest='gps', metavar='SUB-COMMAND')
 argp.add_argument('-n', '--name', metavar='NAME',
                   help='Name of device to connect to (USB ser. no.)')
 
-argp.add_argument('-c', '--cpu', metavar='SERIAL NUM.',
+argp.add_argument('-c', '--cpu', metavar='CPU SN',
                   help='CPU serial number of device to connect to')
 
 def do_info(device: Device) -> None:

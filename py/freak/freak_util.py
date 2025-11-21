@@ -28,8 +28,7 @@ class Device:
         gen = usb.core.find(True, idVendor=0x1209, idProduct=0xce93, **opts) # pyright: ignore
         u = list(gen) # type: ignore
         if self.args and self.args.cpu is not None:
-            u = [dev for dev in u
-                 if message.get_serial_number(dev) == self.args.cpu] # pyright: ignore
+            u = [dev for dev in u if message.get_serial_number(dev) == self.args.cpu] # pyright: ignore
         if len(u) == 0:
             print('No GPS Freak USB device found', file=sys.stderr)
             sys.exit(1)

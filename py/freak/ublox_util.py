@@ -9,16 +9,6 @@ from .ublox_msg import UBloxMsg, UBloxReader
 import argparse, struct, time
 import usb.core # pyright: ignore
 
-# My current changes:
-# CFG-TP-PULSE_DEF 0x01 was 0x00
-# CFG-TP-FREQ_LOCK_TP1 8844582 0x0086f526 was 1 0x00000001
-# CFG-TP-DUTY_LOCK_TP1 50.0 was 10.0
-# CFG-TP-PULSE_LENGTH_DEF 0x00 was 0x01
-# CFG-SBAS-USE_TESTMODE True 0x01 was False 0x00
-# CFG-SBAS-PRNSCANMASK 0x0000000000000000 was 0x000000000003ab88
-# CFG-UART1-BAUDRATE 230400 0x00038400 was 9600 0x00002580
-# CFG-MSGOUT-NMEA_ID_GSV_UART1 1 0x01 was 5 0x05
-
 from typing import Any, Tuple
 
 def key_value(s: str) -> Tuple[UBloxCfg, Any]:
@@ -294,7 +284,7 @@ def run_command(args: argparse.Namespace, device: Device, command: str) -> None:
         do_status(device.get_ublox(), args.verbose)
 
     elif command == 'set':
-        do_set(device.get_ublox(), args.KV, args.layer)
+        do_set(device.get_ublox(), args.KV, args.layers)
 
     elif command == 'get':
         do_get(device.get_ublox(), args.layer, args.KEY, args.sort)

@@ -94,8 +94,8 @@ Heat-sinking
 ------------
 
 The LMK05318b generates a bit of heat, and the board may reach temperatures
-approaching 30 °C above ambient.  This should not be a problem, but provision is
-made to heat-sink the rear of the PCB to the case.
+30 °C above ambient.  This should not be a problem, but provision is made to
+heat-sink the rear of the PCB to the case.
 
 There is an 11 mm × 7 mm exposed copper area backside to the LMK05318b.  Solder
 a 2 mm thick copper slug to this, and then cover with a 1.5 mm thick thermal
@@ -153,7 +153,7 @@ Components that I have hand-soldered in preference to using JLCPCB assembly:
 * Likewise, the antennae power PTC fuse and the 74HC1G07 for antennae-short
   detection are hand-soldered, to save assembly costs.  The 74HC1G07 is
   optional.
-* The three C0G/NPO loop-filter caps (C78, C79, C92).
+* The three C0G/NP0 loop-filter caps (C78, C79, C92).
   JLCPCB doesn't have the exact parts.
 * The LED.
 * The TVS protection diodes I have never populated.  The 0402 pads are designed
@@ -197,7 +197,8 @@ Initial configuration
 
 Run `freak config manufacture`.  This will upload a fairly sane default
 configuration for the device, with all outputs at 10 MHz, except for 1 Hz on
-output 3.
+output 3.  The DPLL bandwidth is set to 0.3 Hz, which is quite low, and requires
+a decent TCXO to achieve lock
 
 If you want to customize the configuration:
  * The uploaded default LMK05318b configuration expects a 8844582 Hz reference
@@ -207,7 +208,7 @@ If you want to customize the configuration:
    when GPS signal is lost.  Don't configure the GPS to output the reference
    with no GPS signal (CFG-TP-FREQ_TP1).
  * You can use TICS/Pro to customize the LMK05318b configuration.  Start
-   from `py/freak/bw10hz_ref8844582.tcs` or another in py/freak/*.tcs.
+   from `py/freak/bw0p3hz_ref8844582.tcs` or another in py/freak/*.tcs.
  * Note that TICS/Pro tends to silently change the lock parameters to values
    that are not good for this hardware.  After running the DPLL script, go to
    the 'Reference Validation' and 'DPLL and BAW flags' tabs, and ensure that
@@ -215,9 +216,12 @@ If you want to customize the configuration:
  * Setting the host-side UART baud rate **must** be done using `freak gps baud`,
    the normal OS serial port baud rate setting is ignored.  I use
    230400 baud; the default 9600 is awfully slow.
+ * The initial configuration mentioned above sets `TP-ALIGN_TO_TOW_TP1` to
+   False.  This improves short term frequency accuracy, at the expense of a long
+   term phase drift away from perfectly tracking GPS.
 
-Control Lines
-=============
+Internal Control Lines
+======================
 
 The CPU has various control lines to the GPS and clock chip.  There is UART to
 the GPS, and all are on an I2C bus.  In addition, there are connections to:
@@ -233,9 +237,9 @@ Hardware Options
 The three U.Fl connectors can be soldered.  The GPS timepulse output also
 requires soldering a 50 Ω 0603 or similar termination component.
 
-The output 2 balun can be removed and replaced with resistors.  Populate the
-series resistor R32 with a 0 Ω short, and optionally terminate the second line
-of the internal differential pair with 50 Ω.
+There are pads for a balun on output 2.  If wanted, remove the two 0603
+resistors, and solder a 2:1 impedance balun, for a 3 dB increase in output
+power.
 
 Before building a device:
  * There are a lot of closely spaced 0402 components on the board.  Unless you
@@ -360,15 +364,15 @@ The output balun on output 2 is not worth the cost.  I've marked it as DNP
 in the schematic.
 
 The `freak` tool
-========================
+================
 
 The `freak` tool can perform various operations as well as setting the output
 frequencies.  Everything has a `--help` option which is hopefully helpful.
 
-`freak freq` with no arguments displays the current output frequencies.  Give
- it arguments to set the output frequencies.  The units default to MHz, but an
- explicit unit of Hz, kHz or GHz may be given.  Rational numbers (e.g., 100/3)
- are accepted, and avoid rounding errors inherent with decimals (33.333333).
+`freak freq` with no arguments displays the current output frequencies.  Give it
+arguments to set the output frequencies.  The units default to MHz, but an
+explicit unit of Hz, kHz or GHz may be given.  Rational numbers (e.g., 100/3)
+are accepted, and avoid rounding errors inherent with decimals (33.333333).
 
 `freak plan` can carry out the frequency planning computations without writing
 them to the device.  This is useful to explore what is possible.

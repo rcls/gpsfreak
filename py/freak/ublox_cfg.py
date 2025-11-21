@@ -50,8 +50,21 @@ class UBloxCfg:
     def to_value(self, s: Any) -> Any:
         '''Typically, s will be a string, but can be anything castable.'''
         match self.typ[0]:
-            case 'I'|'U'|'E'|'X'|'L':
+            case 'I'|'U'|'E'|'X':
                 return int(s, 0)
+            case 'L':
+                s = s.lower()
+                if s in ('t', 'true'):
+                    return True
+                if s in ('f', 'false'):
+                    return False
+                try:
+                    v = int(s)
+                    if v in (0, 1):
+                        return bool(v)
+                except:
+                    pass
+                raise ValueError('invalid boolean ' + repr(s))
             case 'R': return float(s)
             case _  : assert False
 

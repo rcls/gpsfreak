@@ -137,7 +137,7 @@ class MaskedBytes:
         self.mask = bytearray(DATA_SIZE)
 
     def bundle(self, ro: bool = True, max_block: int = 1000,
-               defaults:MaskedBytes|None = None) -> BundledBytes:
+               defaults: MaskedBytes | None = None) -> BundledBytes:
         result: BundledBytes = {}
         current_addr = 0
         current_data: bytearray|None = None

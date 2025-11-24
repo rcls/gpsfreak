@@ -1,0 +1,5 @@
+*.bin
+*.csv
+*.gnumeric
+*.txt
+target/

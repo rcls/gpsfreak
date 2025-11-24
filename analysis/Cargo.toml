@@ -1,0 +1,22 @@
+#cargo-features = ["edition2024"]
+
+[package]
+edition = "2024"
+name = "foo"
+version = "0.0.1"
+
+[features]
+default = ["verbose"]
+verbose = []
+
+[dependencies]
+memmap2 = "*"
+rustfft = "*"
+
+[[bin]]
+name = "mapband"
+path = "src/mapband.rs"
+
+[[bin]]
+name = "cross"
+path = "src/cross.rs"

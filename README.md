@@ -321,7 +321,7 @@ upgrade purely via software command.)
 different part, then double or triple check the footprint, and note the odd pad
 numbering.
 
-**PTC Fuse**: U-Blox example schematics just use a current limiting resistor.
+**PTC Fuse** U-Blox example schematics just use a current limiting resistor.
 Which would be cheaper. The 74HC1G07 logic gate for antennae short-circuit
 sensing is optional.
 
@@ -337,8 +337,8 @@ revision 0, so the pin is grounded.
 Cost Reduction Opportunities
 ============================
 
-Really understand the difference between MAX-F10 and MAX-M10.  Does L5 band help
-much, or does SBAS make this redundant?
+The MAX-M10S is a cheaper alternative to MAX-F10S, but still performs OK, albeit
+with a slightly worse short-term frequency accuracy.
 
 The TCXO can be replaced by a cheaper one.  The phase noise to worry about is
 capped above at around 18 kHz by the BAW oscillator, and at low frequencies by

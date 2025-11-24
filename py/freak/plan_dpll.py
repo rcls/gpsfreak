@@ -110,12 +110,7 @@ class DPLLPlan:
         # stored we can loosen that up a bit.
         ref, vco = freq_lock_counts(self.reference, self.baw / 24,
                                     Fraction(96, 1000), 10)
-        #from math import ceil
-        #ref = ceil(10_000_000 / (self.baw / 24) * self.reference)
-        #vco = round(ref / self.reference * (self.baw / 24))
         assert 9_900_000 < vco < 10_100_000
-        assert 800_000 < ref < 900_000
-        #print(ref, vco)
         return ref, vco
 
     def pll1_ratio(self) -> Tuple[int, int]:
@@ -128,7 +123,7 @@ def freq_lock_counts(freq1: Fraction, freq2: Fraction,
                      meas_time: Fraction, max_off: int) -> Tuple[int, int]:
     '''Return frequency lock detection counts for a pair of frequencies,
     near a given measurement time in seconds.'''
-    assert freq1 < freq2
+    assert freq1 < freq2, f'{float(freq1)} {float(freq2)}'
     base1 = round(meas_time * freq1 / Hz)
     assert base1 > 1000
     best1 = 0
@@ -156,6 +151,9 @@ def baw_plan_for_freq(target: Target, freq: Fraction) -> DPLLPlan:
     for pre_div in range(2, 17+1):
         fb_div_target = ratio / 2 / pre_div
         fb_div = fb_div_target.limit_denominator((1 << 40) - 1)
+        # Check that the approximate DPLL fractional part is in an OK range.
+        if fb_div < 1 or abs(fb_div - round(fb_div)) < 0.125:
+            continue
         plan = DPLLPlan(
             baw = target.reference * 2 * pre_div * fb_div,
             baw_target = freq,
@@ -187,6 +185,11 @@ def baw_plan_low_approx(target: Target, freq: Fraction) -> DPLLPlan | None:
     for prediv in range(2, 17 + 1):
         ref_mult = target.reference * 2 * prediv
         ratio_target = freq / ref_mult
+        # Check that the approximate DPLL fractional part is in an OK range.
+        approx_fb_div = float(BAW_FREQ / ref_mult)
+        if approx_fb_div < 1 or \
+           abs(approx_fb_div - round(approx_fb_div)) < 0.125:
+            continue
         for m in range(start, end + 1):
             fb_div = ratio_target * m
             fb_div = fb_div.limit_denominator(1 << 40)
@@ -232,6 +235,11 @@ def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
         for prediv in range(2, 17 + 1):
             post_fb_div = target.reference * 2 * prediv
             fb_base = base / post_fb_div
+            # Check that the approximate DPLL fractional part is in an OK range.
+            approx_fb_div = float(fb_base * BAW_FREQ)
+            if approx_fb_div < 1 or \
+               abs(approx_fb_div - round(approx_fb_div)) < 0.125:
+                continue
             for stage2 in sym_range(base, BAW_LOW, BAW_HIGH, 1<<24):
                 fb_div = fb_base * stage2
                 if fb_div.denominator < 1<<40:

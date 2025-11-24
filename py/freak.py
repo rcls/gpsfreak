@@ -61,7 +61,8 @@ restart = subp.add_parser(
     power-cycling.''')
 
 cpu_reset = subp.add_parser(
-    'cpu-reset', help='Reset device CPU', description='Reset device CPU')
+    'reset', help='Reset device CPU',
+    description='Reset device CPU and reload configuration.')
 cpu_reset.add_argument('-u', '--dfu', action='store_true',
                        help='Enter DFU for firmware upload')
 
@@ -146,7 +147,7 @@ elif args.command == 'restart':
     message.command(dev, message.GPS_RESET, b'\0')
     dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # pyright: ignore
 
-elif args.command == 'cpu-reset':
+elif args.command == 'reset':
     # Just send the command blindly, no response.
     if not args.dfu:
         device.get_usb().write( # pyright: ignore

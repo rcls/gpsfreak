@@ -1,7 +1,7 @@
-GPS _freak_ — GPS Disciplined Frequency Generator
+GPSfreak — GPS Disciplined Frequency Generator
 =================================================
 
-GPS _freak_ is a flexible, programmable, high-accuracy, low-jitter, frequency
+GPSfreak is a flexible, programmable, high-accuracy, low-jitter, frequency
 generator, using GPS as a reference.
 
 There are 5 outputs via 5 SMA connectors, with 4 separately programmable
@@ -217,8 +217,8 @@ If you want to customize the configuration:
    the normal OS serial port baud rate setting is ignored.  I use
    230400 baud; the default 9600 is awfully slow.
  * The initial configuration mentioned above sets `TP-ALIGN_TO_TOW_TP1` to
-   False.  This improves short term frequency accuracy, at the expense of a long
-   term phase drift away from perfectly tracking GPS.
+   False.  This improves short term frequency accuracy, at the expense of a
+   small (≈ 3 ppt) long term inaccuracy.
 
 Internal Control Lines
 ======================

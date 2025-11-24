@@ -7,7 +7,6 @@ edition = '2024'
 
 [dependencies]
 stm32h503 = { path = './stm32h503' }
-#arrayvec = {version = '*', default-features=false}
 konst = '*'
 
 [target.'cfg(not(target_arch = "arm"))'.dependencies]

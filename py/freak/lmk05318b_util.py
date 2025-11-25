@@ -124,13 +124,12 @@ def set_drives(dev: Device, drives: list[str | None]) -> None:
 
     masked_write(dev, data)
 
+DEFAULT_DRIVES=['lvds8', 'lvds8', 'lvds8', 'lvds8',
+                'off', 'off', 'lvds4', 'lvds4']
+
 def do_drive(dev: Device, drives: list[Tuple[str, str]],
              defaults: bool) -> None:
-    if defaults:
-        drives = [('0', 'lvds8'), ('1', 'off'), ('2', 'lvds8'), ('3', 'off'),
-                  ('4', 'off'), ('5', 'off'), ('6', 'cmos+z'), ('7', 'lvds8')] \
-                  + drives
-    expanded: list[None|str] = [None] * 8
+    expanded: list[None|str] = list(DEFAULT_DRIVES) if defaults else [None] * 8
     for ch, drive in drives:
         assert len(ch) == 1 and ch >= '0' and ch < '8'
         if drive.startswith('cmos'):

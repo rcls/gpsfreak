@@ -177,7 +177,7 @@ def baw_plan_low_approx(target: Target, freq: Fraction) -> DPLLPlan | None:
     start = ceil(BAW_LOW / freq)
     end   = BAW_HIGH // freq
     mid   = BAW_FREQ // freq
-    end   = min(end  , mid + half_range, 1 << 32)
+    end   = min(end, mid + half_range, 1 << 32)
     start = max(start, end - 2 * half_range)
     # FIXME - as we get close to the bottom of the possible range, fewer
     # of the stage1*stage2 possibilities are feasible, so we are wasting
@@ -220,10 +220,12 @@ def sym_range(f: Fraction, low: Fraction, high: Fraction,
     final = max(end - offset, offset - start)
     for p in parity, 1 - parity:
         for i in range(initial + p, 1 + final, 2):
-            if start <= offset - i <= end:
-                yield offset - i
-            if i != 0 and start <= offset + i <= end:
-                yield offset + i
+            value = offset - i
+            if start <= value <= end:
+                yield value
+            value = offset + i
+            if i != 0 and start <= value <= end:
+                yield value
 
 def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
     '''Brute force for an exact solution of getting a low frequency out of
@@ -236,7 +238,7 @@ def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
             post_fb_div = target.reference * 2 * prediv
             fb_base = base / post_fb_div
             # Check that the approximate DPLL fractional part is in an OK range.
-            approx_fb_div = float(fb_base * BAW_FREQ)
+            approx_fb_div = float(BAW_FREQ / fb_base)
             if approx_fb_div < 1 or \
                abs(approx_fb_div - round(approx_fb_div)) < 0.125:
                 continue
@@ -357,6 +359,10 @@ def test_exact():
     assert plan.baw == REF_FREQ * 2 * plan.fb_div * plan.fb_prediv
     assert plan.baw_target == f
     assert plan.baw == f
+
+def test_exact_low():
+    plan = baw_plan_low_exact(Target(freqs = []), 1 * Hz)
+    assert plan
 
 def test_110khz():
     f = 110 * kHz

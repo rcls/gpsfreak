@@ -105,7 +105,7 @@ pub fn dma_tx(data: *const u8, len: usize) -> bool {
         return false;
     }
 
-    ch.write(data as usize, len);
+    ch.write(data as usize, len, 0);
     crate::cpu::barrier();
     true
 }

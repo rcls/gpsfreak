@@ -9,11 +9,14 @@ pub fn dma() -> &'static Dma {unsafe {&*stm32h503::GPDMA1::ptr()}}
 
 #[allow(non_camel_case_types)]
 pub trait DMA_Channel {
-    /// Write to peripheral.  DADDR should be initialized.
-    fn write(&self, data: usize, len: usize);
+    /// Write to peripheral.  DADDR should be initialized.  The channel should
+    /// be initialised by writes_t0().  Only a size of 0 (bytes) is currently
+    /// supported.
+    fn write(&self, data: usize, len: usize, size: u8);
 
-    /// Read from peripheral. SADDR should be initialized.
-    fn read(&self, data: usize, len: usize);
+    /// Read from peripheral. The channel should be initialized by read_from().
+    /// Only as size of 0 (bytes) is currently supported.
+    fn read(&self, data: usize, len: usize, size: u8);
 
     /// Configure to write to a peripheral from memory.
     fn writes_to(&self, dst: *mut   u8, request: u8);
@@ -28,12 +31,12 @@ pub trait DMA_Channel {
 }
 
 impl DMA_Channel for Channel {
-    fn write(&self, data: usize, len: usize) {
+    fn write(&self, data: usize, len: usize, _size: u8) {
         self.SAR().write(|w| w.SA().bits(data as u32));
         self.BR1.write(|w| w.BNDT().bits(len as u16));
         self.CR.write(|w| w.EN().set_bit().TCIE().set_bit());
     }
-    fn read(&self, data: usize, len: usize) {
+    fn read(&self, data: usize, len: usize, _size: u8) {
         self.DAR().write(|w| w.DA().bits(data as u32));
         self.BR1.write(|w| w.BNDT().bits(len as u16));
         self.CR.write(|w| w.EN().set_bit().TCIE().set_bit());
@@ -71,7 +74,6 @@ pub trait Flat {
 
 impl Flat for u8 {}
 impl<const N: usize, T: Flat> Flat for [T; N] {}
-//impl<const N: usize> Flat for [u16; N] {}
 impl Flat for i16 {}
 impl Flat for u16 {}
 impl Flat for [u8] {}

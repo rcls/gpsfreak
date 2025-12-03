@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .plan_constants import *
-from .plan_tools import Target, is_multiple_of, output_divider
+from .plan_tools import Target, freq_to_str, is_multiple_of, output_divider
 
 from dataclasses import dataclass
 from fractions import Fraction
@@ -361,8 +361,12 @@ def test_exact():
     assert plan.baw == f
 
 def test_exact_low():
-    plan = baw_plan_low_exact(Target(freqs = []), 1 * Hz)
+    plan = baw_plan_low_exact(Target(freqs = []), 1001 * Hz / 1000)
     assert plan
+    print(plan)
+    print(freq_to_str(plan.baw))
+    assert plan.baw == plan.baw_target
+    assert is_multiple_of(plan.baw, 1001 * Hz / 1000)
 
 def test_110khz():
     f = 110 * kHz

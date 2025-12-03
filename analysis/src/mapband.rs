@@ -13,11 +13,10 @@ pub fn main() {
     let file = File::open(&args[1]).unwrap();
 
     let mmap = unsafe {Mmap::map(&file).unwrap()};
-    let bytes = &mmap[4096 + 13000000 ..];
-    let len = bytes.len();
-    let nice = be_nice_to_fft(len - 10_000_000);
+    let len = mmap.len();
+    let nice = be_nice_to_fft(len - 13_000_000);
     eprintln!("FFT nice : {nice} / {len} (lost {})", len - nice);
-    let bytes = &bytes[len - nice ..];
+    let bytes = &mmap[len - nice ..];
 
     if args.len() <= 2 {
         println!("Freq est. {}", freq_estimate(bytes));
@@ -29,7 +28,7 @@ pub fn main() {
     if false {
         cycle_lengths(bytes);
     }
-    else if true {
+    else if false {
         phases(bytes, frequency);
     }
     else {

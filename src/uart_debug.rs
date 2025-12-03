@@ -35,7 +35,7 @@ pub struct Debug {
     buf: [UCell<u8>; BUF_SIZE],
 }
 
-pub fn debug_isr() {
+fn debug_isr() {
     DEBUG.isr();
 }
 

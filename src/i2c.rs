@@ -1,9 +1,9 @@
 
 use core::marker::PhantomData;
 
+use crate::cpu::{barrier, interrupt};
 use crate::dma::{Channel, DMA_Channel, Flat};
 use crate::vcell::{UCell, VCell};
-use crate::cpu::{barrier, interrupt};
 
 /// Interrupt priority for the I2C and its DMA interrupt handlers.  Users of
 /// this code should run at no higher than that priority.
@@ -98,7 +98,7 @@ pub fn init() {
     enable_priority(GPDMA1_CH2, PRIORITY);
 }
 
-pub fn i2c_isr() {
+fn i2c_isr() {
     let i2c = unsafe {&*I2C::ptr()};
     let context = unsafe {CONTEXT.as_mut()};
 
@@ -130,8 +130,8 @@ pub fn i2c_isr() {
         *context.error.as_mut() = 1;
     }
     else {
-        panic!("Unexpected I2C ISR {:#x} {:#x}",
-               status.bits(), i2c.CR2.read().bits());
+        panic!("Unexpected I2C ISR {:#x} {:#x}", status.bits(),
+               i2c.CR2.read().bits());
     }
 
     // Stop the ISR from prematurely retriggering.  Otherwise we may return
@@ -172,17 +172,17 @@ impl I2cContext {
         // Synchronous I2C start for the reg ptr write.
         // No DMA write is active so the dma req. hopefully just gets ignored.
         i2c.CR2.write(
-            |w|w.START().set_bit().NBYTES().bits(1).SADD().bits(addr as u16));
+            |w| w.START().set_bit().SADD().bits(addr as u16).NBYTES().bits(1));
         i2c.TXDR.write(|w| w.bits(reg as u32));
 
-        rx_channel().read(data, len);
+        rx_channel().read(data, len, 0);
     }
     #[inline(never)]
     fn read_start(&self, addr: u8, data: usize, len: usize) {
         let i2c = unsafe {&*I2C::ptr()};
 
         interrupt::disable_all();
-        rx_channel().read(data, len);
+        rx_channel().read(data, len, 0);
         self.arm(F_I2C | F_DMA_RX);
         i2c.CR2.write(
             |w|w.START().set_bit().AUTOEND().bit(true).SADD().bits(addr as u16)
@@ -201,7 +201,7 @@ impl I2cContext {
             |w| w.START().set_bit().AUTOEND().set_bit()
                 . SADD().bits(addr as u16).NBYTES().bits(len as u8 + 1));
         i2c.TXDR.write(|w| w.TXDATA().bits(reg));
-        tx_channel().write(data, len);
+        tx_channel().write(data, len, 0);
         self.arm(F_I2C | F_DMA_TX);
         interrupt::enable_all();
     }
@@ -216,7 +216,7 @@ impl I2cContext {
         // Do the DMA set-up in the shadow of the address handling.  In case
         // we manage to get an I2C error before the DMA set-up is done, we have
         // interrupts disabled.
-        tx_channel().write(data, len);
+        tx_channel().write(data, len, 0);
         self.arm(F_I2C | F_DMA_TX);
         interrupt::enable_all();
     }
@@ -224,8 +224,8 @@ impl I2cContext {
     fn write_read_start(&self, addr: u8, wdata: usize, wlen: usize,
                         rdata: usize, rlen: usize) {
         let i2c = unsafe {&*I2C::ptr()};
-        tx_channel().write(wdata, wlen);
-        rx_channel().read (rdata, rlen);
+        tx_channel().write(wdata, wlen, 0);
+        rx_channel().read (rdata, rlen, 0);
         self.pending_len.write(rlen);
         self.arm(F_I2C | F_DMA_TX | F_DMA_RX);
         i2c.CR2.write(

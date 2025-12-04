@@ -28,6 +28,7 @@ mod debug;
 mod usb;
 #[macro_use]
 mod utils;
+#[path = "../stm-common/vcell.rs"]
 mod vcell;
 
 pub fn main() -> ! {

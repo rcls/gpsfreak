@@ -182,6 +182,7 @@ impl<const P: u8> Priority<P> {
         }
         Priority{old}
     }
+
     pub fn wfe(&self) {
         if cfg!(target_os = "none") {
             unsafe {cortex_m::register::basepri::write(self.old)};
@@ -209,7 +210,7 @@ fn bugger() {
     // TODO - change this to keeping a log in the backup SRAM.
     crate::dbgln!("Crash @ {pc:#010x}");
     loop {
-        crate::uart_debug::debug_isr();
+        crate::debug::debug_isr();
     }
 }
 

@@ -1,3 +1,6 @@
 [submodule "stm32h503"]
 	path = stm32h503
 	url = git@github.com:rcls/pac-stm32h503.git
+[submodule "stm-common"]
+	path = stm-common
+	url = git@github.com:rcls/stm-common.git

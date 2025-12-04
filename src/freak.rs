@@ -24,7 +24,7 @@ mod led;
 mod lmk05318b;
 mod provision;
 #[macro_use]
-mod uart_debug;
+mod debug;
 mod usb;
 #[macro_use]
 mod utils;
@@ -41,7 +41,7 @@ pub fn main() -> ! {
 
     cpu::maybe_enter_dfu();
 
-    uart_debug::init();
+    debug::init();
 
     crc::init();
     led::init();

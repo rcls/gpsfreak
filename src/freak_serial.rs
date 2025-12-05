@@ -1,6 +1,7 @@
 use crate::cpu::barrier;
 use crate::usb;
 use crate::dbgln;
+use crate::usb::EndPointPair;
 use usb::types::{LineCoding, SetupHeader};
 use crate::vcell::{UCell, VCell};
 
@@ -254,4 +255,18 @@ pub fn get_line_coding() -> SetupResult {
         dte_rate: FAKE_BAUD.read(),
         char_format: 0, parity_type: 0, data_bits: 8};
     SetupResult::tx_data(lc)
+}
+
+#[derive_const(Default)]
+pub struct FreakUSBSerialIntr;
+
+impl EndPointPair for FreakUSBSerialIntr {
+    /// This handles USB interrupt pipe VTTX not CPU interrupts!
+    fn tx_handler(&mut self) {
+        // TODO - nothing here yet!
+        let chep = chep_intr().read();
+        chep_intr().write(|w| w.interrupt().VTTX().clear_bit());
+        intr_dbgln!("interrupt_tx_handler CHEP now {:#06x} was {:#06x}",
+                    chep_intr().read().bits(), chep.bits());
+    }
 }

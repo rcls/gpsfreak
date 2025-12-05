@@ -39,6 +39,7 @@ pub struct FreakUSB;
 impl usb::EightEndPoints for FreakUSB {
     type EP0 = usb::control::ControlState;
     type EP1 = crate::freak_serial::FreakUSBSerial;
+    type EP2 = crate::freak_serial::FreakUSBSerialIntr;
 }
 
 pub static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();

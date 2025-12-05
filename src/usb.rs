@@ -30,7 +30,6 @@ use crate::link_assert;
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
 macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
-macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!main_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
 macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
@@ -60,17 +59,7 @@ pub struct DummyEndPoint;
 impl EndPointPair for DummyEndPoint {}
 
 #[allow(non_camel_case_types)]
-// #[derive_const(Default)]
 pub struct USB_State<EPS: EightEndPoints> {
-    // /// Base of the ACM CDC TX buffer we are accumulating.
-    // tx_base: *mut u32,
-    // /// Current number of bytes in TX buffer we are accumulating.
-    // tx_len: usize,
-    // /// Accumulating bytes into 32 bit words.
-    // tx_part: u32,
-    // /// Is software still processing a received buffer?
-    // rx_processing: RxProcessing,
-
     pub ep0: EPS::EP0,
     pub ep1: EPS::EP1,
     pub ep2: EPS::EP2,
@@ -194,10 +183,11 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
             }
             match istr.bits() & 31 {
                 0  => self.ep0.tx_handler(),
-                16 => self.ep1.rx_handler(),
+                16 => self.ep0.rx_handler(),
                 1  => self.ep1.tx_handler(),
                 17 => self.ep1.rx_handler(),
-                2  => self.interrupt_handler(),
+                2  => self.ep2.tx_handler(),
+                18 => self.ep2.rx_handler(),
                 3  => main_tx_handler(),
                 19 => main_rx_handler(),
                 4  => self.ep4.tx_handler(),
@@ -228,14 +218,6 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
         self.ep5.start_of_frame();
         self.ep6.start_of_frame();
         self.ep7.start_of_frame();
-    }
-    /// This handles USB interrupt pipe VTTX not CPU interrupts!
-    fn interrupt_handler(&mut self) {
-        // TODO - nothing here yet!
-        let chep = chep_intr().read();
-        chep_intr().write(|w| w.interrupt().VTTX().clear_bit());
-        intr_dbgln!("interrupt_tx_handler CHEP now {:#06x} was {:#06x}",
-                    chep_intr().read().bits(), chep.bits());
     }
 
     fn usb_initialize(&mut self) {

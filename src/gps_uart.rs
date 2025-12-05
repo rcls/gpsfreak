@@ -169,7 +169,7 @@ fn dma_isr() {
 
     if !cr.EN().bit() && sr.bits() & 0x7f00 != 0 {
         // We completed a transfer, or it errored.
-        crate::usb::serial_rx_done();
+        crate::usb::freak_serial::serial_rx_done();
     }
 }
 

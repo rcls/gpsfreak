@@ -3,6 +3,7 @@
 #![deny(warnings)]
 #![allow(internal_features)]
 #![allow(unpredictable_function_pointer_comparisons)]
+#![feature(associated_type_defaults)]
 #![feature(const_clone, const_cmp, const_convert, const_default, const_index,
            const_ops, const_trait_impl)]
 #![feature(default_field_values)]

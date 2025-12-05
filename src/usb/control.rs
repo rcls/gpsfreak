@@ -12,21 +12,21 @@ use super::{ctrl_dbgln, usb_dbgln};
 pub struct ControlState {
     /// If request(Type) are non-zero, then we are waiting RX data for this
     /// setup request.
-    setup: SetupHeader,
+    setup: SetupHeader = SetupHeader::default(),
     /// Set-up data to send.  On TX ACK we send the next block.
-    setup_data: SetupResult,
+    setup_data: SetupResult = SetupResult::default(),
     /// If set, the TX setup data is shorter than the requested data and we must
     /// end with a zero-length packet if needed.
-    setup_short: bool,
+    setup_short: bool = false,
     /// Address received in a SET ADDRESS.  On TX ACK, we apply this.
-    pending_address: Option<u8>,
+    pending_address: Option<u8> = None,
     /// Are we configured?
-    configured: bool,
+    configured: bool = false,
     /// Do we have a pending DFU reboot?
-    pending_dfu: bool,
+    pending_dfu: bool = false,
 }
 
-pub static CONTROL_STATE: UCell<ControlState> = Default::default();
+pub static CONTROL_STATE: UCell::<ControlState> = UCell::default();
 
 impl ControlState {
     pub fn initialize(&mut self) {

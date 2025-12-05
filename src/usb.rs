@@ -21,6 +21,8 @@ mod hardware;
 mod strings;
 mod types;
 
+pub mod freak_serial;
+
 use control::{CONTROL_STATE, ControlState};
 use hardware::*;
 use types::*;
@@ -34,41 +36,77 @@ use stm32h503::Interrupt::USB_FS as INTERRUPT;
 macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!main_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
-macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
-macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 macro_rules!usb_dbgln  {($($tt:tt)*) => {if true  {dbgln!($($tt)*)}};}
 macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 
 pub(crate) use {ctrl_dbgln, usb_dbgln};
 
-#[allow(non_camel_case_types)]
+pub trait EndPointPair: const Default {
+    fn rx_handler(&mut self) {}
+    fn tx_handler(&mut self) {}
+    fn start_of_frame(&mut self) {}
+}
+
+pub trait EightEndPoints: const Default {
+    type EP0: EndPointPair = DummyEndPoint;
+    type EP1: EndPointPair = DummyEndPoint;
+    type EP2: EndPointPair = DummyEndPoint;
+    type EP3: EndPointPair = DummyEndPoint;
+    type EP4: EndPointPair = DummyEndPoint;
+    type EP5: EndPointPair = DummyEndPoint;
+    type EP6: EndPointPair = DummyEndPoint;
+    type EP7: EndPointPair = DummyEndPoint;
+}
+
 #[derive_const(Default)]
-struct USB_State {
-    /// Base of the ACM CDC TX buffer we are accumulating.
-    tx_base: *mut u32 = BULK_TX_BUF as _,
-    /// Current number of bytes in TX buffer we are accumulating.
-    tx_len: usize,
-    /// Accumulating bytes into 32 bit words.
-    tx_part: u32,
-    /// Is software still processing a received buffer?
-    rx_processing: RxProcessing = RxProcessing::Idle,
+pub struct DummyEndPoint;
+impl EndPointPair for DummyEndPoint {}
+
+#[allow(non_camel_case_types)]
+// #[derive_const(Default)]
+struct USB_State<EPS: EightEndPoints> {
+    // /// Base of the ACM CDC TX buffer we are accumulating.
+    // tx_base: *mut u32,
+    // /// Current number of bytes in TX buffer we are accumulating.
+    // tx_len: usize,
+    // /// Accumulating bytes into 32 bit words.
+    // tx_part: u32,
+    // /// Is software still processing a received buffer?
+    // rx_processing: RxProcessing,
+
+    ep0: EPS::EP0,
+    ep1: EPS::EP1,
+    ep2: EPS::EP2,
+    ep3: EPS::EP3,
+    ep4: EPS::EP4,
+    ep5: EPS::EP5,
+    ep6: EPS::EP6,
+    ep7: EPS::EP7,
 }
 
-/// Status of processing received CDC ACM serial data.
-#[derive(PartialEq)]
-enum RxProcessing {
-    /// Nothing is being processed.
-    Idle,
-    /// The serial handling is currently forwarding some data.
-    Processing,
-    /// The serial handling is currently busy with somebody elses data, but
-    /// we have data for it.
-    Blocked,
+impl<EPS: EightEndPoints> const Default for USB_State<EPS> {
+    fn default() -> Self {Self{
+        ep0: EPS::EP0::default(),
+        ep1: EPS::EP1::default(),
+        ep2: EPS::EP2::default(),
+        ep3: EPS::EP3::default(),
+        ep4: EPS::EP4::default(),
+        ep5: EPS::EP5::default(),
+        ep6: EPS::EP6::default(),
+        ep7: EPS::EP7::default(),
+    }}
 }
 
-unsafe impl Sync for USB_State {}
+unsafe impl<EPS: EightEndPoints> Sync for USB_State<EPS> {}
 
-static USB_STATE: UCell<USB_State> = Default::default();
+#[derive_const(Default)]
+pub struct FreakUSB;
+
+impl EightEndPoints for FreakUSB {
+    type EP1 = freak_serial::FreakUSBSerial;
+}
+
+static USB_STATE: UCell<USB_State<FreakUSB>> = Default::default();
 
 /// Operating systems appear to think that changing baud rates on serial ports
 /// at random is fine.  It is not.  So we ignore the CDC ACM baud rate
@@ -130,11 +168,7 @@ fn usb_isr() {
 }
 
 pub fn serial_tx_byte(byte: u8) {
-    unsafe{USB_STATE.as_mut()}.serial_tx_byte(byte);
-}
-
-pub fn serial_rx_done() {
-    unsafe{USB_STATE.as_mut()}.serial_rx_done();
+    unsafe{USB_STATE.as_mut()}.ep1.serial_tx_byte(byte);
 }
 
 fn set_configuration(cfg: u8) {
@@ -156,7 +190,7 @@ fn set_configuration(cfg: u8) {
     chep_main().write(|w| w.main().init(&main).rx_valid(&main).tx_nak(&main));
 }
 
-impl USB_State {
+impl<EPS: EightEndPoints> USB_State<EPS> {
     fn isr(&mut self) {
         let usb = unsafe {&*stm32h503::USB::ptr()};
         let mut istr = usb.ISTR.read();
@@ -183,10 +217,12 @@ impl USB_State {
             match istr.bits() & 31 {
                 0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
                 16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
-                1  => self.serial_tx_handler(),
-                17 => self.serial_rx_handler(),
+                1  => self.ep1.tx_handler(),
+                17 => self.ep1.rx_handler(),
                 2  => self.interrupt_handler(),
                 3  => main_tx_handler(),
+                4  => self.ep4.tx_handler(),
+                12 => self.ep4.rx_handler(),
                 19 => main_rx_handler(),
                 _  => {
                     dbgln!("Bugger endpoint?, ISTR = {:#010x}", istr.bits());
@@ -206,150 +242,15 @@ impl USB_State {
     /// push through any pending data.  Hopefully quickly enough for the actual
     /// IN request.
     fn start_of_frame(&mut self) {
-        // If serial TX is idle, then push through any pending data.
-        let chep = chep_ser().read();
-        if !chep.tx_nakking() || self.tx_len == 0 {
-            return;                         // Not ready for data.
-        }
-
-        // Store any sub-word bytes.
-        if self.tx_len & 3 != 0 {
-            let ptr = self.tx_base.wrapping_byte_add(self.tx_len & !3);
-            unsafe {*ptr = self.tx_part >> 32 - 8 * (self.tx_len & 3)};
-        }
-
-        self.send_tx_buffer(chep);
+        self.ep0.start_of_frame();
+        self.ep1.start_of_frame();
+        self.ep2.start_of_frame();
+        self.ep3.start_of_frame();
+        self.ep4.start_of_frame();
+        self.ep5.start_of_frame();
+        self.ep6.start_of_frame();
+        self.ep7.start_of_frame();
     }
-
-    fn serial_tx_handler(&mut self) {
-        let chep = chep_ser().read();
-        if !chep.VTTX().bit() {
-            stx_dbgln!("serial tx spurious CHEP {:#06x}", chep.bits());
-            return;
-        }
-
-        if !chep.tx_nakking() || self.tx_len < 64 {
-            stx_dbgln!("STX wait for more.  CHEP {:#06x}", chep.bits());
-            chep_ser().write(|w| w.serial().VTTX().clear_bit());
-            return;
-        }
-
-        self.send_tx_buffer(chep);
-    }
-
-    fn serial_tx_byte(&mut self, byte: u8) {
-        fast_dbgln!("serial_tx_byte {byte:02x}");
-        if self.tx_len >= 64 {
-            return;                     // We're full.  Drop it.
-        }
-        self.tx_part = (self.tx_part >> 8) + ((byte as u32) << 24);
-        if self.tx_len & 3 == 3 {
-            let ptr = self.tx_base.wrapping_byte_add(self.tx_len - 3);
-            unsafe {*ptr = self.tx_part};
-        }
-        self.tx_len += 1;
-        if self.tx_len < 64 {
-            return;
-        }
-
-        let chep = chep_ser().read();
-        if chep.rx_disabled() {
-            return;                         // Not initialized, or reset.
-        }
-        if chep.tx_active() {
-            stx_dbgln!("USB TX push now full CHEP {:#06x}", chep.bits());
-        }
-
-        self.send_tx_buffer(chep);
-    }
-
-    fn send_tx_buffer(&mut self, chep: hardware::CheprR) {
-        bd_serial().tx_set(self.tx_base as _, self.tx_len);
-        // It's OK to clear VTTX even if we haven't handled the interrupt yet
-        // - we are doing just what the ISR would.
-        chep_ser().write(|w| w.serial().VTTX().clear_bit().tx_valid(&chep));
-        stx_dbgln!("serial tx arm, len {} CHEP {:#06x} was {:#06x}",
-                   self.tx_len, chep_ser().read().bits(), chep.bits());
-
-        // We have two TX buffers, differing only by a single bit.
-        self.tx_base = (self.tx_base as usize ^ 64) as _;
-        self.tx_len = 0;
-    }
-
-    fn serial_rx_handler(&mut self) {
-        let chep = chep_ser().read();
-        if !chep.VTRX().bit() {
-            srx_dbgln!("SRX spurious! CHEP {:#06x}", chep.bits());
-            return;
-        }
-        if !chep.rx_nakking() {
-            chep_ser().write(|w| w.serial().VTRX().clear_bit());
-            srx_dbgln!("SRX extra! CHEP {:#06x} was {:#06x}",
-                       chep_ser().read().bits(), chep.bits());
-            return;
-        }
-
-        let bd = bd_serial().rx.read();
-        let len = chep_bd_len(bd);
-        if len == 0 {
-            // Just kick off the same block again.
-            chep_ser().write(|w| w.serial().VTRX().clear_bit().rx_valid(&chep));
-            srx_dbgln!("SRX, Zero size CHEP={:#06x} was {:#06x}",
-                       chep_ser().read().bits(), chep.bits());
-            return;
-        }
-
-        if self.rx_processing != RxProcessing::Idle {
-            srx_dbgln!("SRX jammed! CHEP = {:#06x}", chep.bits());
-            chep_ser().write(|w| w.serial().VTRX().clear_bit());
-            return;
-        }
-
-        // Start an RX into the other buffer.  It's OK to clear VTRX here!
-        bd_serial().rx.write(bd ^ 64);
-        chep_ser().write(|w| w.serial().VTRX().clear_bit().rx_valid(&chep));
-        srx_dbgln!("SRX continue CHEP {:#06x} was {:#06x}",
-                   chep.bits(), chep.bits());
-
-        // Dispatch the block.
-        if crate::gps_uart::dma_tx(chep_bd_ptr(bd), len) {
-            self.rx_processing = RxProcessing::Processing;
-        }
-        else {
-            self.rx_processing = RxProcessing::Blocked;
-        }
-    }
-
-    /// Notification from the consumer that we have finished processing a buffer
-    /// and are ready for the next.  This is also called when the serial
-    /// handling has processed someone elses data.
-    fn serial_rx_done(&mut self) {
-        // If another guy is sending stuff out the serial, then we may get
-        // spurious calls.
-        if self.rx_processing == RxProcessing::Idle {
-            return;
-        }
-
-        let chep = chep_ser().read();
-
-        if !chep.rx_nakking() {
-            self.rx_processing = RxProcessing::Idle;
-            srx_dbgln!("serial_rx_done, now idle.  CHEP={:#06x}", chep.bits());
-            return;                     // RX is in progress (or not wanted).
-        }
-
-        self.rx_processing = RxProcessing::Processing;
-        let bd = bd_serial().rx.read();
-        // Start processing the pending block.
-        crate::gps_uart::dma_tx(chep_bd_ptr(bd), chep_bd_len(bd));
-
-        // Start an RX.  It's OK to clear VTRX here.
-        bd_serial().rx.write(bd ^ 64);
-        chep_ser().write(|w| w.serial().VTRX().clear_bit().rx_valid(&chep));
-        srx_dbgln!("serial_rx_done, unblocked, CHEP {:#06x} was {:#06x}",
-                   chep_ser().read().bits(), chep.bits());
-    }
-
     /// This handles USB interrupt pipe VTTX not CPU interrupts!
     fn interrupt_handler(&mut self) {
         // TODO - nothing here yet!

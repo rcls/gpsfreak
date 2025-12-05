@@ -3,7 +3,7 @@
 #sudo dfu-util -e -E 1
 if test -n "$1"
 then
-    ./freak -n $1 cpu-reset --dfu
+    ./freak -n $1 reset --dfu
     sleep 1
 fi
 

@@ -149,11 +149,12 @@ elif args.command == 'restart':
 
 elif args.command == 'reset':
     # Just send the command blindly, no response.
+    dev = device.get_usb()
     if not args.dfu:
-        device.get_usb().write( # pyright: ignore
-            0x03, message.frame(message.CPU_REBOOT, b''))
+        dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # pyright: ignore
     else:
-        device.get_usb().ctrl_transfer(0x21, 0, timeout=100) # pyright: ignore
+        dev.detach_kernel_driver(0) # pyright: ignore
+        dev.ctrl_transfer(0x21, 0, timeout=100) # pyright: ignore
 
 elif args.command in ('clock', 'lmk05318b'):
     lmk05318b_util.run_command(args, device, args.clock)

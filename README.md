@@ -1,6 +1,7 @@
 GPSfreak — GPS Disciplined Frequency Generator
 =================================================
 
+<img width=50% align="right" src="images/outside.jpg" />
 GPSfreak is a flexible, programmable, high-accuracy, low-jitter, frequency
 generator, using GPS as a reference.
 
@@ -24,6 +25,8 @@ All software in this project is licensed under the GNU GPL v3.  (`COPYING.txt`)
 
 Connectors
 ==========
+
+<img width=50% align="right" src="images/inside.jpg" />
 
 **Outputs 1+** and **1–**
 : Complementary high frequency, 3 MHz to 1.6 GHz, 11 dBm nominal output power.

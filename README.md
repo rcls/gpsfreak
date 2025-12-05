@@ -1,11 +1,11 @@
 GPSfreak — GPS Disciplined Frequency Generator
 =================================================
 
-<img width=50% align="right" src="images/outside.jpg" />
+[ <img width=50% align="right" src="images/outside.jpg" /> ](images/outside-big.jpg)
 GPSfreak is a flexible, programmable, high-accuracy, low-jitter, frequency
 generator, using GPS as a reference.
 
-There are 5 outputs via 5 SMA connectors, with 4 separately programmable
+There are 5 outputs via SMA connectors, with 4 separately programmable
 frequencies derived from 2 PLLs.
 
 The outputs are driven by a Texas Instruments LMK05318b clock generator, and a
@@ -26,7 +26,7 @@ All software in this project is licensed under the GNU GPL v3.  (`COPYING.txt`)
 Connectors
 ==========
 
-<img width=50% align="right" src="images/inside.jpg" />
+[ <img width=50% align="right" src="images/inside.jpg" /> ](images/inside-big.jpg)
 
 **Outputs 1+** and **1–**
 : Complementary high frequency, 3 MHz to 1.6 GHz, 11 dBm nominal output power.

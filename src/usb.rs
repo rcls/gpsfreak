@@ -23,7 +23,7 @@ mod types;
 
 pub mod freak_serial;
 
-use control::{CONTROL_STATE, ControlState};
+use control::ControlState;
 use hardware::*;
 use types::*;
 
@@ -45,6 +45,7 @@ pub trait EndPointPair: const Default {
     fn rx_handler(&mut self) {}
     fn tx_handler(&mut self) {}
     fn start_of_frame(&mut self) {}
+    fn usb_initialize(&mut self) {} // Control endpoints only?
 }
 
 pub trait EightEndPoints: const Default {
@@ -103,6 +104,7 @@ unsafe impl<EPS: EightEndPoints> Sync for USB_State<EPS> {}
 pub struct FreakUSB;
 
 impl EightEndPoints for FreakUSB {
+    type EP0 = ControlState;
     type EP1 = freak_serial::FreakUSBSerial;
 }
 
@@ -150,7 +152,7 @@ pub fn init() {
     // Clear any spurious interrupts.
     usb.ISTR.write(|w| w);
 
-    usb_initialize(unsafe {CONTROL_STATE.as_mut()});
+    unsafe {USB_STATE.as_mut()}.usb_initialize();
 
     interrupt::enable_priority(INTERRUPT, interrupt::PRIO_COMMS);
 
@@ -207,7 +209,7 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
         }
 
         if istr.RST_DCON().bit() {
-            usb_initialize(unsafe {CONTROL_STATE.as_mut()});
+            self.usb_initialize();
         }
 
         while istr.CTR().bit() {
@@ -215,8 +217,8 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
                 errata_delay();
             }
             match istr.bits() & 31 {
-                0  => unsafe {CONTROL_STATE.as_mut()}.control_tx_handler(),
-                16 => unsafe {CONTROL_STATE.as_mut()}.control_rx_handler(),
+                0  => self.ep0.tx_handler(),
+                16 => self.ep1.rx_handler(),
                 1  => self.ep1.tx_handler(),
                 17 => self.ep1.rx_handler(),
                 2  => self.interrupt_handler(),
@@ -258,6 +260,27 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
         chep_intr().write(|w| w.interrupt().VTTX().clear_bit());
         intr_dbgln!("interrupt_tx_handler CHEP now {:#06x} was {:#06x}",
                     chep_intr().read().bits(), chep.bits());
+    }
+
+    fn usb_initialize(&mut self) {
+        let usb = unsafe {&*stm32h503::USB::ptr()};
+        usb_dbgln!("USB initialize...");
+
+        self.ep0.usb_initialize();
+
+        usb.CNTR.write(
+            |w|w.PDWN().clear_bit().USBRST().clear_bit()
+                .RST_DCONM().set_bit().CTRM().set_bit().SOFM().set_bit());
+
+        usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(0));
+
+        bd_control().rx.write(chep_block::<64>(CTRL_RX_OFFSET));
+        clear_buffer_descs();
+
+        let ctrl = chep_ctrl().read();
+        chep_ctrl().write(
+            |w| w.control().dtogrx(&ctrl, false).dtogtx(&ctrl, false)
+                 .rx_valid(&ctrl));
     }
 }
 
@@ -379,27 +402,6 @@ fn command_handler() {
     let message = unsafe {&*(MAIN_RX_BUF as *const crate::command::MessageBuf)};
     crate::command::command_handler(
         &message, chep_bd_len(bd_main().rx.read()), main_tx_response);
-}
-
-fn usb_initialize(cs: &mut ControlState) {
-    let usb = unsafe {&*stm32h503::USB::ptr()};
-    usb_dbgln!("USB initialize...");
-
-    cs.initialize();
-
-    usb.CNTR.write(
-        |w|w.PDWN().clear_bit().USBRST().clear_bit()
-            .RST_DCONM().set_bit().CTRM().set_bit().SOFM().set_bit());
-
-    usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(0));
-
-    bd_control().rx.write(chep_block::<64>(CTRL_RX_OFFSET));
-    clear_buffer_descs();
-
-    let ctrl = chep_ctrl().read();
-    chep_ctrl().write(
-        |w| w.control().dtogrx(&ctrl, false).dtogtx(&ctrl, false)
-             .rx_valid(&ctrl));
 }
 
 fn errata_delay() {

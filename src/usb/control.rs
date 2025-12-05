@@ -4,7 +4,7 @@ use super::hardware::*;
 use super::types::*;
 
 use crate::cpu::barrier;
-use crate::vcell::UCell;
+use crate::usb::EndPointPair;
 
 use super::{ctrl_dbgln, usb_dbgln};
 
@@ -26,14 +26,8 @@ pub struct ControlState {
     pending_dfu: bool = false,
 }
 
-pub static CONTROL_STATE: UCell::<ControlState> = UCell::default();
-
-impl ControlState {
-    pub fn initialize(&mut self) {
-        *self = Self::default();
-    }
-
-    pub fn control_tx_handler(&mut self) {
+impl EndPointPair for ControlState {
+    fn tx_handler(&mut self) {
         let chep = chep_ctrl().read();
         ctrl_dbgln!("Control TX handler CHEP0 = {:#010x}", chep.bits());
 
@@ -63,7 +57,7 @@ impl ControlState {
         }
     }
 
-    pub fn control_rx_handler(&mut self) {
+    fn rx_handler(&mut self) {
         let chep = chep_ctrl().read();
         ctrl_dbgln!("Control RX handler CHEP0 = {:#010x}", chep.bits());
 
@@ -97,9 +91,9 @@ impl ControlState {
             return;
         }
 
-        // The USBSRAM only supports 32 bit accesses.  However, that only makes a
-        // difference to the AHB bus on writes, not reads.  So access the setup
-        // packet in place.
+        // The USBSRAM only supports 32 bit accesses.  However, that only makes
+        // a difference to the AHB bus on writes, not reads.  So access the
+        // setup packet in place.
         barrier();
         let setup = unsafe {SetupHeader::from_ptr(CTRL_RX_BUF)};
         // FIXME what about SETUP + OUT?
@@ -118,8 +112,9 @@ impl ControlState {
             },
             SetupResult::Rx(_) => {
                 ctrl_dbgln!("Set-up error");
-                // Set STATTX to 1 (stall).  FIXME - clearing DTOGRX should not be
-                // needed.  FIXME - do we really want to stall TX, or just NAK?
+                // Set STATTX to 1 (stall).  FIXME - clearing DTOGRX should not
+                // be needed.  FIXME - do we really want to stall TX, or just
+                // NAK?
                 chep_ctrl().write(
                     |w|w.control().VTRX().clear_bit()
                         .stat_rx(&chep, 1).stat_tx(&chep, 1));
@@ -127,6 +122,12 @@ impl ControlState {
         }
     }
 
+    fn usb_initialize(&mut self) {
+        *self = Self::default();
+    }
+}
+
+impl ControlState {
     fn setup_rx_handler(&mut self, setup: &SetupHeader) -> SetupResult {
         // Cancel any pending set-address and set-up data.
         self.pending_address = None;

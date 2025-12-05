@@ -95,7 +95,8 @@ pub fn dma_tx(data: *const u8, len: usize) -> bool {
     if LOOPBACK {
         for b in unsafe {core::slice::from_raw_parts(data, len)} {
             // Evil alert - this is broken rust, we grab a second &mut pointer!
-            crate::usb::serial_tx_byte(*b);
+            // It's only debug code so I don't care.
+            crate::freak_serial::serial_tx_byte(*b);
         }
     }
     let dma  = unsafe {&*DMA ::ptr()};
@@ -143,7 +144,7 @@ fn uart_isr() {
         loop {
             let byte = uart.RDR.read().bits() as u8;
             if !LOOPBACK {
-                crate::usb::serial_tx_byte(byte);
+                crate::freak_serial::serial_tx_byte(byte);
             }
 
             if !uart.ISR.read().RXFNE().bit() {
@@ -169,7 +170,7 @@ fn dma_isr() {
 
     if !cr.EN().bit() && sr.bits() & 0x7f00 != 0 {
         // We completed a transfer, or it errored.
-        crate::usb::freak_serial::serial_rx_done();
+        crate::freak_serial::serial_rx_done();
     }
 }
 

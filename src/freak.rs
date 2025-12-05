@@ -11,12 +11,15 @@
 #![feature(format_args_nl)]
 #![feature(link_llvm_intrinsics)]
 
+use vcell::UCell;
+
 mod command;
 mod cpu;
 mod crc;
 mod crc32;
 mod dma;
 mod flash;
+mod freak_serial;
 mod gps_uart;
 mod i2c;
 mod led;
@@ -29,6 +32,16 @@ mod usb;
 mod utils;
 #[path = "../stm-common/vcell.rs"]
 mod vcell;
+
+#[derive_const(Default)]
+pub struct FreakUSB;
+
+impl usb::EightEndPoints for FreakUSB {
+    type EP0 = usb::control::ControlState;
+    type EP1 = crate::freak_serial::FreakUSBSerial;
+}
+
+pub static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();
 
 pub fn main() -> ! {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -62,7 +75,7 @@ pub fn main() -> ! {
 
     lmk05318b::init();
 
-    usb::init();
+    unsafe {USB_STATE.as_mut()}.init();
 
     // Enable FPU.  We aren't using it yet!!!
     // unsafe {scb.cpacr.write(0x00f00000)};

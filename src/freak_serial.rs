@@ -1,11 +1,30 @@
+use crate::cpu::barrier;
+use crate::usb;
+use crate::dbgln;
+use usb::types::{LineCoding, SetupHeader};
+use crate::vcell::{UCell, VCell};
 
-use crate::usb::hardware::{
+use super::USB_STATE;
+
+use usb::types::SetupResult;
+use usb::ctrl_dbgln;
+
+use usb::hardware::{
+    BULK_TX_BUF, CTRL_RX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
     CheprR, CheprReader, CheprWriter,
-    bd_serial, chep_bd_len, chep_bd_ptr, chep_ser};
+    bd_serial, bd_interrupt, chep_bd_len, chep_bd_ptr, chep_intr,
+    chep_bd_tx, chep_ser, copy_by_dest32};
 
-macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
-macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
-macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+macro_rules!fast_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+
+/// Operating systems appear to think that changing baud rates on serial ports
+/// at random is fine.  It is not.  So we ignore the CDC ACM baud rate
+/// and do our own thing.  But we still fake baud rate responses just to
+/// keep random OSes happy.
+static FAKE_BAUD: VCell<u32> = VCell::new(9600);
 
 /// Status of processing received CDC ACM serial data.
 #[derive(PartialEq)]
@@ -22,7 +41,7 @@ enum RxProcessing {
 #[derive_const(Default)]
 pub struct FreakUSBSerial {
     /// Base of the ACM CDC TX buffer we are accumulating.
-    tx_base: *mut u32 = super::hardware::BULK_TX_BUF as _,
+    tx_base: *mut u32 = BULK_TX_BUF as _,
     /// Current number of bytes in TX buffer we are accumulating.
     tx_len: usize,
     /// Accumulating bytes into 32 bit words.
@@ -33,10 +52,14 @@ pub struct FreakUSBSerial {
 }
 
 pub fn serial_rx_done() {
-    unsafe{super::USB_STATE.as_mut()}.ep1.serial_rx_done();
+    unsafe{USB_STATE.as_mut()}.ep1.serial_rx_done();
 }
 
-impl super::EndPointPair for FreakUSBSerial {
+pub fn serial_tx_byte(byte: u8) {
+    unsafe{USB_STATE.as_mut()}.ep1.serial_tx_byte(byte);
+}
+
+impl usb::EndPointPair for FreakUSBSerial {
     fn start_of_frame(&mut self) {
         // If serial TX is idle, then push through any pending data.
         let chep = chep_ser().read();
@@ -181,4 +204,54 @@ impl FreakUSBSerial {
         self.tx_base = (self.tx_base as usize ^ 64) as _;
         self.tx_len = 0;
     }
+}
+
+pub fn set_control_line_state(_value: u8) -> SetupResult {
+    usb_tx_interrupt();
+    SetupResult::no_data()
+}
+
+fn usb_tx_interrupt() {
+    intr_dbgln!("Sending USB interrupt");
+    // Just send a canned response, because USB sucks.  We don't care if one
+    // response stomps on a previous one, because we always send the same data.
+    #[allow(dead_code)]
+    #[repr(C)]
+    struct LineState{header: SetupHeader, state: u16}
+    static LINE_STATE: LineState = LineState{
+        header: SetupHeader {
+            request_type: 0xa1, request: 0x20, value_lo: 3,
+            value_hi: 0, index: 0, length: 2},
+        state: 3,
+    };
+    unsafe {copy_by_dest32(&LINE_STATE as *const _ as *const _,
+                           INTR_TX_BUF, size_of::<LineState>())};
+    barrier();
+    bd_interrupt().tx.write(chep_bd_tx(INTR_TX_OFFSET, size_of::<LineState>()));
+    let chep = chep_intr().read();
+    chep_intr().write(|w| w.interrupt().tx_valid(&chep));
+    intr_dbgln!("INTR CHEP now {:#06x} was {:#06x}",
+                chep_intr().read().bits(), chep.bits());
+}
+
+pub fn set_line_coding() -> bool {
+    let line_coding: LineCoding = unsafe {
+        core::mem::transmute_copy (
+            &* (CTRL_RX_BUF as *const (u32, u32))
+        )
+    };
+    ctrl_dbgln!("USB Set Line Coding, Baud = {}", line_coding.dte_rate);
+    FAKE_BAUD.write(line_coding.dte_rate);
+    true
+}
+
+pub fn get_line_coding() -> SetupResult {
+    ctrl_dbgln!("USB Get Line Coding");
+    static LINE_CODING: UCell<LineCoding> = Default::default();
+    let lc = unsafe {LINE_CODING.as_mut()};
+    *lc = LineCoding {
+        // "Yes honey, whatever you say."
+        dte_rate: FAKE_BAUD.read(),
+        char_format: 0, parity_type: 0, data_bits: 8};
+    SetupResult::tx_data(lc)
 }

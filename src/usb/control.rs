@@ -170,10 +170,10 @@ impl ControlState {
             },
 
             (0x21, 0x20) => SetupResult::Rx(7), // Set Line Coding.
-            (0xa1, 0x21) => super::get_line_coding(),
+            (0xa1, 0x21) => crate::freak_serial::get_line_coding(),
 
             // We could flush buffers on a transition from line-down to line-up...
-            (0x21, 0x22) => super::set_control_line_state(setup.value_lo),
+            (0x21, 0x22) => crate::freak_serial::set_control_line_state(setup.value_lo),
             _ => {
                 usb_dbgln!("Unknown setup {:02x} {:02x} {:02x} {:02x} -> {}",
                            setup.request_type, setup.request,
@@ -187,7 +187,7 @@ impl ControlState {
     fn setup_rx_data(&mut self) -> bool {
         // First check that we really were expecting data.
         match (self.setup.request_type, self.setup.request) {
-            (0x21, 0x20) => return super::set_line_coding(),
+            (0x21, 0x20) => return crate::freak_serial::set_line_coding(),
             _ => return false,
         }
     }

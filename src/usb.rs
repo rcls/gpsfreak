@@ -15,21 +15,17 @@
 ///   64 bytes at 0x40 offset.
 ///   CHEP 2
 
-mod control;
+pub mod control;
 mod descriptor;
-mod hardware;
+pub mod hardware;
 mod strings;
-mod types;
+pub mod types;
 
-pub mod freak_serial;
-
-use control::ControlState;
 use hardware::*;
 use types::*;
 
-use crate::cpu::{barrier, interrupt, nothing};
+use crate::cpu::{interrupt, nothing};
 use crate::link_assert;
-use crate::vcell::{UCell, VCell};
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
@@ -65,7 +61,7 @@ impl EndPointPair for DummyEndPoint {}
 
 #[allow(non_camel_case_types)]
 // #[derive_const(Default)]
-struct USB_State<EPS: EightEndPoints> {
+pub struct USB_State<EPS: EightEndPoints> {
     // /// Base of the ACM CDC TX buffer we are accumulating.
     // tx_base: *mut u32,
     // /// Current number of bytes in TX buffer we are accumulating.
@@ -75,14 +71,14 @@ struct USB_State<EPS: EightEndPoints> {
     // /// Is software still processing a received buffer?
     // rx_processing: RxProcessing,
 
-    ep0: EPS::EP0,
-    ep1: EPS::EP1,
-    ep2: EPS::EP2,
-    ep3: EPS::EP3,
-    ep4: EPS::EP4,
-    ep5: EPS::EP5,
-    ep6: EPS::EP6,
-    ep7: EPS::EP7,
+    pub ep0: EPS::EP0,
+    pub ep1: EPS::EP1,
+    pub ep2: EPS::EP2,
+    pub ep3: EPS::EP3,
+    pub ep4: EPS::EP4,
+    pub ep5: EPS::EP5,
+    pub ep6: EPS::EP6,
+    pub ep7: EPS::EP7,
 }
 
 impl<EPS: EightEndPoints> const Default for USB_State<EPS> {
@@ -100,77 +96,8 @@ impl<EPS: EightEndPoints> const Default for USB_State<EPS> {
 
 unsafe impl<EPS: EightEndPoints> Sync for USB_State<EPS> {}
 
-#[derive_const(Default)]
-pub struct FreakUSB;
-
-impl EightEndPoints for FreakUSB {
-    type EP0 = ControlState;
-    type EP1 = freak_serial::FreakUSBSerial;
-}
-
-static USB_STATE: UCell<USB_State<FreakUSB>> = Default::default();
-
-/// Operating systems appear to think that changing baud rates on serial ports
-/// at random is fine.  It is not.  So we ignore the CDC ACM baud rate
-/// and do our own thing.  But we still fake baud rate responses just to
-/// keep random OSes happy.
-static FAKE_BAUD: VCell<u32> = VCell::new(9600);
-
-pub fn init() {
-    let crs   = unsafe {&*stm32h503::CRS  ::ptr()};
-    let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
-    let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
-    let usb   = unsafe {&*stm32h503::USB  ::ptr()};
-
-    // Bring up the HSI48 clock.
-    rcc.CR.modify(|_,w| w.HSI48ON().set_bit());
-    while !rcc.CR.read().HSI48RDY().bit() {
-    }
-    // Route the HSI48 to USB.
-    rcc.CCIPR4.modify(|_,w| w.USBFSSEL().B_0x3());
-
-    // Configure pins (PA11, PA12).  (PA9 = VBUS?)
-    gpioa.AFRH.modify(|_,w| w.AFSEL11().B_0xA().AFSEL12().B_0xA());
-    gpioa.MODER.modify(|_,w| w.MODE11().B_0x2().MODE12().B_0x2());
-
-    // Enable CRS and USB clocks.
-    rcc.APB1LENR.modify(|_,w| w.CRSEN().set_bit());
-    rcc.APB2ENR.modify(|_,w| w.USBFSEN().set_bit());
-
-    // crs_sync_in_2 USB SOF selected - default.
-    crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit());
-    crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit().CEN().set_bit());
-
-    usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().set_bit());
-    // Wait t_startup (1µs).
-    for _ in 0 .. crate::cpu::CPU_FREQ / 2000000 {
-        nothing();
-    }
-    usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().clear_bit());
-    usb.BCDR.write(|w| w.DPPU_DPD().set_bit());
-
-    // Clear any spurious interrupts.
-    usb.ISTR.write(|w| w);
-
-    unsafe {USB_STATE.as_mut()}.usb_initialize();
-
-    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_COMMS);
-
-    // We use the PENDSV exception to dispatch some work at lower priority.
-    let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
-    let pendsv_prio = &scb.shpr[10];
-    // Cortex-M crate has two different ideas of what the SHPR is, make sure we
-    // are built with the correct one.
-    link_assert!(pendsv_prio as *const _ as usize == 0xe000ed22);
-    unsafe {pendsv_prio.write(crate::cpu::interrupt::PRIO_APP)};
-}
-
 fn usb_isr() {
-    unsafe{USB_STATE.as_mut()}.isr();
-}
-
-pub fn serial_tx_byte(byte: u8) {
-    unsafe{USB_STATE.as_mut()}.ep1.serial_tx_byte(byte);
+    unsafe{super::USB_STATE.as_mut()}.isr();
 }
 
 fn set_configuration(cfg: u8) {
@@ -193,6 +120,55 @@ fn set_configuration(cfg: u8) {
 }
 
 impl<EPS: EightEndPoints> USB_State<EPS> {
+    pub fn init(&mut self) {
+        let crs   = unsafe {&*stm32h503::CRS  ::ptr()};
+        let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
+        let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
+        let usb   = unsafe {&*stm32h503::USB  ::ptr()};
+
+        // Bring up the HSI48 clock.
+        rcc.CR.modify(|_,w| w.HSI48ON().set_bit());
+        while !rcc.CR.read().HSI48RDY().bit() {
+        }
+        // Route the HSI48 to USB.
+        rcc.CCIPR4.modify(|_,w| w.USBFSSEL().B_0x3());
+
+        // Configure pins (PA11, PA12).  (PA9 = VBUS?)
+        gpioa.AFRH.modify(|_,w| w.AFSEL11().B_0xA().AFSEL12().B_0xA());
+        gpioa.MODER.modify(|_,w| w.MODE11().B_0x2().MODE12().B_0x2());
+
+        // Enable CRS and USB clocks.
+        rcc.APB1LENR.modify(|_,w| w.CRSEN().set_bit());
+        rcc.APB2ENR.modify(|_,w| w.USBFSEN().set_bit());
+
+        // crs_sync_in_2 USB SOF selected - default.
+        crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit());
+        crs.CR.modify(|_,w| w.AUTOTRIMEN().set_bit().CEN().set_bit());
+
+        usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().set_bit());
+        // Wait t_startup (1µs).
+        for _ in 0 .. crate::cpu::CPU_FREQ / 2000000 {
+            nothing();
+        }
+        usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().clear_bit());
+        usb.BCDR.write(|w| w.DPPU_DPD().set_bit());
+
+        // Clear any spurious interrupts.
+        usb.ISTR.write(|w| w);
+
+        self.usb_initialize();
+
+        // We use the PENDSV exception to dispatch some work at lower priority.
+        let scb = unsafe {&*cortex_m::peripheral::SCB::PTR};
+        let pendsv_prio = &scb.shpr[10];
+        // Cortex-M crate has two different ideas of what the SHPR is, make sure we
+        // are built with the correct one.
+        link_assert!(pendsv_prio as *const _ as usize == 0xe000ed22);
+        unsafe {pendsv_prio.write(crate::cpu::interrupt::PRIO_APP)};
+
+        interrupt::enable_priority(INTERRUPT, interrupt::PRIO_COMMS);
+    }
+
     fn isr(&mut self) {
         let usb = unsafe {&*stm32h503::USB::ptr()};
         let mut istr = usb.ISTR.read();
@@ -223,9 +199,9 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
                 17 => self.ep1.rx_handler(),
                 2  => self.interrupt_handler(),
                 3  => main_tx_handler(),
+                19 => main_rx_handler(),
                 4  => self.ep4.tx_handler(),
                 12 => self.ep4.rx_handler(),
-                19 => main_rx_handler(),
                 _  => {
                     dbgln!("Bugger endpoint?, ISTR = {:#010x}", istr.bits());
                     break;  // FIXME, this will hang!
@@ -336,56 +312,6 @@ let chep = chep_main().read();
                 if chep.tx_active() {"INCORRECT STATE "} else {""},
                 chep_main().read().bits(),
                 chep.bits());
-}
-
-fn set_control_line_state(_value: u8) -> SetupResult {
-    usb_tx_interrupt();
-    SetupResult::no_data()
-}
-
-fn set_line_coding() -> bool {
-    let line_coding: LineCoding = unsafe {
-        core::mem::transmute_copy (
-            &* (CTRL_RX_BUF as *const (u32, u32))
-        )
-    };
-    ctrl_dbgln!("USB Set Line Coding, Baud = {}", line_coding.dte_rate);
-    FAKE_BAUD.write(line_coding.dte_rate);
-    true
-}
-
-fn get_line_coding() -> SetupResult {
-    ctrl_dbgln!("USB Get Line Coding");
-    static LINE_CODING: UCell<LineCoding> = Default::default();
-    let lc = unsafe {LINE_CODING.as_mut()};
-    *lc = LineCoding {
-        // "Yes honey, whatever you say."
-        dte_rate: FAKE_BAUD.read(),
-        char_format: 0, parity_type: 0, data_bits: 8};
-    SetupResult::tx_data(lc)
-}
-
-fn usb_tx_interrupt() {
-    intr_dbgln!("Sending USB interrupt");
-    // Just send a canned response, because USB sucks.  We don't care if one
-    // response stomps on a previous one, because we always send the same data.
-    #[allow(dead_code)]
-    #[repr(C)]
-    struct LineState{header: SetupHeader, state: u16}
-    static LINE_STATE: LineState = LineState{
-        header: SetupHeader {
-            request_type: 0xa1, request: 0x20, value_lo: 3,
-            value_hi: 0, index: 0, length: 2},
-        state: 3,
-    };
-    unsafe {copy_by_dest32(&LINE_STATE as *const _ as *const _,
-                           INTR_TX_BUF, size_of::<LineState>())};
-    barrier();
-    bd_interrupt().tx.write(chep_bd_tx(INTR_TX_OFFSET, size_of::<LineState>()));
-    let chep = chep_intr().read();
-    chep_intr().write(|w| w.interrupt().tx_valid(&chep));
-    intr_dbgln!("INTR CHEP now {:#06x} was {:#06x}",
-                chep_intr().read().bits(), chep.bits());
 }
 
 /// Initialize all the RX BD entries, except for the control ones.

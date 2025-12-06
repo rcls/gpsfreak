@@ -1,15 +1,12 @@
 use crate::cpu::barrier;
 use crate::usb;
 use crate::dbgln;
-use crate::usb::EndPointPair;
-use usb::types::{LineCoding, SetupHeader};
 use crate::vcell::{UCell, VCell};
 
 use super::USB_STATE;
 
-use usb::types::SetupResult;
-use usb::ctrl_dbgln;
-
+use usb::{EndPointPair, ctrl_dbgln};
+use usb::types::{LineCoding, SetupHeader, SetupResult};
 use usb::hardware::{
     BULK_TX_BUF, CTRL_RX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
     CheprR, CheprReader, CheprWriter,

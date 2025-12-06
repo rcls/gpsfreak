@@ -14,6 +14,7 @@
 use vcell::UCell;
 
 mod command;
+mod command_usb;
 mod cpu;
 mod crc;
 mod crc32;
@@ -38,8 +39,9 @@ pub struct FreakUSB;
 
 impl usb::EightEndPoints for FreakUSB {
     type EP0 = usb::control::ControlState;
-    type EP1 = crate::freak_serial::FreakUSBSerial;
-    type EP2 = crate::freak_serial::FreakUSBSerialIntr;
+    type EP1 = freak_serial::FreakUSBSerial;
+    type EP2 = freak_serial::FreakUSBSerialIntr;
+    type EP3 = command_usb::CommandUSB;
 }
 
 pub static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();
@@ -76,6 +78,8 @@ pub fn main() -> ! {
 
     lmk05318b::init();
 
+    command_usb::init();
+
     unsafe {USB_STATE.as_mut()}.init();
 
     // Enable FPU.  We aren't using it yet!!!
@@ -110,5 +114,5 @@ pub fn main() -> ! {
 #[unsafe(link_section = ".vectors")]
 pub static VECTORS: cpu::VectorTable = {
     let mut vtor = cpu::VectorTable::default();
-    *vtor.debug().gps_uart().i2c().led().lmk05318b().usb()
+    *vtor.debug().gps_uart().i2c().led().lmk05318b().usb().command_usb()
 };

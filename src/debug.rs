@@ -28,7 +28,14 @@ pub struct DebugMeta;
 
 impl debug_core::DebugMeta for DebugMeta {
     const ENABLE: bool = ENABLE;
+    const INTERRUPT: u32 = INTERRUPT as u32;
     fn get_debug() -> &'static Debug<Self> {&DEBUG}
+    /// We don't support lazy initialization.  Provide a dummy hook for
+    /// debug_core.
+    fn lazy_init() {}
+    /// We don't support lazy initialization.  Provide a dummy hook for
+    /// debug_core.
+    fn is_init() -> bool {true}
 }
 
 pub fn debug_marker() -> debug_core::DebugMarker<DebugMarker, DebugMeta> {
@@ -69,11 +76,6 @@ pub fn init() {
         debug_core::flush::<DebugMeta>();
     }
 }
-
-/// We don't support lazy initialization.  Provide a dummy hook for debug_core.
-fn lazy_init() {}
-/// We don't support lazy initialization.  Provide a dummy hook for debug_core.
-fn is_init() -> bool {true}
 
 #[cfg(target_os = "none")]
 #[panic_handler]

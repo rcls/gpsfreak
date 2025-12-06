@@ -1,5 +1,6 @@
 
 use core::marker::PhantomData;
+use stm_common::dbgln;
 use stm_common::utils::barrier;
 
 use super::{DataEndPoints, USBTypes, ctrl_dbgln, usb_dbgln};

@@ -86,7 +86,8 @@
 
 use stm_common::vcell::UCell;
 
-use crate::{gps_uart::GpsPriority, i2c};
+use crate::gps_uart::GpsPriority;
+use crate::i2c;
 use crate::utils::vcopy_aligned;
 
 mod crc16;

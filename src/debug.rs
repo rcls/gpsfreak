@@ -4,9 +4,7 @@
 
 use crate::cpu::interrupt;
 
-#[path = "../stm-common/debug_core.rs"]
-#[macro_use]
-mod debug_core;
+use stm_common::debug_core;
 use debug_core::Debug;
 
 use stm32h503::USART3 as UART;
@@ -69,18 +67,12 @@ pub fn init() {
         |w|w.FIFOEN().set_bit().TE().set_bit().UE().set_bit());
 
     interrupt::enable_priority(INTERRUPT, interrupt::PRIO_DEBUG);
-
-    if false {
-        dbg!("");
-        dbgln!("");
-        debug_core::flush::<DebugMeta>();
-    }
 }
 
 #[cfg(target_os = "none")]
 #[panic_handler]
 fn ph(info: &core::panic::PanicInfo) -> ! {
-    dbgln!("{info}");
+    stm_common::dbgln!("{info}");
     loop {
         debug_core::flush::<DebugMeta>();
     }

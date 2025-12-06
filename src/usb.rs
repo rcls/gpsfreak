@@ -20,6 +20,8 @@ pub mod hardware;
 pub mod string;
 pub mod types;
 
+use stm_common::dbgln;
+
 use crate::cpu::{CPU_FREQ, interrupt, nothing};
 use crate::usb::hardware::{
     CTRL_RX_OFFSET, CheprWriter, bd_control, chep_block, chep_ctrl};

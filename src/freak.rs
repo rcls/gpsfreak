@@ -11,7 +11,7 @@
 #![feature(format_args_nl)]
 #![feature(link_llvm_intrinsics)]
 
-use stm_common::{utils::WFE, vcell::UCell};
+use stm_common::{utils::WFE, vcell::UCell, dbgln};
 
 use crate::usb::types::{SetupHeader, SetupResult};
 

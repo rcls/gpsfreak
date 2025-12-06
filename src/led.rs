@@ -14,7 +14,11 @@ use stm32h503::Interrupt::TIM3 as INTERRUPT;
 use crate::cpu::interrupt::PRIO_LED as PRIORITY;
 type Priority = crate::cpu::Priority<PRIORITY>;
 
-type FiveHz = UCell<LedTimer<1000, 1000>>;
+type FiveHz = LedTimerUCell<1000, 1000>;
+
+#[derive_const(Default)]
+pub struct LedTimerUCell<const ON: i16, const OFF: i16>(
+    UCell<LedTimer<ON, OFF>>);
 
 pub static BLUE: FiveHz = Default::default();
 pub static RED_GREEN: FiveHz = Default::default();
@@ -82,9 +86,9 @@ fn drive(red_green: bool, blue: bool) {
 
 }
 
-impl<const ON: i16, const OFF: i16> UCell<LedTimer<ON, OFF>> {
+impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
     fn isr(&self, now: i16) {
-        unsafe {self.as_mut().isr(now)};
+        unsafe {self.0.as_mut().isr(now)};
     }
 
     pub fn set(&self, state: bool) {
@@ -93,9 +97,9 @@ impl<const ON: i16, const OFF: i16> UCell<LedTimer<ON, OFF>> {
         let _guard = Priority::new();
 
         let now = tim.CNT.read().bits() as i16;
-        schedule(unsafe {self.as_mut()}.set(state, now));
+        schedule(unsafe {self.0.as_mut()}.set(state, now));
 
-        drive(RED_GREEN.led, BLUE.led);
+        drive(RED_GREEN.0.led, BLUE.0.led);
     }
 
     pub fn pulse(&self, state: bool) {
@@ -104,9 +108,9 @@ impl<const ON: i16, const OFF: i16> UCell<LedTimer<ON, OFF>> {
         let _guard = Priority::new();
 
         let now = tim.CNT.read().bits() as i16;
-        schedule(unsafe {self.as_mut()}.pulse(state, now));
+        schedule(unsafe {self.0.as_mut()}.pulse(state, now));
 
-        drive(RED_GREEN.led, BLUE.led);
+        drive(RED_GREEN.0.led, BLUE.0.led);
     }
 }
 
@@ -229,14 +233,14 @@ fn isr() {
 
     BLUE.isr(now);
     RED_GREEN.isr(now);
-    drive(RED_GREEN.led, BLUE.led);
+    drive(RED_GREEN.0.led, BLUE.0.led);
 
     // We make sure that the time is always scheduled in the future, even if
     // there is nothing to do.  Otherwise we need to deal with the ambiguity
     // between timers in the past being processed or late.
     let deadline = W(now) + W(30000);
-    let deadline = min(deadline, BLUE.expiry);
-    let deadline = min(deadline, RED_GREEN.expiry);
+    let deadline = min(deadline, BLUE.0.expiry);
+    let deadline = min(deadline, RED_GREEN.0.expiry);
     dbgln!("LED {now} {deadline}");
 
     trigger(deadline);

@@ -1,20 +1,7 @@
 use core::ptr::{read_volatile, write_volatile};
 
-/// Calling this function will cause a linker error when building the firmware,
-/// unless the compiler optimises it away completely.
-///
-/// This is used to build assertions that are evaluated at compile time but
-/// aren't officially Rust const code.
-pub fn unreachable() -> ! {
-    #[cfg(target_os = "none")]
-    unsafe {
-        // This will cause a compiler error if not removed by the optimizer.
-        unsafe extern "C" {fn nowayjose();}
-        nowayjose();
-    }
-    panic!();
-}
-
+/// Like memcpy(), but guarentee using the largest of u32, u16 or u8 compatible
+/// with the alignment and length.
 pub unsafe fn vcopy_aligned(dest: *mut u8, src: *const u8, length: usize) {
     let mix = dest as usize | src as usize | length;
     if mix & 3 == 0 {
@@ -39,11 +26,4 @@ pub unsafe fn vcopy_aligned(dest: *mut u8, src: *const u8, length: usize) {
                                    read_volatile(src.wrapping_byte_add(i)))};
         }
     }
-}
-
-/// Cause a build time error if the condition fails and the code path is not
-/// optimized out.  For test builds this is converted to a run-time check.
-#[macro_export]
-macro_rules! link_assert {
-    ($e:expr) => { if !$e {$crate::utils::unreachable()} }
 }

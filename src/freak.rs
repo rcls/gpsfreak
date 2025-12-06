@@ -11,6 +11,7 @@
 #![feature(format_args_nl)]
 #![feature(link_llvm_intrinsics)]
 
+use stm_common::vcell;
 use vcell::UCell;
 
 use crate::usb::types::{SetupHeader, SetupResult};
@@ -35,8 +36,6 @@ mod debug;
 mod usb;
 #[macro_use]
 mod utils;
-#[path = "../stm-common/vcell.rs"]
-mod vcell;
 
 #[derive_const(Default)]
 struct FreakUSB;

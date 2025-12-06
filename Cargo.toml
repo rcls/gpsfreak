@@ -6,7 +6,8 @@ version = '0.1.0'
 edition = '2024'
 
 [dependencies]
-stm32h503 = { path = './stm32h503' }
+stm32h503 = {path = './stm32h503'}
+stm_common = {path = './stm-common'}
 konst = '*'
 
 [target.'cfg(not(target_arch = "arm"))'.dependencies]

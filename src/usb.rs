@@ -16,9 +16,8 @@
 ///   CHEP 2
 
 pub mod control;
-pub mod descriptor;
 pub mod hardware;
-pub mod strings;
+pub mod string;
 pub mod types;
 
 use hardware::*;

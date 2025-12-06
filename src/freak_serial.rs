@@ -1,12 +1,12 @@
 use crate::cpu::barrier;
 use crate::usb;
 use crate::dbgln;
+use crate::freak_descriptors::{INTF_ACM_DATA, INTF_ACM_INTR};
 use crate::vcell::{UCell, VCell};
 
 use super::USB_STATE;
 
 use usb::{EndpointPair, ctrl_dbgln};
-use usb::descriptor::{INTF_ACM_DATA, INTF_ACM_INTR};
 use usb::types::{LineCoding, SetupHeader, SetupResult};
 use usb::hardware::{
     BULK_TX_BUF, CTRL_RX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
@@ -20,9 +20,9 @@ macro_rules!fast_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 
 /// Operating systems appear to think that changing baud rates on serial ports
-/// at random is fine.  It is not.  So we ignore the CDC ACM baud rate
-/// and do our own thing.  But we still fake baud rate responses just to
-/// keep random OSes happy.
+/// at random is fine.  It is not.  So we ignore the CDC ACM baud rate and do
+/// our own thing.  But we still fake baud rate responses just to keep random
+/// OSes happy.
 static FAKE_BAUD: VCell<u32> = VCell::new(9600);
 
 /// Status of processing received CDC ACM serial data.

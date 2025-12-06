@@ -8,7 +8,7 @@ use usb::hardware::{CheprReader, CheprWriter, MAIN_RX_BUF, MAIN_TX_BUF,
 #[derive_const(Default)]
 pub struct CommandUSB;
 
-macro_rules!main_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub fn init() {
     // We use the PENDSV exception to dispatch some work at lower priority.
@@ -24,10 +24,10 @@ impl EndpointPair for CommandUSB {
     fn rx_handler(&mut self) {
         let chep = chep_main().read();
         if !chep.VTRX().bit() {
-            main_dbgln!("main: Spurious RX interrupt, CHEP {:#6x}", chep.bits());
+            dbgln!("main: Spurious RX interrupt, CHEP {:#6x}", chep.bits());
             return;
         }
-        main_dbgln!("main: RX interrupt, CHEP {:#6x}", chep.bits());
+        dbgln!("main: RX interrupt, CHEP {:#6x}", chep.bits());
 
         // We notify the application by triggering PendSV.  The application
         // can notify completion, either by transmitting a message or by
@@ -44,18 +44,18 @@ impl EndpointPair for CommandUSB {
     fn tx_handler(&mut self) {
         let chep = chep_main().read();
         if !chep.VTTX().bit() {
-            main_dbgln!("main: Spurious TX interrupt, CHEP {:#6x}", chep.bits());
+            dbgln!("main: Spurious TX interrupt, CHEP {:#6x}", chep.bits());
             return;
         }
         chep_main().write(|w| w.main().rx_valid(&chep).VTTX().clear_bit());
-        main_dbgln!("main: TX done CHEP {:#06x} was {:#06x}",
+        dbgln!("main: TX done CHEP {:#06x} was {:#06x}",
                     chep_main().read().bits(), chep.bits());
     }
 }
 
 /// PendSV ISR for handling device commands at appropriate priority.
 fn command_handler() {
-    main_dbgln!("Command handler entry");
+    dbgln!("Command handler entry");
 
     // Get a point to the message.  TODO - copy!
     let message = unsafe {&*(MAIN_RX_BUF as *const crate::command::MessageBuf)};
@@ -67,7 +67,7 @@ fn command_handler() {
 fn main_tx_response(message: &[u8]) {
 let chep = chep_main().read();
     if message.len() == 0 {
-        main_dbgln!("main_tx_response, no data, rearm");
+        dbgln!("main_tx_response, no data, rearm");
         chep_main().write(|w| w.main().rx_valid(&chep));
         return;
     }
@@ -80,7 +80,7 @@ let chep = chep_main().read();
     let chep = chep_main().read();
     chep_main().write(|w| w.main().tx_valid(&chep));
 
-    main_dbgln!("main tx {len} bytes, {}CHEP now {:#06x} was {:#06x}",
+    dbgln!("main tx {len} bytes, {}CHEP now {:#06x} was {:#06x}",
                 if chep.tx_active() {"INCORRECT STATE "} else {""},
                 chep_main().read().bits(),
                 chep.bits());

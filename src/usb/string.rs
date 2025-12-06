@@ -16,7 +16,7 @@ macro_rules! define_usb_strings{
         pub const NUM_STRINGS: usize = STRING_LIST.len();
 
         const LENGTHS: [usize; NUM_STRINGS] = konst::iter::collect_const!(
-            usize => STRING_LIST, map($crate::usb::strings::string_table::str_utf16_count));
+            usize => STRING_LIST, map($crate::usb::string::str_utf16_count));
 
         const TOTAL_LENGTH: usize = OFFSETS[NUM_STRINGS - 1] as usize
             + LENGTHS[NUM_STRINGS - 1] + NUM_STRINGS;
@@ -41,7 +41,8 @@ macro_rules! define_usb_strings{
                 let end = start + LENGTHS[i] as usize;
                 // Byte count (length*2+2), Descriptor type (3), as LE word.
                 d[start] = LENGTHS[i] as u16 * 2 + 2 + 0x300;
-                $crate::usb::strings::string_table::str_to_utf16_inplace(&mut d[start + 1 ..= end], STRING_LIST[i]);
+                $crate::usb::string::str_to_utf16_inplace(
+                    &mut d[start + 1 ..= end], STRING_LIST[i]);
                 i += 1;
             }
             d

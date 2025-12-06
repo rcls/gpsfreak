@@ -1,10 +1,23 @@
-use super::types::*;
-use super::strings::string_index;
+
+use crate::usb::types::SetupResult;
+use crate::usb::types::*;
 
 pub const INTF_ACM_INTR: u8 = 0;
 pub const INTF_ACM_DATA: u8 = 1;
 pub const INTF_MAIN    : u8 = 2;
 pub const INTF_DFU     : u8 = 3;
+
+type Offset = u8;
+
+pub const STRING_LIST: [&str; 8] = [
+    "\u{0409}", // Languages.
+    "Ralph", "GPS Freak", "Device Configuration",
+    "CDC", "CDC DATA interface", "Device Control", "DFU",
+];
+
+crate::define_usb_strings!{}
+
+pub const IDX_SERIAL_NUMBER: u8 = NUM_STRINGS as u8;
 
 pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     length            : size_of::<DeviceDesc>() as u8,
@@ -19,7 +32,7 @@ pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     device            : 0x100,
     i_manufacturer    : string_index("Ralph"),
     i_product         : string_index("GPS Freak"),
-    i_serial          : super::strings::IDX_SERIAL_NUMBER,
+    i_serial          : crate::freak_descriptors::IDX_SERIAL_NUMBER,
     num_configurations: 1,
 };
 
@@ -116,3 +129,16 @@ pub static CONFIG0_DESC: FullConfigDesc = FullConfigDesc{
         dfu_version        : 0x011a,
     },
 };
+
+pub fn get_string(idx: u8) -> SetupResult {
+    if idx != IDX_SERIAL_NUMBER {
+        return _get_descriptor(idx);
+    }
+    // Special case.
+    let data = crate::command::USB_NAME.as_ref();
+    let byte_len = data[0] & 0xff;
+    let data = unsafe {
+        core::slice::from_raw_parts(data as *const u16 as *const u8,
+                                    byte_len as usize)};
+    SetupResult::Tx(data, None)
+}

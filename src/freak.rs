@@ -22,6 +22,7 @@ mod crc;
 mod crc32;
 mod dma;
 mod flash;
+mod freak_descriptors;
 mod freak_serial;
 mod gps_uart;
 mod i2c;
@@ -41,14 +42,14 @@ struct FreakUSB;
 
 impl usb::USBTypes for FreakUSB {
     fn get_device_descriptor(&mut self) -> SetupResult {
-        SetupResult::tx_data(&usb::descriptor::DEVICE_DESC)
+        SetupResult::tx_data(&freak_descriptors::DEVICE_DESC)
     }
     fn get_config_descriptor(&mut self, _: &SetupHeader) -> SetupResult {
         // Always return CONFIG0 ....
-        SetupResult::tx_data(&usb::descriptor::CONFIG0_DESC)
+        SetupResult::tx_data(&freak_descriptors::CONFIG0_DESC)
     }
     fn get_string_descriptor(&mut self, idx: u8) -> SetupResult {
-        usb::strings::get_descriptor(idx)
+        freak_descriptors::get_string(idx)
     }
 
     type EP1 = freak_serial::FreakUSBSerial;
@@ -128,7 +129,7 @@ struct TriggerDFU;
 
 impl usb::EndpointPair for TriggerDFU {
     fn setup_wanted(&mut self, setup: &SetupHeader) -> bool {
-        setup.index == usb::descriptor::INTF_DFU as u16
+        setup.index == freak_descriptors::INTF_DFU as u16
     }
     fn setup_handler(&mut self, setup: &SetupHeader) -> SetupResult {
         match (setup.request_type, setup.request) {

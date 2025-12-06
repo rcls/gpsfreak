@@ -1,6 +1,6 @@
 use crate::cpu::barrier;
 use crate::freak_usb::{
-    BULK_TX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
+    BULK_RX_BUF, BULK_TX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
     bd_interrupt, bd_serial, chep_intr, chep_ser};
 use crate::freak_usb::{CheprWriter as _};
 use crate::usb;
@@ -153,6 +153,13 @@ impl usb::EndpointPair for FreakUSBSerial {
             _ => SetupResult::error(),
         }
     }
+
+    fn initialize() {
+        bd_serial().rx_set::<64>(BULK_RX_BUF);
+
+        let ser = chep_ser().read();
+        chep_ser().write(|w|w.serial().init(&ser).rx_valid(&ser).tx_nak(&ser));
+    }
 }
 
 impl FreakUSBSerial {
@@ -287,5 +294,11 @@ impl EndpointPair for FreakUSBSerialIntr {
         chep_intr().write(|w| w.interrupt().VTTX().clear_bit());
         intr_dbgln!("interrupt_tx_handler CHEP now {:#06x} was {:#06x}",
                     chep_intr().read().bits(), chep.bits());
+    }
+
+    fn initialize() {
+        // Interrupt.
+        let intr = chep_intr().read();
+        chep_intr().write(|w| w.interrupt().init(&intr).tx_nak(&intr));
     }
 }

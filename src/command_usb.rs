@@ -52,6 +52,15 @@ impl EndpointPair for CommandUSB {
         dbgln!("main: TX done CHEP {:#06x} was {:#06x}",
                     chep_main().read().bits(), chep.bits());
     }
+
+    fn initialize() {
+        bd_main().rx_set::<64>(MAIN_RX_BUF);
+
+        // Main.  FIXME - this can happen underneath processing a message, leaving
+        // us in inconsistent state.  We should recover!
+        let main = chep_main().read();
+        chep_main().write(|w| w.main().init(&main).rx_valid(&main).tx_nak(&main));
+    }
 }
 
 /// PendSV ISR for handling device commands at appropriate priority.

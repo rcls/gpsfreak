@@ -21,9 +21,6 @@ pub mod string;
 pub mod types;
 
 use crate::cpu::{CPU_FREQ, interrupt, nothing};
-use crate::freak_usb::{
-    BULK_RX_BUF, MAIN_RX_BUF, bd_main, bd_serial, chep_intr, chep_main, chep_ser};
-use crate::freak_usb::CheprWriter as _;
 use crate::usb::hardware::{
     CTRL_RX_OFFSET, CheprWriter, bd_control, chep_block, chep_ctrl};
 use crate::usb::types::{SetupHeader, SetupResult};
@@ -53,6 +50,9 @@ pub trait EndpointPair: const Default {
     fn setup_handler(&mut self, _h: &SetupHeader) -> SetupResult {
         SetupResult::error()
     }
+
+    /// Hardware level initialization.
+    fn initialize() {}
 }
 
 pub trait USBTypes: const Default {
@@ -67,6 +67,9 @@ pub trait USBTypes: const Default {
     type EP5: EndpointPair = DummyEndPoint;
     type EP6: EndpointPair = DummyEndPoint;
     type EP7: EndpointPair = DummyEndPoint;
+
+    /// CPU frequency, in HZ.
+    const CPU_FREQ: u32;
 }
 
 #[derive_const(Default)]
@@ -112,25 +115,6 @@ unsafe impl<UT: USBTypes> Sync for USB_State<UT> {}
 
 fn usb_isr() {
     unsafe{super::USB_STATE.as_mut()}.isr();
-}
-
-fn set_configuration(cfg: u8) {
-    usb_dbgln!("Set configuration {cfg}");
-
-    clear_buffer_descs();
-
-    // Serial.
-    let ser = chep_ser().read();
-    chep_ser().write(|w|w.serial().init(&ser).rx_valid(&ser).tx_nak(&ser));
-
-    // Interrupt.
-    let intr = chep_intr().read();
-    chep_intr().write(|w| w.interrupt().init(&intr).tx_nak(&intr));
-
-    // Main.  FIXME - this can happen underneath processing a message, leaving
-    // us in inconsistent state.  We should recover!
-    let main = chep_main().read();
-    chep_main().write(|w| w.main().init(&main).rx_valid(&main).tx_nak(&main));
 }
 
 impl<UT: USBTypes> USB_State<UT> {
@@ -196,7 +180,7 @@ impl<UT: USBTypes> USB_State<UT> {
 
         while istr.CTR().bit() {
             if istr.DIR().bit() {
-                errata_delay();
+                Self::errata_delay();
             }
             match istr.bits() & 31 {
                 0  => self.ep0.tx_handler(&mut self.eps),
@@ -256,34 +240,40 @@ impl<UT: USBTypes> USB_State<UT> {
         usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(0));
 
         bd_control().rx.write(chep_block::<64>(CTRL_RX_OFFSET));
-        clear_buffer_descs();
 
         let ctrl = chep_ctrl().read();
         chep_ctrl().write(
             |w| w.control().dtogrx(&ctrl, false).dtogtx(&ctrl, false)
                  .rx_valid(&ctrl));
+
+        Self::ep_initialize();
     }
-}
 
-/// Initialize all the RX BD entries, except for the control ones.
-fn clear_buffer_descs() {
-    bd_serial().rx_set::<64>(BULK_RX_BUF);
-    bd_main()  .rx_set::<64>(MAIN_RX_BUF);
-}
+    /// Initialize all the RX BD entries, except for the control ones.
+    fn ep_initialize() {
+        UT::EP1::initialize();
+        UT::EP2::initialize();
+        UT::EP3::initialize();
+        UT::EP4::initialize();
+        UT::EP5::initialize();
+        UT::EP6::initialize();
+        UT::EP7::initialize();
+    }
 
-fn errata_delay() {
-    // ERRATA:
-    //
-    // During OUT transfers, the correct transfer interrupt (CTR) is
-    // triggered a little before the last USB SRAM accesses have completed.
-    // If the software responds quickly to the interrupt, the full buffer
-    // contents may not be correct.
-    //
-    // Workaround: Software should ensure that a small delay is included
-    // before accessing the SRAM contents. This delay should be
-    // 800 ns in Full Speed mode and 6.4 μs in Low Speed mode.
-    for _ in 0 .. CPU_FREQ / 1250000 / 2 {
-        nothing();
+    fn errata_delay() {
+        // ERRATA:
+        //
+        // During OUT transfers, the correct transfer interrupt (CTR) is
+        // triggered a little before the last USB SRAM accesses have completed.
+        // If the software responds quickly to the interrupt, the full buffer
+        // contents may not be correct.
+        //
+        // Workaround: Software should ensure that a small delay is included
+        // before accessing the SRAM contents. This delay should be
+        // 800 ns in Full Speed mode and 6.4 μs in Low Speed mode.
+        for _ in 0 .. UT::CPU_FREQ / 1250000 / 2 {
+            nothing();
+        }
     }
 }
 

@@ -57,6 +57,8 @@ impl usb::USBTypes for FreakUSB {
     type EP2 = freak_serial::FreakUSBSerialIntr;
     type EP3 = command_usb::CommandUSB;
     type EP7 = TriggerDFU; // Not a real end-point, just a setup handler.
+
+    const CPU_FREQ: u32 = cpu::CPU_FREQ;
 }
 
 static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();

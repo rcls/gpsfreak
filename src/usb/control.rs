@@ -275,7 +275,8 @@ impl<UT: USBTypes> ControlState<UT> {
             return SetupResult::error();
         }
         else {
-            super::set_configuration(config);
+            usb_dbgln!("Set configuration {config}");
+            super::USB_State::<UT>::ep_initialize();
             self.configured = true;
         }
         SetupResult::no_data()

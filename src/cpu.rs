@@ -217,11 +217,6 @@ fn bugger() {
     }
 }
 
-#[inline(always)]
-pub fn nothing() {
-    unsafe {core::arch::asm!("", options(nomem, nostack, preserves_flags))}
-}
-
 pub mod interrupt {
     /// Interrupt priority for uart debug, the is the highest priority as debug
     /// can get used everywhere.

@@ -84,6 +84,7 @@
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
 
+use stm_common::utils::nothing;
 use stm_common::vcell::UCell;
 
 use crate::gps_uart::GpsPriority;
@@ -357,7 +358,7 @@ fn gps_reset(message: &MessageBuf) -> Result {
     if message.payload > 1 {
         // Sleep for approx, 1ms.
         for _ in 0 .. crate::cpu::CPU_FREQ / 2000 {
-            crate::cpu::nothing();
+            nothing();
         }
     }
     if message.payload != 0 {
@@ -375,7 +376,7 @@ fn lmk_powerdown(message: &MessageBuf) -> Result {
     if message.payload > 1 {
         // Sleep for approx, 1µs.
         for _ in 0 .. crate::cpu::CPU_FREQ / 2000000 {
-            crate::cpu::nothing();
+            nothing();
         }
     }
     if message.payload != 0 {
@@ -391,7 +392,7 @@ fn serial_sync(message: &MessageBuf) -> Result {
     }
     crate::gps_uart::wait_for_tx_idle();
     for _ in 0 .. message.payload * (crate::cpu::CPU_FREQ / 2000000) {
-        crate::cpu::nothing();
+        nothing();
     }
     crate::gps_uart::wait_for_tx_idle();
     SEND_ACK

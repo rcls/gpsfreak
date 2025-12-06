@@ -1,4 +1,7 @@
-
+/// Rust const handling isn't up to abstracting this out as generic code, so
+/// we wrap it all in a macro instead.
+///
+/// The caller should define STRING_LIST and Offset before invoking this macro.
 #[macro_export]
 macro_rules! define_usb_strings{
     {} => {

@@ -279,7 +279,7 @@ impl<UT: USBTypes> USB_State<UT> {
     }
 }
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn usb(&mut self) -> &mut Self {
         self.isr(INTERRUPT, usb_isr)
     }

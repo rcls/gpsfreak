@@ -175,7 +175,7 @@ fn dma_isr() {
     }
 }
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn gps_uart(&mut self) -> &mut Self {
         self.isr(INTERRUPT, uart_isr).isr(DMA_INTERRUPT, dma_isr)
     }

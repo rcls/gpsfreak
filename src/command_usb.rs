@@ -96,9 +96,9 @@ let chep = chep_main().read();
                 chep.bits());
 }
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn command_usb(&mut self) -> &mut Self {
-        self.pendsv = command_handler;
+        self.vectors.pendsv = command_handler;
         self
     }
 }

@@ -350,44 +350,24 @@ fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN]) {
 }
 
 #[derive(Clone, Copy)]
-#[repr(C)]
-pub struct VectorTable {
-    pub stack     : *const u8,
-    pub reset     : fn() -> !,
-    pub nmi       : fn(),
-    pub hard_fault: fn(),
-    pub reserved1 : [u32; 7],
-    pub svcall    : fn(),
-    pub reserved2 : [u32; 2],
-    pub pendsv    : fn(),
-    pub systick   : fn(),
-    pub isr       : [fn(); 134],
+#[derive_const(Default)]
+pub struct VectorMeta;
+
+impl stm_common::interrupt::Meta for VectorMeta {
+    fn main() -> ! {crate::main()}
+    fn bugger() {bugger()}
+    const INITIAL_SP: *const u8 = &raw const end_of_ram;
 }
 
-/// !@#$!@$#
-unsafe impl Sync for VectorTable {}
-
-impl const Default for VectorTable {
-    fn default() -> Self {
-        VectorTable{
-            stack     : &raw const end_of_ram,
-            reset     : crate::main,
-            nmi       : bugger,
-            hard_fault: bugger,
-            reserved1 : [0; _],
-            svcall    : bugger,
-            reserved2 : [0; _],
-            pendsv    : bugger,
-            systick   : bugger,
-            isr       : [bugger; _],
-        }
-    }
+#[derive(Clone, Copy)]
+#[derive_const(Default)]
+pub struct Config {
+    pub vectors: stm_common::interrupt::VectorTable<VectorMeta>,
 }
 
-impl VectorTable {
-    pub const fn isr(&mut self,
-                     n: stm32h503::Interrupt, handler: fn()) -> &mut Self {
-        self.isr[n as usize] = handler;
+impl Config {
+    pub const fn isr(&mut self, i: stm32h503::Interrupt, f: fn()) -> &mut Self {
+        self.vectors.isr(i, f);
         self
     }
 }

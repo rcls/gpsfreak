@@ -109,7 +109,7 @@ fn dma_tx_isr() {
 
 implement_i2c_api!(CONTEXT);
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn i2c(&mut self) -> &mut Self {
         use stm32h503::Interrupt::*;
         self.isr(GPDMA1_CH1, dma_rx_isr)

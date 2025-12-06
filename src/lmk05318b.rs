@@ -110,7 +110,7 @@ fn lmk05318b_status() -> Result<(bool, bool, bool), ()> {
     Ok((good, changes, flicker))
 }
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn lmk05318b(&mut self) -> &mut Self {
         self.isr(INTERRUPT, update_status).isr(TIM_INTERRUPT, update_status)
     }

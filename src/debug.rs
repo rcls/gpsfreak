@@ -67,18 +67,16 @@ pub fn init() {
 fn ph(info: &core::panic::PanicInfo) -> ! {
     stm_common::dbgln!("{info}");
     loop {
-        debug_core::flush::<DebugMeta>();
+        stm_common::debug::flush::<DebugMeta>();
     }
 }
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn debug(&mut self) -> &mut Self {
         if crate::DEBUG_ENABLE {
-            self.isr(INTERRUPT, debug_isr)
+            self.vectors.isr(INTERRUPT, debug_isr);
         }
-        else {
-            self
-        }
+        self
     }
 }
 

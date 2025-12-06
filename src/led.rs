@@ -245,7 +245,7 @@ fn isr() {
     trigger(deadline);
 }
 
-impl crate::cpu::VectorTable {
+impl crate::cpu::Config {
     pub const fn led(&mut self) -> &mut Self {
         self.isr(INTERRUPT, isr)
     }

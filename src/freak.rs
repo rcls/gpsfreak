@@ -150,9 +150,12 @@ impl usb::EndpointPair for TriggerDFU {
     }
 }
 
+static CONFIG: cpu::Config = {
+    let mut config = cpu::Config::default();
+    *config.debug().gps_uart().i2c().led().lmk05318b().usb().command_usb()
+};
+
 #[used]
 #[unsafe(link_section = ".vectors")]
-pub static VECTORS: cpu::VectorTable = {
-    let mut vtor = cpu::VectorTable::default();
-    *vtor.debug().gps_uart().i2c().led().lmk05318b().usb().command_usb()
-};
+pub static VECTORS: stm_common::interrupt::VectorTable<cpu::VectorMeta>
+    = CONFIG.vectors;

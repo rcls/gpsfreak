@@ -88,7 +88,7 @@ fn write_unlock() -> Result {
     let flash  = unsafe {&*stm32h503::FLASH ::ptr()};
     let icache = unsafe {&*stm32h503::ICACHE::ptr()};
 
-    crate::cpu::barrier();
+    stm_common::utils::barrier();
     // Start an ICACHE invalidation.  The docs don't say we can't continue
     // during the invalidate.
     icache.CR.modify(|_,w| w.CACHEINV().set_bit());

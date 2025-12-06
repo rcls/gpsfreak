@@ -84,7 +84,8 @@
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
 
-use crate::vcell::UCell;
+use stm_common::vcell::UCell;
+
 use crate::{gps_uart::GpsPriority, i2c};
 use crate::utils::vcopy_aligned;
 

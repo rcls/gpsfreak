@@ -1,4 +1,6 @@
-use crate::cpu::barrier;
+use stm_common::utils::barrier;
+use stm_common::vcell::{UCell, VCell};
+
 use crate::freak_usb::{
     BULK_RX_BUF, BULK_TX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
     bd_interrupt, bd_serial, chep_intr, chep_ser};
@@ -6,7 +8,6 @@ use crate::freak_usb::{CheprWriter as _};
 use crate::usb;
 use crate::dbgln;
 use crate::freak_descriptors::{INTF_ACM_DATA, INTF_ACM_INTR};
-use crate::vcell::{UCell, VCell};
 
 use super::USB_STATE;
 

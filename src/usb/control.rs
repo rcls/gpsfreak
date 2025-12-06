@@ -1,11 +1,11 @@
 
 use core::marker::PhantomData;
+use stm_common::utils::barrier;
 
 use super::{DataEndPoints, USBTypes, ctrl_dbgln, usb_dbgln};
 use super::types::*;
 use super::hardware::*;
 
-use crate::cpu::barrier;
 use crate::usb::EndpointPair;
 
 type SetupTxCallback = Option<fn(&SetupHeader)>;

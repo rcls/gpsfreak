@@ -1,4 +1,5 @@
-use crate::vcell::{UCell, VCell};
+use stm_common::utils::{WFE, barrier};
+use stm_common::vcell::{UCell, VCell};
 
 pub const CPU_FREQ: u32 = 160_000_000;
 
@@ -217,13 +218,6 @@ fn bugger() {
 }
 
 #[inline(always)]
-pub fn barrier() {
-    // The rust library compile_fence isn't behaving as expected.  Use the ASM
-    // version.  Oh well, that still didn't achieve what I wanted.
-    unsafe {core::arch::asm!("", options(nostack, preserves_flags))}
-}
-
-#[inline(always)]
 pub fn nothing() {
     unsafe {core::arch::asm!("", options(nomem, nostack, preserves_flags))}
 }
@@ -266,18 +260,6 @@ pub mod interrupt {
         let bit: usize = n as usize % 32;
         let idx: usize = n as usize / 32;
         unsafe {nvic.iser[idx].write(1u32 << bit)};
-    }
-}
-
-#[inline(always)]
-#[allow(non_snake_case)]
-pub fn WFE() {
-    if cfg!(target_arch = "arm") {
-        unsafe {
-            core::arch::asm!("wfe", options(nomem, preserves_flags, nostack))};
-    }
-    else {
-        panic!("wfe!");
     }
 }
 

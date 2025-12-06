@@ -1,5 +1,4 @@
-
-use crate::vcell::UCell;
+use stm_common::vcell::UCell;
 
 use core::num::Wrapping as W;
 

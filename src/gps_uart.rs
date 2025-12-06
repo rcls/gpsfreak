@@ -2,10 +2,11 @@
 // TX on pin 19 PA8 (USART2 AF4, USART3 AF13)
 // RX on pin 18 PB15 (USART2 AF13, USART1 AF4, LPUART1, AF8)
 
-use crate::cpu::WFE;
 use crate::cpu::interrupt::{self, PRIO_COMMS};
 use crate::dma::DMA_Channel;
-use crate::vcell::VCell;
+
+use stm_common::utils::{WFE, barrier};
+use stm_common::vcell::VCell;
 
 use stm32h503::GPDMA1 as DMA;
 use stm32h503::USART2 as UART;
@@ -107,7 +108,7 @@ pub fn dma_tx(data: *const u8, len: usize) -> bool {
     }
 
     ch.write(data as usize, len, 0);
-    crate::cpu::barrier();
+    barrier();
     true
 }
 

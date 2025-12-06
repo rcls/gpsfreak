@@ -35,9 +35,11 @@
 //! That procedure should ensure that an interrupted config update leaves us
 //! still using the previous one.
 
+use stm_common::utils::WFE;
+use stm_common::vcell::UCell;
+
 use crate::crc32::{self, VERIFY_MAGIC};
 use crate::gps_uart::GpsPriority;
-use crate::vcell::UCell;
 
 const CONFIG_MAGIC: u32 = 0x4b72a6ce;
 
@@ -135,7 +137,7 @@ fn run_ublox_command(data: *const u8, length: usize) {
         if ok {
             break;
         }
-        crate::cpu::WFE();
+        WFE();
     }
     crate::gps_uart::wait_for_tx_idle();
 }

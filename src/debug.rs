@@ -24,10 +24,11 @@ pub type DebugMarker = crate::cpu::Priority::<{interrupt::PRIO_COMMS}>;
 #[derive(Default)]
 pub struct DebugMeta;
 
-impl debug_core::DebugMeta for DebugMeta {
+impl debug_core::Meta for DebugMeta {
     const ENABLE: bool = ENABLE;
     const INTERRUPT: u32 = INTERRUPT as u32;
-    fn get_debug() -> &'static Debug<Self> {&DEBUG}
+    fn debug() -> &'static Debug<Self> {&DEBUG}
+    fn uart() -> &'static debug_core::UART {unsafe {&*UART::PTR}}
     /// We don't support lazy initialization.  Provide a dummy hook for
     /// debug_core.
     fn lazy_init() {}
@@ -36,7 +37,7 @@ impl debug_core::DebugMeta for DebugMeta {
     fn is_init() -> bool {true}
 }
 
-pub fn debug_marker() -> debug_core::DebugMarker<DebugMarker, DebugMeta> {
+pub fn debug_marker() -> debug_core::Marker<DebugMarker, DebugMeta> {
     Default::default()
 }
 

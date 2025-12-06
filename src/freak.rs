@@ -39,6 +39,15 @@ mod utils;
 #[derive_const(Default)]
 struct FreakUSB;
 
+pub const DEBUG_ENABLE: bool = true;
+
+fn debug_fmt(fmt: core::fmt::Arguments) {
+    if DEBUG_ENABLE {
+        let _guard = cpu::Priority::<{cpu::interrupt::PRIO_COMMS}>::default();
+        stm_common::debug::debug_fmt::<debug::DebugMeta>(fmt);
+    }
+}
+
 impl usb::USBTypes for FreakUSB {
     fn get_device_descriptor(&mut self) -> SetupResult {
         SetupResult::tx_data(&freak_descriptors::DEVICE_DESC)

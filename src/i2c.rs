@@ -1,18 +1,35 @@
 
 use crate::cpu::interrupt;
-use crate::dma::{Channel, DMA_Channel};
-use i2c_core::{CONTEXT, F_DMA_RX, F_DMA_TX};
+use crate::dma::Channel;
 
-pub use i2c_core::{read, write, write_read};
+use stm_common::{i2c, implement_i2c_api};
 
-#[path = "../stm-common/i2c_core.rs"]
-mod i2c_core;
+use i2c::{F_DMA_RX, F_DMA_TX, I2cContext, Meta};
+
+// pub use i2c_core::{read, write, write_read};
 
 /// Interrupt priority for the I2C and its DMA interrupt handlers.  Users of
 /// this code should run at no higher than that priority.
 use interrupt::PRIO_COMMS as PRIORITY;
+use stm_common::vcell::UCell;
 
-pub type I2C = stm32h503::I2C1;
+#[derive(Clone, Copy)]
+#[derive_const(Default)]
+struct I2CMeta;
+
+impl Meta for I2CMeta {
+    fn i2c() -> &'static stm32h503::i2c1::RegisterBlock {
+        unsafe {&*stm32h503::I2C1::PTR}
+    }
+
+    fn rx_channel() -> &'static Channel {crate::dma::dma().C(RX_CHANNEL)}
+    fn tx_channel() -> &'static Channel {crate::dma::dma().C(TX_CHANNEL)}
+
+    /// Request selection for GPDMA1 Ch1
+    const RX_MUXIN: u8 = 12;
+    /// Request selection for GPDMA1 Ch2
+    const TX_MUXIN: u8 = 13;
+}
 
 /// I2C receive channel on GPDMA1.
 const RX_CHANNEL: usize = 1;
@@ -20,18 +37,12 @@ const RX_CHANNEL: usize = 1;
 /// I2C transmit channel on GPDMA1.
 const TX_CHANNEL: usize = 2;
 
-/// Request selection for GPDMA1 Ch1
-const RX_MUXIN: u8 = 12;
-/// Request selection for GPDMA1 Ch2
-const TX_MUXIN: u8 = 13;
-
-fn rx_channel() -> &'static Channel {crate::dma::dma().C(RX_CHANNEL)}
-fn tx_channel() -> &'static Channel {crate::dma::dma().C(TX_CHANNEL)}
+static CONTEXT: UCell<I2cContext<I2CMeta>> = UCell::default();
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub fn init() {
-    let i2c   = unsafe {&*I2C::ptr()};
+    let i2c   = I2CMeta::i2c();
     let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let rcc   = unsafe {&*stm32h503::RCC::ptr()};
 
@@ -61,18 +72,11 @@ pub fn init() {
     gpiob.OTYPER.modify(|_,w| w.OT6().set_bit().OT7().set_bit());
     gpiob.MODER.modify(|_, w| w.MODE6().B_0x2().MODE7().B_0x2());
 
-    // Enable everything.
-    i2c.CR1.write(
-        |w|w.TXDMAEN().set_bit().RXDMAEN().set_bit().PE().set_bit()
-            .NACKIE().set_bit().ERRIE().set_bit().TCIE().set_bit()
-            .STOPIE().set_bit());
-
-    rx_channel().read_from(i2c.RXDR.as_ptr() as *const u8, RX_MUXIN);
-    tx_channel().writes_to(i2c.TXDR.as_ptr() as *mut   u8, TX_MUXIN);
+    I2cContext::<I2CMeta>::initialize();
 
     if false {
-        i2c_core::write_reg(0, 0, &0i16).defer();
-        i2c_core::read_reg(0, 0, &mut 0i16).defer();
+        write_reg(0, 0, &0i16).defer();
+        read_reg(0, 0, &mut 0i16).defer();
     }
 
     use interrupt::*;
@@ -85,7 +89,7 @@ pub fn init() {
 
 fn dma_rx_isr() {
     dbgln!("I2C DMA RX ISR");
-    let ch = rx_channel();
+    let ch = I2CMeta::rx_channel();
     let sr = ch.SR().read();
     ch.FCR().write(|w| w.bits(sr.bits())); // Clear flags.
     if sr.TCF().bit() {
@@ -95,7 +99,7 @@ fn dma_rx_isr() {
 
 fn dma_tx_isr() {
     dbgln!("I2C DMA TX ISR");
-    let ch = tx_channel();
+    let ch = I2CMeta::tx_channel();
     let sr = ch.SR().read();
     ch.FCR().write(|w| w.bits(sr.bits())); // Clear flags.
     if sr.TCF().bit() {
@@ -103,13 +107,15 @@ fn dma_tx_isr() {
     }
 }
 
+implement_i2c_api!(CONTEXT);
+
 impl crate::cpu::VectorTable {
     pub const fn i2c(&mut self) -> &mut Self {
         use stm32h503::Interrupt::*;
         self.isr(GPDMA1_CH1, dma_rx_isr)
             .isr(GPDMA1_CH2, dma_tx_isr)
-            .isr(I2C1_EV, i2c_core::i2c_isr)
-            .isr(I2C1_ER, i2c_core::i2c_isr)
+            .isr(I2C1_EV, i2c_isr)
+            .isr(I2C1_ER, i2c_isr)
     }
 }
 

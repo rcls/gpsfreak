@@ -4,13 +4,12 @@
 
 use crate::cpu::interrupt;
 
-use stm_common::debug_core;
-use debug_core::Debug;
+use stm_common::debug;
+use debug::{Debug, Meta};
 
 use stm32h503::USART3 as UART;
 use stm32h503::Interrupt::USART3 as INTERRUPT;
 
-pub const ENABLE: bool = true;
 pub const BAUD: u32 = 115200;
 const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
 const _: () = assert!(BRR < 65536);
@@ -18,17 +17,14 @@ const _: () = assert!(BRR < 65536);
 /// State for debug logging.
 pub static DEBUG: Debug<DebugMeta> = Debug::default();
 
-/// Guard for running at the priority for accessing debug.
-pub type DebugMarker = crate::cpu::Priority::<{interrupt::PRIO_COMMS}>;
-
 #[derive(Default)]
 pub struct DebugMeta;
 
-impl debug_core::Meta for DebugMeta {
-    const ENABLE: bool = ENABLE;
+impl Meta for DebugMeta {
+    const ENABLE: bool = crate::DEBUG_ENABLE;
     const INTERRUPT: u32 = INTERRUPT as u32;
     fn debug() -> &'static Debug<Self> {&DEBUG}
-    fn uart() -> &'static debug_core::UART {unsafe {&*UART::PTR}}
+    fn uart() -> &'static stm32h503::usart3::RegisterBlock {unsafe {&*UART::PTR}}
     /// We don't support lazy initialization.  Provide a dummy hook for
     /// debug_core.
     fn lazy_init() {}
@@ -37,16 +33,12 @@ impl debug_core::Meta for DebugMeta {
     fn is_init() -> bool {true}
 }
 
-pub fn debug_marker() -> debug_core::Marker<DebugMarker, DebugMeta> {
-    Default::default()
-}
-
 pub fn debug_isr() {
     DEBUG.isr();
 }
 
 pub fn init() {
-    if !ENABLE {
+    if !crate::DEBUG_ENABLE {
         return;
     }
 
@@ -81,7 +73,7 @@ fn ph(info: &core::panic::PanicInfo) -> ! {
 
 impl crate::cpu::VectorTable {
     pub const fn debug(&mut self) -> &mut Self {
-        if ENABLE {
+        if crate::DEBUG_ENABLE {
             self.isr(INTERRUPT, debug_isr)
         }
         else {
@@ -92,7 +84,7 @@ impl crate::cpu::VectorTable {
 
 #[test]
 fn check_isr() {
-    if ENABLE {
+    if crate::DEBUG_ENABLE {
         assert!(crate::VECTORS.isr[INTERRUPT as usize] == debug_isr);
     }
 }

@@ -2,11 +2,11 @@ use stm_common::usb;
 use stm_common::utils::barrier;
 use stm_common::vcell::{UCell, VCell};
 
-use crate::freak_usb::{
+use crate::usb::{
     BULK_RX_BUF, BULK_TX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
     bd_interrupt, bd_serial, chep_intr, chep_ser};
-use crate::freak_usb::{CheprWriter as _};
-use crate::freak_descriptors::{INTF_ACM_DATA, INTF_ACM_INTR};
+use crate::usb::{CheprWriter as _};
+use super::descriptors::{INTF_ACM_DATA, INTF_ACM_INTR};
 
 use super::USB_STATE;
 
@@ -54,11 +54,11 @@ pub struct FreakUSBSerial {
 }
 
 pub fn serial_rx_done() {
-    unsafe{USB_STATE.as_mut()}.eps.ep1.serial_rx_done();
+    unsafe{USB_STATE.as_mut()}.ep1.serial_rx_done();
 }
 
 pub fn serial_tx_byte(byte: u8) {
-    unsafe{USB_STATE.as_mut()}.eps.ep1.serial_tx_byte(byte);
+    unsafe{USB_STATE.as_mut()}.ep1.serial_tx_byte(byte);
 }
 
 impl usb::EndpointPair for FreakUSBSerial {

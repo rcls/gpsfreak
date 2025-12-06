@@ -31,7 +31,7 @@ pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     device            : 0x100,
     i_manufacturer    : string_index("Ralph"),
     i_product         : string_index("GPS Freak"),
-    i_serial          : crate::freak_descriptors::IDX_SERIAL_NUMBER,
+    i_serial          : IDX_SERIAL_NUMBER,
     num_configurations: 1,
 };
 

@@ -1,6 +1,7 @@
-use crate::usb::hardware::{BD, USB_SRAM_BASE, chep_bd, chep_ref};
+use stm_common::usb::hardware;
+use hardware::{BD, USB_SRAM_BASE, chep_bd, chep_ref};
 
-pub trait CheprWriter : crate::usb::hardware::CheprWriter {
+pub trait CheprWriter: hardware::CheprWriter {
     fn serial   (&mut self) -> &mut Self {self.endpoint(1, 0)}
     fn interrupt(&mut self) -> &mut Self {self.endpoint(2, 3)}
     fn main     (&mut self) -> &mut Self {self.endpoint(3, 0)}

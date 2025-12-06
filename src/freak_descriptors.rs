@@ -1,6 +1,5 @@
 
-use crate::usb::types::SetupResult;
-use crate::usb::types::*;
+use stm_common::usb::types::*;
 
 pub const INTF_ACM_INTR: u8 = 0;
 pub const INTF_ACM_DATA: u8 = 1;
@@ -15,7 +14,7 @@ pub const STRING_LIST: [&str; 8] = [
     "CDC", "CDC DATA interface", "Device Control", "DFU",
 ];
 
-crate::define_usb_strings!{}
+stm_common::define_usb_strings!{}
 
 pub const IDX_SERIAL_NUMBER: u8 = NUM_STRINGS as u8;
 

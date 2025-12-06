@@ -13,7 +13,7 @@
 
 use stm_common::{utils::WFE, vcell::UCell, dbgln};
 
-use crate::usb::types::{SetupHeader, SetupResult};
+use stm_common::usb::types::{SetupHeader, SetupResult};
 
 mod command;
 mod command_usb;
@@ -48,7 +48,7 @@ fn debug_fmt(fmt: core::fmt::Arguments) {
     }
 }
 
-impl usb::USBTypes for FreakUSB {
+impl stm_common::usb::USBTypes for FreakUSB {
     fn get_device_descriptor(&mut self) -> SetupResult {
         SetupResult::tx_data(&freak_descriptors::DEVICE_DESC)
     }
@@ -68,7 +68,8 @@ impl usb::USBTypes for FreakUSB {
     const CPU_FREQ: u32 = cpu::CPU_FREQ;
 }
 
-static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();
+static USB_STATE: UCell<stm_common::usb::USB_State<FreakUSB>>
+    = Default::default();
 
 pub fn main() -> ! {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -104,7 +105,7 @@ pub fn main() -> ! {
 
     command_usb::init();
 
-    unsafe {USB_STATE.as_mut()}.init();
+    usb::init();
 
     // Enable FPU.  We aren't using it yet!!!
     // unsafe {scb.cpacr.write(0x00f00000)};
@@ -137,7 +138,7 @@ pub fn main() -> ! {
 #[derive_const(Default)]
 struct TriggerDFU;
 
-impl usb::EndpointPair for TriggerDFU {
+impl stm_common::usb::EndpointPair for TriggerDFU {
     fn setup_wanted(&mut self, setup: &SetupHeader) -> bool {
         setup.index == freak_descriptors::INTF_DFU as u16
     }

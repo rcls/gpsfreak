@@ -1,7 +1,7 @@
 use crate::freak_usb::{CheprWriter as _, bd_main};
 use crate::freak_usb::{MAIN_RX_BUF, MAIN_TX_BUF, chep_main};
 use stm_common::link_assert;
-use crate::usb;
+use stm_common::usb;
 
 use usb::EndpointPair;
 use usb::hardware::{CheprReader, CheprWriter, chep_bd_len, copy_by_dest32};

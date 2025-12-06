@@ -1,3 +1,4 @@
+use stm_common::usb;
 use stm_common::utils::barrier;
 use stm_common::vcell::{UCell, VCell};
 
@@ -5,13 +6,11 @@ use crate::freak_usb::{
     BULK_RX_BUF, BULK_TX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
     bd_interrupt, bd_serial, chep_intr, chep_ser};
 use crate::freak_usb::{CheprWriter as _};
-use crate::usb;
-use crate::dbgln;
 use crate::freak_descriptors::{INTF_ACM_DATA, INTF_ACM_INTR};
 
 use super::USB_STATE;
 
-use usb::{EndpointPair, ctrl_dbgln};
+use usb::EndpointPair;
 use usb::types::{LineCoding, SetupHeader, SetupResult};
 use usb::hardware::{
     CTRL_RX_BUF, CheprR, CheprReader, CheprWriter,
@@ -20,7 +19,8 @@ use usb::hardware::{
 macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 macro_rules!fast_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
-macro_rules!intr_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
+macro_rules!intr_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
+macro_rules!ctrl_dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 /// Operating systems appear to think that changing baud rates on serial ports
 /// at random is fine.  It is not.  So we ignore the CDC ACM baud rate and do

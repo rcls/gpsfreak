@@ -396,7 +396,7 @@ fn serial_sync(message: &MessageBuf) -> Result {
 }
 
 fn set_get_baud(message: &MessageBuf, r: Responder) -> Result {
-    let _prio = GpsPriority::new();
+    let _prio = GpsPriority::default();
     if message.len > 0 {
         let message = Message::<u32>::from_buf(message)?;
         crate::gps_uart::set_baud_rate(message.payload);
@@ -500,7 +500,7 @@ fn flash_erase(message: &MessageBuf) -> Result {
 
 fn test_gps_write(message: &MessageBuf) -> Result {
     dbgln!("test_gps_write");
-    let prio = crate::gps_uart::GpsPriority::new();
+    let prio = crate::gps_uart::GpsPriority::default();
     while !crate::gps_uart::dma_tx(
             &message.payload as *const u8, message.len as usize) {
         prio.wfe();

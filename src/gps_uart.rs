@@ -120,7 +120,7 @@ pub fn wait_for_tx_idle() {
     let uart = unsafe {&*UART::ptr()};
     while dma_tx_busy() || !uart.ISR.read().TC().bit() {
         // Arm the TC interrupt.
-        let prio = GpsPriority::new();
+        let prio = GpsPriority::default();
         uart.CR1().modify(|_,w| w.TCIE().set_bit());
         drop(prio);
         WFE();

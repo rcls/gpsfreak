@@ -94,7 +94,7 @@ impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
     pub fn set(&self, state: bool) {
         let tim = unsafe {&*TIM::PTR};
 
-        let _guard = Priority::new();
+        let _guard = Priority::default();
 
         let now = tim.CNT.read().bits() as i16;
         schedule(unsafe {self.0.as_mut()}.set(state, now));
@@ -105,7 +105,7 @@ impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
     pub fn pulse(&self, state: bool) {
         let tim = unsafe {&*TIM::PTR};
 
-        let _guard = Priority::new();
+        let _guard = Priority::default();
 
         let now = tim.CNT.read().bits() as i16;
         schedule(unsafe {self.0.as_mut()}.pulse(state, now));

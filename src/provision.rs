@@ -129,7 +129,7 @@ fn run_command_packet(data: &[u8]) {
 fn run_ublox_command(data: *const u8, length: usize) {
     dbgln!("Run U-Blox packet @{data:#?} {length} bytes");
     loop {
-        let prio = GpsPriority::new();
+        let prio = GpsPriority::default();
         let ok = crate::gps_uart::dma_tx(data, length);
         drop(prio);
         if ok {

@@ -6,8 +6,8 @@ version = '0.1.0'
 edition = '2024'
 
 [dependencies]
-stm32h503 = {path = './stm32h503'}
-stm_common = {path = './stm-common'}
+stm32h503 = {git = 'https://github.com/rcls/pac-stm32h503.git'}
+stm_common = {path = './stm-common', features = ['cpu_stm32h503']}
 konst = '*'
 
 [target.'cfg(not(target_arch = "arm"))'.dependencies]

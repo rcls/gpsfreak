@@ -8,7 +8,6 @@ use crate::cpu::interrupt;
 #[macro_use]
 mod debug_core;
 use debug_core::Debug;
-pub use debug_core::debug_isr;
 
 use stm32h503::USART3 as UART;
 use stm32h503::Interrupt::USART3 as INTERRUPT;
@@ -19,12 +18,25 @@ const BRR: u32 = (crate::cpu::CPU_FREQ + BAUD/2) / BAUD;
 const _: () = assert!(BRR < 65536);
 
 /// State for debug logging.
-pub static DEBUG: Debug = Debug::default();
+pub static DEBUG: Debug<DebugMeta> = Debug::default();
 
 /// Guard for running at the priority for accessing debug.
-type DebugMarker = crate::cpu::Priority::<{interrupt::PRIO_COMMS}>;
-pub fn debug_marker() -> DebugMarker {
-    return DebugMarker::new();
+pub type DebugMarker = crate::cpu::Priority::<{interrupt::PRIO_COMMS}>;
+
+#[derive(Default)]
+pub struct DebugMeta;
+
+impl debug_core::DebugMeta for DebugMeta {
+    const ENABLE: bool = ENABLE;
+    fn get_debug() -> &'static Debug<Self> {&DEBUG}
+}
+
+pub fn debug_marker() -> debug_core::DebugMarker<DebugMarker, DebugMeta> {
+    Default::default()
+}
+
+pub fn debug_isr() {
+    DEBUG.isr();
 }
 
 pub fn init() {
@@ -54,7 +66,7 @@ pub fn init() {
     if false {
         dbg!("");
         dbgln!("");
-        debug_core::flush();
+        debug_core::flush::<DebugMeta>();
     }
 }
 
@@ -68,14 +80,14 @@ fn is_init() -> bool {true}
 fn ph(info: &core::panic::PanicInfo) -> ! {
     dbgln!("{info}");
     loop {
-        debug_core::flush();
+        debug_core::flush::<DebugMeta>();
     }
 }
 
 impl crate::cpu::VectorTable {
     pub const fn debug(&mut self) -> &mut Self {
         if ENABLE {
-            self.isr(INTERRUPT, debug_core::debug_isr)
+            self.isr(INTERRUPT, debug_isr)
         }
         else {
             self
@@ -86,6 +98,6 @@ impl crate::cpu::VectorTable {
 #[test]
 fn check_isr() {
     if ENABLE {
-        assert!(crate::VECTORS.isr[INTERRUPT as usize] == debug_core::debug_isr);
+        assert!(crate::VECTORS.isr[INTERRUPT as usize] == debug_isr);
     }
 }

@@ -5,7 +5,8 @@ use crate::vcell::{UCell, VCell};
 
 use super::USB_STATE;
 
-use usb::{EndPointPair, ctrl_dbgln};
+use usb::{EndpointPair, ctrl_dbgln};
+use usb::descriptor::{INTF_ACM_DATA, INTF_ACM_INTR};
 use usb::types::{LineCoding, SetupHeader, SetupResult};
 use usb::hardware::{
     BULK_TX_BUF, CTRL_RX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
@@ -50,14 +51,14 @@ pub struct FreakUSBSerial {
 }
 
 pub fn serial_rx_done() {
-    unsafe{USB_STATE.as_mut()}.ep1.serial_rx_done();
+    unsafe{USB_STATE.as_mut()}.eps.ep1.serial_rx_done();
 }
 
 pub fn serial_tx_byte(byte: u8) {
-    unsafe{USB_STATE.as_mut()}.ep1.serial_tx_byte(byte);
+    unsafe{USB_STATE.as_mut()}.eps.ep1.serial_tx_byte(byte);
 }
 
-impl usb::EndPointPair for FreakUSBSerial {
+impl usb::EndpointPair for FreakUSBSerial {
     fn start_of_frame(&mut self) {
         // If serial TX is idle, then push through any pending data.
         let chep = chep_ser().read();
@@ -129,6 +130,25 @@ impl usb::EndPointPair for FreakUSBSerial {
         }
         else {
             self.rx_processing = RxProcessing::Blocked;
+        }
+    }
+
+    fn setup_wanted(&mut self, h: &SetupHeader) -> bool {
+        // I believe that the requests should come for INTF_ACM_INTR, but we
+        // also support the DATA interface because I can't see it in the spec
+        // and I have no confidence people will agree with me.
+        h.index == INTF_ACM_INTR as u16 || h.index == INTF_ACM_DATA as u16
+    }
+
+    fn setup_handler(&mut self, setup: &SetupHeader) -> SetupResult {
+        match (setup.request_type, setup.request) {
+            // Set Line Coding.
+            (0x21, 0x20) => SetupResult::rx_data_cb(7, set_line_coding),
+            (0xa1, 0x21) => get_line_coding(),
+
+            // We could flush buffers on a transition from line-down to line-up.
+            (0x21, 0x22) => set_control_line_state(setup.value_lo),
+            _ => SetupResult::error(),
         }
     }
 }
@@ -204,7 +224,7 @@ impl FreakUSBSerial {
     }
 }
 
-pub fn set_control_line_state(_value: u8) -> SetupResult {
+fn set_control_line_state(_value: u8) -> SetupResult {
     usb_tx_interrupt();
     SetupResult::no_data()
 }
@@ -232,7 +252,7 @@ fn usb_tx_interrupt() {
                 chep_intr().read().bits(), chep.bits());
 }
 
-pub fn set_line_coding() -> bool {
+fn set_line_coding() -> bool {
     let line_coding: LineCoding = unsafe {
         core::mem::transmute_copy (
             &* (CTRL_RX_BUF as *const (u32, u32))
@@ -243,7 +263,7 @@ pub fn set_line_coding() -> bool {
     true
 }
 
-pub fn get_line_coding() -> SetupResult {
+fn get_line_coding() -> SetupResult {
     ctrl_dbgln!("USB Get Line Coding");
     static LINE_CODING: UCell<LineCoding> = Default::default();
     let lc = unsafe {LINE_CODING.as_mut()};
@@ -257,7 +277,7 @@ pub fn get_line_coding() -> SetupResult {
 #[derive_const(Default)]
 pub struct FreakUSBSerialIntr;
 
-impl EndPointPair for FreakUSBSerialIntr {
+impl EndpointPair for FreakUSBSerialIntr {
     /// This handles USB interrupt pipe VTTX not CPU interrupts!
     fn tx_handler(&mut self) {
         // TODO - nothing here yet!

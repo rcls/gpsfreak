@@ -16,15 +16,16 @@
 ///   CHEP 2
 
 pub mod control;
-mod descriptor;
+pub mod descriptor;
 pub mod hardware;
-mod strings;
+pub mod strings;
 pub mod types;
 
 use hardware::*;
 use types::*;
 
-use crate::cpu::{interrupt, nothing};
+use crate::cpu::{CPU_FREQ, interrupt, nothing};
+use control::ControlState;
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;
 
@@ -34,54 +35,78 @@ macro_rules!fast_dbgln {($($tt:tt)*) => {if false {dbgln!($($tt)*)}};}
 
 pub(crate) use {ctrl_dbgln, usb_dbgln};
 
-pub trait EndPointPair: const Default {
+pub trait EndpointPair: const Default {
+    /// Handler for RX done notifications.
     fn rx_handler(&mut self) {}
+    /// Handler for TX done notifications.
     fn tx_handler(&mut self) {}
+    /// Start-of-frame handler.
     fn start_of_frame(&mut self) {}
-    fn usb_initialize(&mut self) {} // Control endpoints only?
+    /// Do we want to handle a setup request?
+    #[inline(always)]
+    fn setup_wanted(&mut self, _h: &SetupHeader) -> bool {
+        false
+    }
+    /// Handler for set-up requests.  Currently no RX data supported.
+    fn setup_handler(&mut self, _h: &SetupHeader) -> SetupResult {
+        SetupResult::error()
+    }
 }
 
-pub trait EightEndPoints: const Default {
-    type EP0: EndPointPair = DummyEndPoint;
-    type EP1: EndPointPair = DummyEndPoint;
-    type EP2: EndPointPair = DummyEndPoint;
-    type EP3: EndPointPair = DummyEndPoint;
-    type EP4: EndPointPair = DummyEndPoint;
-    type EP5: EndPointPair = DummyEndPoint;
-    type EP6: EndPointPair = DummyEndPoint;
-    type EP7: EndPointPair = DummyEndPoint;
+pub trait USBTypes: const Default {
+    fn get_device_descriptor(&mut self) -> SetupResult;
+    fn get_config_descriptor(&mut self, setup: &SetupHeader) -> SetupResult;
+    fn get_string_descriptor(&mut self, idx: u8) -> SetupResult;
+
+    type EP1: EndpointPair = DummyEndPoint;
+    type EP2: EndpointPair = DummyEndPoint;
+    type EP3: EndpointPair = DummyEndPoint;
+    type EP4: EndpointPair = DummyEndPoint;
+    type EP5: EndpointPair = DummyEndPoint;
+    type EP6: EndpointPair = DummyEndPoint;
+    type EP7: EndpointPair = DummyEndPoint;
 }
 
 #[derive_const(Default)]
 pub struct DummyEndPoint;
-impl EndPointPair for DummyEndPoint {}
+impl EndpointPair for DummyEndPoint {}
 
-#[allow(non_camel_case_types)]
-pub struct USB_State<EPS: EightEndPoints> {
-    pub ep0: EPS::EP0,
-    pub ep1: EPS::EP1,
-    pub ep2: EPS::EP2,
-    pub ep3: EPS::EP3,
-    pub ep4: EPS::EP4,
-    pub ep5: EPS::EP5,
-    pub ep6: EPS::EP6,
-    pub ep7: EPS::EP7,
+pub struct DataEndPoints<UT: USBTypes> {
+    pub ep1: UT::EP1,
+    pub ep2: UT::EP2,
+    pub ep3: UT::EP3,
+    pub ep4: UT::EP4,
+    pub ep5: UT::EP5,
+    pub ep6: UT::EP6,
+    pub ep7: UT::EP7,
 }
 
-impl<EPS: EightEndPoints> const Default for USB_State<EPS> {
+#[allow(non_camel_case_types)]
+pub struct USB_State<UT: USBTypes> {
+    pub ep0: ControlState<UT>,
+    pub eps: DataEndPoints<UT>,
+}
+
+impl<UT: USBTypes> const Default for DataEndPoints<UT> {
     fn default() -> Self {Self{
-        ep0: EPS::EP0::default(),
-        ep1: EPS::EP1::default(),
-        ep2: EPS::EP2::default(),
-        ep3: EPS::EP3::default(),
-        ep4: EPS::EP4::default(),
-        ep5: EPS::EP5::default(),
-        ep6: EPS::EP6::default(),
-        ep7: EPS::EP7::default(),
+        ep1: UT::EP1::default(),
+        ep2: UT::EP2::default(),
+        ep3: UT::EP3::default(),
+        ep4: UT::EP4::default(),
+        ep5: UT::EP5::default(),
+        ep6: UT::EP6::default(),
+        ep7: UT::EP7::default(),
     }}
 }
 
-unsafe impl<EPS: EightEndPoints> Sync for USB_State<EPS> {}
+impl<UT: USBTypes> const Default for USB_State<UT> {
+    fn default() -> Self {Self{
+        ep0: ControlState::default(),
+        eps: Default::default(),
+    }}
+}
+
+unsafe impl<UT: USBTypes> Sync for USB_State<UT> {}
 
 fn usb_isr() {
     unsafe{super::USB_STATE.as_mut()}.isr();
@@ -106,7 +131,7 @@ fn set_configuration(cfg: u8) {
     chep_main().write(|w| w.main().init(&main).rx_valid(&main).tx_nak(&main));
 }
 
-impl<EPS: EightEndPoints> USB_State<EPS> {
+impl<UT: USBTypes> USB_State<UT> {
     pub fn init(&mut self) {
         let crs   = unsafe {&*stm32h503::CRS  ::ptr()};
         let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -134,7 +159,7 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
 
         usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().set_bit());
         // Wait t_startup (1µs).
-        for _ in 0 .. crate::cpu::CPU_FREQ / 2000000 {
+        for _ in 0 .. CPU_FREQ / 2000000 {
             nothing();
         }
         usb.CNTR.write(|w| w.PDWN().clear_bit().USBRST().clear_bit());
@@ -172,22 +197,22 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
                 errata_delay();
             }
             match istr.bits() & 31 {
-                0  => self.ep0.tx_handler(),
-                1  => self.ep1.tx_handler(),
-                2  => self.ep2.tx_handler(),
-                3  => self.ep3.tx_handler(),
-                4  => self.ep4.tx_handler(),
-                5  => self.ep5.tx_handler(),
-                6  => self.ep6.tx_handler(),
-                7  => self.ep7.tx_handler(),
-                16 => self.ep0.rx_handler(),
-                17 => self.ep1.rx_handler(),
-                18 => self.ep2.rx_handler(),
-                19 => self.ep3.rx_handler(),
-                20 => self.ep4.rx_handler(),
-                21 => self.ep5.rx_handler(),
-                22 => self.ep6.rx_handler(),
-                23 => self.ep7.rx_handler(),
+                0  => self.ep0.tx_handler(&mut self.eps),
+                1  => self.eps.ep1.tx_handler(),
+                2  => self.eps.ep2.tx_handler(),
+                3  => self.eps.ep3.tx_handler(),
+                4  => self.eps.ep4.tx_handler(),
+                5  => self.eps.ep5.tx_handler(),
+                6  => self.eps.ep6.tx_handler(),
+                7  => self.eps.ep7.tx_handler(),
+                16 => self.ep0.rx_handler(&mut self.eps),
+                17 => self.eps.ep1.rx_handler(),
+                18 => self.eps.ep2.rx_handler(),
+                19 => self.eps.ep3.rx_handler(),
+                20 => self.eps.ep4.rx_handler(),
+                21 => self.eps.ep5.rx_handler(),
+                22 => self.eps.ep6.rx_handler(),
+                23 => self.eps.ep7.rx_handler(),
                 _  => {
                     dbgln!("Bugger endpoint?, ISTR = {:#010x}", istr.bits());
                     break;  // FIXME, this will hang!
@@ -207,13 +232,13 @@ impl<EPS: EightEndPoints> USB_State<EPS> {
     /// IN request.
     fn start_of_frame(&mut self) {
         self.ep0.start_of_frame();
-        self.ep1.start_of_frame();
-        self.ep2.start_of_frame();
-        self.ep3.start_of_frame();
-        self.ep4.start_of_frame();
-        self.ep5.start_of_frame();
-        self.ep6.start_of_frame();
-        self.ep7.start_of_frame();
+        self.eps.ep1.start_of_frame();
+        self.eps.ep2.start_of_frame();
+        self.eps.ep3.start_of_frame();
+        self.eps.ep4.start_of_frame();
+        self.eps.ep5.start_of_frame();
+        self.eps.ep6.start_of_frame();
+        self.eps.ep7.start_of_frame();
     }
 
     fn usb_initialize(&mut self) {
@@ -255,7 +280,7 @@ fn errata_delay() {
     // Workaround: Software should ensure that a small delay is included
     // before accessing the SRAM contents. This delay should be
     // 800 ns in Full Speed mode and 6.4 μs in Low Speed mode.
-    for _ in 0 .. crate::cpu::CPU_FREQ / 1250000 / 2 {
+    for _ in 0 .. CPU_FREQ / 1250000 / 2 {
         nothing();
     }
 }

@@ -124,6 +124,7 @@ pub const TYPE_INTF_ASSOC    : u8 = 11;
 pub const TYPE_DFU_FUNCTIONAL: u8 = 0x21;
 pub const TYPE_CS_INTERFACE  : u8 = 0x24;
 
+#[derive(Clone, Copy)]
 #[derive_const(Default)]
 #[repr(C)]
 pub struct SetupHeader {
@@ -150,30 +151,41 @@ impl SetupHeader {
 /// Result from processing a set-up.  It can indicate no-data, data TX, data RX
 /// and error.
 pub enum SetupResult {
-    Tx(&'static [u8]),
-    Rx(usize),
+    Tx(&'static [u8], Option<fn(&SetupHeader)>),
+    Rx(usize, Option<fn() -> bool>),
 }
 
 impl const Default for SetupResult {
-    fn default() -> SetupResult {SetupResult::Rx(0)}
+    fn default() -> Self {SetupResult::Rx(0, None)}
 }
 
 impl SetupResult {
     pub fn tx_data<T>(data: &'static T) -> SetupResult {
         SetupResult::Tx(unsafe {from_raw_parts(
-            data as *const _ as *const _, size_of::<T>())})
+            data as *const _ as *const _, size_of::<T>())}, None)
+    }
+    pub fn tx_data_cb<T>(data: &'static T, cb: fn(&SetupHeader))
+            -> SetupResult {
+        SetupResult::Tx(unsafe {from_raw_parts(
+            data as *const _ as *const _, size_of::<T>())}, Some(cb))
     }
     pub fn no_data() -> SetupResult {
         SetupResult::tx_data(&())
     }
+    pub fn no_data_cb(cb: fn(&SetupHeader)) -> SetupResult {
+        SetupResult::tx_data_cb(&(), cb)
+    }
     pub fn rx_data(len: usize) -> SetupResult {
-        SetupResult::Rx(len)
+        SetupResult::Rx(len, None)
+    }
+    pub fn rx_data_cb(len: usize, cb: fn() -> bool) -> SetupResult {
+        SetupResult::Rx(len, Some(cb))
     }
     pub fn error() -> SetupResult {
-        SetupResult::Rx(0)
+        SetupResult::Rx(0, None)
     }
     pub fn is_tx(&self) -> bool {
-        if let SetupResult::Tx(_) = self {true} else {false}
+        if let SetupResult::Tx(_, _) = self {true} else {false}
     }
 }
 

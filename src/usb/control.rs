@@ -1,33 +1,51 @@
 
-use super::descriptor::{CONFIG0_DESC, DEVICE_DESC, INTF_DFU};
-use super::hardware::*;
+use core::marker::PhantomData;
+
+use super::{DataEndPoints, USBTypes, ctrl_dbgln, usb_dbgln};
 use super::types::*;
+use super::hardware::*;
 
 use crate::cpu::barrier;
-use crate::usb::EndPointPair;
+use crate::usb::EndpointPair;
 
-use super::{ctrl_dbgln, usb_dbgln};
+type SetupTxCallback = Option<fn(&SetupHeader)>;
 
-#[derive_const(Default)]
-pub struct ControlState {
-    /// If request(Type) are non-zero, then we are waiting RX data for this
-    /// setup request.
-    setup: SetupHeader = SetupHeader::default(),
+pub struct ControlState<UT: USBTypes> {
+    /// Meta-data: desriptors etc.
+    meta: UT,
+    /// Last set-up received, while we are processing it.
+    setup: SetupHeader,
     /// Set-up data to send.  On TX ACK we send the next block.
-    setup_data: SetupResult = SetupResult::default(),
+    setup_data: SetupResult,
     /// If set, the TX setup data is shorter than the requested data and we must
     /// end with a zero-length packet if needed.
-    setup_short: bool = false,
+    setup_short: bool,
     /// Address received in a SET ADDRESS.  On TX ACK, we apply this.
-    pending_address: Option<u8> = None,
+    pending_address: Option<u8>,
     /// Are we configured?
-    configured: bool = false,
-    /// Do we have a pending DFU reboot?
-    pending_dfu: bool = false,
+    configured: bool,
+    /// Callback for post-setup OUT data.  We only support single packets!
+    pending_rx_cb: Option<fn() -> bool>,
+    pending_tx_cb: SetupTxCallback,
+    dummy: PhantomData<UT>,
 }
 
-impl EndPointPair for ControlState {
-    fn tx_handler(&mut self) {
+impl<UT: USBTypes> const Default for ControlState<UT> {
+    fn default() -> Self {Self{
+        meta: UT::default(),
+        setup: SetupHeader::default(),
+        setup_data: SetupResult::default(),
+        setup_short: false,
+        pending_address: None,
+        configured: false,
+        pending_rx_cb: None,
+        pending_tx_cb: None,
+        dummy: PhantomData,
+    }}
+}
+
+impl<UT: USBTypes> ControlState<UT> {
+    pub fn tx_handler(&mut self, _: &mut DataEndPoints<UT>) {
         let chep = chep_ctrl().read();
         ctrl_dbgln!("Control TX handler CHEP0 = {:#010x}", chep.bits());
 
@@ -36,28 +54,24 @@ impl EndPointPair for ControlState {
             return;
         }
 
-        if let SetupResult::Tx(data) = self.setup_data {
-            self.setup_next_data(data);
+        if let SetupResult::Tx(data, cb) = self.setup_data {
+            self.setup_next_data(data, cb);
             chep_ctrl().write(
                 |w| w.control().VTTX().clear_bit().tx_valid(&chep));
             return;
         }
 
-        if self.pending_dfu {
-            unsafe {crate::cpu::trigger_dfu()};
+        if let Some(cb) = self.pending_tx_cb {
+            self.pending_tx_cb = None;
+            cb(&self.setup);
+            self.setup = SetupHeader::default();
         }
 
         chep_ctrl().write(
             |w|w.control().VTTX().clear_bit().rx_valid(&chep).dtogrx(&chep, false));
-
-        if let Some(address) = self.pending_address {
-            Self::do_set_address(address);
-            self.pending_address = None;
-            // FIXME - race with incoming?
-        }
     }
 
-    fn rx_handler(&mut self) {
+    pub fn rx_handler(&mut self, eps: &mut DataEndPoints<UT>) {
         let chep = chep_ctrl().read();
         ctrl_dbgln!("Control RX handler CHEP0 = {:#010x}", chep.bits());
 
@@ -96,13 +110,16 @@ impl EndPointPair for ControlState {
         // setup packet in place.
         barrier();
         let setup = unsafe {SetupHeader::from_ptr(CTRL_RX_BUF)};
-        // FIXME what about SETUP + OUT?
-        let result = self.setup_rx_handler(&setup);
+        self.setup = setup;
+
+        let result = self.setup_rx_handler(&setup, eps);
         match result {
-            SetupResult::Tx(data) => self.setup_send_data(&setup, data),
-            SetupResult::Rx(len) if len == setup.length as usize && len != 0 => {
-                // Receive some data.  TODO: is the length match guarenteed?
-                self.setup = setup;
+            SetupResult::Tx(data, cb) => self.setup_send_data(&setup, data, cb),
+            SetupResult::Rx(len, cb)
+                if len == setup.length as usize && len != 0 => {
+                // Receive some data (if len != 0).  TODO: is the length match
+                // guarenteed?
+                self.pending_rx_cb = cb;
                 chep_ctrl().write(
                     |w|w.control().VTRX().clear_bit().rx_valid(&chep)
                         .dtogrx(&chep, true) //.dtogtx(&chep, true)
@@ -110,8 +127,9 @@ impl EndPointPair for ControlState {
                 ctrl_dbgln!("Set-up data rx armed {len}, CHEP = {:#x}",
                             chep_ctrl().read().bits());
             },
-            SetupResult::Rx(_) => {
+            SetupResult::Rx(_, _) => {
                 ctrl_dbgln!("Set-up error");
+                self.setup = SetupHeader::default();
                 // Set STATTX to 1 (stall).  FIXME - clearing DTOGRX should not
                 // be needed.  FIXME - do we really want to stall TX, or just
                 // NAK?
@@ -122,17 +140,19 @@ impl EndPointPair for ControlState {
         }
     }
 
-    fn usb_initialize(&mut self) {
+    pub fn usb_initialize(&mut self) {
         *self = Self::default();
     }
-}
 
-impl ControlState {
-    fn setup_rx_handler(&mut self, setup: &SetupHeader) -> SetupResult {
+    pub fn start_of_frame(&mut self) {}
+
+    fn setup_rx_handler(&mut self, setup: &SetupHeader,
+                        eps: &mut DataEndPoints<UT>)
+            -> SetupResult {
         // Cancel any pending set-address and set-up data.
         self.pending_address = None;
         self.setup_data = SetupResult::default();
-        self.setup = SetupHeader::default();
+        self.pending_rx_cb = None;
 
         let bd = bd_control().rx.read();
         let len = bd >> 16 & 0x03ff;
@@ -145,12 +165,11 @@ impl ControlState {
                setup.length);
         match (setup.request_type, setup.request) {
             (0x80, 0x00) => SetupResult::tx_data(&0u16), // Status.
-            (0x21, 0x00) => {self.pending_dfu = true; SetupResult::no_data()}
-            (0x00, 0x05) => self.set_address(setup.value_lo), // Set address.
+            (0x00, 0x05) => self.set_address(setup), // Set address.
             (0x80, 0x06) => match setup.value_hi { // Get descriptor.
-                1 => SetupResult::tx_data(&DEVICE_DESC),
-                2 => SetupResult::tx_data(&CONFIG0_DESC),
-                3 => super::strings::get_descriptor(setup.value_lo),
+                1 => self.meta.get_device_descriptor(),
+                2 => self.meta.get_config_descriptor(setup),
+                3 => self.meta.get_string_descriptor(setup.value_lo),
                 // 6 => setup_result(), // Device qualifier.
                 desc => {
                     usb_dbgln!("Unsupported get descriptor {desc}");
@@ -162,19 +181,28 @@ impl ControlState {
             // just ACK the set interface message.
             (0x01, 0x0b) => SetupResult::no_data(), // Set interface
 
-            (0xa1, 0x03) => if setup.index == INTF_DFU as u16 { // DFU
-                SetupResult::tx_data(&[0u8, 100, 0, 0, 0, 0])
-            }
-            else {
-                SetupResult::error()
-            },
-
-            (0x21, 0x20) => SetupResult::Rx(7), // Set Line Coding.
-            (0xa1, 0x21) => crate::freak_serial::get_line_coding(),
-
-            // We could flush buffers on a transition from line-down to line-up...
-            (0x21, 0x22) => crate::freak_serial::set_control_line_state(setup.value_lo),
             _ => {
+                if eps.ep1.setup_wanted(setup) {
+                    return eps.ep1.setup_handler(setup);
+                }
+                if eps.ep2.setup_wanted(setup) {
+                    return eps.ep2.setup_handler(setup);
+                }
+                if eps.ep3.setup_wanted(setup) {
+                    return eps.ep3.setup_handler(setup);
+                }
+                if eps.ep4.setup_wanted(setup) {
+                    return eps.ep4.setup_handler(setup);
+                }
+                if eps.ep5.setup_wanted(setup) {
+                    return eps.ep5.setup_handler(setup);
+                }
+                if eps.ep6.setup_wanted(setup) {
+                    return eps.ep6.setup_handler(setup);
+                }
+                if eps.ep7.setup_wanted(setup) {
+                    return eps.ep7.setup_handler(setup);
+                }
                 usb_dbgln!("Unknown setup {:02x} {:02x} {:02x} {:02x} -> {}",
                            setup.request_type, setup.request,
                            setup.value_lo, setup.value_hi, setup.length);
@@ -186,27 +214,26 @@ impl ControlState {
     /// Process just received setup OUT data.
     fn setup_rx_data(&mut self) -> bool {
         // First check that we really were expecting data.
-        match (self.setup.request_type, self.setup.request) {
-            (0x21, 0x20) => return crate::freak_serial::set_line_coding(),
-            _ => return false,
-        }
+        let Some(cb) = self.pending_rx_cb else {return false};
+        self.pending_rx_cb = None;
+        cb()
     }
 
     // Note that data should be a tx_data or no_data.
-    fn setup_send_data(&mut self, setup: &SetupHeader, data: &'static [u8]) {
+    fn setup_send_data(&mut self, setup: &SetupHeader,
+                       data: &'static [u8], cb: SetupTxCallback) {
         self.setup_short = data.len() < setup.length as usize;
         let len = if self.setup_short {data.len()} else {setup.length as usize};
         ctrl_dbgln!("Setup response length = {} -> {}", data.len(), len);
 
-        self.setup_next_data(&data[..len]);
+        self.setup_next_data(&data[..len], cb);
 
         let chep = chep_ctrl().read();
         chep_ctrl().write(|w| w.control().VTRX().clear_bit().tx_valid(&chep));
     }
 
-    /// Send the next data from the control state.  Return True if something sent,
-    /// False if nothing sent.
-    fn setup_next_data(&mut self, data: &'static [u8]) {
+    /// Send the next data from the control state.
+    fn setup_next_data(&mut self, data: &'static [u8], cb: SetupTxCallback) {
         let len = data.len();
         let is_short = len < 64;
         let len = if is_short {len} else {64};
@@ -216,10 +243,11 @@ impl ControlState {
         unsafe {copy_by_dest32(data.as_ptr(), CTRL_TX_BUF, len)};
 
         if len != data.len() || !is_short && self.setup_short {
-            self.setup_data = SetupResult::Tx(&data[len..]);
+            self.setup_data = SetupResult::Tx(&data[len..], cb);
         }
         else {
             self.setup_data = SetupResult::default();
+            self.pending_tx_cb = cb;
         }
 
         // If the length is zero, then we are sending an ack.  If the length
@@ -227,16 +255,15 @@ impl ControlState {
         bd_control().tx.write(chep_bd_tx(CTRL_TX_OFFSET, len));
     }
 
-    fn set_address(&mut self, address: u8) -> SetupResult {
-        usb_dbgln!("Set addr received {address}");
-        self.pending_address = Some(address);
-        SetupResult::no_data()
+    fn set_address(&mut self, header: &SetupHeader) -> SetupResult {
+        usb_dbgln!("Set addr received {}", header.value_lo);
+        SetupResult::no_data_cb(Self::do_set_address)
     }
 
-    fn do_set_address(address: u8) {
-        usb_dbgln!("Set address apply {address}");
+    fn do_set_address(setup: &SetupHeader) {
+        usb_dbgln!("Set address apply {}", setup.value_lo);
         let usb = unsafe {&*stm32h503::USB::ptr()};
-        usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(address));
+        usb.DADDR.write(|w| w.EF().set_bit().ADD().bits(setup.value_lo));
     }
 
     fn set_configuration(&mut self, config: u8) -> SetupResult {

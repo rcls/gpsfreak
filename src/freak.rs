@@ -13,6 +13,8 @@
 
 use vcell::UCell;
 
+use crate::usb::types::{SetupHeader, SetupResult};
+
 mod command;
 mod command_usb;
 mod cpu;
@@ -35,16 +37,27 @@ mod utils;
 mod vcell;
 
 #[derive_const(Default)]
-pub struct FreakUSB;
+struct FreakUSB;
 
-impl usb::EightEndPoints for FreakUSB {
-    type EP0 = usb::control::ControlState;
+impl usb::USBTypes for FreakUSB {
+    fn get_device_descriptor(&mut self) -> SetupResult {
+        SetupResult::tx_data(&usb::descriptor::DEVICE_DESC)
+    }
+    fn get_config_descriptor(&mut self, _: &SetupHeader) -> SetupResult {
+        // Always return CONFIG0 ....
+        SetupResult::tx_data(&usb::descriptor::CONFIG0_DESC)
+    }
+    fn get_string_descriptor(&mut self, idx: u8) -> SetupResult {
+        usb::strings::get_descriptor(idx)
+    }
+
     type EP1 = freak_serial::FreakUSBSerial;
     type EP2 = freak_serial::FreakUSBSerialIntr;
     type EP3 = command_usb::CommandUSB;
+    type EP7 = TriggerDFU; // Not a real end-point, just a setup handler.
 }
 
-pub static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();
+static USB_STATE: UCell<usb::USB_State<FreakUSB>> = Default::default();
 
 pub fn main() -> ! {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
@@ -107,6 +120,22 @@ pub fn main() -> ! {
 
     loop {
         cpu::WFE();
+    }
+}
+
+#[derive_const(Default)]
+struct TriggerDFU;
+
+impl usb::EndpointPair for TriggerDFU {
+    fn setup_wanted(&mut self, setup: &SetupHeader) -> bool {
+        setup.index == usb::descriptor::INTF_DFU as u16
+    }
+    fn setup_handler(&mut self, setup: &SetupHeader) -> SetupResult {
+        match (setup.request_type, setup.request) {
+            (0x21, 0x00) => unsafe {cpu::trigger_dfu()},
+            (0xa1, 0x03) => SetupResult::tx_data(&[0u8, 100, 0, 0, 0, 0]),
+            _ => SetupResult::error(),
+        }
     }
 }
 

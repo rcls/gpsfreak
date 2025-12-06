@@ -1,4 +1,9 @@
-use crate::{link_assert, usb::{EndPointPair, hardware::{CheprReader, CheprWriter, MAIN_RX_BUF, MAIN_TX_BUF, bd_main, chep_bd_len, chep_main, copy_by_dest32}}};
+use crate::link_assert;
+use crate::usb;
+
+use usb::EndpointPair;
+use usb::hardware::{CheprReader, CheprWriter, MAIN_RX_BUF, MAIN_TX_BUF,
+                    bd_main, chep_bd_len, chep_main, copy_by_dest32};
 
 #[derive_const(Default)]
 pub struct CommandUSB;
@@ -15,7 +20,7 @@ pub fn init() {
     unsafe {pendsv_prio.write(crate::cpu::interrupt::PRIO_APP)};
 }
 
-impl EndPointPair for CommandUSB {
+impl EndpointPair for CommandUSB {
     fn rx_handler(&mut self) {
         let chep = chep_main().read();
         if !chep.VTRX().bit() {

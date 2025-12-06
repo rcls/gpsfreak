@@ -1,6 +1,7 @@
 pub use stm32h503::usb::chepr::{R as CheprR, W as CheprW};
 
-use crate::{cpu::barrier, vcell::VCell};
+use crate::cpu::barrier;
+use crate::vcell::VCell;
 
 pub trait CheprWriter {
     fn control  (&mut self) -> &mut Self {self.endpoint(0, 1)}

@@ -55,7 +55,7 @@ macro_rules! define_usb_strings{
             let len = DATA[offset] as usize & 255;
             let data: &[u8] = unsafe{core::slice::from_raw_parts(
                 &DATA[offset] as *const u16 as *const u8, len)};
-            SetupResult::Tx(data)
+            SetupResult::Tx(data, None)
         }
     }
 }

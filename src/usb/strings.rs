@@ -24,5 +24,5 @@ pub fn get_descriptor(idx: u8) -> SetupResult {
     let data = unsafe {
         core::slice::from_raw_parts(data as *const u16 as *const u8,
                                     byte_len as usize)};
-    return SetupResult::Tx(data);
+    SetupResult::Tx(data, None)
 }

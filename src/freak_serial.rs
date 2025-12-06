@@ -1,4 +1,8 @@
 use crate::cpu::barrier;
+use crate::freak_usb::{
+    BULK_TX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
+    bd_interrupt, bd_serial, chep_intr, chep_ser};
+use crate::freak_usb::{CheprWriter as _};
 use crate::usb;
 use crate::dbgln;
 use crate::freak_descriptors::{INTF_ACM_DATA, INTF_ACM_INTR};
@@ -9,10 +13,8 @@ use super::USB_STATE;
 use usb::{EndpointPair, ctrl_dbgln};
 use usb::types::{LineCoding, SetupHeader, SetupResult};
 use usb::hardware::{
-    BULK_TX_BUF, CTRL_RX_BUF, INTR_TX_BUF, INTR_TX_OFFSET,
-    CheprR, CheprReader, CheprWriter,
-    bd_serial, bd_interrupt, chep_bd_len, chep_bd_ptr, chep_intr,
-    chep_bd_tx, chep_ser, copy_by_dest32};
+    CTRL_RX_BUF, CheprR, CheprReader, CheprWriter,
+    chep_bd_len, chep_bd_ptr, chep_bd_tx, copy_by_dest32};
 
 macro_rules!srx_dbgln  {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 macro_rules!stx_dbgln  {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}

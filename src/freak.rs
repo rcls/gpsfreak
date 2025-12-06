@@ -23,6 +23,7 @@ mod crc32;
 mod dma;
 mod flash;
 mod freak_descriptors;
+mod freak_usb;
 mod freak_serial;
 mod gps_uart;
 mod i2c;

@@ -20,10 +20,13 @@ pub mod hardware;
 pub mod string;
 pub mod types;
 
-use hardware::*;
-use types::*;
-
 use crate::cpu::{CPU_FREQ, interrupt, nothing};
+use crate::freak_usb::{
+    BULK_RX_BUF, MAIN_RX_BUF, bd_main, bd_serial, chep_intr, chep_main, chep_ser};
+use crate::freak_usb::CheprWriter as _;
+use crate::usb::hardware::{
+    CTRL_RX_OFFSET, CheprWriter, bd_control, chep_block, chep_ctrl};
+use crate::usb::types::{SetupHeader, SetupResult};
 use control::ControlState;
 
 use stm32h503::Interrupt::USB_FS as INTERRUPT;

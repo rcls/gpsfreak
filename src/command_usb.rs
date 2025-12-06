@@ -1,9 +1,10 @@
+use crate::freak_usb::{CheprWriter as _, bd_main};
+use crate::freak_usb::{MAIN_RX_BUF, MAIN_TX_BUF, chep_main};
 use crate::link_assert;
 use crate::usb;
 
 use usb::EndpointPair;
-use usb::hardware::{CheprReader, CheprWriter, MAIN_RX_BUF, MAIN_TX_BUF,
-                    bd_main, chep_bd_len, chep_main, copy_by_dest32};
+use usb::hardware::{CheprReader, CheprWriter, chep_bd_len, copy_by_dest32};
 
 #[derive_const(Default)]
 pub struct CommandUSB;

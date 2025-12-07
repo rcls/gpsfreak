@@ -1,3 +1,0 @@
-[submodule "stm-common"]
-	path = stm-common
-	url = git@github.com:rcls/stm-common.git

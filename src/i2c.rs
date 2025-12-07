@@ -18,17 +18,17 @@ use stm_common::vcell::UCell;
 struct I2CMeta;
 
 impl Meta for I2CMeta {
-    fn i2c() -> &'static stm32h503::i2c1::RegisterBlock {
+    fn i2c(&self) -> &'static stm32h503::i2c1::RegisterBlock {
         unsafe {&*stm32h503::I2C1::PTR}
     }
 
-    fn rx_channel() -> &'static Channel {crate::dma::dma().C(RX_CHANNEL)}
-    fn tx_channel() -> &'static Channel {crate::dma::dma().C(TX_CHANNEL)}
+    fn rx_channel(&self) -> &'static Channel {crate::dma::dma().C(RX_CHANNEL)}
+    fn tx_channel(&self) -> &'static Channel {crate::dma::dma().C(TX_CHANNEL)}
 
     /// Request selection for GPDMA1 Ch1
-    const RX_MUXIN: u8 = 12;
+    fn rx_muxin(&self) -> u8 {12}
     /// Request selection for GPDMA1 Ch2
-    const TX_MUXIN: u8 = 13;
+    fn tx_muxin(&self) -> u8 {13}
 }
 
 /// I2C receive channel on GPDMA1.
@@ -42,7 +42,7 @@ static CONTEXT: UCell<I2cContext<I2CMeta>> = UCell::default();
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 pub fn init() {
-    let i2c   = I2CMeta::i2c();
+    let i2c   = I2CMeta.i2c();
     let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let rcc   = unsafe {&*stm32h503::RCC::ptr()};
 
@@ -72,7 +72,7 @@ pub fn init() {
     gpiob.OTYPER.modify(|_,w| w.OT6().set_bit().OT7().set_bit());
     gpiob.MODER.modify(|_, w| w.MODE6().B_0x2().MODE7().B_0x2());
 
-    I2cContext::<I2CMeta>::initialize();
+    CONTEXT.initialize();
 
     if false {
         write_reg(0, 0, &0i16).defer();
@@ -89,7 +89,7 @@ pub fn init() {
 
 fn dma_rx_isr() {
     dbgln!("I2C DMA RX ISR");
-    let ch = I2CMeta::rx_channel();
+    let ch = I2CMeta.rx_channel();
     let sr = ch.SR().read();
     ch.FCR().write(|w| w.bits(sr.bits())); // Clear flags.
     if sr.TCF().bit() {
@@ -99,7 +99,7 @@ fn dma_rx_isr() {
 
 fn dma_tx_isr() {
     dbgln!("I2C DMA TX ISR");
-    let ch = I2CMeta::tx_channel();
+    let ch = I2CMeta.tx_channel();
     let sr = ch.SR().read();
     ch.FCR().write(|w| w.bits(sr.bits())); // Clear flags.
     if sr.TCF().bit() {

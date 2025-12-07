@@ -38,7 +38,7 @@ struct TriggerDFU;
 static USB_STATE: UCell<usb::USB_State<FreakUSB>>
     = Default::default();
 
-impl usb::USBTypes for FreakUSB {
+impl usb::USBMeta for FreakUSB {
     fn get_device_descriptor(&mut self) -> SetupResult {
         SetupResult::tx_data(&descriptors::DEVICE_DESC)
     }

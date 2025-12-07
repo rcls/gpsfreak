@@ -25,8 +25,12 @@ SECTIONS
      *(SORT_BY_ALIGNMENT(.bss*))
      __bss_end = .;
      *(SORT_BY_ALIGNMENT(.noinit*))
+     __noinit_end = .;
+  } > RAM
+  .dummy(INFO): {
      . += 2K; /* Stack reservation. */
   } > RAM
+
   .stack_sizes (INFO): {
      KEEP(*(.stack_sizes));
   }

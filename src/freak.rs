@@ -50,6 +50,10 @@ pub fn main() -> ! {
 
     cpu::maybe_enter_dfu();
 
+    if DEBUG_ENABLE {
+        unsafe {stm_common::set_debug_handler(Some(debug_fmt))};
+    }
+
     debug::init();
 
     crc::init();
@@ -61,7 +65,7 @@ pub fn main() -> ! {
 
     // Spin for ≈100ms to wait for the clock generator and GPS to start.
     for _ in 0 .. cpu::CPU_FREQ / 20 {
-        cpu::nothing();
+        stm_common::utils::nothing();
     }
 
     command::init(

@@ -236,8 +236,7 @@ pub mod interrupt {
     /// spins.  TODO - rate limit that interrupt.
     pub const PRIO_STATUS: u8 = PRIO_APP | 0x10;
 
-
-    // We don't use disabling interrupts to transfer ownership, so no need for
+    // We don't use disabling interrupts to establish ownership, so no need for
     // the enable to be unsafe.
     pub fn enable_all() {
         #[cfg(target_arch = "arm")]

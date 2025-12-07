@@ -1,5 +1,9 @@
 
-use stm_common::usb::types::*;
+use stm_common::usb::types::{
+    AbstractControlDesc, CDC_Header, CallManagementDesc, ConfigurationDesc,
+    DFU_FunctionalDesc, DeviceDesc, EndpointDesc, InterfaceAssociation,
+    InterfaceDesc, SetupResult, TYPE_CONFIGURATION, TYPE_CS_INTERFACE,
+    TYPE_DEVICE, TYPE_DFU_FUNCTIONAL, TYPE_INTF_ASSOC, UnionFunctionalDesc};
 
 pub const INTF_ACM_INTR: u8 = 0;
 pub const INTF_ACM_DATA: u8 = 1;
@@ -69,14 +73,14 @@ pub static CONFIG0_DESC: FullConfigDesc = FullConfigDesc{
         max_power          : 200,       // 400mA
     },
     assoc: InterfaceAssociation{
-        length            : size_of::<InterfaceAssociation>() as u8,
-        descriptor_type   : TYPE_INTF_ASSOC,
-        first_interface   : 0,
-        interface_count   : 2,
-        function_class    : 2,          // Communications
-        function_sub_class: 2,          // Abstract (Modem [sic])
-        function_protocol : 0,
-        i_function        : string_index("CDC"),
+        length             : size_of::<InterfaceAssociation>() as u8,
+        descriptor_type    : TYPE_INTF_ASSOC,
+        first_interface    : 0,
+        interface_count    : 2,
+        function_class     : 2,          // Communications
+        function_sub_class : 2,          // Abstract (Modem [sic])
+        function_protocol  : 0,
+        i_function         : string_index("CDC"),
     },
     // 1 endpoints, Communication, Abstract, AT Commands [sic]
     interface0: InterfaceDesc::new(
@@ -108,15 +112,15 @@ pub static CONFIG0_DESC: FullConfigDesc = FullConfigDesc{
         control_interface  : 0,
         sub_interface      : [1],
     },
-    endp0: EndpointDesc::new(0x82, 3, 64, 4), // IN 2, Interrupt.
+    endp0                  : EndpointDesc::new(0x82, 3, 64, 4), // IN 2, Interrupt.
     interface1: InterfaceDesc::new(
         INTF_ACM_DATA, 2, 10, 0, 0, string_index("CDC DATA interface")),
-    endp1: EndpointDesc::new(0x81, 2, 64, 1), // IN 1, Bulk.
-    endp2: EndpointDesc::new(0x01, 2, 64, 1), // OUT 1, Bulk.
+    endp1                  : EndpointDesc::new(0x81, 2, 64, 1), // IN 1, Bulk.
+    endp2                  : EndpointDesc::new(0x01, 2, 64, 1), // OUT 1, Bulk.
     interface2: InterfaceDesc::new(                          // Vendor specific.
         INTF_MAIN, 2, 0xff, 0, 0, string_index("Device Control")),
-    endp3: EndpointDesc::new(0x03, 2, 64, 1),
-    endp4: EndpointDesc::new(0x83, 2, 64, 1),
+    endp3                  : EndpointDesc::new(0x03, 2, 64, 1),
+    endp4                  : EndpointDesc::new(0x83, 2, 64, 1),
     interface3: InterfaceDesc::new(           // Application specific / DFU / 1.
         INTF_DFU, 0, 0xfe, 1, 1, string_index("DFU")),
     dfu: DFU_FunctionalDesc {

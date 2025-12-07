@@ -1,7 +1,6 @@
 use crate::usb::CheprWriter as _;
 use crate::usb::{MAIN_RX_BUF, MAIN_TX_BUF, bd_main, chep_main};
-use stm_common::link_assert;
-use stm_common::usb;
+use stm_common::{link_assert, usb};
 
 use usb::EndpointPair;
 use usb::hardware::{CheprReader, CheprWriter, chep_bd_len, copy_by_dest32};
@@ -75,7 +74,7 @@ fn command_handler() {
 
 // Called at lower priority and can get interrupted!
 fn main_tx_response(message: &[u8]) {
-let chep = chep_main().read();
+    let chep = chep_main().read();
     if message.len() == 0 {
         dbgln!("main_tx_response, no data, rearm");
         chep_main().write(|w| w.main().rx_valid(&chep));

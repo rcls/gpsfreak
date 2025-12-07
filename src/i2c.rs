@@ -1,16 +1,12 @@
 
-use crate::cpu::interrupt;
-use crate::dma::Channel;
 
-use stm_common::{i2c, implement_i2c_api};
+use stm_common::{dma::Channel, i2c, implement_i2c_api, interrupt};
 
 use i2c::{F_DMA_RX, F_DMA_TX, I2cContext, Meta};
 
-// pub use i2c_core::{read, write, write_read};
-
 /// Interrupt priority for the I2C and its DMA interrupt handlers.  Users of
 /// this code should run at no higher than that priority.
-use interrupt::PRIO_COMMS as PRIORITY;
+use crate::cpu::interrupt::PRIO_COMMS as PRIORITY;
 use stm_common::vcell::UCell;
 
 #[derive(Clone, Copy)]
@@ -22,14 +18,17 @@ impl Meta for I2CMeta {
         unsafe {&*stm32h503::I2C1::PTR}
     }
 
-    fn rx_channel(&self) -> &'static Channel {crate::dma::dma().C(RX_CHANNEL)}
-    fn tx_channel(&self) -> &'static Channel {crate::dma::dma().C(TX_CHANNEL)}
+    fn rx_channel(&self) -> &'static Channel {dma().C(RX_CHANNEL)}
+    fn tx_channel(&self) -> &'static Channel {dma().C(TX_CHANNEL)}
 
     /// Request selection for GPDMA1 Ch1
     fn rx_muxin(&self) -> u8 {12}
     /// Request selection for GPDMA1 Ch2
     fn tx_muxin(&self) -> u8 {13}
 }
+
+type Dma = stm32h503::gpdma1::RegisterBlock;
+fn dma() -> &'static Dma {unsafe {&*stm32h503::GPDMA1::PTR}}
 
 /// I2C receive channel on GPDMA1.
 const RX_CHANNEL: usize = 1;
@@ -79,12 +78,11 @@ pub fn init() {
         read_reg(0, 0, &mut 0i16).defer();
     }
 
-    use interrupt::*;
     use stm32h503::Interrupt::*;
-    enable_priority(I2C1_EV, PRIORITY);
-    enable_priority(I2C1_ER, PRIORITY);
-    enable_priority(GPDMA1_CH1, PRIORITY);
-    enable_priority(GPDMA1_CH2, PRIORITY);
+    interrupt::enable_priority(I2C1_EV, PRIORITY);
+    interrupt::enable_priority(I2C1_ER, PRIORITY);
+    interrupt::enable_priority(GPDMA1_CH1, PRIORITY);
+    interrupt::enable_priority(GPDMA1_CH2, PRIORITY);
 }
 
 fn dma_rx_isr() {

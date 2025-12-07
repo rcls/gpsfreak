@@ -4,13 +4,12 @@
 //! configuration, sending I²C commands.  This is basically just the status
 //! LED handling.
 
-use crate::cpu::interrupt;
-
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
+use stm_common::interrupt::enable_priority;
 use stm32h503::Interrupt::EXTI0 as INTERRUPT;
 use stm32h503::Interrupt::TIM6 as TIM_INTERRUPT;
-use interrupt::PRIO_STATUS as PRIORITY;
+use crate::cpu::interrupt::PRIO_STATUS as PRIORITY;
 
 /// I²C address of the LMK05318(B).
 pub const LMK05318: u8 = 0xc8;
@@ -42,8 +41,8 @@ pub fn init() {
 
     // This needs to run at the same priority as the command code, because both
     // access I²C.
-    interrupt::enable_priority(INTERRUPT, PRIORITY);
-    interrupt::enable_priority(TIM_INTERRUPT, PRIORITY);
+    enable_priority(INTERRUPT, PRIORITY);
+    enable_priority(TIM_INTERRUPT, PRIORITY);
     // Software trigger the EXTI0 interrupt to kick things off.  TODO - could
     // just call it!
     let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};

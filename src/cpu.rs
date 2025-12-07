@@ -1,10 +1,9 @@
+use stm_common::interrupt::VectorTable;
 use stm_common::utils::{WFE, barrier};
 use stm_common::vcell::{UCell, VCell};
 
 pub const CPU_FREQ: u32 = 160_000_000;
 
-#[cfg(target_os = "none")]
-const SYS_VTOR: u32 = 0x0bf87000;
 const BKPSRAM_BASE: u32 = 0x40036400;
 const DFU_MAGIC: u32 = 0x52434C76;
 
@@ -27,9 +26,9 @@ pub static SERIAL_NUMBER: UCell<[u8; SERIAL_LEN]> = UCell::new([0; _]);
 
 pub static IS_PROTOTYPE: UCell<bool> = UCell::new(false);
 
-static PROTO_SN0: u32 = 0x006b0028;
-static PROTO_SN1: u32 = 0x31335105;
-static PROTO_SN2: u32 = 0x30393436;
+const PROTO_SN0: u32 = 0x006b0028;
+const PROTO_SN1: u32 = 0x31335105;
+const PROTO_SN2: u32 = 0x30393436;
 
 /// Key for writes to AIRCR.  We include the PRIGROUP value we use:
 /// 3 priority bits, 5 sub-priority bits (but only the top one actually
@@ -37,10 +36,10 @@ static PROTO_SN2: u32 = 0x30393436;
 const AIRCR_KEY: u32 = 0x05fa0500;
 
 pub fn init() {
-    let flash  = unsafe {&*stm32h503::FLASH ::ptr()};
-    let icache = unsafe {&*stm32h503::ICACHE::ptr()};
-    let pwr    = unsafe {&*stm32h503::PWR   ::ptr()};
-    let rcc    = unsafe {&*stm32h503::RCC   ::ptr()};
+    let flash  = unsafe {&*stm32h503::FLASH ::PTR};
+    let icache = unsafe {&*stm32h503::ICACHE::PTR};
+    let pwr    = unsafe {&*stm32h503::PWR   ::PTR};
+    let rcc    = unsafe {&*stm32h503::RCC   ::PTR};
     let scb    = unsafe {&*cortex_m::peripheral::SCB::PTR};
 
     // Copy the RW data and clear the BSS. The rustc memset is hideous so we
@@ -53,7 +52,6 @@ pub fn init() {
         for i in 0 .. len as usize {
             unsafe {*dst.wrapping_add(i) = *src.wrapping_add(i)}
         }
-
 
         let bss = &raw mut __bss_start as *mut u32;
         let len = &raw mut __bss_end as usize - bss as usize;
@@ -204,7 +202,7 @@ impl<const P: u8> Drop for Priority<P> {
 }
 
 fn bugger() {
-    interrupt::disable_all();
+    stm_common::interrupt::disable_all();
     let fp = unsafe {frameaddress(0)};
     // The exception PC is at +0x18, but then LLVM pushes an additional 8
     // bytes to form the frame.
@@ -235,26 +233,6 @@ pub mod interrupt {
     /// Interrupt priority for status led updates.  Lowest priority, incase it
     /// spins.  TODO - rate limit that interrupt.
     pub const PRIO_STATUS: u8 = PRIO_APP | 0x10;
-
-    // We don't use disabling interrupts to establish ownership, so no need for
-    // the enable to be unsafe.
-    pub fn enable_all() {
-        #[cfg(target_arch = "arm")]
-        unsafe{cortex_m::interrupt::enable()}
-    }
-    pub fn disable_all() {
-        #[cfg(target_arch = "arm")]
-        cortex_m::interrupt::disable()
-    }
-
-    pub fn enable_priority(n: stm32h503::Interrupt, p: u8) {
-        let nvic = unsafe {&*cortex_m::peripheral::NVIC::PTR};
-        unsafe {nvic.ipr[n as usize].write(p)};
-
-        let bit: usize = n as usize % 32;
-        let idx: usize = n as usize / 32;
-        unsafe {nvic.iser[idx].write(1u32 << bit)};
-    }
 }
 
 pub fn maybe_enter_dfu() {
@@ -302,6 +280,7 @@ pub unsafe fn goto_sys_flash() -> ! {
     // Reboot into DFU.
     #[cfg(target_os = "none")]
     unsafe {
+        const SYS_VTOR: u32 = 0x0bf87000;
         let scb = &*cortex_m::peripheral::SCB::PTR;
         scb.vtor.write(SYS_VTOR);
         let sp = *(SYS_VTOR as *const u32);
@@ -344,22 +323,15 @@ fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN]) {
 }
 
 #[derive(Clone, Copy)]
-#[derive_const(Default)]
-pub struct VectorMeta;
-
-impl stm_common::interrupt::Meta for VectorMeta {
-    fn main() -> ! {crate::main()}
-    fn bugger() {bugger()}
-    const INITIAL_SP: *const u8 = &raw const end_of_ram;
-}
-
-#[derive(Clone, Copy)]
-#[derive_const(Default)]
 pub struct Config {
-    pub vectors: stm_common::interrupt::VectorTable<VectorMeta>,
+    pub vectors: VectorTable,
 }
 
 impl Config {
+    pub const fn new() -> Config {
+        Config{vectors: VectorTable::new(
+            &raw const end_of_ram, crate::main, bugger)}
+    }
     pub const fn isr(&mut self, i: stm32h503::Interrupt, f: fn()) -> &mut Self {
         self.vectors.isr(i, f);
         self

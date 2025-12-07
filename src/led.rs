@@ -53,10 +53,9 @@ pub fn init() {
     tim.PSC.write(|w| w.bits(PSC));
     tim.CR1.write(|w| w.CEN().set_bit());
 
-    use crate::cpu::interrupt;
     // Both the interrupt, and the callers into this code, should run at the
     // same priority.
-    interrupt::enable_priority(INTERRUPT, PRIORITY);
+    stm_common::interrupt::enable_priority(INTERRUPT, PRIORITY);
 }
 
 /// Set the physical LEDs.

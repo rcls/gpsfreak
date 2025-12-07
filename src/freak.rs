@@ -17,7 +17,6 @@ mod command;
 mod cpu;
 mod crc;
 mod crc32;
-mod dma;
 mod flash;
 mod gps_uart;
 mod i2c;
@@ -107,12 +106,9 @@ pub fn main() -> ! {
     }
 }
 
-static CONFIG: cpu::Config = {
-    let mut config = cpu::Config::default();
-    *config.debug().gps_uart().i2c().led().lmk05318b().usb().command_usb()
-};
+static CONFIG: cpu::Config = *cpu::Config::new()
+        .debug().gps_uart().i2c().led().lmk05318b().usb().command_usb();
 
 #[used]
 #[unsafe(link_section = ".vectors")]
-pub static VECTORS: stm_common::interrupt::VectorTable<cpu::VectorMeta>
-    = CONFIG.vectors;
+pub static VECTORS: stm_common::interrupt::VectorTable = CONFIG.vectors;

@@ -2,9 +2,10 @@
 // TX on pin 19 PA8 (USART2 AF4, USART3 AF13)
 // RX on pin 18 PB15 (USART2 AF13, USART1 AF4, LPUART1, AF8)
 
-use crate::cpu::interrupt::{self, PRIO_COMMS};
-use crate::dma::DMA_Channel;
+use crate::cpu::interrupt::PRIO_COMMS;
 
+use stm_common::dma::DMA_Channel;
+use stm_common::interrupt;
 use stm_common::utils::{WFE, barrier};
 use stm_common::vcell::VCell;
 

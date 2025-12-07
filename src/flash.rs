@@ -2,6 +2,8 @@
 //! and 0x08010000 repspectively.  We run from the first bank and only write
 //! to the second bank.
 
+use stm_common::interrupt;
+
 pub type Mem32 = [u32; 8];
 
 pub type Result = core::result::Result<(), ()>;
@@ -101,10 +103,10 @@ fn write_unlock() -> Result {
         return Ok(());                  // Already unlocked.
     }
     // Magic key numbers.
-    crate::cpu::interrupt::disable_all();
+    interrupt::disable_all();
     flash.NSKEYR.write(|w| w.bits(0x45670123));
     flash.NSKEYR.write(|w| w.bits(0xcdef89ab));
-    crate::cpu::interrupt::enable_all();
+    interrupt::enable_all();
 
     dbgln!("FLASH - after unlock, NSCR = {:#010x}.", flash.NSCR.read().bits());
 

@@ -2,7 +2,7 @@
 // RX on pin 25. PA15, USART3 RX.
 // TX on pin 26. PB3, USART3 TX
 
-use crate::cpu::interrupt;
+use crate::cpu::interrupt::PRIO_DEBUG;
 
 use stm_common::debug;
 use debug::{Debug, Meta};
@@ -61,7 +61,7 @@ pub fn init() {
     uart.CR1.write(
         |w|w.FIFOEN().set_bit().TE().set_bit().UE().set_bit());
 
-    interrupt::enable_priority(INTERRUPT, interrupt::PRIO_DEBUG);
+    stm_common::interrupt::enable_priority(INTERRUPT, PRIO_DEBUG);
 }
 
 #[cfg(target_os = "none")]

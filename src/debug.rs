@@ -7,7 +7,6 @@ use crate::cpu::interrupt;
 use stm_common::debug;
 use debug::{Debug, Meta};
 
-use stm32h503::USART3 as UART;
 use stm32h503::Interrupt::USART3 as INTERRUPT;
 
 pub const BAUD: u32 = 115200;
@@ -17,20 +16,23 @@ const _: () = assert!(BRR < 65536);
 /// State for debug logging.
 pub static DEBUG: Debug<DebugMeta> = Debug::default();
 
-#[derive(Default)]
+#[derive_const(Default)]
 pub struct DebugMeta;
 
 impl Meta for DebugMeta {
-    const ENABLE: bool = crate::DEBUG_ENABLE;
-    const INTERRUPT: u32 = INTERRUPT as u32;
     fn debug() -> &'static Debug<Self> {&DEBUG}
-    fn uart() -> &'static stm32h503::usart3::RegisterBlock {unsafe {&*UART::PTR}}
+
+    fn uart(&self) -> &'static stm32h503::usart1::RegisterBlock {
+        unsafe {&*stm32h503::USART3::PTR}}
     /// We don't support lazy initialization.  Provide a dummy hook for
     /// debug_core.
-    fn lazy_init() {}
+    fn lazy_init(&self) {}
     /// We don't support lazy initialization.  Provide a dummy hook for
     /// debug_core.
-    fn is_init() -> bool {true}
+    fn is_init(&self) -> bool {true}
+    fn interrupt(&self) -> u32 {INTERRUPT as u32}
+
+    const ENABLE: bool = crate::DEBUG_ENABLE;
 }
 
 pub fn debug_isr() {
@@ -45,7 +47,7 @@ pub fn init() {
     let gpioa = unsafe {&*stm32h503::GPIOA::ptr()};
     let gpiob = unsafe {&*stm32h503::GPIOB::ptr()};
     let rcc   = unsafe {&*stm32h503::RCC  ::ptr()};
-    let uart  = unsafe {&*UART::ptr()};
+    let uart = DebugMeta.uart();
 
     rcc.APB1LENR.modify(|_,w| w.USART3EN().set_bit());
 

@@ -81,12 +81,11 @@ fn drive(red_green: bool, blue: bool) {
                 .BS4().bit(!red_green).BS5().bit(red_green));
         gpioa.BSRR.write(|w| w.BR15().set_bit().BS15().bit(!blue));
     }
-
 }
 
 impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
     fn isr(&self, now: i16) {
-        unsafe {self.0.as_mut().isr(now)};
+        unsafe {self.0.as_mut()}.isr(now);
     }
 
     pub fn set(&self, state: bool) {
@@ -174,7 +173,7 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
 
     fn set(&mut self, state: bool, now: i16) -> Option<W<i16>> {
         self.target = state;
-        if self.expiry != None {
+        if let Some(_) = self.expiry {
             if self.led == self.next || self.duration(self.next) == 0 {
                 self.next = state;
             }
@@ -191,8 +190,7 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
     fn pulse(&mut self, state: bool, now: i16) -> Option<W<i16>> {
         // Equivalent to: request(state) ; request(!state)
         self.target = !state;
-        let next = state ^ (
-            self.duration(state) == 0 || self.led == state);
+        let next = state ^ (self.duration(state) == 0 || self.led == state);
         if self.expiry != None {
             self.next = next;
             return None;
@@ -205,7 +203,7 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
         self.led = state;
         self.next = next;
         let duration = self.duration(state);
-        if duration != 0 {
+        if duration > 0 {
             self.expiry = Some(W(now) + W(duration));
         }
         else {

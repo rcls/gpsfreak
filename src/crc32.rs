@@ -16,8 +16,8 @@ pub fn compute(address: *const u8, length: usize) -> u32 {
 }
 
 pub fn hw_compute(address: *const u8, length: usize) -> u32 {
-    let crc = unsafe {&*stm32h503::CRC::ptr()};
-    crc.POL.write(|w| w.bits(POLY32 as u32));
+    let crc = unsafe {&*stm32h503::CRC::PTR};
+    crc.POL.write(|w| w.bits(POLY32));
     crc.INIT.write(|w| w.CRC_INIT().bits(!0));
     crc.CR.write(|w| w.POLYSIZE().B_0x0().RESET().set_bit());
     // TODO - word by word!  And share with the other identical code.

@@ -89,7 +89,7 @@ pub fn provision() {
             continue;
         }
         // Check for a valid U-Blox message.
-        if data.len() >= 8 && data[0] == 'µ' as u8 && data[1] == 'b' as u8 {
+        if data.len() >= 8 && data[0] == 'µ' as u8 && data[1] == b'b' {
             let lfield = data[4] as usize + data[5] as usize * 256;
             let length = lfield + 8;
             dbgln!("UBX packet len {lfield} total {length}");

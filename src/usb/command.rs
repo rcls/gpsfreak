@@ -69,7 +69,7 @@ fn command_handler() {
     // Get a point to the message.  TODO - copy!
     let message = unsafe {&*(MAIN_RX_BUF as *const crate::command::MessageBuf)};
     crate::command::command_handler(
-        &message, chep_bd_len(bd_main().rx.read()), main_tx_response);
+        message, chep_bd_len(bd_main().rx.read()), main_tx_response);
 }
 
 // Called at lower priority and can get interrupted!

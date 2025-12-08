@@ -9,7 +9,6 @@ pub fn init() {
     let rcc = unsafe {&*stm32h503::RCC::ptr()};
 
     rcc.AHB1ENR.modify(|_,w| w.CRCEN().set_bit());
-
 }
 
 pub const fn crc_table<T> (poly: T, bits: u32) -> [T; 256] where

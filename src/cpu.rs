@@ -49,7 +49,7 @@ pub fn init() {
         let src = &raw const __rom_data_start;
         let dst = &raw mut __data_start;
         let len = &raw mut __data_end as usize - dst as usize;
-        for i in 0 .. len as usize {
+        for i in 0 .. len {
             unsafe {*dst.wrapping_add(i) = *src.wrapping_add(i)}
         }
 
@@ -311,14 +311,14 @@ fn format_serial_number(sn: &[u32; 3], text: &mut [u8; SERIAL_LEN]) {
     // 0x08fff800 : 32 bit binary, X&Y wafer coords, convert to hex.
     // XXXXXXX-XXXXXXXXXX
     let lot = ((sn[2] as u64) << 32 | sn[1] as u64) >> 8;
-    for i in 0..7 {
-        text[i] = (lot >> i * 8) as u8;
+    for (i, p) in text[..7].iter_mut().enumerate() {
+        *p = (lot >> i * 8) as u8;
     }
-    text[7] = '-' as u8;
+    text[7] = b'-';
     let binary = (sn[1] as u64) << 32 | sn[0] as u64;
-    for i in 0..10 {
+    for (i, p) in text[8..18].iter_mut().enumerate() {
         let hex = binary >> 36 - i * 4 & 15;
-        text[8 + i] = hex as u8 + b'0' + if hex > 9 {b'a' - b'9' - 1} else {0};
+        *p = hex as u8 + b'0' + if hex > 9 {b'a' - b'9' - 1} else {0};
     }
 }
 

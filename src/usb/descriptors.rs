@@ -39,7 +39,7 @@ pub static DEVICE_DESC: DeviceDesc = DeviceDesc{
     num_configurations: 1,
 };
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[allow(dead_code)]
 pub struct FullConfigDesc {
     config    : ConfigurationDesc,

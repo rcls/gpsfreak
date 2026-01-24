@@ -4,10 +4,15 @@ PROJECTS=$(KICAD_PRO:%.kicad_pro=%)
 
 all: $(PROJECTS:%=%.all)
 
+pdfs: $(PROJECTS:%=%.pdfs)
+
 $(PROJECTS:%=%.all): %.all: out/%_bom.csv out/%_cpl.csv out/%_gerber.zip out/%.rpt
 	echo "$*" "$@" "$<"
 
-.PHONY: $(PROJECTS:%=%.all) $(PROJECTS:%=%.drc)
+$(PROJECTS:%=%.pdfs): %.pdfs: %-sch.pdf %-pcb.pdf
+
+.PHONY: all pdfs
+.PHONY: $(PROJECTS:%=%.all) $(PROJECTS:%=%.drc) $(PROJECTS:%=%.pdfs)
 
 $(PROJECTS:%=%.drc): %.drc: %.rpt
 	! grep 'Found [^0]' $<
@@ -39,6 +44,13 @@ out/%_cpl_all.csv: %.kicad_pcb
 out/%_cpl.csv: out/%_cpl_all.csv out/%_bom.csv filter_pos.py
 	mkdir -p out
 	./filter_pos.py cpl $< out/$*_bom.csv $@
+
+%-sch.pdf: %.kicad_sch *.kicad_sch
+	kicad-cli sch export pdf -o $@ $<
+
+%-pcb.pdf: %.kicad_pcb
+	kicad-cli pcb export pdf --mode-multipage --black-and-white -l Edge.Cuts,F.Silkscreen,F.Mask,F.Cu,In1.Cu,In2.Cu,B.Cu,B.Mask,B.Silkscreen -o tmp $<
+	mv tmp/$*.pdf $@
 
 .PHONY: clean
 clean:

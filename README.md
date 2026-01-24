@@ -15,6 +15,9 @@ Power and data are supplied via a USB-C connector (USB FS data rate).  The GPS
 unit is available over USB as a CDC ACM serial port.  In addition, there are USB
 end-points for device control via the CPU, and Python scripts to drive this.
 
+The hardware is developed using KiCad, and the software using Rust and Python.
+There are pdfs of the [schematic](gpsfreak-sch.pdf) and [PCB layout](gpsfreak-pcb.pdf).
+
 License
 =======
 

@@ -4117,7 +4117,7 @@
 			(uuid "609e1b50-5749-41c1-b489-8ff53cd03dd6")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
 					(reference "TP7")
 					(unit 1)
@@ -4252,7 +4252,7 @@
 			(uuid "232f49ed-2239-495d-ac36-79a08bb7dcf6")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
 					(reference "U7")
 					(unit 1)
@@ -4688,7 +4688,7 @@
 			(uuid "a56a1c89-3d41-4012-b4f2-34bf19b280fd")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
 					(reference "#PWR059")
 					(unit 1)
@@ -5343,7 +5343,7 @@
 			(uuid "232f49ed-2239-495d-ac36-79a08bb7dcf7")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
 					(reference "U7")
 					(unit 2)
@@ -6470,7 +6470,7 @@
 			(uuid "bb631994-91d7-49b8-a58e-f60762b6fef0")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
 					(reference "U6")
 					(unit 1)

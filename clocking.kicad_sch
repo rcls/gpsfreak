@@ -5442,7 +5442,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "1a1ef2c4-5354-4b02-b388-8c98fb31a5cb")
 		(property "Reference" "U21"
 			(at 107.95 135.763 0)
@@ -5512,7 +5512,7 @@
 			(uuid "b06b2b17-d77c-4d92-b32f-b8a5eb62295c")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "U21")
 					(unit 1)
@@ -6228,7 +6228,7 @@
 			(uuid "36d8122c-361a-4fe9-ab1a-7fdc15a4a4f8")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "#PWR062")
 					(unit 1)
@@ -6386,7 +6386,7 @@
 		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "5d2812d2-c71e-4875-b82a-02cfc5bd3692")
@@ -6427,6 +6427,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 243.84 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C3855387"
 			(at 243.84 133.35 0)
 			(effects
 				(font
@@ -6805,7 +6814,7 @@
 			(uuid "1a6407f0-8c5c-4219-9dfc-c5ea8902ced0")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "L26")
 					(unit 1)
@@ -7909,7 +7918,7 @@
 		(at 201.93 104.14 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "a79989e2-58b7-4bd7-a9d3-68e79fa73632")
@@ -8193,7 +8202,7 @@
 			(uuid "bd5d2c14-183c-475c-9699-b29575844e24")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "R24")
 					(unit 1)
@@ -8642,7 +8651,7 @@
 		(at 200.66 40.64 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "ca3d17f3-2425-4850-b866-922a0bd853d2")
@@ -8900,7 +8909,7 @@
 		(at 163.83 53.34 0)
 		(unit 2)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "e39866f5-03b5-4c96-99f6-a0fb392f2979")
@@ -8990,7 +8999,7 @@
 			(uuid "adfde395-0c7d-4d3f-bb9a-2e0b5677c2c6")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
 					(reference "U3")
 					(unit 2)
@@ -9414,7 +9423,7 @@
 		(at 245.11 95.25 90)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "fcffaa9b-94db-4d79-872a-d18157e6c9a6")
@@ -9456,6 +9465,15 @@
 		)
 		(property "Description" "Unpolarized capacitor"
 			(at 245.11 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C20044553"
+			(at 245.11 95.25 90)
 			(effects
 				(font
 					(size 1.27 1.27)

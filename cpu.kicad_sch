@@ -6895,7 +6895,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "3f43712d-4118-492f-b9a4-f7ff4e1ae362")
 		(property "Reference" "D41"
 			(at 173.99 87.63 0)
@@ -7040,7 +7040,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "400776f7-05e9-4aef-bb09-cb2d3fbac209")
 		(property "Reference" "D42"
 			(at 181.61 87.63 0)
@@ -7247,7 +7247,7 @@
 		(at 134.62 78.74 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "4a8516fe-3e4a-44e3-af0b-64968cdaef0a")
@@ -8727,7 +8727,7 @@
 			(uuid "77819594-51b1-4b4d-a80d-39b307088a7a")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
 					(reference "J13")
 					(unit 1)
@@ -8938,7 +8938,7 @@
 			(uuid "388c71e5-3cfe-43b1-a73b-513b56742263")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/9b249195-a432-4f49-a1e0-f7d117f1807f"
 					(reference "#FLG03")
 					(unit 1)
@@ -9017,7 +9017,7 @@
 		(at 41.91 73.66 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "e00f9f50-daee-43c2-a3d1-0001888a1ffb")
@@ -9046,7 +9046,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "Check foot print"
+		(property "Datasheet" "~"
 			(at 45.72 73.66 0)
 			(effects
 				(font
@@ -9056,6 +9056,15 @@
 			)
 		)
 		(property "Description" "USB 2.0-only 16P Type-C Receptacle connector"
+			(at 41.91 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C2765186"
 			(at 41.91 73.66 0)
 			(effects
 				(font

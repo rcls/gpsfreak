@@ -3165,7 +3165,7 @@
 		(at 160.02 58.42 90)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "0e8abda5-ad21-4404-a4eb-05d78dd24e4b")
@@ -3213,7 +3213,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C21189"
 			(at 160.02 58.42 90)
 			(effects
 				(font
@@ -3385,7 +3385,7 @@
 		(at 149.86 72.39 180)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "18152e64-8b89-490d-aafb-3072ca6299f7")
@@ -3433,7 +3433,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C23185"
 			(at 149.86 72.39 90)
 			(effects
 				(font
@@ -3464,7 +3464,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "1b947b63-6e35-4297-a924-6d2ebfed44f6")
 		(property "Reference" "D34"
 			(at 136.906 74.676 90)
@@ -3533,7 +3533,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "1c3c2718-af90-41a0-bb58-d1025e5b31b3")
 		(property "Reference" "D35"
 			(at 89.408 115.824 90)
@@ -4368,7 +4368,7 @@
 			(uuid "09424c48-162a-4ab0-bcda-ef85de6d2003")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
 					(reference "U32")
 					(unit 1)
@@ -4523,7 +4523,7 @@
 			(uuid "feea9bfb-16ce-4012-bf9c-ed81fb183bd8")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
 					(reference "T2")
 					(unit 1)
@@ -5036,7 +5036,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "8c502e58-7e2b-4c0c-9276-8b87b200a327")
 		(property "Reference" "D36"
 			(at 168.656 117.856 90)
@@ -5314,7 +5314,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "99ec8f54-7dd1-4a30-84e8-49b1a7194677")
 		(property "Reference" "D32"
 			(at 56.896 74.676 90)
@@ -5736,7 +5736,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "b34a621b-4fa2-4687-bba5-d6b20130f6bb")
 		(property "Reference" "D31"
 			(at 56.896 54.864 90)
@@ -6068,7 +6068,7 @@
 			(uuid "74d85bfa-d267-4f96-8287-6f991043066c")
 		)
 		(instances
-			(project ""
+			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/26994282-45a2-461a-b033-dde2ded4d8ff"
 					(reference "J2")
 					(unit 1)
@@ -6084,7 +6084,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "ca5a3609-707c-4f49-a06b-b4aaa198184d")
 		(property "Reference" "D33"
 			(at 137.16 54.864 90)

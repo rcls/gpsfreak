@@ -1141,7 +1141,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "*PTC* *Thermistor* PIN?ARRAY* bornier* *Terminal?Block* R_*"
+			(property "ki_fp_filters" "R_* RV_*"
 				(at 0 0 0)
 				(effects
 					(font

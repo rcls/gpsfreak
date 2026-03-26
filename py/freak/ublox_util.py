@@ -52,7 +52,7 @@ def add_to_argparse(argp: argparse.ArgumentParser,
                              help='Set configuration values.')
     valset.add_argument('KV', type=key_value, nargs='+',
                         metavar='KEY=VALUE', help='KEY=VALUE pairs')
-    valset.add_argument('-l', '--layers', help='Layer mask')
+    valset.add_argument('-l', '--layers', type=int, help='Layer mask')
 
     valget = subp.add_parser('get', description='Get configuration values.',
                              help='Get configuration values.')

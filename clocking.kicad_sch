@@ -2699,6 +2699,26 @@
 		)
 		(uuid "a1db2e2b-60d3-434f-a600-253ea21acc4f")
 	)
+	(text_box "Temperature sensor is optional."
+		(exclude_from_sim no)
+		(at 125.73 134.62 0)
+		(size 20.32 4.768)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "53026ebb-6e83-4386-95d0-117a62b3b584")
+	)
 	(text_box "GPIO1 selects I²C address."
 		(exclude_from_sim no)
 		(at 216.2175 134.9319 0)
@@ -9184,7 +9204,16 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" "GRM31C5C1E474"
+			(at 251.46 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C21082486"
 			(at 251.46 133.35 0)
 			(effects
 				(font

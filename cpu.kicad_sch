@@ -5977,7 +5977,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "LTST-S310F3WT"
 			(at 74.93 104.14 0)
 			(effects
 				(font
@@ -5987,6 +5987,15 @@
 			)
 		)
 		(property "Description" "RGB LED, green/blue/anode/red"
+			(at 74.93 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C284951"
 			(at 74.93 105.41 0)
 			(effects
 				(font

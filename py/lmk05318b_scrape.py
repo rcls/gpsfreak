@@ -143,8 +143,8 @@ extra_field(Field('DPLL_FDEV_REG_UPDATE', 0, 0, 'R/W', 0, 0x160))
 extra_field(Field('DPLL_FDEV_EXTRA', 1, 1, 'R/W', 0, 0x15a))
 
 # More from TICS/Pro DCO & SYNC tab.
-extra_field(Field('DPLL_REF_SYNC_OUT7_EN', 7, 7, 'R/W', 0, 252))
-extra_field(Field('DPLL_REF_SYNC_OUT7_NDIV_RST_DIV', 6, 6, 'R/W', 0, 252))
+#extra_field(Field('DPLL_REF_SYNC_OUT7_EN', 7, 7, 'R/W', 0, 252))
+#extra_field(Field('DPLL_REF_SYNC_OUT7_NDIV_RST_DIV', 6, 6, 'R/W', 0, 252))
 
 # Various undocumented fields are set in the TICS file.  Some are observed to
 # change with the configuration, and influence outputs.

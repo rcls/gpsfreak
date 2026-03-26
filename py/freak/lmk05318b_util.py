@@ -13,11 +13,13 @@ from fractions import Fraction
 from typing import Any, Tuple
 
 DRIVES = {
+    # Each number is two bits, the fields SEL, MODE1, MODE2 forming the lower
+    # six bits of the appropriate register.
     'off'  : (0, 0, 0, 'Off'),
     'lvds' : (1, 0, 0, 'LVDS 4mA'),
     'lvds4': (1, 0, 0, 'LVDS 4mA'),
-    'lvds6': (1, 1, 0, 'LVDS 6mA'),
-    'lvds8': (1, 2, 0, 'LVDS 8mA'),
+    'lvds6': (1, 1, 0, 'LVDS 6mA'), # AKA AC-CML
+    'lvds8': (1, 2, 0, 'LVDS 8mA'), # AKA AC-LVPECL
 }
 CMOS_DRIVES = ('z', 'hi-Z'), ('0', 'low'), ('-', 'inverted'), ('+', 'normal')
 for v1, (l1, d1) in enumerate(CMOS_DRIVES):

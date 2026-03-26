@@ -4316,7 +4316,7 @@
 				(justify top)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+		(property "Footprint" "Parts:SOT-353_SC-70-5"
 			(at 157.48 123.825 0)
 			(effects
 				(font
@@ -6812,7 +6812,7 @@
 				(justify top)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+		(property "Footprint" "Parts:SOT-353_SC-70-5"
 			(at 77.47 123.825 0)
 			(effects
 				(font

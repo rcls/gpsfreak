@@ -692,66 +692,6 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 59.69 67.31 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "7196ed0f-5308-4d07-b233-30eee4fa1326")
-		(property "Netclass" "100diff"
-			(at 62.484 70.866 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify top)
-			)
-		)
-		(property "Component Class" ""
-			(at 88.9 86.36 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-			)
-		)
-	)
-	(netclass_flag ""
-		(length 2.54)
-		(shape round)
-		(at 59.69 62.23 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "99950105-34ef-43be-80b1-eac1d84dec1c")
-		(property "Netclass" "100diff"
-			(at 62.484 58.928 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-			)
-		)
-		(property "Component Class" ""
-			(at 30.48 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-			)
-		)
-	)
-	(netclass_flag ""
-		(length 2.54)
-		(shape round)
 		(at 71.12 67.31 180)
 		(effects
 			(font
@@ -782,6 +722,36 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
+		(at 59.69 67.31 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "b1fff0c2-a113-4aaa-8da6-086fe555bd47")
+		(property "Netclass" "50ms"
+			(at 59.69 70.612 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Component Class" ""
+			(at 88.9 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
 		(at 74.93 62.23 0)
 		(effects
 			(font
@@ -801,6 +771,36 @@
 		)
 		(property "Component Class" ""
 			(at 104.14 43.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+			)
+		)
+	)
+	(netclass_flag ""
+		(length 2.54)
+		(shape round)
+		(at 59.69 62.23 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f4a89699-33f0-47e6-98e6-b8495cea406b")
+		(property "Netclass" "50ms"
+			(at 59.69 58.928 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Component Class" ""
+			(at 88.9 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)

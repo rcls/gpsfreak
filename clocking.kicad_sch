@@ -2960,16 +2960,8 @@
 		(uuid "ff864d69-8530-44d3-9e53-b7ca80b04bdf")
 	)
 	(no_connect
-		(at 213.36 78.74)
-		(uuid "1b7681e4-6ca5-450f-a7b0-559515aac964")
-	)
-	(no_connect
 		(at 209.55 43.18)
 		(uuid "4fa8ff58-226f-4307-9fad-b03a825731b9")
-	)
-	(no_connect
-		(at 210.82 78.74)
-		(uuid "adf12fcb-bfee-45f9-86fe-ed2aaacfb793")
 	)
 	(wire
 		(pts
@@ -3153,7 +3145,7 @@
 	)
 	(wire
 		(pts
-			(xy 205.74 68.58) (xy 205.74 78.74)
+			(xy 205.74 76.2) (xy 205.74 78.74)
 		)
 		(stroke
 			(width 0)
@@ -3173,7 +3165,7 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 78.74) (xy 195.58 68.58)
+			(xy 195.58 78.74) (xy 195.58 76.2)
 		)
 		(stroke
 			(width 0)
@@ -3663,6 +3655,16 @@
 	)
 	(wire
 		(pts
+			(xy 213.36 76.2) (xy 213.36 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9ebd8321-c305-4f3f-82e5-a32d896ad7d0")
+	)
+	(wire
+		(pts
 			(xy 210.82 129.54) (xy 210.82 132.08)
 		)
 		(stroke
@@ -3740,6 +3742,16 @@
 			(type default)
 		)
 		(uuid "a9038685-a688-4f10-82db-16d342e518f9")
+	)
+	(wire
+		(pts
+			(xy 208.28 57.15) (xy 208.28 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a9f96895-d95d-4261-9cfa-2b0386bb818b")
 	)
 	(wire
 		(pts
@@ -3883,7 +3895,7 @@
 	)
 	(wire
 		(pts
-			(xy 190.5 78.74) (xy 190.5 68.58)
+			(xy 190.5 78.74) (xy 190.5 76.2)
 		)
 		(stroke
 			(width 0)
@@ -3923,7 +3935,7 @@
 	)
 	(wire
 		(pts
-			(xy 193.04 78.74) (xy 193.04 69.85)
+			(xy 193.04 78.74) (xy 193.04 59.69)
 		)
 		(stroke
 			(width 0)
@@ -3963,7 +3975,7 @@
 	)
 	(wire
 		(pts
-			(xy 203.2 68.58) (xy 203.2 78.74)
+			(xy 203.2 76.2) (xy 203.2 78.74)
 		)
 		(stroke
 			(width 0)
@@ -4063,7 +4075,7 @@
 	)
 	(wire
 		(pts
-			(xy 198.12 78.74) (xy 198.12 68.58)
+			(xy 198.12 78.74) (xy 198.12 76.2)
 		)
 		(stroke
 			(width 0)
@@ -4113,7 +4125,7 @@
 	)
 	(wire
 		(pts
-			(xy 187.96 78.74) (xy 187.96 68.58)
+			(xy 187.96 78.74) (xy 187.96 76.2)
 		)
 		(stroke
 			(width 0)
@@ -4160,6 +4172,16 @@
 			(type default)
 		)
 		(uuid "f97bbcae-d79f-4a98-bf24-f8547450dedf")
+	)
+	(wire
+		(pts
+			(xy 210.82 76.2) (xy 210.82 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f9a5ef29-f206-4805-ab9c-1365ae1f23bd")
 	)
 	(wire
 		(pts
@@ -4322,12 +4344,12 @@
 		(uuid "61a9ec75-69fd-4292-8835-33bf7771b1f4")
 	)
 	(label "VDDO_456"
-		(at 208.28 77.47 0)
+		(at 208.28 57.15 270)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "68865430-ced0-4489-bbb0-2c82db31915f")
 	)
@@ -4462,7 +4484,7 @@
 		(uuid "da3ee22d-9760-4780-8911-37bd2d15fc53")
 	)
 	(label "VDDO_7"
-		(at 193.04 69.85 270)
+		(at 193.04 59.69 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4703,7 +4725,7 @@
 	)
 	(hierarchical_label "OUT7_P"
 		(shape output)
-		(at 187.96 68.58 90)
+		(at 187.96 76.2 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4712,7 +4734,7 @@
 		)
 		(uuid "37d1756d-9fa4-49e4-bdbb-53bb598d7f7b")
 	)
-	(hierarchical_label "nOUT0_P"
+	(hierarchical_label "OUT0_P"
 		(shape output)
 		(at 190.5 132.08 270)
 		(effects
@@ -4723,7 +4745,7 @@
 		)
 		(uuid "3cd4148d-e99d-41dd-948a-7b43bcb07466")
 	)
-	(hierarchical_label "nOUT3_N"
+	(hierarchical_label "OUT3_N"
 		(shape output)
 		(at 210.82 132.08 270)
 		(effects
@@ -4736,7 +4758,7 @@
 	)
 	(hierarchical_label "OUT6_N"
 		(shape output)
-		(at 198.12 68.58 90)
+		(at 198.12 76.2 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4745,7 +4767,7 @@
 		)
 		(uuid "6eb2e435-0553-4ea7-a2b8-e2dcdf709fbc")
 	)
-	(hierarchical_label "nOUT2_N"
+	(hierarchical_label "OUT2_N"
 		(shape output)
 		(at 208.28 132.08 270)
 		(effects
@@ -4756,7 +4778,7 @@
 		)
 		(uuid "70dd3dbe-bfeb-4c71-b68c-4738b57fb9e1")
 	)
-	(hierarchical_label "nOUT2_P"
+	(hierarchical_label "OUT2_P"
 		(shape output)
 		(at 205.74 132.08 270)
 		(effects
@@ -4769,7 +4791,7 @@
 	)
 	(hierarchical_label "OUT7_N"
 		(shape output)
-		(at 190.5 68.58 90)
+		(at 190.5 76.2 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4778,7 +4800,18 @@
 		)
 		(uuid "7924a5af-ae36-4fe2-9352-44bc2a40bfd7")
 	)
-	(hierarchical_label "nOUT3_P"
+	(hierarchical_label "OUT4_N"
+		(shape output)
+		(at 213.36 76.2 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "83a71ff4-06bb-459f-8109-0647b1025e2d")
+	)
+	(hierarchical_label "OUT3_P"
 		(shape output)
 		(at 213.36 132.08 270)
 		(effects
@@ -4789,7 +4822,7 @@
 		)
 		(uuid "8a7bade3-5fc6-485c-99d3-5a02ee200ba0")
 	)
-	(hierarchical_label "nOUT1_P"
+	(hierarchical_label "OUT1_P"
 		(shape output)
 		(at 198.12 132.08 270)
 		(effects
@@ -4800,7 +4833,18 @@
 		)
 		(uuid "a606630a-b3d6-4809-86d0-14432fe34c37")
 	)
-	(hierarchical_label "nOUT0_N"
+	(hierarchical_label "OUT4_P"
+		(shape output)
+		(at 210.82 76.2 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bc9128dc-bc49-41e6-800f-d4c99c5e927d")
+	)
+	(hierarchical_label "OUT0_N"
 		(shape output)
 		(at 193.04 132.08 270)
 		(effects
@@ -4813,7 +4857,7 @@
 	)
 	(hierarchical_label "OUT5_N"
 		(shape output)
-		(at 205.74 68.58 90)
+		(at 205.74 76.2 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4822,7 +4866,7 @@
 		)
 		(uuid "d759f64f-133a-4b9d-8734-2a69248af298")
 	)
-	(hierarchical_label "nOUT1_N"
+	(hierarchical_label "OUT1_N"
 		(shape output)
 		(at 195.58 132.08 270)
 		(effects
@@ -4835,7 +4879,7 @@
 	)
 	(hierarchical_label "OUT5_P"
 		(shape output)
-		(at 203.2 68.58 90)
+		(at 203.2 76.2 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4846,7 +4890,7 @@
 	)
 	(hierarchical_label "OUT6_P"
 		(shape output)
-		(at 195.58 68.58 90)
+		(at 195.58 76.2 90)
 		(effects
 			(font
 				(size 1.27 1.27)

@@ -1296,11 +1296,11 @@
 			(embedded_fonts no)
 		)
 	)
-	(text_box "Eyeballing the datasheet, the TLV3601 output resistance is in the ballpark of 50Ω."
+	(text_box "The TLV3601 output resistance appears to be around 80Ω, compared with the target 50Ω."
 		(exclude_from_sim no)
 		(at 90.5881 98.8639 0)
 		(size 24.9819 9.0861)
-		(margins 0.9525 0.9525 0.9525 0.9525)
+		(margins 0.254 0.254 0.254 0.254)
 		(stroke
 			(width 0)
 			(type solid)

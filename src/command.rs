@@ -11,10 +11,12 @@
 //! The magic is the byte sequence CE 93 (little endian 0x93ce), which is
 //! UTF-8 for 'Γ' (GREEK UPPER CASE GAMMA).
 //!
-//! The code bit identifies the message purpose and format.  The high bit
+//! The code byte identifies the message purpose and format.  The high bit
 //! indicates the direction: 0 is to the device, 1 is from the device.
 //!
 //! Any request to the device gets a response, a ACK or NAK if nothing else.
+//! Over USB, a new request will not be accepted until any previous response
+//! has been read.
 //!
 //! Note that if the device gets a request code indicating a message from the
 //! device, then it does not respond.  This avoids message loops!
@@ -35,7 +37,7 @@
 //!
 //! Commands (codes are hex):
 //!    00 : PING.  Arbitrary payload.  Response is 80 and echos the payload.
-//!         By sending a random token, you can check that messages are
+//!         By sending an arbitrary token, you can check that messages are
 //!         synchronised.
 //!    80 : ACK. Generic Acknowledgement.  Payload is generally empty.
 //!         Ping responses echo the payload.  Otherwise if non-empty, then is an

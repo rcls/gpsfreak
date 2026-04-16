@@ -37,7 +37,7 @@ def is_multiple_of(a: Fraction, b: Fraction) -> bool:
 
 def do_factor_splitting(left: int, right: int, maxL: int, maxR: int, \
                         primes: list[int], index: int) \
-        -> Generator[Tuple[int, int]]:
+        -> Generator[Tuple[int, int], None, None]:
     '''Worker function for factor_splitting below'''
     if index >= len(primes):
         if left <= maxL and right <= maxR:
@@ -55,7 +55,7 @@ def do_factor_splitting(left: int, right: int, maxL: int, maxR: int, \
         right //= prime
 
 def factor_splitting(number: int, primes: list[int], maxL: int, maxR: int) \
-        -> Generator[Tuple[int, int]]:
+        -> Generator[Tuple[int, int], None, None]:
     '''Return all possible factorisations of number into two factors, with the
     constraint that both are less than maxL or maxR.  The list primes should
     contain at least all prime factors of number.'''

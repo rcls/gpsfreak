@@ -249,7 +249,7 @@ def add_pll1(target: Target, plan: PLLPlan, freqs: list[Fraction]) -> None:
         assert od is not None
         plan.dividers[i] = 0, od[0], od[1]
 
-def cont_frac_approx(f: Fraction) -> Generator[Fraction]:
+def cont_frac_approx(f: Fraction) -> Generator[Fraction, None, None]:
     '''Generate the sequence of continued fraction approximations to f.'''
     intf = int(f)
     if intf:

@@ -207,7 +207,7 @@ def add_live_ublox(ubx: UBloxReader, b: bytearray) -> None:
     set_ubx(b, changes)
 
 def parse_config(dev: USBDevice, h: Config | None) \
-        -> Generator[Tuple[str, ByteString]]:
+        -> Generator[Tuple[str, ByteString], None, None]:
     if h is None:
         return
     assert h.is_valid()

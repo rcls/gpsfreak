@@ -204,7 +204,7 @@ def baw_plan_low_approx(target: Target, freq: Fraction) -> DPLLPlan | None:
     return best
 
 def sym_range(f: Fraction, low: Fraction, high: Fraction,
-              limit: int) -> Generator[int]:
+              limit: int) -> Generator[int, None, None]:
     '''Iterate over all multipliers of `f` that give a product in the range
     between `low` and `high` inclusive.  But limit the multiplier to `limit`.
     Return even multipliers before odd multipliers, and then return multipliers

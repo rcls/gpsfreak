@@ -153,8 +153,12 @@ elif args.command == 'reset':
     if not args.dfu:
         dev.write(0x03, message.frame(message.CPU_REBOOT, b'')) # pyright: ignore
     else:
-        dev.detach_kernel_driver(0) # pyright: ignore
-        dev.ctrl_transfer(0x21, 0, timeout=100) # pyright: ignore
+        import usb
+        try:
+            dev.detach_kernel_driver(0) # pyright: ignore
+        except usb.core.USBError:
+            pass
+        dev.ctrl_transfer(0x21, 0, wIndex=3, timeout=100) # pyright: ignore
 
 elif args.command in ('clock', 'lmk05318b'):
     lmk05318b_util.run_command(args, device, args.clock)

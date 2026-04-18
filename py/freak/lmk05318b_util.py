@@ -304,6 +304,8 @@ def add_freq_commands(subp: Any, short: str, long: str) -> None:
         p.add_argument('-r', '--reference', metavar='REF', type=str_to_freq,
                        default=REF_FREQ,
                        help='Reference input frequency to LMK05318b')
+        p.add_argument('-d', '--ref-div', type=int, default=1,
+                       help='Reference input divider')
     plan.add_argument('-v', '--verbose', action='store_true',
                       help='Report LMK05318b register settings')
 

@@ -65,6 +65,10 @@ class DPLLPlan:
         else:
             return None
 
+    def tdc_freq(self) -> Fraction:
+        '''The frequency at the DPLL Time Domain Comparator'''
+        return self.reference / self.ref_div
+
     def pll2_pfd(self) -> Fraction:
         # Just like TICS Pro, assume a FPD divider of 18.  We are assuming that
         # the only use of that is to get the PFD frequency into the supported
@@ -73,8 +77,7 @@ class DPLLPlan:
 
     def validate(self) -> None:
         assert self.fb_div.denominator < 1 << 40
-        assert self.baw == \
-            self.reference / self.ref_div * 2 * self.fb_prediv * self.fb_div
+        assert self.baw == self.tdc_freq() * 2 * self.fb_prediv * self.fb_div
         assert abs(self.baw - self.baw_target) < 1 * Hz
 
     def baw_lock_det(self) -> Tuple[int, int]:
@@ -108,8 +111,8 @@ class DPLLPlan:
         # TICS/Pro seems to always use a VCO count value of just over
         # 10_000_000.  After working out the murky way the unlock count is
         # stored we can loosen that up a bit.
-        ref, vco = freq_lock_counts(self.reference, self.baw / 24,
-                                    Fraction(96, 1000), 10)
+        ref, vco = freq_lock_counts(
+            self.tdc_freq(), self.baw / 24, Fraction(96, 1000), 10)
         assert 9_900_000 < vco < 10_100_000
         return ref, vco
 
@@ -147,7 +150,7 @@ def baw_plan_for_freq(target: Target, freq: Fraction) -> DPLLPlan:
     '''Make a DPLL plan for the given frequency.  Note that the frequency is
     not validated.'''
     best = None
-    ratio = freq / target.reference
+    ratio = freq / target.tdc_freq()
     for pre_div in range(2, 17+1):
         fb_div_target = ratio / 2 / pre_div
         fb_div = fb_div_target.limit_denominator((1 << 40) - 1)
@@ -155,10 +158,11 @@ def baw_plan_for_freq(target: Target, freq: Fraction) -> DPLLPlan:
         if fb_div < 1 or abs(fb_div - round(fb_div)) < 0.125:
             continue
         plan = DPLLPlan(
-            baw = target.reference * 2 * pre_div * fb_div,
+            baw = target.tdc_freq() * 2 * pre_div * fb_div,
             baw_target = freq,
             pll1_pfd = target.pll1_pfd,
             reference = target.reference,
+            ref_div = target.ref_div,
             fb_prediv = pre_div,
             fb_div = fb_div)
         if plan.baw == freq:
@@ -183,7 +187,7 @@ def baw_plan_low_approx(target: Target, freq: Fraction) -> DPLLPlan | None:
     # of the stage1*stage2 possibilities are feasible, so we are wasting
     # time trying infeasible values of m.
     for prediv in range(2, 17 + 1):
-        ref_mult = target.reference * 2 * prediv
+        ref_mult = target.tdc_freq() * 2 * prediv
         ratio_target = freq / ref_mult
         # Check that the approximate DPLL fractional part is in an OK range.
         approx_fb_div = float(BAW_FREQ / ref_mult)
@@ -200,6 +204,7 @@ def baw_plan_low_approx(target: Target, freq: Fraction) -> DPLLPlan | None:
                 best = DPLLPlan(
                     baw = baw, baw_target = freq * m,
                     reference = target.reference,
+                    ref_div = target.ref_div,
                     fb_prediv = prediv, fb_div = fb_div)
     return best
 
@@ -235,7 +240,7 @@ def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
     for stage1 in range(6, 256 + 1):
         base = freq * stage1
         for prediv in range(2, 17 + 1):
-            post_fb_div = target.reference * 2 * prediv
+            post_fb_div = target.tdc_freq() * 2 * prediv
             fb_base = base / post_fb_div
             # Check that the approximate DPLL fractional part is in an OK range.
             approx_fb_div = float(BAW_FREQ / fb_base)
@@ -250,6 +255,7 @@ def baw_plan_low_exact(target: Target, freq: Fraction) -> DPLLPlan | None:
                         baw = post_fb_div * fb_div,
                         baw_target = post_fb_div * fb_div,
                         reference = target.reference,
+                        ref_div = target.ref_div,
                         fb_prediv = prediv,
                         fb_div = fb_div)
     return None

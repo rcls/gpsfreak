@@ -18,6 +18,7 @@ class Target:
     freqs: list[Fraction]
     pll1_pfd : Fraction = 2 * XO_FREQ   # Frequency at the PLL1 PFD.
     reference: Fraction = REF_FREQ
+    ref_div: int = 1
     pll1_base: Fraction|None = None
     pll2_base: Fraction|None = None
 
@@ -25,6 +26,9 @@ class Target:
         if not self.pll2_base:
             return False
         return is_multiple_of(self.pll2_base, freq)
+
+    def tdc_freq(self) -> Fraction:
+        return self.reference / self.ref_div
 
 def fail(why: str) -> NoReturn:
     raise PlanningFailed(why)

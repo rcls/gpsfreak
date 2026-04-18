@@ -23,13 +23,15 @@ CHANNELS_COOKED = [
 
 def make_freq_target(args: argparse.Namespace, raw: bool) -> Target:
     reference = args.reference if args.reference else REF_FREQ
+    ref_div = args.ref_div if args.ref_div else 1
     freqs = args.FREQ
     channels = CHANNELS_RAW if raw else CHANNELS_COOKED
     result = [Fraction(0)] * max(6, len(args.FREQ))
     # FIXME - this just silently ignores extras.
     for (i, _, _), f in zip(channels, freqs):
         result[i] = f
-    return Target(freqs=result, pll2_base=args.pll2, reference=reference)
+    return Target(freqs=result, pll2_base=args.pll2,
+                  reference=reference, ref_div=ref_div)
 
 def make_freq_data(plan: PLLPlan) -> MaskedBytes:
     data = MaskedBytes()
@@ -78,7 +80,7 @@ def make_freq_data(plan: PLLPlan) -> MaskedBytes:
         else:
             assert stage2 == 1
 
-    data.DPLL_PRIREF_RDIV = 1
+    data.DPLL_PRIREF_RDIV = plan.dpll.ref_div
     data.DPLL_REF_FB_PRE_DIV = plan.dpll.fb_prediv - 2
     div = plan.dpll.fb_div.numerator // plan.dpll.fb_div.denominator
     num = plan.dpll.fb_div.numerator % plan.dpll.fb_div.denominator
@@ -219,8 +221,11 @@ def report_plan(target: Target, plan: PLLPlan, raw: bool,
 
     print()
     dpll = plan.dpll
-    print(f'BAW: {freq_to_str(dpll.baw)} = {freq_to_str(target.reference)} '
-          f'* 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
+    print(f'BAW: {freq_to_str(dpll.baw)} = {freq_to_str(target.reference)} ',
+          end='')
+    if dpll.ref_div > 1:
+        print(f'/ {dpll.ref_div} ', end='')
+    print(f'* 2 * {dpll.fb_prediv} * {fraction_to_str(dpll.fb_div)}')
     if dpll.baw != dpll.baw_target:
         error = freq_to_str(dpll.baw - dpll.baw_target, 4)
         print(f'    target {freq_to_str(dpll.baw_target)}, error {error}')
@@ -266,7 +271,7 @@ def rejig_pll1(base: PLLPlan) -> PLLPlan:
     if base.pll2 == base.pll2_target:
         return base                     # Nothing to improve.
 
-    reference = base.dpll.reference
+    reference = base.dpll.tdc_freq()
     best = base
 
     # Back calculate the BAW frequency from the target.  Ratios with smaller

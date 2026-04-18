@@ -95,10 +95,13 @@ def do_info(device: Device) -> None:
 
     print('CPU serial num:', message.get_serial_number(dev))
 
-    result = message.tmp117_read(dev, 0, 2)
-    assert len(result) == 2
-    temp = struct.unpack('>H', result)[0] / 128
-    print(f'Temperature   : {temp:.2f} °C')
+    try:
+        result = message.tmp117_read(dev, 0, 2)
+        assert len(result) == 2
+        temp = struct.unpack('>H', result)[0] / 128
+        print(f'Temperature   : {temp:.2f} °C')
+    except message.RequestFailed:
+        pass
 
     pv = message.retrieve(dev, message.GET_PROTOCOL_VERSION)
     print('Protocol Vers :', struct.unpack('<I', pv.payload)[0])

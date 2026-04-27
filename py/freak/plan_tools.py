@@ -109,14 +109,14 @@ def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     if index != BIG_DIVIDE:
         return None
 
-    # For index 4, the two stage divider must have the fist stage in [6..=256]
+    # For index 4, the two stage divider must have the fist stage in [7..=256]
     # and the second stage in [1..=(1<<24)].  Prefer an even second stage
     # divider, as this gives 50% duty cycle.  If the second stage is even,
     # keep the first stage as high as possible.  If the second stage is odd,
     # keep the second stage as high as possible to keep the duty cycle near
     # 50%.
 
-    base = max(6, ceil(Fraction(ratio, 1 << 24)))
+    base = max(7, ceil(Fraction(ratio, 1 << 24)))
     result = None
     for first in range(256, base - 1, -1):
         if ratio % first == 0:

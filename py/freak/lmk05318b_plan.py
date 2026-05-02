@@ -171,7 +171,9 @@ def reverse_plan(d: MaskedBytes, reference: Fraction) -> Tuple[Target, PLLPlan]:
     dpll.baw_target = dpll.baw
 
     plan = PLLPlan(dpll = dpll)
-    if d.PLL2_DEN == 0:
+    if d.APLL2_DEN_MODE == 0:
+        plan.multiplier = d.PLL2_NDIV + Fraction(d.PLL2_NUM, 1 << 24)
+    elif d.PLL2_DEN == 0:
         plan.multiplier = Fraction(0)
     else:
         plan.multiplier = d.PLL2_NDIV + Fraction(d.PLL2_NUM, d.PLL2_DEN)

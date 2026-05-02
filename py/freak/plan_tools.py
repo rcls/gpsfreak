@@ -23,11 +23,14 @@ class Target:
     pll2_base: Fraction|None = None
 
     def force_pll2(self, freq: Fraction) -> bool:
+        '''If the PLL2 frequency has been specified, then we drive outputs
+        from PLL2 when possible.'''
         if not self.pll2_base:
             return False
         return is_multiple_of(self.pll2_base, freq)
 
     def tdc_freq(self) -> Fraction:
+        '''The frequency at the DPLL comparator.'''
         return self.reference / self.ref_div
 
 def fail(why: str) -> NoReturn:
@@ -109,7 +112,7 @@ def output_divider(index: int, ratio: int) -> Tuple[int, int] | None:
     if index != BIG_DIVIDE:
         return None
 
-    # For index 4, the two stage divider must have the fist stage in [7..=256]
+    # For index 5, the two stage divider must have the first stage in [7..=256]
     # and the second stage in [1..=(1<<24)].  Prefer an even second stage
     # divider, as this gives 50% duty cycle.  If the second stage is even,
     # keep the first stage as high as possible.  If the second stage is odd,

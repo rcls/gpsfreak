@@ -14,7 +14,7 @@
 //! The code byte identifies the message purpose and format.  The high bit
 //! indicates the direction: 0 is to the device, 1 is from the device.
 //!
-//! Any request to the device gets a response, a ACK or NAK if nothing else.
+//! Any request to the device gets a response, an ACK or NAK if nothing else.
 //! Over USB, a new request will not be accepted until any previous response
 //! has been read.
 //!
@@ -85,6 +85,9 @@
 //!            Both peek and poke will do 32-bit or 16-bit transfers if address
 //!            and length are both sufficiently aligned.  Neither guard against
 //!            crashing the device or making irreversable changes.
+//!
+//!    74 : flash erase.  Erase a flash sector. u32 payload is the sector
+//!         address.
 
 use stm_common::utils::nothing;
 use stm_common::vcell::UCell;

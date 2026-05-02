@@ -282,6 +282,8 @@ def single_baw_mult(freq: Fraction) -> int | None:
 def dpll_plan(target: Target) -> DPLLPlan:
     # If we are given a DPLL target, then use it.
     if target.pll1_base:
+        if target.pll1_base < MHz / 4:
+            fail('PLL1 target factor should be ≥ 0.25 MHz')
         m = single_baw_mult(target.pll1_base)
         assert m is not None
         return baw_plan_for_freq(target, m * target.pll1_base)

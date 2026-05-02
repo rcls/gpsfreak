@@ -25,9 +25,8 @@ class Target:
     def force_pll2(self, freq: Fraction) -> bool:
         '''If the PLL2 frequency has been specified, then we drive outputs
         from PLL2 when possible.'''
-        if not self.pll2_base:
-            return False
-        return is_multiple_of(self.pll2_base, freq)
+        return not self.pll1_base and self.pll2_base and \
+            is_multiple_of(self.pll2_base, freq)
 
     def tdc_freq(self) -> Fraction:
         '''The frequency at the DPLL comparator.'''

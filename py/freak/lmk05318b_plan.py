@@ -30,7 +30,7 @@ def make_freq_target(args: argparse.Namespace, raw: bool) -> Target:
     # FIXME - this just silently ignores extras.
     for (i, _, _), f in zip(channels, freqs):
         result[i] = f
-    return Target(freqs=result, pll2_base=args.pll2,
+    return Target(freqs=result, pll1_base=args.pll1, pll2_base=args.pll2,
                   reference=reference, ref_div=ref_div)
 
 def make_freq_data(plan: PLLPlan) -> MaskedBytes:

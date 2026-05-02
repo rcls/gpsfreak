@@ -299,6 +299,8 @@ def add_freq_commands(subp: Any, short: str, long: str) -> None:
     for p, n in (freq, '*'), (plan, '+'):
         p.add_argument('FREQ', nargs=n, type=str_to_freq,
                        help=f'Frequencies for each {short}')
+        p.add_argument('-1', '--pll1', type=str_to_freq,
+                       help=f'Forced divisor of PLL1 frequency')
         p.add_argument('-2', '--pll2', type=str_to_freq,
                        help=f'Forced divisor of PLL2 frequency')
         p.add_argument('-r', '--reference', metavar='REF', type=str_to_freq,

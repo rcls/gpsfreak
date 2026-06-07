@@ -92,6 +92,8 @@
 use stm_common::utils::nothing;
 use stm_common::vcell::UCell;
 
+use crate::cpu::Priority;
+use crate::cpu::interrupt::PRIO_COMMS;
 use crate::gps_uart::GpsPriority;
 use crate::i2c;
 use crate::utils::vcopy_aligned;
@@ -104,6 +106,9 @@ macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
 /// I²C address of the TMP117.  ADD0 on the TMP117 connects to 3V3.
 pub const TMP117: u8 = 0x92;
+
+/// I²C address of the UBlox GPS.
+pub const I2C_UBLOX: u8 = 0x84;
 
 /// Error codes for Nack responses.
 #[repr(u16)]
@@ -121,6 +126,7 @@ enum Error {
     /// Payload parameter value bogus.
     BadParameter   = 5,
     /// Special value used to indicate that an ACK (not a NACK) should be sent.
+    /// This is never actually sent in a NACK packet.
     Succeeded      = 6,
 }
 
@@ -303,6 +309,8 @@ fn command_dispatch(message: &MessageBuf, len: usize, r: Responder) -> Result {
         0x61 => i2c_read (crate::lmk05318b::LMK05318 |  1, message, r),
         0x62 => i2c_write(TMP117 & !1, message),
         0x63 => i2c_read (TMP117 |  1, message, r),
+        0x64 => i2c_write(I2C_UBLOX & !1, message),
+        0x65 => i2c_read (I2C_UBLOX |  1, message, r),
 
         0x68 => lmk05318b_status(message),
 
@@ -347,7 +355,11 @@ fn set_get_name(message: &MessageBuf, r: Responder) -> Result {
         let payload = &message.payload[..len];
         let Ok(utf8) = str::from_utf8(payload)
             else {return Err(Error::BadParameter)};
+        // Potentially we are racing with a USB string fetch, so raise the
+        // interrupt priority while storing the new string.
+        let prio = Priority::<PRIO_COMMS>::default();
         str_to_usb(unsafe {USB_NAME.as_mut()}, utf8);
+        drop(prio);
         name.len = len as u8;
         name.payload[..len].copy_from_slice(payload);
     }

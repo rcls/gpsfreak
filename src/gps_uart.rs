@@ -101,7 +101,7 @@ pub fn dma_tx(data: *const u8, len: usize) -> bool {
             crate::usb::serial::serial_tx_byte(*b);
         }
     }
-    let dma  = unsafe {&*DMA ::ptr()};
+    let dma  = unsafe {&*DMA::ptr()};
     let ch = &dma.C[DMA_CHANNEL];
 
     if ch.busy() {
@@ -114,7 +114,7 @@ pub fn dma_tx(data: *const u8, len: usize) -> bool {
 }
 
 pub fn dma_tx_busy() -> bool {
-    let dma = unsafe {&*DMA ::ptr()};
+    let dma = unsafe {&*DMA::ptr()};
     dma.C[DMA_CHANNEL].busy()
 }
 

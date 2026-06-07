@@ -1554,6 +1554,7 @@ ublox_cfg.add_cfg_list([
     UBloxCfg('SIGNAL-QZSS_L5_ENA', 0x10310017, 'L'),
     UBloxCfg('SIGNAL-NAVIC_ENA', 0x10310026, 'L'),
     UBloxCfg('SIGNAL-NAVIC_L5_ENA', 0x1031001d, 'L'),
+    UBloxCfg('FORCE-L5_HEALTHY', 0x10320001, 'L'),
     UBloxCfg('SPI-MAXFF', 0x20640001, 'U1'),
     UBloxCfg('SPI-CPOLARITY', 0x10640002, 'L'),
     UBloxCfg('SPI-CPHASE', 0x10640003, 'L'),

@@ -33,6 +33,8 @@ def writeall(f: io.IOBase, b: bytes) -> int:
     mv = memoryview(b)
     done = 0
     while done < len(mv):
+        # IOBase appears not to have a write() method?  We rely on using
+        # instances that do.
         progress: int = f.write(mv[done:])
         if progress == 0:
             raise EOFError()

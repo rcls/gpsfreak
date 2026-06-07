@@ -18,6 +18,7 @@ SMALL_PRIMES = [
 SMALL_FACTOR_LIMIT = 1009 * 1009
 
 def factorize(n: int) -> list[int]:
+    '''Return the list of distinct prime factors of `n`.'''
     assert n > 0
     factors: list[int] = []
     for p in SMALL_PRIMES:
@@ -38,6 +39,8 @@ def factorize(n: int) -> list[int]:
     return factors
 
 def large_factors(factors: set[int], n: int) -> None:
+    # We've divided out all factors in SMALL_PRIMES before calling this
+    # function.  So any factor less than SMALL_FACTOR_LIMIT, must be prime.
     while n >= SMALL_FACTOR_LIMIT:
         if miller_rabin_pseudo_prime(n):
             factors.add(n)
@@ -126,6 +129,8 @@ def test_pollard_ρ() -> None:
 def test_miller_rabin() -> None:
     assert not miller_rabin_pseudo_prime(SMALL_FACTOR_LIMIT)
     assert miller_rabin_pseudo_prime(65537)
+    assert miller_rabin_pseudo_prime(18446744073709551557)
+    assert miller_rabin_pseudo_prime(18446744073709551629)
     assert not miller_rabin_pseudo_prime(1301119843216015234441)
     assert not miller_rabin_pseudo_prime((1 << 32) - 1)
     assert miller_rabin_pseudo_prime(2)

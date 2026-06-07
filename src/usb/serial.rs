@@ -43,7 +43,7 @@ enum RxProcessing {
 #[derive_const(Default)]
 pub struct FreakUSBSerial {
     /// Base of the ACM CDC TX buffer we are accumulating.
-    tx_base: *mut u32 = BULK_TX_BUF as _,
+    tx_base: *mut u32 = BULK_TX_BUF,
     /// Current number of bytes in TX buffer we are accumulating.
     tx_len: usize,
     /// Accumulating bytes into 32 bit words.

@@ -4,11 +4,14 @@ use core::num::Wrapping as W;
 
 /// The timer we use for blinking.
 ///
-/// We use a prescaler to get the counter running at 10kHz (100µs).  It is
-/// 16-bit, and we use signed wrapping arithmetic, giving a maximum timeout
-/// of just over 3 seconds.
+/// We use a prescaler to get the counter running at 10kHz (100µs).  We use
+/// signed wrapping arithmetic, so a 16-bit timer gives a maximum timeout of
+/// just over 3 seconds.
 use stm32h503::TIM3 as TIM;
 use stm32h503::Interrupt::TIM3 as INTERRUPT;
+
+type ITime = i16;
+type WTime = core::num::Wrapping<ITime>;
 
 use crate::cpu::interrupt::PRIO_LED as PRIORITY;
 type Priority = crate::cpu::Priority<PRIORITY>;
@@ -16,7 +19,7 @@ type Priority = crate::cpu::Priority<PRIORITY>;
 type FiveHz = LedTimerUCell<1000, 1000>;
 
 #[derive_const(Default)]
-pub struct LedTimerUCell<const ON: i16, const OFF: i16>(
+pub struct LedTimerUCell<const ON: ITime, const OFF: ITime>(
     UCell<LedTimer<ON, OFF>>);
 
 pub static BLUE: FiveHz = Default::default();
@@ -83,8 +86,8 @@ fn drive(red_green: bool, blue: bool) {
     }
 }
 
-impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
-    fn isr(&self, now: i16) {
+impl<const ON: ITime, const OFF: ITime> LedTimerUCell<ON, OFF> {
+    fn isr(&self, now: ITime) {
         unsafe {self.0.as_mut()}.isr(now);
     }
 
@@ -93,7 +96,7 @@ impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
 
         let _guard = Priority::default();
 
-        let now = tim.CNT.read().bits() as i16;
+        let now = tim.CNT.read().CNT().bits().cast_signed();
         schedule(unsafe {self.0.as_mut()}.set(state, now));
 
         drive(RED_GREEN.0.led, BLUE.0.led);
@@ -104,7 +107,7 @@ impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
 
         let _guard = Priority::default();
 
-        let now = tim.CNT.read().bits() as i16;
+        let now = tim.CNT.read().CNT().bits().cast_signed();
         schedule(unsafe {self.0.as_mut()}.pulse(state, now));
 
         drive(RED_GREEN.0.led, BLUE.0.led);
@@ -113,7 +116,7 @@ impl<const ON: i16, const OFF: i16> LedTimerUCell<ON, OFF> {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[derive_const(Default)]
-pub struct LedTimer<const ON: i16, const OFF: i16> {
+pub struct LedTimer<const ON: ITime, const OFF: ITime> {
     /// Current desired state of the LED.  Various methods update this field,
     /// the wrapping methods in `Led` update the physical LED to match.
     led: bool,
@@ -122,23 +125,23 @@ pub struct LedTimer<const ON: i16, const OFF: i16> {
     /// State we want to end up on.
     target: bool,
     /// Time at which the current setting expires.
-    expiry: Option<W<i16>>,
+    expiry: Option<WTime>,
 }
 
-fn schedule(deadline: Option<W<i16>>) {
+fn schedule(deadline: Option<WTime>) {
     let tim = unsafe {&*TIM::PTR};
     let Some(deadline) = deadline else {return};
     // Only update the timer if we want to bring the expiry forwards.  We are
     // not called from the ISR, so equality doesn't need an update.
-    if deadline - W(tim.CCR1.read().bits() as i16) < W(0) {
+    if deadline - W(tim.CCR1.read().bits() as ITime) < W(0) {
         trigger(deadline);
     }
 }
 
-fn trigger(deadline: W<i16>) {
+fn trigger(deadline: WTime) {
     let tim = unsafe {&*TIM::PTR};
     tim.CCR1.write(|w| w.bits(deadline.0 as u16 as u32));
-    let now = tim.CNT.read().bits() as i16;
+    let now = tim.CNT.read().CNT().bits().cast_signed();
     if W(now) - deadline >= W(0) {
         // We've already expired.  Instead of potentially recursing, do a
         // software trigger.
@@ -148,8 +151,8 @@ fn trigger(deadline: W<i16>) {
     }
 }
 
-impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
-    fn isr(&mut self, now: i16) {
+impl<const ON: ITime, const OFF: ITime> LedTimer<ON, OFF> {
+    fn isr(&mut self, now: ITime) {
         let Some(expiry) = self.expiry else {return};
         if W(now) - expiry < W(0) {
             return;
@@ -167,11 +170,11 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
         }
     }
 
-    fn duration(&self, state: bool) -> i16 {
+    fn duration(&self, state: bool) -> ITime {
         if state {ON} else {OFF}
     }
 
-    fn set(&mut self, state: bool, now: i16) -> Option<W<i16>> {
+    fn set(&mut self, state: bool, now: ITime) -> Option<WTime> {
         self.target = state;
         if let Some(_) = self.expiry {
             if self.led == self.next || self.duration(self.next) == 0 {
@@ -187,7 +190,7 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
         self.update(state, state, now)
     }
 
-    fn pulse(&mut self, state: bool, now: i16) -> Option<W<i16>> {
+    fn pulse(&mut self, state: bool, now: ITime) -> Option<WTime> {
         // Equivalent to: request(state) ; request(!state)
         self.target = !state;
         let next = state ^ (self.duration(state) == 0 || self.led == state);
@@ -199,7 +202,7 @@ impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
     }
 
     /// Set self.led and return the timer expiry time.
-    fn update(&mut self, state: bool, next: bool, now: i16) -> Option<W<i16>> {
+    fn update(&mut self, state: bool, next: bool, now: ITime) -> Option<WTime> {
         self.led = state;
         self.next = next;
         let duration = self.duration(state);
@@ -218,9 +221,9 @@ fn isr() {
     let tim = unsafe {&*TIM::PTR};
     tim.SR.write(|w| w.bits(0));
 
-    let now = tim.CNT.read().bits() as i16;
+    let now = tim.CNT.read().CNT().bits().cast_signed();
 
-    let min = |a: W<i16>, b: Option<W<i16>>| -> W<i16> {
+    let min = |a: WTime, b: Option<WTime>| -> WTime {
         match (a, b) {
             (a, Some(b)) => if a - b < W(0) {a} else {b},
             (a, None) => a,
@@ -370,7 +373,7 @@ fn test_zero() {
 }
 
 #[cfg(test)]
-impl<const ON: i16, const OFF: i16> LedTimer<ON, OFF> {
+impl<const ON: ITime, const OFF: ITime> LedTimer<ON, OFF> {
     fn test_pulse1() {
         for led in [false, true] {
             for next in [false, true] {

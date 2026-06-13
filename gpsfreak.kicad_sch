@@ -310,15 +310,25 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "Ganged outputs\nprovide high\ncurrent drive.\n"
+	(text_box "Ganged outputs\nprovide high\ncurrent drive.\n"
 		(exclude_from_sim no)
-		(at 143.256 52.07 0)
+		(at 133.4235 46.7812 0)
+		(size 16.4364 7.0851)
+		(margins 0.254 0.254 0.254 0.254)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
+			(justify left)
 		)
-		(uuid "897b02a8-fe2c-4793-badd-d3361161462f")
+		(uuid "c3da628a-3494-4c63-9fbc-e53ea1b79ca3")
 	)
 	(junction
 		(at 149.86 58.42)
@@ -378,7 +388,7 @@
 	)
 	(wire
 		(pts
-			(xy 181.61 88.9) (xy 191.77 88.9)
+			(xy 181.61 88.9) (xy 193.04 88.9)
 		)
 		(stroke
 			(width 0)
@@ -395,6 +405,16 @@
 			(type default)
 		)
 		(uuid "282527a7-4ca3-466e-9d3d-f2301b4f4d6b")
+	)
+	(wire
+		(pts
+			(xy 218.44 76.2) (xy 223.52 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2fe86bc4-7df6-4610-976c-2891645e7249")
 	)
 	(wire
 		(pts
@@ -438,7 +458,7 @@
 	)
 	(wire
 		(pts
-			(xy 176.53 71.12) (xy 191.77 71.12)
+			(xy 176.53 71.12) (xy 193.04 71.12)
 		)
 		(stroke
 			(width 0)
@@ -455,6 +475,16 @@
 			(type default)
 		)
 		(uuid "4b65475f-2e19-45b9-ae0e-d2c7add0f9e0")
+	)
+	(wire
+		(pts
+			(xy 218.44 71.12) (xy 223.52 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4c48bf59-e52e-46e9-bb44-146a13cdd776")
 	)
 	(wire
 		(pts
@@ -498,7 +528,7 @@
 	)
 	(wire
 		(pts
-			(xy 179.07 91.44) (xy 191.77 91.44)
+			(xy 179.07 91.44) (xy 193.04 91.44)
 		)
 		(stroke
 			(width 0)
@@ -525,6 +555,16 @@
 			(type default)
 		)
 		(uuid "7bc9bad1-8875-406a-bd72-e8124c2df5be")
+	)
+	(wire
+		(pts
+			(xy 218.44 68.58) (xy 223.52 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a84ace60-86f4-48c2-944d-37ba082b430b")
 	)
 	(wire
 		(pts
@@ -568,13 +608,23 @@
 	)
 	(wire
 		(pts
-			(xy 176.53 73.66) (xy 191.77 73.66)
+			(xy 176.53 73.66) (xy 193.04 73.66)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "caf99592-4a1e-4a11-bf3a-52d0d9ec07a1")
+	)
+	(wire
+		(pts
+			(xy 218.44 73.66) (xy 223.52 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "db60fce5-0333-4572-8122-d7adebfa7e7b")
 	)
 	(wire
 		(pts
@@ -1176,6 +1226,112 @@
 		)
 	)
 	(sheet
+		(at 193.04 66.04)
+		(size 25.4 12.7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "4b25ac19-17bc-44e9-ba12-1d7cffc23283")
+		(property "Sheetname" "FPGA"
+			(at 205.486 68.1224 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(thickness 0.508)
+					(bold yes)
+				)
+			)
+		)
+		(property "Sheetfile" "fpga.kicad_sch"
+			(at 193.04 79.3246 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "ClkIn+" input
+			(at 193.04 73.66 180)
+			(uuid "12bc1a74-c4d6-4568-afb0-5f8abd5145bd")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ClkIn-" input
+			(at 193.04 71.12 180)
+			(uuid "6823954f-a0b3-446e-989c-5db7b6878f10")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ClkIO+" bidirectional
+			(at 218.44 71.12 0)
+			(uuid "0dae7aaf-ef71-4e85-baf2-54e976cf7835")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "ClkIO-" input
+			(at 218.44 73.66 0)
+			(uuid "1347707a-0529-4f15-9b71-3cf93b638159")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "ClkOEN" output
+			(at 218.44 76.2 0)
+			(uuid "f352b0d7-bb36-49df-8252-b4ebecece47a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "VFPGA" output
+			(at 218.44 68.58 0)
+			(uuid "9d6fcf1e-0f38-4e17-a4d1-ff42524898a2")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "gpsfreak"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 109.22 74.93)
 		(size 25.4 12.7)
 		(exclude_from_sim no)
@@ -1242,7 +1398,7 @@
 		)
 	)
 	(sheet
-		(at 109.22 105.41)
+		(at 109.22 101.6)
 		(size 25.4 12.7)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1257,7 +1413,7 @@
 		)
 		(uuid "69331f4b-e5ad-4452-8850-5c5a77857efb")
 		(property "Sheetname" "GPS"
-			(at 122.174 112.0644 0)
+			(at 122.174 108.2544 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1269,14 +1425,14 @@
 			)
 		)
 		(property "Sheetfile" "gps.kicad_sch"
-			(at 109.22 118.6946 0)
+			(at 109.22 113.6146 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left top)
+				(justify left bottom)
 			)
 		)
 		(instances
@@ -1288,7 +1444,7 @@
 		)
 	)
 	(sheet
-		(at 191.77 105.41)
+		(at 165.1 101.6)
 		(size 25.4 12.7)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1303,7 +1459,7 @@
 		)
 		(uuid "6988b802-c4bd-48f6-b03d-8f2b1e6051d9")
 		(property "Sheetname" "Power"
-			(at 204.47 111.8104 0)
+			(at 177.8 108.0004 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1315,7 +1471,52 @@
 			)
 		)
 		(property "Sheetfile" "power.kicad_sch"
-			(at 191.77 118.9486 0)
+			(at 165.1 113.6146 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(instances
+			(project "gpsfreak"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
+					(page "9")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 223.52 66.04)
+		(size 25.4 12.7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "8de00818-124c-4cc8-9910-e794140dfeb1")
+		(property "Sheetname" "Output4"
+			(at 238.506 72.4404 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+			)
+		)
+		(property "Sheetfile" "output-passive.kicad_sch"
+			(at 223.52 79.0706 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1325,16 +1526,56 @@
 				(justify left top)
 			)
 		)
+		(pin "IO_N" output
+			(at 223.52 73.66 180)
+			(uuid "d5f4e2dc-611a-4ae4-bb14-c7c77de8986d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "IO_P" bidirectional
+			(at 223.52 71.12 180)
+			(uuid "a1d95533-cce4-44ca-9837-0b653648c399")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "OEN" input
+			(at 223.52 76.2 180)
+			(uuid "3edc5c6e-7a46-44e6-bb5e-574aa603b9f9")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "Vsw" input
+			(at 223.52 68.58 180)
+			(uuid "3df206ec-670d-4b65-ad2d-94de10e276a8")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
-					(page "8")
+					(page "14")
 				)
 			)
 		)
 	)
 	(sheet
-		(at 151.13 105.41)
+		(at 137.16 101.6)
 		(size 25.4 12.7)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1349,7 +1590,7 @@
 		)
 		(uuid "9b249195-a432-4f49-a1e0-f7d117f1807f")
 		(property "Sheetname" "CPU"
-			(at 163.576 112.3184 0)
+			(at 149.606 108.5084 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1361,14 +1602,14 @@
 			)
 		)
 		(property "Sheetfile" "cpu.kicad_sch"
-			(at 151.13 118.6946 0)
+			(at 137.16 113.6146 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left top)
+				(justify left bottom)
 			)
 		)
 		(instances
@@ -1380,7 +1621,7 @@
 		)
 	)
 	(sheet
-		(at 191.77 86.36)
+		(at 193.04 86.36)
 		(size 25.4 12.7)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1395,7 +1636,7 @@
 		)
 		(uuid "bc4a3f50-85d7-4b0d-bb14-10533109d674")
 		(property "Sheetname" "Output3"
-			(at 204.724 92.7604 0)
+			(at 205.994 92.7604 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1407,7 +1648,7 @@
 			)
 		)
 		(property "Sheetfile" "output-tlv3601.kicad_sch"
-			(at 191.77 99.6446 0)
+			(at 193.04 99.6446 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1418,7 +1659,7 @@
 			)
 		)
 		(pin "O_N" input
-			(at 191.77 91.44 180)
+			(at 193.04 91.44 180)
 			(uuid "880050f2-6b8e-4ea7-a393-a2eaf4244d15")
 			(effects
 				(font
@@ -1428,7 +1669,7 @@
 			)
 		)
 		(pin "O_P" input
-			(at 191.77 88.9 180)
+			(at 193.04 88.9 180)
 			(uuid "db4a45b5-11b5-45c6-aaf9-1804406fac7c")
 			(effects
 				(font
@@ -1441,72 +1682,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
 					(page "13")
-				)
-			)
-		)
-	)
-	(sheet
-		(at 191.77 68.58)
-		(size 25.4 12.7)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "d9ae02c3-f798-426e-9122-f6e2522738d6")
-		(property "Sheetname" "Output4"
-			(at 204.724 74.9804 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 2.54 2.54)
-					(thickness 0.508)
-					(bold yes)
-				)
-			)
-		)
-		(property "Sheetfile" "output-tlv3601.kicad_sch"
-			(at 191.77 81.8646 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(pin "O_N" input
-			(at 191.77 73.66 180)
-			(uuid "bcdc0592-7ae9-4348-bc4f-560bbf78f320")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "O_P" input
-			(at 191.77 71.12 180)
-			(uuid "5a9e8294-ee16-4c79-8487-21c87e64b115")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(instances
-			(project "gpsfreak"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65"
-					(page "14")
 				)
 			)
 		)

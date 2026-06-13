@@ -898,7 +898,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "442c9c79-5f90-41f9-a411-f26769c10e16")
-		(property "Reference" "C30"
+		(property "Reference" "C11"
 			(at 65.786 61.976 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -973,7 +973,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/64bdf83b-4762-4d14-abd1-564acb81cb91"
-					(reference "C30")
+					(reference "C11")
 					(unit 1)
 				)
 			)
@@ -1621,7 +1621,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "ec7d3e5f-760a-4b02-b796-30b7a263c533")
-		(property "Reference" "C31"
+		(property "Reference" "C12"
 			(at 65.786 67.056 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1696,7 +1696,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/64bdf83b-4762-4d14-abd1-564acb81cb91"
-					(reference "C31")
+					(reference "C12")
 					(unit 1)
 				)
 			)

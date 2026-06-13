@@ -1865,10 +1865,6 @@
 					(reference "#PWR037")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "#PWR042")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -1884,7 +1880,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "164e0f36-088b-48d0-bd9e-9bbc9f9a34d1")
-		(property "Reference" "R34"
+		(property "Reference" "R31"
 			(at 58.674 107.95 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1957,11 +1953,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/bc4a3f50-85d7-4b0d-bb14-10533109d674"
-					(reference "R34")
-					(unit 1)
-				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "R37")
+					(reference "R31")
 					(unit 1)
 				)
 			)
@@ -2045,10 +2037,6 @@
 					(reference "D35")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "D36")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2064,7 +2052,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "1dd2a0cd-5d7b-481d-b2ac-79fb0fde99f0")
-		(property "Reference" "R35"
+		(property "Reference" "R32"
 			(at 58.674 120.65 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2137,11 +2125,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/bc4a3f50-85d7-4b0d-bb14-10533109d674"
-					(reference "R35")
-					(unit 1)
-				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "R38")
+					(reference "R32")
 					(unit 1)
 				)
 			)
@@ -2235,10 +2219,6 @@
 					(reference "R33")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "R36")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2318,10 +2298,6 @@
 					(reference "J3")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "J4")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2397,10 +2373,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/bc4a3f50-85d7-4b0d-bb14-10533109d674"
 					(reference "#PWR038")
-					(unit 1)
-				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "#PWR043")
 					(unit 1)
 				)
 			)
@@ -2494,10 +2466,6 @@
 					(reference "L31")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "L32")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2574,10 +2542,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/bc4a3f50-85d7-4b0d-bb14-10533109d674"
 					(reference "#PWR041")
-					(unit 1)
-				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "#PWR048")
 					(unit 1)
 				)
 			)
@@ -2658,10 +2622,6 @@
 					(reference "#PWR047")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "#PWR052")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2738,10 +2698,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/bc4a3f50-85d7-4b0d-bb14-10533109d674"
 					(reference "#PWR050")
-					(unit 1)
-				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "#PWR054")
 					(unit 1)
 				)
 			)
@@ -2837,10 +2793,6 @@
 					(reference "C3")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "C39")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2918,10 +2870,6 @@
 					(reference "#PWR045")
 					(unit 1)
 				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "#PWR051")
-					(unit 1)
-				)
 			)
 		)
 	)
@@ -2948,7 +2896,7 @@
 			)
 		)
 		(property "Value" "TLV3601DCKR"
-			(at 77.47 125.222 0)
+			(at 81.788 118.364 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3021,10 +2969,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/bc4a3f50-85d7-4b0d-bb14-10533109d674"
 					(reference "U31")
-					(unit 1)
-				)
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/d9ae02c3-f798-426e-9122-f6e2522738d6"
-					(reference "U32")
 					(unit 1)
 				)
 			)

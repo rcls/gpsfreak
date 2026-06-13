@@ -5,192 +5,6 @@
 	(uuid "cf049e14-c50a-4d5c-8d38-3a63ee1a9bc9")
 	(paper "A4")
 	(lib_symbols
-		(symbol "Connector:Conn_Coaxial"
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at 0.254 3.048 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Conn_Coaxial"
-				(at 2.921 0 90)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "BNC SMA SMB SMC LEMO coaxial connector CINCH RCA MCX MMCX U.FL UMRF"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "*BNC* *SMA* *SMB* *SMC* *Cinch* *LEMO* *UMRF* *MCX* *U.FL*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "Conn_Coaxial_0_1"
-				(polyline
-					(pts
-						(xy -2.54 0) (xy -0.508 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 1.778 0)
-					(mid 0.222 -1.8079)
-					(end -1.778 -0.508)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start -1.778 0.508)
-					(mid 0.2221 1.8084)
-					(end 1.778 0)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 0)
-					(radius 0.508)
-					(stroke
-						(width 0.2032)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy 0 -1.778)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "Conn_Coaxial_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "In"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -5.08 90)
-					(length 2.54)
-					(name "Ext"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Device:C"
 			(pin_numbers
 				(hide yes)
@@ -2847,7 +2661,7 @@
 		(exclude_from_sim no)
 		(at 125.73 134.62 0)
 		(size 20.32 4.768)
-		(margins 0.9525 0.9525 0.9525 0.9525)
+		(margins 0.254 0.254 0.254 0.254)
 		(stroke
 			(width 0)
 			(type solid)
@@ -2865,9 +2679,9 @@
 	)
 	(text_box "GPIO1 selects I²C address."
 		(exclude_from_sim no)
-		(at 216.2175 134.9319 0)
-		(size 16.1924 4.768)
-		(margins 0.9525 0.9525 0.9525 0.9525)
+		(at 217.4875 134.9319 0)
+		(size 14.9224 4.768)
+		(margins 0.254 0.254 0.254 0.254)
 		(stroke
 			(width 0)
 			(type default)
@@ -2886,8 +2700,8 @@
 	(text_box "The variant with external filter cap appears to be vapour-ware."
 		(exclude_from_sim no)
 		(at 212.1153 43.2379 0)
-		(size 19.0247 10.1021)
-		(margins 0.9525 0.9525 0.9525 0.9525)
+		(size 19.0247 8.8321)
+		(margins 0.254 0.254 0.254 0.254)
 		(stroke
 			(width 0)
 			(type solid)
@@ -3114,6 +2928,10 @@
 		(uuid "ff864d69-8530-44d3-9e53-b7ca80b04bdf")
 	)
 	(no_connect
+		(at 118.11 130.81)
+		(uuid "1e74d831-f686-470d-9a8d-c41ea2ef51d7")
+	)
+	(no_connect
 		(at 209.55 43.18)
 		(uuid "4fa8ff58-226f-4307-9fad-b03a825731b9")
 	)
@@ -3219,16 +3037,6 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 130.81) (xy 118.11 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1d69c56d-234e-41a4-aee1-d31f52468c7d")
-	)
-	(wire
-		(pts
 			(xy 121.92 60.96) (xy 128.27 60.96)
 		)
 		(stroke
@@ -3246,6 +3054,16 @@
 			(type default)
 		)
 		(uuid "1de2ca20-13ca-4f3c-b85e-a6656da1bd57")
+	)
+	(wire
+		(pts
+			(xy 162.56 113.03) (xy 176.53 113.03)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "20e8dd3f-583b-43de-9f1c-c96ff57905a1")
 	)
 	(wire
 		(pts
@@ -3469,7 +3287,7 @@
 	)
 	(wire
 		(pts
-			(xy 152.4 113.03) (xy 176.53 113.03)
+			(xy 153.67 113.03) (xy 154.94 113.03)
 		)
 		(stroke
 			(width 0)
@@ -4387,7 +4205,7 @@
 		)
 		(uuid "1aea7add-1922-4996-81ab-de885ea0dde2")
 	)
-	(label "GPSCLKLO"
+	(label "PRIREFLO"
 		(at 165.1 102.87 0)
 		(effects
 			(font
@@ -4406,6 +4224,16 @@
 			(justify right bottom)
 		)
 		(uuid "21dce190-00f1-472c-b3ec-e228384e7bd5")
+	)
+	(label "SECREFLO"
+		(at 165.1 113.03 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2e168184-4b95-4189-bbb5-67103c81272e")
 	)
 	(label "VDDO_456"
 		(at 135.89 53.34 180)
@@ -4426,16 +4254,6 @@
 			(justify left bottom)
 		)
 		(uuid "333472fd-dd41-4f1b-9658-4a5a498c73c5")
-	)
-	(label "SecRef"
-		(at 165.1 113.03 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "3b4f405e-3c38-48dd-9218-4bf33b400783")
 	)
 	(label "VDD_DIG"
 		(at 106.68 123.19 180)
@@ -4667,33 +4485,9 @@
 		)
 		(uuid "f7bea331-e386-4033-ac5e-7cfe3bb0c9ed")
 	)
-	(global_label "ALERT"
-		(shape output)
-		(at 121.92 130.81 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "01f46301-4a1c-4fcb-882b-c737bab251e6")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 132.4647 130.81 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
-	(global_label "GPSCLK"
+	(global_label "PRIREF"
 		(shape input)
 		(at 153.67 102.87 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4702,7 +4496,7 @@
 		)
 		(uuid "36d97e0a-26e4-43fb-b709-eff67e00d684")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 143.3672 102.87 0)
+			(at 144.8912 102.87 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4733,6 +4527,28 @@
 					(size 1.27 1.27)
 				)
 				(justify left)
+			)
+		)
+	)
+	(global_label "SECREF"
+		(shape input)
+		(at 153.67 113.03 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "60424f2e-2424-4cd3-9c07-3d3a3346cd0e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.3992 113.03 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
 			)
 		)
 	)
@@ -5084,7 +4900,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "048113bb-28c6-4c61-b75d-eb884dc2a3d4")
-		(property "Reference" "C75"
+		(property "Reference" "C28"
 			(at 81.28 113.03 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5159,7 +4975,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C75")
+					(reference "C28")
 					(unit 1)
 				)
 			)
@@ -5176,7 +4992,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "07debde5-9be5-4cae-a925-20c3d31f2d4b")
-		(property "Reference" "C24"
+		(property "Reference" "C64"
 			(at 107.95 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5251,7 +5067,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C24")
+					(reference "C64")
 					(unit 1)
 				)
 			)
@@ -5425,7 +5241,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "116c44c9-c041-4351-a8e0-74f5836e67ff")
-		(property "Reference" "C91"
+		(property "Reference" "C33"
 			(at 248.92 90.17 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5437,14 +5253,14 @@
 			)
 		)
 		(property "Value" "10u"
-			(at 248.92 95.25 90)
+			(at 249.936 92.964 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify bottom)
+				(justify left bottom)
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
@@ -5500,7 +5316,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C91")
+					(reference "C33")
 					(unit 1)
 				)
 			)
@@ -5673,7 +5489,7 @@
 		(in_pos_files yes)
 		(dnp yes)
 		(uuid "1a1ef2c4-5354-4b02-b388-8c98fb31a5cb")
-		(property "Reference" "U21"
+		(property "Reference" "U61"
 			(at 107.95 135.763 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5753,7 +5569,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "U21")
+					(reference "U61")
 					(unit 1)
 				)
 			)
@@ -5771,7 +5587,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "1ad2c47c-a17e-4e1a-9707-71718b6aad99")
-		(property "Reference" "C93"
+		(property "Reference" "C35"
 			(at 248.92 107.95 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5846,7 +5662,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C93")
+					(reference "C35")
 					(unit 1)
 				)
 			)
@@ -5863,7 +5679,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "27798895-563d-4f30-b8ee-74224fe7758f")
-		(property "Reference" "L25"
+		(property "Reference" "L65"
 			(at 73.66 111.76 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5936,7 +5752,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L25")
+					(reference "L65")
 					(unit 1)
 				)
 			)
@@ -5953,7 +5769,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "2e5c108c-4bbe-495a-9df5-ff990cecd692")
-		(property "Reference" "L29"
+		(property "Reference" "L69"
 			(at 100.33 95.25 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6026,7 +5842,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L29")
+					(reference "L69")
 					(unit 1)
 				)
 			)
@@ -6367,7 +6183,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "4efd87b5-4ebe-4fb6-aa68-69d77b65e2e9")
-		(property "Reference" "C28"
+		(property "Reference" "C68"
 			(at 128.27 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6442,87 +6258,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C28")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Conn_Coaxial")
-		(at 147.32 113.03 0)
-		(mirror y)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "58c896aa-6fa5-4c8c-ad4c-e641a4b14627")
-		(property "Reference" "J9"
-			(at 147.066 109.982 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "U.Fl"
-			(at 144.399 113.03 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Parts:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
-			(at 147.32 113.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 147.32 113.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 147.32 113.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "a8ec1b6f-abf9-485e-9edf-7820764005ee")
-		)
-		(pin "1"
-			(uuid "2da8966d-96b1-42d0-9b93-608f7dd5aeb7")
-		)
-		(instances
-			(project "gpsfreak"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "J9")
+					(reference "C68")
 					(unit 1)
 				)
 			)
@@ -6616,7 +6352,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5c04d01c-3ad1-4110-b8ff-c22964e8acf2")
-		(property "Reference" "C77"
+		(property "Reference" "C32"
 			(at 157.734 94.996 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6691,7 +6427,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C77")
+					(reference "C32")
 					(unit 1)
 				)
 			)
@@ -6787,7 +6523,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5d2812d2-c71e-4875-b82a-02cfc5bd3692")
-		(property "Reference" "C78"
+		(property "Reference" "C36"
 			(at 243.84 134.62 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6862,7 +6598,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C78")
+					(reference "C36")
 					(unit 1)
 				)
 			)
@@ -6957,7 +6693,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "63ed17e4-6669-47f0-a8f2-721e23138c57")
-		(property "Reference" "C76"
+		(property "Reference" "C29"
 			(at 119.38 134.62 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7032,7 +6768,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C76")
+					(reference "C29")
 					(unit 1)
 				)
 			)
@@ -7126,7 +6862,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "72e8f24c-cf8e-46b1-aa07-3a9474098c82")
-		(property "Reference" "C74"
+		(property "Reference" "C27"
 			(at 107.95 96.52 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7201,7 +6937,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C74")
+					(reference "C27")
 					(unit 1)
 				)
 			)
@@ -7218,7 +6954,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "763acb9f-9733-47bb-9e5f-3eebbf2ad5cc")
-		(property "Reference" "L26"
+		(property "Reference" "L66"
 			(at 100.33 35.56 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7291,7 +7027,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L26")
+					(reference "L66")
 					(unit 1)
 				)
 			)
@@ -7386,7 +7122,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "7a61e846-5577-4bdf-9f9a-39adf32ffc15")
-		(property "Reference" "R23"
+		(property "Reference" "R63"
 			(at 227.33 38.608 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7459,7 +7195,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "R23")
+					(reference "R63")
 					(unit 1)
 				)
 			)
@@ -7476,7 +7212,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "7b5e6917-e230-46df-be40-d8cdd9c55ba5")
-		(property "Reference" "L21"
+		(property "Reference" "L61"
 			(at 73.66 35.56 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7549,7 +7285,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L21")
+					(reference "L61")
 					(unit 1)
 				)
 			)
@@ -7566,7 +7302,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "7d2970af-90e2-40ae-b5d4-8438a7997813")
-		(property "Reference" "C27"
+		(property "Reference" "C67"
 			(at 121.92 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7641,7 +7377,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C27")
+					(reference "C67")
 					(unit 1)
 				)
 			)
@@ -7658,7 +7394,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "849c69d9-eac6-45ad-8d61-1a496c1d465f")
-		(property "Reference" "C25"
+		(property "Reference" "C65"
 			(at 115.57 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7733,7 +7469,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C25")
+					(reference "C65")
 					(unit 1)
 				)
 			)
@@ -7750,7 +7486,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "8955fe14-931a-4e1e-96cb-5d3b5e14bd6a")
-		(property "Reference" "C22"
+		(property "Reference" "C62"
 			(at 107.95 36.83 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7825,7 +7561,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C22")
+					(reference "C62")
 					(unit 1)
 				)
 			)
@@ -7920,7 +7656,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "8c7c3413-d454-42b9-bd5e-ae3363717ba8")
-		(property "Reference" "L24"
+		(property "Reference" "L64"
 			(at 73.66 95.25 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7993,7 +7729,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L24")
+					(reference "L64")
 					(unit 1)
 				)
 			)
@@ -8010,7 +7746,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "91a6d318-4fe8-4cc9-8484-e44f242420af")
-		(property "Reference" "C71"
+		(property "Reference" "C24"
 			(at 81.28 77.47 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8085,7 +7821,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C71")
+					(reference "C24")
 					(unit 1)
 				)
 			)
@@ -8325,8 +8061,8 @@
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 147.32 118.11 0)
+		(lib_id "Device:R")
+		(at 158.75 113.03 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8334,10 +8070,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "9dd2f4ec-5634-47a7-8174-3839235273a2")
-		(property "Reference" "#PWR024"
-			(at 147.32 124.46 0)
-			(hide yes)
+		(uuid "9cb51cb2-016d-44ec-94f6-3f096971a9d2")
+		(property "Reference" "R62"
+			(at 158.75 110.998 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8346,19 +8081,18 @@
 				)
 			)
 		)
-		(property "Value" "GND"
-			(at 147.32 120.904 0)
+		(property "Value" "100"
+			(at 158.75 113.03 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify top)
 			)
 		)
-		(property "Footprint" ""
-			(at 147.32 118.11 0)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 158.75 114.808 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8369,7 +8103,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 147.32 118.11 0)
+			(at 158.75 113.03 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8379,8 +8113,8 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 147.32 118.11 0)
+		(property "Description" "Resistor"
+			(at 158.75 113.03 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8389,14 +8123,28 @@
 					(size 1.27 1.27)
 				)
 			)
+		)
+		(property "LCSC" "C25076"
+			(at 158.75 113.03 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "2fdfdcf6-b3a5-4352-bd36-3427d1fd0c29")
 		)
 		(pin "1"
-			(uuid "48b3d360-14bd-4e80-bf0c-72b8ff170d40")
+			(uuid "e4c7dc2e-223d-4bd7-aab3-c361a5fc396a")
 		)
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "#PWR024")
+					(reference "R62")
 					(unit 1)
 				)
 			)
@@ -8413,7 +8161,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9fe98fa5-b942-4209-9731-c009effb359f")
-		(property "Reference" "C23"
+		(property "Reference" "C63"
 			(at 81.28 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8488,7 +8236,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C23")
+					(reference "C63")
 					(unit 1)
 				)
 			)
@@ -8505,7 +8253,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "a3c3ec53-2472-43b6-81e8-0d5b2df6b563")
-		(property "Reference" "C29"
+		(property "Reference" "C31"
 			(at 179.07 35.56 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8580,7 +8328,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C29")
+					(reference "C31")
 					(unit 1)
 				)
 			)
@@ -8832,7 +8580,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "aaac386f-1bd9-4904-8993-67849df78640")
-		(property "Reference" "R24"
+		(property "Reference" "R64"
 			(at 232.918 44.45 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8905,7 +8653,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "R24")
+					(reference "R64")
 					(unit 1)
 				)
 			)
@@ -9000,7 +8748,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "affb208b-d224-44f1-af68-89d04cb5d382")
-		(property "Reference" "L23"
+		(property "Reference" "L63"
 			(at 73.66 76.2 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9073,7 +8821,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L23")
+					(reference "L63")
 					(unit 1)
 				)
 			)
@@ -9090,7 +8838,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b2e1b7b0-ba64-4450-aa9d-d2377f38e7bf")
-		(property "Reference" "L27"
+		(property "Reference" "L67"
 			(at 100.33 54.61 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9163,7 +8911,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L27")
+					(reference "L67")
 					(unit 1)
 				)
 			)
@@ -9180,7 +8928,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b402900d-1adc-458a-9673-f13f1b7873a9")
-		(property "Reference" "L28"
+		(property "Reference" "L68"
 			(at 100.33 76.2 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9253,7 +9001,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L28")
+					(reference "L68")
 					(unit 1)
 				)
 			)
@@ -9270,7 +9018,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b59ea6aa-696d-49e8-bf57-25c1d655eb27")
-		(property "Reference" "R21"
+		(property "Reference" "R61"
 			(at 158.75 100.838 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9343,7 +9091,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "R21")
+					(reference "R61")
 					(unit 1)
 				)
 			)
@@ -9554,7 +9302,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "d7f211d8-5646-45a8-8b8d-4be0fae71a4a")
-		(property "Reference" "C73"
+		(property "Reference" "C26"
 			(at 81.28 96.52 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9629,7 +9377,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C73")
+					(reference "C26")
 					(unit 1)
 				)
 			)
@@ -9646,7 +9394,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "e2a26d07-102b-4558-8f00-21ec31195765")
-		(property "Reference" "C21"
+		(property "Reference" "C61"
 			(at 81.28 36.83 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9721,7 +9469,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C21")
+					(reference "C61")
 					(unit 1)
 				)
 			)
@@ -9729,7 +9477,7 @@
 	)
 	(symbol
 		(lib_id "Parts:TG5032CGN")
-		(at 163.83 53.34 0)
+		(at 153.67 40.64 0)
 		(unit 2)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -9739,7 +9487,7 @@
 		(dnp no)
 		(uuid "e39866f5-03b5-4c96-99f6-a0fb392f2979")
 		(property "Reference" "U3"
-			(at 157.48 48.768 0)
+			(at 147.32 36.068 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9750,7 +9498,7 @@
 			)
 		)
 		(property "Value" "TG5032CGN"
-			(at 163.83 47.244 0)
+			(at 153.67 34.544 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9760,7 +9508,7 @@
 			)
 		)
 		(property "Footprint" "Parts:QFN10_TG5032CGN 40.0000M-CAGHNA0_EPS"
-			(at 163.83 53.34 0)
+			(at 153.67 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9772,7 +9520,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 163.83 53.34 0)
+			(at 153.67 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9784,7 +9532,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 163.83 53.34 0)
+			(at 153.67 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9795,7 +9543,7 @@
 			)
 		)
 		(property "LCSC" "C2891970"
-			(at 163.83 53.34 0)
+			(at 153.67 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10011,7 +9759,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "eaf9f045-d5b1-4a6d-ae5b-089ccc878408")
-		(property "Reference" "C79"
+		(property "Reference" "C37"
 			(at 251.46 134.62 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10086,7 +9834,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C79")
+					(reference "C37")
 					(unit 1)
 				)
 			)
@@ -10103,7 +9851,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "efbb247e-de69-47e7-b627-360afe25785d")
-		(property "Reference" "C72"
+		(property "Reference" "C25"
 			(at 107.95 77.47 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10178,7 +9926,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C72")
+					(reference "C25")
 					(unit 1)
 				)
 			)
@@ -10351,7 +10099,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "fcffaa9b-94db-4d79-872a-d18157e6c9a6")
-		(property "Reference" "C92"
+		(property "Reference" "C34"
 			(at 244.094 94.996 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10426,7 +10174,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "C92")
+					(reference "C34")
 					(unit 1)
 				)
 			)
@@ -10443,7 +10191,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "ff2b7f25-d848-435f-b951-f07e0d5c4c9c")
-		(property "Reference" "L22"
+		(property "Reference" "L62"
 			(at 73.66 54.61 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10516,7 +10264,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/131a3728-0d51-4d75-9961-26d31d87be39"
-					(reference "L22")
+					(reference "L62")
 					(unit 1)
 				)
 			)

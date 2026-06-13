@@ -660,6 +660,146 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:Thermistor_PTC"
 			(pin_numbers
 				(hide yes)
@@ -1933,10 +2073,10 @@
 		)
 		(uuid "1b1473ba-1004-4374-8781-56502e40c331")
 	)
-	(text_box "Part number here is MAX-M10S.  I've actually built with MAX-F10S."
+	(text_box "Part number in schematic is MAX-M10S.  I've built with MAX-F10S."
 		(exclude_from_sim no)
-		(at 87.63 121.92 0)
-		(size 26.67 6.6406)
+		(at 96.52 69.85 0)
+		(size 26.67 7.62)
 		(margins 0.254 0.254 0.254 0.254)
 		(stroke
 			(width 0)
@@ -1978,12 +2118,6 @@
 		(uuid "71589ced-9f9b-4818-9f0a-b0de15dcf327")
 	)
 	(junction
-		(at 116.84 106.68)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "7ce952d7-8ce6-4279-a164-0cbd3a98bac6")
-	)
-	(junction
 		(at 95.25 81.28)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2004,16 +2138,6 @@
 	(no_connect
 		(at 85.09 111.76)
 		(uuid "cd670bd6-f91b-44ec-898c-dafc616cb3fe")
-	)
-	(wire
-		(pts
-			(xy 115.57 106.68) (xy 116.84 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "03e1701e-d917-45f7-9a4c-83727f8e06a2")
 	)
 	(wire
 		(pts
@@ -2077,17 +2201,7 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 114.3) (xy 116.84 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2f2b8950-5990-4e0c-bca6-7ef71542a62b")
-	)
-	(wire
-		(pts
-			(xy 116.84 106.68) (xy 119.38 106.68)
+			(xy 115.57 106.68) (xy 116.84 106.68)
 		)
 		(stroke
 			(width 0)
@@ -2114,16 +2228,6 @@
 			(type default)
 		)
 		(uuid "523d7995-fb24-42b6-a908-da6ee4bd2539")
-	)
-	(wire
-		(pts
-			(xy 116.84 114.3) (xy 119.38 114.3)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5598fa4f-23f8-4ab9-9ad8-b7d69ca5d925")
 	)
 	(wire
 		(pts
@@ -2204,6 +2308,16 @@
 			(type default)
 		)
 		(uuid "e01500a6-ea60-47e0-913b-2d28a59d257e")
+	)
+	(wire
+		(pts
+			(xy 124.46 106.68) (xy 125.73 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e59d4176-1048-4299-9eaa-a88e292bdf18")
 	)
 	(wire
 		(pts
@@ -2326,8 +2440,7 @@
 	)
 	(global_label "GPSCLK"
 		(shape output)
-		(at 119.38 106.68 0)
-		(fields_autoplaced yes)
+		(at 125.73 106.68 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2336,7 +2449,7 @@
 		)
 		(uuid "561dcee2-1482-42fe-b6a5-8f04251df5a9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 129.6828 106.68 0)
+			(at 135.5248 106.68 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2616,7 +2729,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "1804ae21-a4f3-4b12-9ecf-bc4d58a91411")
-		(property "Reference" "L11"
+		(property "Reference" "L51"
 			(at 73.66 72.39 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2689,7 +2802,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "L11")
+					(reference "L51")
 					(unit 1)
 				)
 			)
@@ -2706,7 +2819,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "31bb0b7e-18d4-4081-8375-7264ad17ade0")
-		(property "Reference" "C11"
+		(property "Reference" "C51"
 			(at 78.74 73.66 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2781,7 +2894,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "C11")
+					(reference "C51")
 					(unit 1)
 				)
 			)
@@ -3434,8 +3547,8 @@
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 124.46 119.38 0)
+		(lib_id "Device:R")
+		(at 120.65 106.68 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3443,10 +3556,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "98ab1a24-0982-43cc-8563-3d0da98e69e0")
-		(property "Reference" "#PWR06"
-			(at 124.46 125.73 0)
-			(hide yes)
+		(uuid "9e6b4a46-8f80-40e3-934a-7833e3b76177")
+		(property "Reference" "R51"
+			(at 120.65 104.648 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3455,19 +3567,18 @@
 				)
 			)
 		)
-		(property "Value" "GND"
-			(at 124.46 122.174 0)
+		(property "Value" "100"
+			(at 120.65 106.68 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify top)
 			)
 		)
-		(property "Footprint" ""
-			(at 124.46 119.38 0)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 120.65 108.458 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3478,7 +3589,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 124.46 119.38 0)
+			(at 120.65 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3488,8 +3599,8 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 124.46 119.38 0)
+		(property "Description" "Resistor"
+			(at 120.65 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3498,14 +3609,28 @@
 					(size 1.27 1.27)
 				)
 			)
+		)
+		(property "LCSC" "C25076"
+			(at 120.65 106.68 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "8ece7ba6-4959-4197-9b6f-acd465e8b042")
 		)
 		(pin "1"
-			(uuid "f0dac04e-b1f5-47ef-9d26-a775cd635e3b")
+			(uuid "964098ae-4077-47e3-8404-d982ee2cb97d")
 		)
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "#PWR06")
+					(reference "R51")
 					(unit 1)
 				)
 			)
@@ -3662,85 +3787,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
 					(reference "#PWR07")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Conn_Coaxial")
-		(at 124.46 114.3 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "b97ed23b-5788-491c-987d-17fab66604a9")
-		(property "Reference" "J8"
-			(at 124.46 111.506 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "U.Fl"
-			(at 127.381 114.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Parts:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
-			(at 124.46 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 124.46 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 124.46 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "a4151f81-d5ae-43ad-979a-9ea3b423399e")
-		)
-		(pin "1"
-			(uuid "0970dde8-cbff-484a-8937-4bc6a771f39b")
-		)
-		(instances
-			(project "gpsfreak"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/69331f4b-e5ad-4452-8850-5c5a77857efb"
-					(reference "J8")
 					(unit 1)
 				)
 			)

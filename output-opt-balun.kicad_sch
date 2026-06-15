@@ -1649,6 +1649,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 160.02 58.42 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "8856f066-1e96-4871-bc25-509b16151858")
 		)
@@ -1686,7 +1697,7 @@
 				(justify top)
 			)
 		)
-		(property "Value" "50"
+		(property "Value" "49.9"
 			(at 149.86 72.39 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1730,6 +1741,17 @@
 			)
 		)
 		(property "LCSC" "C23185"
+			(at 149.86 72.39 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 149.86 72.39 90)
 			(hide yes)
 			(show_name no)
@@ -1811,6 +1833,17 @@
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
 			(at 134.62 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "N/A"
+			(at 134.62 71.12 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2070,6 +2103,17 @@
 				)
 			)
 		)
+		(property "Stock" "N/A"
+			(at 160.02 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "3"
 			(uuid "5c368b02-ed8e-4d0d-bccd-922a5aea8c9b")
 		)
@@ -2171,6 +2215,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 144.78 62.23 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "bf97f990-efa1-48d6-a677-6743f22637db")
 		)
@@ -2253,6 +2308,17 @@
 			)
 		)
 		(property "LCSC" "C307331"
+			(at 144.78 67.31 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 144.78 67.31 90)
 			(hide yes)
 			(show_name no)
@@ -2433,6 +2499,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 171.45 64.77 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "c0b16e40-32c1-4780-a8ec-cd9b1dcc10f9")
 		)
@@ -2502,6 +2579,17 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
+			(at 182.88 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "AliX"
 			(at 182.88 64.77 0)
 			(hide yes)
 			(show_name no)
@@ -2584,6 +2672,17 @@
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
 			(at 134.62 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "N/A"
+			(at 134.62 58.42 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

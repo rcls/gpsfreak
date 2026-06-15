@@ -1,14 +1,14 @@
 (footprint "WSON-6-1EP_2x2mm_P0.65mm_NoEP"
-	(version 20241229)
+	(version 20260206)
 	(generator "pcbnew")
-	(generator_version "9.0")
+	(generator_version "10.0")
 	(layer "F.Cu")
 	(descr "WSON, 6 Pin (http://www.ti.com/lit/ds/symlink/tps61040.pdf#page=35), generated with kicad-footprint-generator ipc_noLead_generator.py")
 	(tags "WSON NoLead")
 	(property "Reference" "REF**"
 		(at 0 -1.95 0)
 		(layer "F.SilkS")
-		(uuid "014e3ba9-24a7-4437-befc-0ef988f0ed19")
+		(uuid "0c9ecd22-530b-46da-b486-7bf398ef6e87")
 		(effects
 			(font
 				(size 1 1)
@@ -19,7 +19,7 @@
 	(property "Value" "WSON-6-1EP_2x2mm_P0.65mm_NoEP"
 		(at 0 1.95 0)
 		(layer "F.Fab")
-		(uuid "afc20fa2-699b-44a3-b6f2-06c0e2b46964")
+		(uuid "f4ff2a3f-ff23-453e-8aa4-cc93f2addaa8")
 		(effects
 			(font
 				(size 1 1)
@@ -31,7 +31,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "5ff6e291-b1dc-48a7-ba8a-1d2cefb9b837")
+		(uuid "6ec9478d-b474-4bf1-ada5-3ec0f35d59fe")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -43,7 +43,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "1ad9483a-9458-45b4-b9b6-3aa7e728c8b6")
+		(uuid "74abed00-39c7-4dda-80a6-7030859e4305")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -52,6 +52,7 @@
 		)
 	)
 	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
 	(fp_line
 		(start -1 -1.11)
 		(end 1 -1.11)
@@ -60,7 +61,7 @@
 			(type solid)
 		)
 		(layer "F.SilkS")
-		(uuid "2a1149fb-8930-4e8a-a2e9-1f682e076bca")
+		(uuid "1a4f8049-4d2c-4a25-8993-3a7a717a0181")
 	)
 	(fp_line
 		(start -1 1.11)
@@ -70,7 +71,7 @@
 			(type solid)
 		)
 		(layer "F.SilkS")
-		(uuid "8ae6b195-8e63-463a-8472-ae7b5105e49d")
+		(uuid "87f2d650-730c-4ad4-a8f5-bcb57c0f1a54")
 	)
 	(fp_poly
 		(pts
@@ -82,7 +83,7 @@
 		)
 		(fill yes)
 		(layer "F.SilkS")
-		(uuid "67dbd2f4-beb8-45fe-a11a-7f6194479256")
+		(uuid "13994dae-4a0a-47d5-b774-9b176428ad09")
 	)
 	(fp_rect
 		(start -1.33 -1.25)
@@ -93,7 +94,7 @@
 		)
 		(fill no)
 		(layer "F.CrtYd")
-		(uuid "a07e986a-d018-4551-b2c6-a62e5d751e2e")
+		(uuid "fb890bff-657f-4bdf-aa09-4483e397f6ac")
 	)
 	(fp_poly
 		(pts
@@ -105,12 +106,12 @@
 		)
 		(fill no)
 		(layer "F.Fab")
-		(uuid "0d789ebc-ab22-4db3-8412-909423d4108f")
+		(uuid "f40ce8fd-00e7-4b64-8b2d-237d17d3fb67")
 	)
 	(fp_text user "${REFERENCE}"
 		(at 0 0 0)
 		(layer "F.Fab")
-		(uuid "3b98dcc1-7858-4b71-9fb6-2ab4b06089e7")
+		(uuid "2ea3d545-3de5-4f57-82ef-554b7f1b2db9")
 		(effects
 			(font
 				(size 0.5 0.5)
@@ -123,54 +124,51 @@
 		(size 0.45 0.3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		(uuid "bf77b950-18c0-44ca-83ff-00e5e7d12171")
+		(uuid "da72dfdd-dffb-4ed7-8a70-1e7e68d581a2")
 	)
 	(pad "2" smd roundrect
 		(at -0.975 0)
 		(size 0.45 0.3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		(uuid "ab34ac49-5a20-4202-9993-e419fecb9ba2")
+		(uuid "6667a7ad-03f1-4b3f-a706-bd5299b0e98a")
 	)
 	(pad "3" smd roundrect
 		(at -0.975 0.65)
 		(size 0.45 0.3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		(uuid "a667e39b-72cf-4e87-a503-7de32b82b707")
+		(uuid "f712818e-11e4-4b81-8922-1b7ae6bf42f0")
 	)
 	(pad "4" smd roundrect
 		(at 0.975 0.65)
 		(size 0.45 0.3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		(uuid "c0562415-a450-478c-8e2e-183286e00b98")
+		(uuid "cd0031d4-d6f0-4e4e-839d-7aa9b2654946")
 	)
 	(pad "5" smd roundrect
 		(at 0.975 0)
 		(size 0.45 0.3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		(uuid "2d391de9-16af-4840-bf1e-b036c7a2f657")
+		(uuid "a0ca5119-d680-479e-b957-f4f497b8bf59")
 	)
 	(pad "6" smd roundrect
 		(at 0.975 -0.65)
 		(size 0.45 0.3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		(uuid "f536490e-bb47-44ae-a630-3da5a3654337")
+		(uuid "4b001091-1331-4a9e-ab94-5e21b42e7908")
 	)
 	(zone
-		(net 0)
-		(net_name "")
 		(layer "F.Cu")
-		(uuid "2bd0eb5c-a903-4053-bc5c-5c7a647d5a9b")
+		(uuid "406ee96e-c642-4376-8dcd-eaa46f3992e9")
 		(hatch edge 0.5)
 		(connect_pads
 			(clearance 0)
 		)
 		(min_thickness 0.25)
-		(filled_areas_thickness no)
 		(keepout
 			(tracks not_allowed)
 			(vias not_allowed)
@@ -185,6 +183,7 @@
 		(fill
 			(thermal_gap 0.5)
 			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
 		)
 		(polygon
 			(pts
@@ -193,7 +192,7 @@
 		)
 	)
 	(embedded_fonts no)
-	(model "${KICAD9_3DMODEL_DIR}/Package_SON.3dshapes/WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm.wrl"
+	(model "${KICAD10_3DMODEL_DIR}/Package_SON.3dshapes/WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm.step"
 		(offset
 			(xyz 0 0 0)
 		)

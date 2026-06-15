@@ -1944,6 +1944,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 60.96 107.95 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "a4bf1934-c75a-4dfc-aea0-dc20092ab558")
 		)
@@ -2016,6 +2027,17 @@
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
 			(at 91.44 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "N/A"
+			(at 91.44 119.38 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2106,6 +2128,17 @@
 			)
 		)
 		(property "LCSC" "C25741"
+			(at 60.96 120.65 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 60.96 120.65 90)
 			(hide yes)
 			(show_name no)
@@ -2207,6 +2240,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 64.77 114.3 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "402e39d9-4f45-483e-ba6f-32b715962dcc")
 		)
@@ -2276,6 +2320,17 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
+			(at 99.06 114.3 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "AliX"
 			(at 99.06 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -2400,7 +2455,7 @@
 				)
 			)
 		)
-		(property "Value" "220"
+		(property "Value" "120"
 			(at 80.01 101.346 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2444,6 +2499,17 @@
 			)
 		)
 		(property "LCSC" "C14709"
+			(at 80.01 104.14 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 80.01 104.14 90)
 			(hide yes)
 			(show_name no)
@@ -2781,6 +2847,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 69.85 104.14 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "7a079473-a5cb-4e39-8639-2f0d805eb613")
 		)
@@ -2940,6 +3017,17 @@
 			)
 		)
 		(property "LCSC" "C2974371"
+			(at 77.47 114.3 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Ext"
 			(at 77.47 114.3 0)
 			(hide yes)
 			(show_name no)

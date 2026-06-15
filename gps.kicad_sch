@@ -2627,6 +2627,17 @@
 				)
 			)
 		)
+		(property "Stock" "N/A"
+			(at 80.01 109.22 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "fd95c4ed-84d7-40d9-a606-63d82f707928")
 		)
@@ -2703,6 +2714,17 @@
 				)
 			)
 		)
+		(property "Stock" "AliX"
+			(at 139.7 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "c4cf5593-1a29-4962-bbda-c8d08b855ee7")
 		)
@@ -2739,7 +2761,7 @@
 				)
 			)
 		)
-		(property "Value" "220"
+		(property "Value" "120"
 			(at 73.66 68.326 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2783,6 +2805,17 @@
 			)
 		)
 		(property "LCSC" "C14709"
+			(at 73.66 71.12 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 73.66 71.12 90)
 			(hide yes)
 			(show_name no)
@@ -2875,6 +2908,17 @@
 			)
 		)
 		(property "LCSC" "C15525"
+			(at 78.74 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 78.74 74.93 0)
 			(hide yes)
 			(show_name no)
@@ -2978,6 +3022,17 @@
 				)
 			)
 		)
+		(property "Stock" "Ok"
+			(at 130.81 85.09 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "2e2e2809-44c6-4ae5-b11d-e8ed6a6a51ee")
 		)
@@ -2999,7 +3054,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -3014,7 +3069,7 @@
 				)
 			)
 		)
-		(property "Value" "100n"
+		(property "Value" "68n"
 			(at 128.905 95.25 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3035,7 +3090,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "LQW15AWR10J80D"
+		(property "Datasheet" "LQW15AW68N"
 			(at 130.81 95.25 0)
 			(hide yes)
 			(show_name no)
@@ -3058,6 +3113,17 @@
 			)
 		)
 		(property "LCSC" "C3224079"
+			(at 130.81 95.25 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "ORDER"
 			(at 130.81 95.25 90)
 			(hide yes)
 			(show_name no)
@@ -3245,7 +3311,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -3304,6 +3370,17 @@
 			)
 		)
 		(property "LCSC" "C4153167"
+			(at 100.33 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "ORDER, 1"
 			(at 100.33 99.06 0)
 			(hide yes)
 			(show_name no)
@@ -3531,6 +3608,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 147.32 93.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "c2ca2c4f-978f-40af-b46e-4c5ae926e5b1")
 		)
@@ -3611,6 +3699,17 @@
 			)
 		)
 		(property "LCSC" "C25076"
+			(at 120.65 106.68 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 120.65 106.68 90)
 			(hide yes)
 			(show_name no)

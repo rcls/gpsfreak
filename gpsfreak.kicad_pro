@@ -173,7 +173,7 @@
         "min_copper_edge_clearance": 0.2,
         "min_groove_width": 0.0,
         "min_hole_clearance": 0.15,
-        "min_hole_to_hole": 0.3,
+        "min_hole_to_hole": 0.25,
         "min_microvia_diameter": 0.2,
         "min_microvia_drill": 0.1,
         "min_resolved_spokes": 2,
@@ -238,7 +238,7 @@
         0.1773,
         0.2,
         0.2065,
-        0.2319,
+        0.2395,
         0.25,
         0.3,
         0.3493,
@@ -953,10 +953,10 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 4,
+    "annotate_start_num": 30,
     "annotation": {
       "method": 0,
-      "sort_order": 1
+      "sort_order": 0
     },
     "bom_export_filename": "${PROJECTNAME}.csv",
     "bom_fmt_presets": [
@@ -1062,15 +1062,15 @@
       "exclude_dnp": false,
       "fields_ordered": [
         {
-          "group_by": true,
-          "label": "Value",
-          "name": "Value",
-          "show": true
-        },
-        {
           "group_by": false,
           "label": "Reference",
           "name": "Reference",
+          "show": true
+        },
+        {
+          "group_by": true,
+          "label": "Value",
+          "name": "Value",
           "show": true
         },
         {
@@ -1110,6 +1110,12 @@
           "show": true
         },
         {
+          "group_by": false,
+          "label": "Stock",
+          "name": "Stock",
+          "show": true
+        },
+        {
           "group_by": true,
           "label": "Datasheet",
           "name": "Datasheet",
@@ -1133,7 +1139,7 @@
       "include_excluded_from_bom": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Reference"
+      "sort_field": "Stock"
     },
     "bus_aliases": {},
     "connection_grid_size": 50.0,
@@ -1184,7 +1190,7 @@
         "uuid": "3160ff17-81c2-4674-af97-e8d9acaf6b65"
       }
     ],
-    "used_designators": "R79,C4-5,J1,J8-9",
+    "used_designators": "U71,#PWR6,#PWR98,R79,C4-6,C15-20,C36-37,C73-76,C97,J1,J8-9",
     "variants": []
   },
   "sheets": [

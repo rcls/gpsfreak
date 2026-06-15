@@ -860,6 +860,17 @@
 				)
 			)
 		)
+		(property "Stock" "6"
+			(at 190.5 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "dbaec91d-429b-4b3a-b2da-ede76791210b")
 		)

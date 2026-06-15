@@ -964,6 +964,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 64.77 62.23 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "329bb486-874e-44b3-be03-548e2eff031b")
 		)
@@ -1278,6 +1289,17 @@
 				)
 			)
 		)
+		(property "Stock" "N/A"
+			(at 54.61 71.12 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "68cc666b-ecff-468f-a1ed-c264531d5e96")
 		)
@@ -1347,6 +1369,17 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
+			(at 87.63 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "AliX"
 			(at 87.63 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -1429,6 +1462,17 @@
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
 			(at 54.61 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "N/A"
+			(at 54.61 58.42 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1595,6 +1639,17 @@
 				)
 			)
 		)
+		(property "Stock" "AliX"
+			(at 78.74 67.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "c0fc497d-5c5d-41cf-ad68-2b1978d407f2")
 		)
@@ -1677,6 +1732,17 @@
 			)
 		)
 		(property "LCSC" "C307331"
+			(at 64.77 67.31 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 64.77 67.31 90)
 			(hide yes)
 			(show_name no)

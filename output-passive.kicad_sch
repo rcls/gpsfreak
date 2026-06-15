@@ -1509,10 +1509,10 @@
 			(embedded_fonts no)
 		)
 	)
-	(text_box "Diode allows parasitic power-up of switch."
+	(text_box "Switch can be powered up via its protection diodes."
 		(exclude_from_sim no)
-		(at 116.84 29.21 0)
-		(size 20.3199 6.6406)
+		(at 115.57 29.21 0)
+		(size 19.0499 6.6406)
 		(margins 0.254 0.254 0.254 0.254)
 		(stroke
 			(width 0)
@@ -1551,7 +1551,7 @@
 	)
 	(text_box "Keep IO_P line short & switch close to digital logic. 50Ω line to connector can be as long as needed."
 		(exclude_from_sim no)
-		(at 153.67 52.8446 0)
+		(at 151.13 52.8446 0)
 		(size 22.8599 10.7298)
 		(margins 0.254 0.254 0.254 0.254)
 		(stroke
@@ -1576,6 +1576,12 @@
 		(uuid "02470d19-7fcc-40b1-b92d-fa02196d246f")
 	)
 	(junction
+		(at 107.95 25.4)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0586fcf5-a12e-4c0f-8fde-43202cf7016a")
+	)
+	(junction
 		(at 102.87 35.56)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1588,10 +1594,10 @@
 		(uuid "177f7eee-2986-4ed5-9510-ff04d56be1d8")
 	)
 	(junction
-		(at 142.24 25.4)
+		(at 139.7 25.4)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "3cf78c61-3f92-485e-abc0-cb44d10c03f8")
+		(uuid "2313cb68-8155-47d3-8a7b-ce7d70c6b8fb")
 	)
 	(junction
 		(at 120.65 60.96)
@@ -1635,12 +1641,6 @@
 		(color 0 0 0 0)
 		(uuid "e6eb1e56-ef37-4b80-8f3c-b190b0847a83")
 	)
-	(junction
-		(at 107.95 25.4)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f73a8f98-e937-4d6f-97f0-6594bcefd25d")
-	)
 	(wire
 		(pts
 			(xy 113.03 35.56) (xy 107.95 35.56)
@@ -1663,17 +1663,7 @@
 	)
 	(wire
 		(pts
-			(xy 142.24 25.4) (xy 151.13 25.4)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "167915b1-2fc6-4b26-b57e-468de3a2a8ed")
-	)
-	(wire
-		(pts
-			(xy 107.95 25.4) (xy 128.27 25.4)
+			(xy 107.95 25.4) (xy 121.92 25.4)
 		)
 		(stroke
 			(width 0)
@@ -1773,7 +1763,7 @@
 	)
 	(wire
 		(pts
-			(xy 135.89 25.4) (xy 142.24 25.4)
+			(xy 129.54 25.4) (xy 139.7 25.4)
 		)
 		(stroke
 			(width 0)
@@ -1930,6 +1920,16 @@
 			(type default)
 		)
 		(uuid "c27493b5-5bd0-4bcb-a324-243b30577246")
+	)
+	(wire
+		(pts
+			(xy 139.7 25.4) (xy 147.32 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c4d2e40a-7ced-434a-9788-84152f70db5d")
 	)
 	(wire
 		(pts
@@ -2257,6 +2257,17 @@
 				)
 			)
 		)
+		(property "Stock" "AliX"
+			(at 172.72 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "f2957abc-ca14-46f2-b9e6-35b928a9b43c")
 		)
@@ -2336,7 +2347,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C25076"
+			(at 128.27 60.96 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 128.27 60.96 90)
 			(hide yes)
 			(show_name no)
@@ -2383,7 +2405,7 @@
 				)
 			)
 		)
-		(property "Value" "39"
+		(property "Value" "33"
 			(at 128.27 69.85 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2426,7 +2448,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C25105"
+			(at 128.27 69.85 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 128.27 69.85 90)
 			(hide yes)
 			(show_name no)
@@ -2454,7 +2487,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 151.13 50.8 0)
+		(at 147.32 50.8 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2464,7 +2497,7 @@
 		(dnp no)
 		(uuid "403d2be5-a9ca-4f91-9847-3600acc85d88")
 		(property "Reference" "#PWR0114"
-			(at 151.13 57.15 0)
+			(at 147.32 57.15 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2475,7 +2508,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 151.13 53.594 0)
+			(at 147.32 53.594 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2486,7 +2519,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 151.13 50.8 0)
+			(at 147.32 50.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2497,7 +2530,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 151.13 50.8 0)
+			(at 147.32 50.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2508,7 +2541,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 151.13 50.8 0)
+			(at 147.32 50.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2563,7 +2596,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Parts:SOT-353_SC-70-6"
+		(property "Footprint" "Parts:SOT-363_SC-70-6"
 			(at 114.3 83.185 0)
 			(hide yes)
 			(show_name no)
@@ -2588,6 +2621,28 @@
 			)
 		)
 		(property "Description" "Single SPDT Analog Switch, 5V/3.3V Single-Supply Operation, 12Ohm Ron, SOT-23-6"
+			(at 115.57 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C133575"
+			(at 115.57 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "ORDER"
 			(at 115.57 69.85 0)
 			(hide yes)
 			(show_name no)
@@ -2780,6 +2835,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 161.29 69.85 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "1d182f2a-4a91-435a-9af8-0f86a7a0a754")
 		)
@@ -2851,6 +2917,17 @@
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
 			(at 156.21 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "N/A"
+			(at 156.21 73.66 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2940,7 +3017,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C11702"
+			(at 115.57 55.88 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 115.57 55.88 90)
 			(hide yes)
 			(show_name no)
@@ -3043,6 +3131,17 @@
 				)
 			)
 		)
+		(property "Stock" "Basic"
+			(at 97.79 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "01768e1b-1c58-4c53-aa0c-c47e8cc9a040")
 		)
@@ -3060,7 +3159,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 142.24 29.21 0)
+		(at 139.7 29.21 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3070,7 +3169,7 @@
 		(dnp no)
 		(uuid "96c5290c-09f3-4aea-bdb7-1b9e915a0489")
 		(property "Reference" "C44"
-			(at 142.24 27.94 0)
+			(at 139.7 27.94 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3081,7 +3180,7 @@
 			)
 		)
 		(property "Value" "0u1"
-			(at 142.24 30.48 0)
+			(at 139.7 30.48 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3092,7 +3191,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 143.2052 33.02 0)
+			(at 140.6652 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3103,7 +3202,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 142.24 29.21 0)
+			(at 139.7 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3114,7 +3213,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 142.24 29.21 0)
+			(at 139.7 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3125,7 +3224,18 @@
 			)
 		)
 		(property "LCSC" "C307331"
-			(at 142.24 29.21 0)
+			(at 139.7 29.21 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
+			(at 139.7 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3214,7 +3324,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C25744"
+			(at 113.03 40.64 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 113.03 40.64 90)
 			(hide yes)
 			(show_name no)
@@ -3242,7 +3363,7 @@
 	)
 	(symbol
 		(lib_id "Diode:1N5819WS")
-		(at 132.08 25.4 180)
+		(at 125.73 25.4 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3252,7 +3373,7 @@
 		(dnp no)
 		(uuid "a07fd27e-971c-4241-9907-f7459c638c1d")
 		(property "Reference" "D42"
-			(at 132.08 27.94 0)
+			(at 125.73 27.94 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3262,7 +3383,7 @@
 			)
 		)
 		(property "Value" "1N5819WS"
-			(at 132.08 22.86 0)
+			(at 125.73 22.86 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3272,7 +3393,7 @@
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SOD-323"
-			(at 132.08 20.955 0)
+			(at 125.73 20.955 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3283,7 +3404,7 @@
 			)
 		)
 		(property "Datasheet" "https://datasheet.lcsc.com/lcsc/2204281430_Guangdong-Hottech-1N5819WS_C191023.pdf"
-			(at 132.08 25.4 0)
+			(at 125.73 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3294,7 +3415,29 @@
 			)
 		)
 		(property "Description" "40V 600mV@1A 1A SOD-323 Schottky Barrier Diodes, SOD-323"
-			(at 132.08 25.4 0)
+			(at 125.73 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
+			(at 125.73 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C191023"
+			(at 125.73 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3399,7 +3542,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 142.24 33.02 0)
+		(at 139.7 33.02 0)
 		(mirror y)
 		(unit 1)
 		(body_style 1)
@@ -3410,7 +3553,7 @@
 		(dnp no)
 		(uuid "af787f88-2d5e-4ae4-940e-5c7708c50e12")
 		(property "Reference" "#PWR0112"
-			(at 142.24 39.37 0)
+			(at 139.7 39.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3421,7 +3564,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 142.24 35.814 0)
+			(at 139.7 35.814 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3432,7 +3575,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 142.24 33.02 0)
+			(at 139.7 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3443,7 +3586,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 142.24 33.02 0)
+			(at 139.7 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3454,7 +3597,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 142.24 33.02 0)
+			(at 139.7 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3542,7 +3685,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C32949"
+			(at 115.57 60.96 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 115.57 60.96 90)
 			(hide yes)
 			(show_name no)
@@ -3632,7 +3786,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C25744"
+			(at 107.95 30.48 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 107.95 30.48 90)
 			(hide yes)
 			(show_name no)
@@ -3724,6 +3889,17 @@
 			)
 		)
 		(property "LCSC" "C25744"
+			(at 115.57 82.55 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 115.57 82.55 90)
 			(hide yes)
 			(show_name no)
@@ -3908,7 +4084,7 @@
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
-		(at 142.24 25.4 0)
+		(at 139.7 25.4 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3918,7 +4094,7 @@
 		(dnp no)
 		(uuid "d62a6493-4526-447c-8ef2-872811a48a95")
 		(property "Reference" "#FLG04"
-			(at 142.24 23.495 0)
+			(at 139.7 23.495 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3929,7 +4105,7 @@
 			)
 		)
 		(property "Value" "PWR_FLAG"
-			(at 142.24 21.59 0)
+			(at 139.7 21.59 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3940,7 +4116,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 142.24 25.4 0)
+			(at 139.7 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3951,7 +4127,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 142.24 25.4 0)
+			(at 139.7 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3962,7 +4138,7 @@
 			)
 		)
 		(property "Description" "Special symbol for telling ERC where power comes from"
-			(at 142.24 25.4 0)
+			(at 139.7 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3986,7 +4162,7 @@
 	)
 	(symbol
 		(lib_id "Analog_Switch:TS5A63157DBV")
-		(at 151.13 38.1 0)
+		(at 147.32 38.1 0)
 		(unit 2)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3996,7 +4172,7 @@
 		(dnp no)
 		(uuid "d9403b4e-9966-455f-988a-5224eb617fb4")
 		(property "Reference" "U41"
-			(at 151.003 37.973 0)
+			(at 147.193 37.973 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4006,7 +4182,7 @@
 			)
 		)
 		(property "Value" "TS5A63157DBV"
-			(at 151.257 49.657 0)
+			(at 147.447 49.657 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4016,8 +4192,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Parts:SOT-353_SC-70-6"
-			(at 152.4 51.435 0)
+		(property "Footprint" "Parts:SOT-363_SC-70-6"
+			(at 148.59 51.435 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4029,7 +4205,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/ts5a63157.pdf"
-			(at 152.4 49.53 0)
+			(at 148.59 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4041,7 +4217,29 @@
 			)
 		)
 		(property "Description" "Single SPDT Analog Switch, 5V/3.3V Single-Supply Operation, 12Ohm Ron, SOT-23-6"
-			(at 151.13 38.1 0)
+			(at 147.32 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C133575"
+			(at 147.32 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "ORDER"
+			(at 147.32 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4220,7 +4418,18 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C25744"
+			(at 102.87 40.64 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 102.87 40.64 90)
 			(hide yes)
 			(show_name no)
@@ -4313,6 +4522,17 @@
 			)
 		)
 		(property "LCSC" "C15195"
+			(at 107.95 40.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
 			(at 107.95 40.64 0)
 			(hide yes)
 			(show_name no)

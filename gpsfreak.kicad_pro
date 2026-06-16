@@ -953,7 +953,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 50,
+    "annotate_start_num": 80,
     "annotation": {
       "method": 0,
       "sort_order": 0
@@ -1139,7 +1139,7 @@
       "include_excluded_from_bom": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Stock"
+      "sort_field": "Reference"
     },
     "bus_aliases": {},
     "connection_grid_size": 50.0,
@@ -1190,7 +1190,7 @@
         "uuid": "3160ff17-81c2-4674-af97-e8d9acaf6b65"
       }
     ],
-    "used_designators": "R51-52,C14-19,C52",
+    "used_designators": "J10,J81,R11,R51-52,R100,C14-19,C41-42,C52,C84",
     "variants": []
   },
   "sheets": [

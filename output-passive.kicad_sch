@@ -3065,7 +3065,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "95fc5d2d-bba5-4a4b-bc5b-27332230b8fc")
-		(property "Reference" "C5"
+		(property "Reference" "C42"
 			(at 97.79 57.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3151,7 +3151,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/8de00818-124c-4cc8-9910-e794140dfeb1"
-					(reference "C5")
+					(reference "C42")
 					(unit 1)
 				)
 			)
@@ -3382,7 +3382,7 @@
 				)
 			)
 		)
-		(property "Value" "1N5819WS"
+		(property "Value" "RB751S-40"
 			(at 125.73 22.86 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3392,7 +3392,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-323"
+		(property "Footprint" "Diode_SMD:D_SOD-523"
 			(at 125.73 20.955 0)
 			(hide yes)
 			(show_name no)
@@ -3403,7 +3403,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://datasheet.lcsc.com/lcsc/2204281430_Guangdong-Hottech-1N5819WS_C191023.pdf"
+		(property "Datasheet" ""
 			(at 125.73 25.4 0)
 			(hide yes)
 			(show_name no)
@@ -3425,7 +3425,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" "Prom"
 			(at 125.73 25.4 0)
 			(hide yes)
 			(show_name no)
@@ -3436,7 +3436,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C191023"
+		(property "LCSC" "C7502700"
 			(at 125.73 25.4 0)
 			(hide yes)
 			(show_name no)
@@ -4466,7 +4466,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "fbbd73b0-e975-413c-9d11-4a2f7ddbc2c0")
-		(property "Reference" "C4"
+		(property "Reference" "C41"
 			(at 107.95 39.37 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4552,7 +4552,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/8de00818-124c-4cc8-9910-e794140dfeb1"
-					(reference "C4")
+					(reference "C41")
 					(unit 1)
 				)
 			)

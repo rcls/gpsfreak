@@ -1244,7 +1244,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Parts:TPSM82822SILR"
+		(symbol "Parts:TPS82084SIL"
 			(pin_names
 				(offset 0.254)
 			)
@@ -1253,7 +1253,7 @@
 			(on_board yes)
 			(in_pos_files yes)
 			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "U?"
+			(property "Reference" "U"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1263,7 +1263,7 @@
 					)
 				)
 			)
-			(property "Value" "TPSM82822SILR"
+			(property "Value" "TPS82084SIL"
 				(at 0 -6.35 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1273,7 +1273,7 @@
 					)
 				)
 			)
-			(property "Footprint" "Parts:SIL0010D-MFG"
+			(property "Footprint" "Parts:SIL0008C_SMD_NV"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1285,7 +1285,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.ti.com/lit/gpn/tpsm82822"
+			(property "Datasheet" "TPS82084SILR"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1298,6 +1298,17 @@
 				)
 			)
 			(property "Description" ""
+				(at 1.27 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "TPS82084SIL"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1308,66 +1319,7 @@
 					)
 				)
 			)
-			(property "ki_keywords" "XPSM82822SILR"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "SIL0010D-MFG"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "TPSM82822SILR_0_1"
-				(pin power_in line
-					(at -7.62 3.81 0)
-					(length 2.54)
-					(name "VIN"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 3.81 0)
-					(length 2.54)
-					(hide yes)
-					(name "VIN"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
+			(symbol "TPS82084SIL_0_1"
 				(pin input line
 					(at -7.62 1.27 0)
 					(length 2.54)
@@ -1378,7 +1330,7 @@
 							)
 						)
 					)
-					(number "3"
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1396,81 +1348,44 @@
 							)
 						)
 					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -7.62 3.81 0)
+					(length 2.54)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 3.81 0)
+					(length 2.54)
+					(hide yes)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_out line
-					(at 7.62 3.81 180)
-					(length 2.54)
-					(name "VOUT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 3.81 180)
-					(length 2.54)
-					(hide yes)
-					(name "VOUT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 3.81 180)
-					(length 2.54)
-					(hide yes)
-					(name "VOUT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -3.81 180)
-					(length 2.54)
-					(name "FB"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "8"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1488,7 +1403,7 @@
 							)
 						)
 					)
-					(number "9"
+					(number "5"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1507,7 +1422,62 @@
 							)
 						)
 					)
-					(number "10"
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 7.62 -3.81 180)
+					(length 2.54)
+					(name "FB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 7.62 3.81 180)
+					(length 2.54)
+					(name "VOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -3.81 0)
+					(length 2.54)
+					(hide yes)
+					(name "PAD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1516,7 +1486,7 @@
 					)
 				)
 			)
-			(symbol "TPSM82822SILR_1_1"
+			(symbol "TPS82084SIL_1_1"
 				(rectangle
 					(start -5.08 5.08)
 					(end 5.08 -5.08)
@@ -2100,12 +2070,6 @@
 		(uuid "e307dc22-8bb7-4121-8e55-d263eae6b42a")
 	)
 	(junction
-		(at 114.3 73.66)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f21b6b32-1ea0-4607-8201-ecf0834c55e1")
-	)
-	(junction
 		(at 196.85 46.99)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2140,12 +2104,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "fb7fdec5-8a14-40a8-9f44-6fa5f2c47b71")
-	)
-	(junction
-		(at 114.3 39.37)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "fc350d95-6c58-41db-878e-5ad4e0fdb057")
 	)
 	(junction
 		(at 193.04 66.04)
@@ -2221,16 +2179,6 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 39.37) (xy 114.3 39.37)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "16cc34ee-dbf1-47ed-917c-157ae4d69660")
-	)
-	(wire
-		(pts
 			(xy 182.88 39.37) (xy 193.04 39.37)
 		)
 		(stroke
@@ -2258,16 +2206,6 @@
 			(type default)
 		)
 		(uuid "23931532-284c-4b8b-9b2b-ea10c7feb78f")
-	)
-	(wire
-		(pts
-			(xy 114.3 73.66) (xy 107.95 73.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "26039225-f51d-405a-8f41-0409f8ba5692")
 	)
 	(wire
 		(pts
@@ -2431,7 +2369,7 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 73.66) (xy 114.3 73.66)
+			(xy 107.95 73.66) (xy 116.84 73.66)
 		)
 		(stroke
 			(width 0)
@@ -2581,7 +2519,7 @@
 	)
 	(wire
 		(pts
-			(xy 107.95 39.37) (xy 114.3 39.37)
+			(xy 107.95 39.37) (xy 116.84 39.37)
 		)
 		(stroke
 			(width 0)
@@ -3359,110 +3297,6 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
 					(reference "#PWR092")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 114.3 69.85 0)
-		(mirror y)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "13d3402e-c44d-4a45-a6b2-9be190b7ec00")
-		(property "Reference" "C2"
-			(at 114.3 68.58 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "Value" "470p"
-			(at 114.3 71.12 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right top)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 113.3348 73.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 114.3 69.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 114.3 69.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C1537"
-			(at 114.3 69.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Stock" "Prom"
-			(at 114.3 69.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "87541c63-2f2a-4f7f-885b-aaec282cf1ff")
-		)
-		(pin "2"
-			(uuid "81914346-f7dd-469f-be4e-7abf02045748")
-		)
-		(instances
-			(project "gpsfreak"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
-					(reference "C2")
 					(unit 1)
 				)
 			)
@@ -4256,7 +4090,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Parts:TPSM82822SILR")
+		(lib_id "Parts:TPS82084SIL")
 		(at 99.06 35.56 0)
 		(unit 1)
 		(body_style 1)
@@ -4276,8 +4110,8 @@
 				)
 			)
 		)
-		(property "Value" "TPSM82822SILR"
-			(at 97.282 42.164 0)
+		(property "Value" "TPS82084SIL"
+			(at 99.06 41.91 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4286,7 +4120,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SIL0010D-MFG"
+		(property "Footprint" "Parts:SIL0008C_SMD_NV"
 			(at 99.06 35.56 0)
 			(hide yes)
 			(show_name no)
@@ -4298,7 +4132,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/gpn/tpsm82822"
+		(property "Datasheet" "TPS82084SILR"
 			(at 99.06 35.56 0)
 			(hide yes)
 			(show_name no)
@@ -4311,7 +4145,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 99.06 35.56 0)
+			(at 100.33 35.56 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4321,7 +4155,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C5219367"
+		(property "LCSC" "C468248"
 			(at 99.06 35.56 0)
 			(hide yes)
 			(show_name no)
@@ -4369,9 +4203,6 @@
 		)
 		(pin "9"
 			(uuid "bdd07433-8a3e-4fb7-93f0-733c4d0e343a")
-		)
-		(pin "10"
-			(uuid "53e744dd-f97d-4f06-92df-5bbe5a5f74b9")
 		)
 		(instances
 			(project "gpsfreak"
@@ -5562,110 +5393,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:C")
-		(at 114.3 35.56 0)
-		(mirror y)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "6e7c83c7-233b-46ad-905f-989068d26a75")
-		(property "Reference" "C1"
-			(at 114.3 34.29 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "Value" "470p"
-			(at 114.3 36.83 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right top)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 113.3348 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 114.3 35.56 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 114.3 35.56 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C1537"
-			(at 114.3 35.56 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Stock" "Prom"
-			(at 114.3 35.56 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "5bf7d0a8-3935-4762-b5cd-de237d212c88")
-		)
-		(pin "2"
-			(uuid "7c823eb0-41ed-4c44-b50b-78cc0da065ab")
-		)
-		(instances
-			(project "gpsfreak"
-				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/6988b802-c4bd-48f6-b03d-8f2b1e6051d9"
-					(reference "C1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:R")
 		(at 107.95 35.56 0)
 		(unit 1)
@@ -5686,7 +5413,7 @@
 				)
 			)
 		)
-		(property "Value" "75k"
+		(property "Value" "39k"
 			(at 107.95 35.56 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5729,7 +5456,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25798"
+		(property "LCSC" "C25783"
 			(at 107.95 35.56 90)
 			(hide yes)
 			(show_name no)
@@ -5740,7 +5467,7 @@
 				)
 			)
 		)
-		(property "Stock" "Prom"
+		(property "Stock" ""
 			(at 107.95 35.56 90)
 			(hide yes)
 			(show_name no)
@@ -5787,7 +5514,7 @@
 				)
 			)
 		)
-		(property "Value" "150k"
+		(property "Value" "200k"
 			(at 107.95 69.85 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5830,7 +5557,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25755"
+		(property "LCSC" "C25764"
 			(at 107.95 69.85 90)
 			(hide yes)
 			(show_name no)
@@ -6377,7 +6104,7 @@
 				)
 			)
 		)
-		(property "Value" "30k"
+		(property "Value" "24k"
 			(at 107.95 43.18 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6387,7 +6114,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 106.172 43.18 90)
 			(hide yes)
 			(show_name no)
@@ -6420,7 +6147,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C22984"
+		(property "LCSC" "C25769"
 			(at 107.95 43.18 90)
 			(hide yes)
 			(show_name no)
@@ -6431,7 +6158,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" ""
 			(at 107.95 43.18 90)
 			(hide yes)
 			(show_name no)
@@ -7747,7 +7474,7 @@
 				)
 			)
 		)
-		(property "Value" "30k"
+		(property "Value" "46k"
 			(at 107.95 77.47 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7757,7 +7484,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 106.172 77.47 90)
 			(hide yes)
 			(show_name no)
@@ -7790,7 +7517,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C22984"
+		(property "LCSC" "C25764"
 			(at 107.95 77.47 90)
 			(hide yes)
 			(show_name no)
@@ -8098,7 +7825,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Parts:TPSM82822SILR")
+		(lib_id "Parts:TPS82084SIL")
 		(at 99.06 69.85 0)
 		(unit 1)
 		(body_style 1)
@@ -8118,8 +7845,8 @@
 				)
 			)
 		)
-		(property "Value" "TPSM82822SILR"
-			(at 97.282 76.454 0)
+		(property "Value" "TPS82084SIL"
+			(at 99.06 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8128,7 +7855,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Parts:SIL0010D-MFG"
+		(property "Footprint" "Parts:SIL0008C_SMD_NV"
 			(at 99.06 69.85 0)
 			(hide yes)
 			(show_name no)
@@ -8140,7 +7867,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/gpn/tpsm82822"
+		(property "Datasheet" "TPS82084SILR"
 			(at 99.06 69.85 0)
 			(hide yes)
 			(show_name no)
@@ -8153,7 +7880,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 99.06 69.85 0)
+			(at 100.33 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8163,7 +7890,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C5219367"
+		(property "LCSC" "C468248"
 			(at 99.06 69.85 0)
 			(hide yes)
 			(show_name no)
@@ -8211,9 +7938,6 @@
 		)
 		(pin "9"
 			(uuid "bb631994-91d7-49b8-a58e-f60762b6fef0")
-		)
-		(pin "10"
-			(uuid "6caee6ba-ee05-42c0-9999-06345a9349d4")
 		)
 		(instances
 			(project "gpsfreak"

@@ -2314,6 +2314,12 @@
 		(uuid "16e5b65b-1c2f-499f-bd98-bdd12e01359a")
 	)
 	(junction
+		(at 156.21 80.01)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "31861f8c-7872-4045-a864-7f4f585594e9")
+	)
+	(junction
 		(at 146.05 53.34)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2421,6 +2427,12 @@
 		(color 0 0 0 0)
 		(uuid "db82a0b9-c47c-4e98-8365-07e749a8344c")
 	)
+	(junction
+		(at 156.21 87.63)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "eb8fad79-2814-4db2-977a-a999a005945e")
+	)
 	(no_connect
 		(at 111.76 95.25)
 		(uuid "07e9501e-6b6d-4916-be13-d33a41d1f7e8")
@@ -2502,6 +2514,16 @@
 			(type default)
 		)
 		(uuid "00fac074-2b08-4d92-abcc-c3f979c5ece4")
+	)
+	(wire
+		(pts
+			(xy 156.21 87.63) (xy 161.29 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "026f03e8-eac7-475c-880f-9d270e36c8f0")
 	)
 	(wire
 		(pts
@@ -2765,6 +2787,26 @@
 	)
 	(wire
 		(pts
+			(xy 153.67 82.55) (xy 153.67 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4984a66f-1288-4a6b-ad6a-081838ee74d6")
+	)
+	(wire
+		(pts
+			(xy 156.21 87.63) (xy 153.67 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4fa827bf-e45e-4b73-99fc-6f6cad1c55e3")
+	)
+	(wire
+		(pts
 			(xy 152.4 102.87) (xy 153.67 102.87)
 		)
 		(stroke
@@ -2805,6 +2847,16 @@
 	)
 	(wire
 		(pts
+			(xy 156.21 80.01) (xy 161.29 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6a0f7b45-5fcb-46c4-ac20-539c3fc1d793")
+	)
+	(wire
+		(pts
 			(xy 118.11 124.46) (xy 118.11 116.84)
 		)
 		(stroke
@@ -2815,13 +2867,23 @@
 	)
 	(wire
 		(pts
-			(xy 152.4 82.55) (xy 158.75 82.55)
+			(xy 152.4 82.55) (xy 153.67 82.55)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "77ecd35e-229d-497a-b40d-91da5b27b82e")
+	)
+	(wire
+		(pts
+			(xy 153.67 80.01) (xy 156.21 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "790c2715-e37b-405c-8b17-9b7d1f67eebe")
 	)
 	(wire
 		(pts
@@ -2885,7 +2947,7 @@
 	)
 	(wire
 		(pts
-			(xy 152.4 85.09) (xy 158.75 85.09)
+			(xy 152.4 85.09) (xy 153.67 85.09)
 		)
 		(stroke
 			(width 0)
@@ -3052,6 +3114,16 @@
 			(type default)
 		)
 		(uuid "c6fb49b1-a5c6-45bd-9ec4-2be12b68b340")
+	)
+	(wire
+		(pts
+			(xy 153.67 87.63) (xy 153.67 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ca27c379-169e-409d-afd1-e0e0a5719f92")
 	)
 	(wire
 		(pts
@@ -3486,7 +3558,6 @@
 	(global_label "I2C_SCL"
 		(shape input)
 		(at 130.81 62.23 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3495,7 +3566,7 @@
 		)
 		(uuid "2a33537a-a2e7-4bf9-b85e-75a5c6a0dd74")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 130.81 51.6853 90)
+			(at 130.81 53.4633 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3620,7 +3691,6 @@
 	(global_label "I2C_SDA"
 		(shape bidirectional)
 		(at 133.35 62.23 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3629,7 +3699,7 @@
 		)
 		(uuid "bb920d12-d888-4ca3-9dd0-01816d21516d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 133.35 50.5135 90)
+			(at 133.35 52.2915 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3663,7 +3733,7 @@
 		)
 	)
 	(global_label "GPS_nRST"
-		(shape input)
+		(shape output)
 		(at 107.95 82.55 180)
 		(effects
 			(font
@@ -3686,7 +3756,7 @@
 	)
 	(hierarchical_label "ClkIn-"
 		(shape input)
-		(at 158.75 85.09 0)
+		(at 161.29 87.63 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3730,7 +3800,7 @@
 	)
 	(hierarchical_label "ClkIn+"
 		(shape input)
-		(at 158.75 82.55 0)
+		(at 161.29 80.01 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3851,7 +3921,7 @@
 			)
 		)
 		(property "Value" "LCMXO2-640HC-4SG48C"
-			(at 132.334 80.01 0)
+			(at 132.08 101.854 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4595,6 +4665,108 @@
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/4b25ac19-17bc-44e9-ba12-1d7cffc23283"
 					(reference "C81")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 156.21 83.82 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "548aa19a-3739-4ca7-83ed-5e6e561b9adc")
+		(property "Reference" "R65"
+			(at 157.734 83.82 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Value" "100"
+			(at 156.21 83.82 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 154.432 83.82 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 156.21 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 156.21 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 156.21 83.82 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Stock" "Basic"
+			(at 156.21 83.82 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "29e055a4-a024-405e-8d0e-ff348053fb3e")
+		)
+		(pin "1"
+			(uuid "136c74d4-5b09-43ff-888f-5a9116fdeb79")
+		)
+		(instances
+			(project "gpsfreak"
+				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/4b25ac19-17bc-44e9-ba12-1d7cffc23283"
+					(reference "R65")
 					(unit 1)
 				)
 			)

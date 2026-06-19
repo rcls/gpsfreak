@@ -1327,7 +1327,7 @@
 		)
 		(uuid "ffb72bbe-6b12-40cd-b51d-41e1911da629")
 	)
-	(label "Ext2"
+	(label "Ext"
 		(at 167.64 59.69 0)
 		(effects
 			(font

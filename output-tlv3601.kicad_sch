@@ -1656,7 +1656,7 @@
 		)
 		(uuid "e76aae1b-269a-4519-9295-e36fc4911d22")
 	)
-	(label "Ext3"
+	(label "Ext"
 		(at 86.36 114.3 0)
 		(effects
 			(font

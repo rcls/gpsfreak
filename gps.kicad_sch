@@ -2094,12 +2094,6 @@
 		(uuid "45888211-9f06-4ae2-86aa-4f7ab4664c53")
 	)
 	(junction
-		(at 78.74 71.12)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "4f7ca9ab-a844-47a0-91ae-ed52822bbf97")
-	)
-	(junction
 		(at 130.81 99.06)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2110,6 +2104,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "71589ced-9f9b-4818-9f0a-b0de15dcf327")
+	)
+	(junction
+		(at 81.28 71.12)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ba018439-691e-4306-a8e4-d8051bf89ae1")
 	)
 	(junction
 		(at 83.82 109.22)
@@ -2157,6 +2157,16 @@
 	)
 	(wire
 		(pts
+			(xy 81.28 71.12) (xy 95.25 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0f1ed082-5c5e-4514-823f-e8f0536a49b0")
+	)
+	(wire
+		(pts
 			(xy 81.28 91.44) (xy 85.09 91.44)
 		)
 		(stroke
@@ -2197,7 +2207,7 @@
 	)
 	(wire
 		(pts
-			(xy 68.58 71.12) (xy 69.85 71.12)
+			(xy 68.58 71.12) (xy 71.12 71.12)
 		)
 		(stroke
 			(width 0)
@@ -2307,23 +2317,13 @@
 	)
 	(wire
 		(pts
-			(xy 77.47 71.12) (xy 78.74 71.12)
+			(xy 78.74 71.12) (xy 81.28 71.12)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "d3d94e0f-7223-46a0-8a9d-e00f3e853bcb")
-	)
-	(wire
-		(pts
-			(xy 78.74 71.12) (xy 95.25 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e01500a6-ea60-47e0-913b-2d28a59d257e")
 	)
 	(wire
 		(pts
@@ -2386,7 +2386,7 @@
 		(uuid "75873050-53da-4124-9788-94a3e22ef0a8")
 	)
 	(label "VGPS"
-		(at 82.55 71.12 0)
+		(at 86.36 71.12 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2496,7 +2496,6 @@
 	(global_label "GPS_nRST"
 		(shape input)
 		(at 81.28 109.22 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2505,7 +2504,7 @@
 		)
 		(uuid "a0df44c3-58f5-443f-b5e1-4ef09f88e02b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 68.9816 109.22 0)
+			(at 70.2516 109.22 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2774,7 +2773,7 @@
 	)
 	(symbol
 		(lib_id "Parts:L_Ferrite_Power")
-		(at 73.66 71.12 90)
+		(at 74.93 71.12 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2784,7 +2783,7 @@
 		(dnp no)
 		(uuid "1804ae21-a4f3-4b12-9ecf-bc4d58a91411")
 		(property "Reference" "L51"
-			(at 73.66 72.39 90)
+			(at 74.93 72.39 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2794,7 +2793,7 @@
 			)
 		)
 		(property "Value" "120"
-			(at 73.66 68.326 90)
+			(at 74.93 68.326 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2804,7 +2803,7 @@
 			)
 		)
 		(property "Footprint" "Inductor_SMD:L_0603_1608Metric"
-			(at 73.66 71.12 0)
+			(at 74.93 71.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2815,7 +2814,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 73.66 71.12 0)
+			(at 74.93 71.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2826,7 +2825,7 @@
 			)
 		)
 		(property "Description" "Inductor with ferrite core"
-			(at 73.66 71.12 0)
+			(at 74.93 71.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2837,7 +2836,7 @@
 			)
 		)
 		(property "LCSC" "C14709"
-			(at 73.66 71.12 90)
+			(at 74.93 71.12 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2848,7 +2847,7 @@
 			)
 		)
 		(property "Stock" "Basic"
-			(at 73.66 71.12 90)
+			(at 74.93 71.12 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2875,7 +2874,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 78.74 74.93 0)
+		(at 81.28 74.93 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2885,7 +2884,7 @@
 		(dnp no)
 		(uuid "31bb0b7e-18d4-4081-8375-7264ad17ade0")
 		(property "Reference" "C51"
-			(at 78.74 73.66 0)
+			(at 81.28 73.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2896,7 +2895,7 @@
 			)
 		)
 		(property "Value" "10u"
-			(at 78.74 76.2 0)
+			(at 81.28 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2907,7 +2906,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 79.7052 78.74 0)
+			(at 82.2452 78.74 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2918,7 +2917,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 78.74 74.93 0)
+			(at 81.28 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2929,7 +2928,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 78.74 74.93 0)
+			(at 81.28 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2940,7 +2939,7 @@
 			)
 		)
 		(property "LCSC" "C15525"
-			(at 78.74 74.93 0)
+			(at 81.28 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2951,7 +2950,7 @@
 			)
 		)
 		(property "Stock" "Basic"
-			(at 78.74 74.93 0)
+			(at 81.28 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3871,7 +3870,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 78.74 78.74 0)
+		(at 81.28 78.74 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3881,7 +3880,7 @@
 		(dnp no)
 		(uuid "a45778f4-843b-46c3-940a-e278f6eec910")
 		(property "Reference" "#PWR028"
-			(at 78.74 85.09 0)
+			(at 81.28 85.09 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3892,7 +3891,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 78.74 81.534 0)
+			(at 81.28 81.534 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3903,7 +3902,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 78.74 78.74 0)
+			(at 81.28 78.74 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3914,7 +3913,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 78.74 78.74 0)
+			(at 81.28 78.74 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3925,7 +3924,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 78.74 78.74 0)
+			(at 81.28 78.74 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

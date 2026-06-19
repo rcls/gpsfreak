@@ -4957,7 +4957,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -5467,7 +5467,7 @@
 				)
 			)
 		)
-		(property "Stock" ""
+		(property "Stock" "Prom"
 			(at 107.95 35.56 90)
 			(hide yes)
 			(show_name no)
@@ -6158,7 +6158,7 @@
 				)
 			)
 		)
-		(property "Stock" ""
+		(property "Stock" "Prom"
 			(at 107.95 43.18 90)
 			(hide yes)
 			(show_name no)
@@ -6346,7 +6346,7 @@
 		(unit 2)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -7474,7 +7474,7 @@
 				)
 			)
 		)
-		(property "Value" "46k"
+		(property "Value" "56k"
 			(at 107.95 77.47 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7517,7 +7517,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25764"
+		(property "LCSC" "C25796"
 			(at 107.95 77.47 90)
 			(hide yes)
 			(show_name no)

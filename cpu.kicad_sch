@@ -7062,7 +7062,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -7681,7 +7681,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "0u1"
+		(property "Value" "1u"
 			(at 144.78 40.64 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7725,7 +7725,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C307331"
+		(property "LCSC" "C52923"
 			(at 144.78 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -10402,7 +10402,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "0u1"
+		(property "Value" "1u"
 			(at 149.86 40.64 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10446,7 +10446,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C307331"
+		(property "LCSC" "C52923"
 			(at 149.86 39.37 0)
 			(hide yes)
 			(show_name no)

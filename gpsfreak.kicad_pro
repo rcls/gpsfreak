@@ -91,10 +91,6 @@
           "Alternates"
         ],
         [
-          "silk_overlap|177607500|107600000|c553fcbf-f892-4ebb-b0c1-9c3cf22d5a2b|caa706ce-d4cf-4b77-8b9c-fa5f87a525f8",
-          ""
-        ],
-        [
           "silk_overlap|178652500|107465000|ac68315e-a596-45ee-beaa-ea18cba57ed9|e72aad19-0e3b-4d85-adcf-112919f0ce3d",
           ""
         ]
@@ -953,7 +949,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 80,
+    "annotate_start_num": 40,
     "annotation": {
       "method": 0,
       "sort_order": 0
@@ -1139,7 +1135,7 @@
       "include_excluded_from_bom": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Reference"
+      "sort_field": "Value"
     },
     "bus_aliases": {},
     "connection_grid_size": 50.0,
@@ -1190,7 +1186,7 @@
         "uuid": "3160ff17-81c2-4674-af97-e8d9acaf6b65"
       }
     ],
-    "used_designators": "J10,J81,R11,R51-52,R100,C14-19,C41-42,C52,C84",
+    "used_designators": "U9,J10,J81,R11,R46-47,R51-52,R100,C14-19,C41-42,C52,C84",
     "variants": []
   },
   "sheets": [

@@ -3054,7 +3054,7 @@
 				)
 			)
 		)
-		(property "Stock" "Ok"
+		(property "Stock" "3"
 			(at 130.81 85.09 0)
 			(hide yes)
 			(show_name no)
@@ -3412,7 +3412,7 @@
 				)
 			)
 		)
-		(property "Stock" "ORDER, 1"
+		(property "Stock" "ORDER"
 			(at 100.33 99.06 0)
 			(hide yes)
 			(show_name no)

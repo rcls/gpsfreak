@@ -1509,7 +1509,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text_box "Switch can be powered up via its protection diodes."
+	(text_box "Switch can be powered via its protection diodes."
 		(exclude_from_sim no)
 		(at 115.57 29.21 0)
 		(size 19.0499 6.6406)
@@ -2395,8 +2395,8 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "211f3acc-d4ae-44a2-92fa-9b4803e3a920")
-		(property "Reference" "R47"
-			(at 128.27 71.882 90)
+		(property "Reference" "R46"
+			(at 128.27 67.818 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2479,7 +2479,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/8de00818-124c-4cc8-9910-e794140dfeb1"
-					(reference "R47")
+					(reference "R46")
 					(unit 1)
 				)
 			)
@@ -2570,12 +2570,12 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "424ca6a9-f56d-4b1a-801c-745b536444ac")
-		(property "Reference" "U41"
+		(property "Reference" "U9"
 			(at 116.713 66.675 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2674,7 +2674,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/8de00818-124c-4cc8-9910-e794140dfeb1"
-					(reference "U41")
+					(reference "U9")
 					(unit 1)
 				)
 			)
@@ -3835,7 +3835,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "be3c08c4-ec4b-47d6-97c3-59f257d336af")
-		(property "Reference" "R48"
+		(property "Reference" "R47"
 			(at 113.538 82.55 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3919,7 +3919,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/8de00818-124c-4cc8-9910-e794140dfeb1"
-					(reference "R48")
+					(reference "R47")
 					(unit 1)
 				)
 			)
@@ -4166,12 +4166,12 @@
 		(unit 2)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "d9403b4e-9966-455f-988a-5224eb617fb4")
-		(property "Reference" "U41"
+		(property "Reference" "U9"
 			(at 147.193 37.973 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4270,7 +4270,7 @@
 		(instances
 			(project "gpsfreak"
 				(path "/3160ff17-81c2-4674-af97-e8d9acaf6b65/8de00818-124c-4cc8-9910-e794140dfeb1"
-					(reference "U41")
+					(reference "U9")
 					(unit 2)
 				)
 			)

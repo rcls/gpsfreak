@@ -22,8 +22,8 @@ type FiveHz = LedTimerUCell<1000, 1000>;
 pub struct LedTimerUCell<const ON: ITime, const OFF: ITime>(
     UCell<LedTimer<ON, OFF>>);
 
-pub static BLUE: FiveHz = Default::default();
-pub static RED_GREEN: FiveHz = Default::default();
+pub static ACTIVITY: FiveHz = Default::default();
+pub static LOCKED: FiveHz = Default::default();
 
 macro_rules!dbgln {($($tt:tt)*) => {if false {crate::dbgln!($($tt)*)}};}
 
@@ -62,18 +62,18 @@ pub fn init() {
 }
 
 /// Set the physical LEDs.
-/// red_green indicator: true = good = green, false = red.
-/// blue true = LED, false = LED off.
+/// locked indicator: true = green, false = red.
+/// activity true = blue LED on, false = blue LED off.
 /// Note that the LED is common anode, so that we drive the GPIO with negative
 /// logic.
-fn drive(red_green: bool, blue: bool) {
+fn drive(locked: bool, activity: bool) {
     let gpioa = unsafe{&*stm32h503::GPIOA::PTR};
     let gpiob = unsafe{&*stm32h503::GPIOB::PTR};
 
+    let green_off = !locked || activity;
+    let red_off = locked || activity;
+    let blue_off = !activity;
     if *crate::cpu::IS_PROTOTYPE.as_ref() {
-        let green_off = !red_green;
-        let red_off = red_green && !blue;
-        let blue_off = !blue;
         gpioa.BSRR.write(
             |w|w.BR1().set_bit().BR2().set_bit().BR3().set_bit()
                 .BS1().bit(blue_off).BS2().bit(green_off).BS3().bit(red_off));
@@ -81,8 +81,8 @@ fn drive(red_green: bool, blue: bool) {
     else {
         gpiob.BSRR.write(
             |w|w.BR4().set_bit().BR5().set_bit()
-                .BS4().bit(!red_green).BS5().bit(red_green));
-        gpioa.BSRR.write(|w| w.BR15().set_bit().BS15().bit(!blue));
+                .BS4().bit(green_off).BS5().bit(red_off));
+        gpioa.BSRR.write(|w| w.BR15().set_bit().BS15().bit(blue_off));
     }
 }
 
@@ -99,7 +99,7 @@ impl<const ON: ITime, const OFF: ITime> LedTimerUCell<ON, OFF> {
         let now = tim.CNT.read().CNT().bits().cast_signed();
         schedule(unsafe {self.0.as_mut()}.set(state, now));
 
-        drive(RED_GREEN.0.led, BLUE.0.led);
+        drive(LOCKED.0.led, ACTIVITY.0.led);
     }
 
     pub fn pulse(&self, state: bool) {
@@ -110,7 +110,7 @@ impl<const ON: ITime, const OFF: ITime> LedTimerUCell<ON, OFF> {
         let now = tim.CNT.read().CNT().bits().cast_signed();
         schedule(unsafe {self.0.as_mut()}.pulse(state, now));
 
-        drive(RED_GREEN.0.led, BLUE.0.led);
+        drive(LOCKED.0.led, ACTIVITY.0.led);
     }
 }
 
@@ -230,16 +230,16 @@ fn isr() {
         }
     };
 
-    BLUE.isr(now);
-    RED_GREEN.isr(now);
-    drive(RED_GREEN.0.led, BLUE.0.led);
+    ACTIVITY.isr(now);
+    LOCKED.isr(now);
+    drive(LOCKED.0.led, ACTIVITY.0.led);
 
     // We make sure that the time is always scheduled in the future, even if
     // there is nothing to do.  Otherwise we need to deal with the ambiguity
     // between timers in the past being processed or late.
     let deadline = W(now) + W(30000);
-    let deadline = min(deadline, BLUE.0.expiry);
-    let deadline = min(deadline, RED_GREEN.0.expiry);
+    let deadline = min(deadline, ACTIVITY.0.expiry);
+    let deadline = min(deadline, LOCKED.0.expiry);
     dbgln!("LED {now} {deadline}");
 
     trigger(deadline);

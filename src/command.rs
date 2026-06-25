@@ -198,19 +198,17 @@ fn str_to_usb(out: &mut [u16], s: &str) {
     let mut bytes = 0x302;
     for code in s.chars() {
         let code = code as u32;
+        let Some(c1) = w.next() else {break};
         if code < 0x10000 {
-            let Some(c) = w.next() else {break};
-            *c = code as u16;
-            bytes += 2;
+            *c1 = code as u16;
         }
         else {
-            let Some(c1) = w.next() else {break};
             let Some(c2) = w.next() else {break};
-            let code = code - 0x10000;
-            *c1 = (code >> 10 & 0x3ff) as u16 + 0xd800;
+            *c1 = (code >> 10 & 0x3ff) as u16 + 0xd7c0;
             *c2 = (code & 0x3ff) as u16 + 0xdc00;
-            bytes += 4;
+            bytes += 2;
         }
+        bytes += 2;
     }
     *head = bytes;
 }

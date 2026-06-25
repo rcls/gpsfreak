@@ -61,17 +61,17 @@ pub fn update_status() {
     exti.RPR1.write(|w| w.RPIF0().set_bit());
     tim.SR.write(|w| w.bits(0));
 
-    use crate::led::RED_GREEN;
+    use crate::led::LOCKED;
 
     let (good, changes, flicker)
         = lmk05318b_status().unwrap_or((false, true, false));
     if !good || changes || flicker {
         dbgln!("Set red");
-        RED_GREEN.set(false);
+        LOCKED.set(false);
     }
     if good {
         dbgln!("Set green");
-        RED_GREEN.set(true);
+        LOCKED.set(true);
     }
 
     // Hopefully we have cleared the interrupt line, but if not, software

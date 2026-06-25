@@ -63,7 +63,7 @@ impl usb::EndpointPair for TriggerDFU {
 
 fn usb_isr() {
     if unsafe{USB_STATE.as_mut()}.isr() {
-        crate::led::BLUE.pulse(true);
+        crate::led::ACTIVITY.pulse(true);
     }
 }
 

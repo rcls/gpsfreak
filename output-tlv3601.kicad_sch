@@ -2814,7 +2814,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "10V"
 			(at 69.85 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -2836,7 +2836,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
+		(property "LCSC" "C315248"
 			(at 69.85 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -2847,7 +2847,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" "Ext"
 			(at 69.85 104.14 90)
 			(hide yes)
 			(show_name no)

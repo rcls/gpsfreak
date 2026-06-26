@@ -3743,7 +3743,7 @@
 		)
 		(uuid "fe83bb77-0b91-4ff1-bf45-c7d7d71f2917")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 97.4658 82.55 0)
+			(at 96.4498 82.55 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4611,7 +4611,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "10V"
 			(at 173.99 67.31 0)
 			(hide yes)
 			(show_name no)
@@ -4633,7 +4633,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
+		(property "LCSC" "C315248"
 			(at 173.99 67.31 0)
 			(hide yes)
 			(show_name no)
@@ -4644,7 +4644,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" "Ext"
 			(at 173.99 67.31 0)
 			(hide yes)
 			(show_name no)
@@ -5688,7 +5688,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "10V"
 			(at 194.31 67.31 0)
 			(hide yes)
 			(show_name no)
@@ -5710,7 +5710,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
+		(property "LCSC" "C315248"
 			(at 194.31 67.31 0)
 			(hide yes)
 			(show_name no)
@@ -5721,7 +5721,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" "Ext"
 			(at 194.31 67.31 0)
 			(hide yes)
 			(show_name no)

@@ -3346,7 +3346,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "10V"
 			(at 203.2 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -3368,7 +3368,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
+		(property "LCSC" "C315248"
 			(at 203.2 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -3379,7 +3379,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" "Ext"
 			(at 203.2 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -7110,7 +7110,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "10V"
 			(at 203.2 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -7132,7 +7132,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
+		(property "LCSC" "C315248"
 			(at 203.2 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -7143,7 +7143,7 @@
 				)
 			)
 		)
-		(property "Stock" "Basic"
+		(property "Stock" "Ext"
 			(at 203.2 73.66 0)
 			(hide yes)
 			(show_name no)
